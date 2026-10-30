@@ -718,8 +718,24 @@ def preflight(missing: List<&2, String>, expr: Core.Expr, context: List<&2, Core
     case names:
       Core.Failure{"Unbound variable: " ++ String.join(Dependencies.unique(names, Nil{}), ", ")}
 
-def evaluate_checked(+expr: Core.Expr, +context: List<&2, Core.Binding>, +sensitive: Bool) -> Core.Value:
+def evaluate_stored(+expr: Core.Expr, +context: List<&2, Core.Binding>, +sensitive: Bool) -> Core.Value:
   preflight(Dependencies.analyze(expr, context, sensitive, False{}), expr, context, sensitive)
+
+def evaluate_checked(expr: Core.Expr, context: List<&2, Core.Binding>, sensitive: Bool) -> Core.Value:
+  evaluate_stored(expr, Core.store_context(Core.evaluation_context(context, True{})), sensitive)
+
+def permissive_parsed(parsed: Parsed, context: List<&2, Core.Binding>, sensitive: Bool) -> Core.Value:
+  match parsed:
+    case Accepted{expr}:
+      Core.permissive_result(evaluate_stored(expr, Core.store_context(Core.evaluation_context(context, False{})), sensitive))
+    case ParseError{message}:
+      Core.NullValue{}
+
+def evaluate_permissive(source: String, context: List<&2, Core.Binding>, +sensitive: Bool) -> Core.Value:
+  permissive_parsed(parse_in(source, sensitive), context, sensitive)
+
+def permissive_snapshot(source: String, context: List<&2, Core.Binding>, sensitive: Bool) -> String:
+  Core.snapshot(evaluate_permissive(source, context, sensitive))
 
 def evaluate_parsed(parsed: Parsed, context: List<&2, Core.Binding>, sensitive: Bool) -> Core.Value:
   match parsed:
@@ -808,7 +824,7 @@ def identifiers(source: String, +sensitive: Bool) -> NamesResult:
   names_result(parse_in(source, sensitive), Nil{}, sensitive, True{})
 
 def dependencies(source: String, context: List<&2, Core.Binding>, +sensitive: Bool) -> NamesResult:
-  names_result(parse_in(source, sensitive), context, sensitive, False{})
+  names_result(parse_in(source, sensitive), Core.store_context(context), sensitive, False{})
 
 def names_snapshot(result: NamesResult) -> String:
   match result:

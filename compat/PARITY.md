@@ -46,7 +46,7 @@ The unchanged upstream suite passes 713 examples with zero failures and 96.82%
 line coverage in the Ruby reference environment. `reference-summary.json` and
 `upstream-spec-catalog.json` record that run. These results describe Ruby only.
 
-The Lua-driven value and dependency corpus has 654 cases matched against Ruby values or parse
+The Lua-driven value and dependency corpus has 733 cases matched against Ruby values or parse
 error classification. It covers truthiness, strings/null, comparisons, selected
 numeric-string coercions, and static operand rejection. It is a small subset of
 the upstream catalog. Native error classes/messages, all calculator methods,
@@ -87,8 +87,8 @@ lua tools/run-oracle.lua PROJECT UPSTREAM GEMS STORAGE RUNROOT OUTPUT
 The probe catches Dentaku errors and records their class; unexpected Ruby failures
 abort without replacing the output. Compare the result before updating committed
 goldens. Parser snapshots currently preserve parse-error classification, while
-full runtime error-class/message parity remains unfinished. The 654-case value and dependency
-corpus passes on JavaScript; the 592-case checkpoint passed native CPU with one
+full runtime error-class/message parity remains unfinished. The 733-case value and dependency
+corpus passes on JavaScript; the 654-case checkpoint passed native CPU with one
 and eight threads. This is correctness verification,
 not the requested performance shootout.
 
@@ -263,6 +263,27 @@ checks over 1,025-item collections exercise these paths without giant literals.
 Both Bend 2.0.16 and 2.0.39 pass all 654 main cases and seven scale checks on
 JavaScript. The proof gate contains 32 laws and the concrete suite 165 fixtures.
 
-Hash fields, PLUCK, and permissive per-item error recovery remain unfinished.
-Only the mapped scalar/array scenarios are claimed here; the upstream enumeration
-families remain partial. Native verification of this batch is pending.
+The 654-case checkpoint and seven scale checks pass native CPU with one and eight
+threads. Its 32 laws also pass Bend 2.0.39's --verdict check against the kernel
+built with Lean 4.34.0. Source commits and hashes are recorded separately from
+the current work; this is correctness evidence, not a performance shootout.
+
+## Hash bindings and permissive evaluation
+
+Ordered hashes preserve distinct string and symbol keys, nested values, class
+identity, indexing, equality independent of insertion order, COUNT, and Ruby-style
+conversion for ordinary symbol names. Array(hash) enumerates key/value pairs.
+Calculator contexts flatten nested hashes with intermediate values. Collection
+item contexts preserve raw field case, shadow matching outer fields, and retain
+outer flattened fields absent from the current item.
+
+Parser.evaluate retains strict evaluate! semantics. Parser.evaluate_permissive
+implements evaluate semantics: MAP, ALL, and ANY recover item errors as null;
+FILTER and REDUCE propagate them to the outer recovery boundary. Caller-provided
+symbol evaluation-mode overrides are preserved. Dependency-only probes do not
+inject an evaluation mode. Raw signed-long RangeError remains observable.
+
+The 79 new differential cases exercise these rules against Ruby. Typed fixture
+hashes accept ordered string/symbol keys; arbitrary Ruby object keys, complete
+symbol inspection, member-access syntax, and PLUCK remain unfinished. Native
+verification of this batch is pending. The upstream families remain partial.

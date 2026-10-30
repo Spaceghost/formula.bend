@@ -29,6 +29,25 @@ local function context_value(value)
   end
   assert(kind == 'table', 'unsupported context value: ' .. kind)
   if value.null then return 'Core.NullValue{}', 'null' end
+  if value.symbol then
+    return 'Core.SymbolValue{' .. bend_string(value.symbol) .. '}', '{"symbol":' .. json_string(value.symbol) .. '}'
+  end
+  if value.hash then
+    local entries, encoded, seen = {}, {}, {}
+    for i, pair in ipairs(value.hash) do
+      assert(#pair == 2, 'hash entry must contain key and value')
+      assert(type(pair[1]) == 'string' or type(pair[1]) == 'table' and pair[1].symbol, 'hash keys must be strings or symbols')
+      local key, key_json = context_value(pair[1])
+      assert(not seen[key_json], 'duplicate hash key')
+      seen[key_json] = true
+      local item, item_json = context_value(pair[2])
+      entries[i] = {key, item}
+      encoded[i] = '[' .. key_json .. ',' .. item_json .. ']'
+    end
+    local expression = 'Core.HashNil{}'
+    for i = #entries, 1, -1 do expression = 'Core.HashEntry{' .. entries[i][1] .. ', ' .. entries[i][2] .. ', ' .. expression .. '}' end
+    return expression, '{"hash":[' .. table.concat(encoded, ',') .. ']}'
+  end
   if value.decimal or value.integer then
     local key = value.decimal and 'decimal' or 'integer'
     local text = value[key]
@@ -42,7 +61,7 @@ local function context_value(value)
   for i = #expressions, 1, -1 do expression = 'Core.ArrayCons{' .. expressions[i] .. ', ' .. expression .. '}' end
   return expression, '[' .. table.concat(encoded, ',') .. ']'
 end
-local function context_values(context)
+local function context_values(context, symbol_context)
   local keys, expressions, encoded = {}, {}, {}
   for name in pairs(context or {}) do keys[#keys+1] = name end
   table.sort(keys)
@@ -51,7 +70,19 @@ local function context_values(context)
     expressions[i] = 'Core.Bound{' .. bend_string(name) .. ', ' .. expression .. '}'
     encoded[i] = json_string(name) .. ':' .. json
   end
-  return #expressions == 0 and 'Nil{}' or '[' .. table.concat(expressions, ', ') .. ']', '{' .. table.concat(encoded, ',') .. '}'
+  local symbol_keys = {}
+  for name in pairs(symbol_context or {}) do symbol_keys[#symbol_keys+1] = name end
+  table.sort(symbol_keys)
+  for _, name in ipairs(symbol_keys) do
+    local expression, json = context_value(symbol_context[name])
+    expressions[#expressions+1] = 'Core.SymbolBound{' .. bend_string(name) .. ', ' .. expression .. '}'
+    encoded[#encoded+1] = json_string('@symbol:' .. name) .. ':' .. json
+  end
+  -- Ruby stores pairs in insertion order with the last normalized key winning;
+  -- Bend's public binding lists put the highest-priority binding first.
+  local bindings = {}
+  for i = #expressions, 1, -1 do bindings[#bindings+1] = expressions[i] end
+  return #bindings == 0 and 'Nil{}' or '[' .. table.concat(bindings, ', ') .. ']', '{' .. table.concat(encoded, ',') .. '}'
 end
 local program = not metadata_only and assert(io.open(prefix .. '.bend', 'w'))
 local expected = assert(io.open(prefix .. '.expected', 'w'))
@@ -64,10 +95,12 @@ for _, case in ipairs(cases) do
   ids[case.id] = true
   assert(not case.id:find('[\t\r\n]') and not case.formula:find('[\t\r\n]'), 'TSV control characters unsupported')
   local operation = case.operation or 'evaluate'
-  local context, encoded_context = context_values(case.context)
+  local context, encoded_context = context_values(case.context, case.symbol_context)
   local sensitive = case.sensitive and 'True{}' or 'False{}'
   local call
-  if operation == 'identifiers' then
+  if operation == 'permissive' then
+    call = 'Parser.permissive_snapshot(' .. bend_string(case.formula) .. ', ' .. context .. ', ' .. sensitive .. ')'
+  elseif operation == 'identifiers' then
     call = 'Parser.names_snapshot(Parser.identifiers(' .. bend_string(case.formula) .. ', ' .. sensitive .. '))'
   elseif operation == 'dependencies' then
     call = 'Parser.names_snapshot(Parser.dependencies(' .. bend_string(case.formula) .. ', ' .. context .. ', ' .. sensitive .. '))'

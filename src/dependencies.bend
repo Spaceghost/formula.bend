@@ -14,6 +14,10 @@ def present(context: List<&2, Core.Binding>, +name: String, +sensitive: Bool) ->
       False{}
     case Core.Bound{key, value} <> rest:
       present_pick(String.eq(Core.normalize(sensitive, key), Core.normalize(sensitive, name)), u => present(rest, name, sensitive))
+    case Core.ScopedBound{key, value} <> rest:
+      present_pick(String.eq(key, Core.normalize(sensitive, name)), u => present(rest, name, sensitive))
+    case Core.SymbolBound{key, value} <> rest:
+      present_pick(String.eq(Core.normalize(sensitive, key), Core.normalize(sensitive, name)), u => present(rest, name, sensitive))
 
 def contains(names: List<&2, String>, +name: String) -> Bool:
   match names:

@@ -108,7 +108,7 @@ The eight address runtime cases pass on both JavaScript and native CPU.
 
 Parity is measured against the pinned Ruby source and its complete 713-example
 suite. The Ruby reference passes all examples; that is not a claim that Bend does.
-A separate 654-case value and dependency corpus currently matches Ruby on JavaScript for selected values and
+A separate 733-case value and dependency corpus currently matches Ruby on JavaScript for selected values and
 parse-error classification. `make parity-check` generates the fixtures using Lua.
 Use `LUA=/path/to/lua` if Lua is not on PATH.
 
@@ -120,11 +120,12 @@ See [the parity checklist](compat/PARITY.md) for remaining rules and the shootou
 gate. No performance comparison is claimed yet.
 
 The corpus supports exact decimal, integer, string, Boolean, null, and nested
-array bindings plus case-sensitive contexts. MAP, FILTER, ALL, ANY, and REDUCE
+array and ordered hash bindings plus case-sensitive contexts. MAP, FILTER, ALL, ANY, and REDUCE
 also pass seven reference checks over 1,025-item collections. Both Bend 2.0.16
-and 2.0.39 pass the JavaScript checks. The 592-case CASE checkpoint passes native
-CPU with one and eight threads; native verification of the enumeration batch is
-pending. Source commits and checksums are recorded in
+and 2.0.39 pass the 654-case enumeration checkpoint on JavaScript. Bend 2.0.39
+also passes native CPU with one and eight threads and Lean-backed kernel
+verification. Native verification of the hash batch is pending.
+Source commits and checksums are recorded in
 `compat/backend-verification.json`.
 
 Scientific exponents support at most 14 significant exponent digits; scales and

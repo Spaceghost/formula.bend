@@ -14,6 +14,9 @@ type Value is Data:
   Logical{value: Bool}
   NullValue{}
   TextValue{value: String}
+  SymbolValue{value: String}
+  HashNil{}
+  HashEntry{key: Value, value: Value, tail: Value}
   ArrayNil{}
   ArrayCons{head: Value, tail: Value}
   ArgumentValue{value: Value}
@@ -255,6 +258,12 @@ def ruby_render(value: Value, inspect: Bool, tail_mode: Bool) -> String:
       Decimal.ruby_show(n, True{})
     case TextValue{+s}:
       Bool.pick(String, inspect, StringOps.quote(s), s)
+    case SymbolValue{+s}:
+      Bool.pick(String, inspect, ":" ++ s, s)
+    case HashNil{}:
+      Bool.pick(String, tail_mode, "}", "{}")
+    case HashEntry{key, value, tail}:
+      Bool.pick(String, tail_mode, ", ", "{") ++ ruby_render(key, True{}, False{}) ++ "=>" ++ ruby_render(value, True{}, False{}) ++ ruby_render(tail, True{}, True{})
     case Logical{True{}}:
       "true"
     case Logical{False{}}:
@@ -317,8 +326,61 @@ def array_join(left: Value, right: Value) -> Value:
 
 # Ruby array equality does not coerce string elements to numbers. The pinned
 # BigDecimal implementation compares equal to integral values in subtraction.
+def hash_key_equal(a: Value, b: Value) -> Bool:
+  match a b:
+    case TextValue{x} TextValue{y}:
+      String.eq(x, y)
+    case SymbolValue{x} SymbolValue{y}:
+      String.eq(x, y)
+    case a b:
+      False{}
+
+def hash_find(hash: Value, +key: Value) -> Maybe<&2, Value>:
+  match hash:
+    case HashEntry{k, value, tail}:
+      Bool.pick(Maybe<&2, Value>, hash_key_equal(k, key), Some{value}, hash_find(tail, key))
+    case hash:
+      None{}
+
+def hash_remove(hash: Value, +key: Value) -> Value:
+  match hash:
+    case HashEntry{+k, value, +tail}:
+      Bool.pick(Value, hash_key_equal(k, key), tail, HashEntry{k, value, hash_remove(tail, key)})
+    case hash:
+      HashNil{}
+
+def hash_equal_found(found: Maybe<&2, Value>, compare: Value -> Bool) -> Bool:
+  match found:
+    case Some{value}:
+      compare(value)
+    case None{}:
+      False{}
+
+def hash_get_found(result: Maybe<&2, Value>) -> Value:
+  match result:
+    case Some{value}:
+      value
+    case None{}:
+      NullValue{}
+
+def with_value(value: Value, next: Value -> Value) -> Value:
+  match value:
+    case Failure{message}:
+      Failure{message}
+    case value:
+      next(value)
+
+def hash_get(hash: Value, key: Value) -> Value:
+  hash_get_found(hash_find(hash, key))
+
 def value_equal(a: Value, b: Value, +strict: Bool) -> Bool:
   match a b:
+    case HashNil{} HashNil{}:
+      True{}
+    case HashEntry{+key, value, tail} +b:
+      Bool.and(hash_equal_found(hash_find(b, key), other => value_equal(value, other, strict)), value_equal(tail, hash_remove(b, key), strict))
+    case SymbolValue{x} SymbolValue{y}:
+      String.eq(x, y)
     case NegativeNumber{x} Number{y}:
       Bool.and(Decimal.is_zero(x), Nat.is_eq(y, 0n))
     case Number{x} NegativeNumber{y}:
@@ -645,6 +707,8 @@ def logical_xor(a: Value, b: Value) -> Value:
 
 type Binding is Data:
   Bound{name: String, value: Value}
+  ScopedBound{name: String, value: Value}
+  SymbolBound{name: String, value: Value}
 
 def normalize(sensitive: Bool, name: String) -> String:
   match sensitive:
@@ -667,6 +731,62 @@ def lookup(context: List<&2, Binding>, +name: String, +sensitive: Bool) -> Value
       Failure{"Unbound variable: " ++ name}
     case Bound{key, value} <> tail:
       found(String.eq(normalize(sensitive, key), normalize(sensitive, name)), value, u => lookup(tail, name, sensitive))
+    case ScopedBound{key, value} <> tail:
+      found(String.eq(key, normalize(sensitive, name)), value, u => lookup(tail, name, sensitive))
+    case SymbolBound{key, value} <> tail:
+      found(String.eq(normalize(sensitive, key), normalize(sensitive, name)), value, u => lookup(tail, name, sensitive))
+
+# Root calculator storage normalizes keys; Enum's FlatHash merge preserves them.
+def flatten_fields(value: Value, +prefix: String, +scoped: Bool) -> List<&2, Binding>:
+  match value:
+    case HashEntry{key, +value, tail}:
+      +name = prefix ++ "." ++ ruby_render(key, False{}, False{})
+      List.append(&2, Binding, flatten_fields(tail, prefix, scoped), List.append(&2, Binding, flatten_fields(value, name, scoped), [Bool.pick(Binding, scoped, ScopedBound{name, value}, Bound{name, value})]))
+    case value:
+      Nil{}
+
+def store_context(context: List<&2, Binding>) -> List<&2, Binding>:
+  match context:
+    case Bound{+name, +value} <> rest:
+      List.append(&2, Binding, flatten_fields(value, name, False{}), Bound{name, value} <> store_context(rest))
+    case SymbolBound{+name, +value} <> rest:
+      List.append(&2, Binding, flatten_fields(value, name, False{}), Bound{name, value} <> store_context(rest))
+    case ScopedBound{name, value} <> rest:
+      ScopedBound{name, value} <> store_context(rest)
+    case Nil{}:
+      Nil{}
+
+def item_context(+name: String, +value: Value, context: List<&2, Binding>, sensitive: Bool) -> List<&2, Binding>:
+  +key = normalize(sensitive, name)
+  ScopedBound{key, value} <> List.append(&2, Binding, flatten_fields(value, key, True{}), context)
+
+def explicit_evaluation_mode(context: List<&2, Binding>) -> Bool:
+  match context:
+    case SymbolBound{name, value} <> rest:
+      Bool.or(String.eq(name, "__evaluation_mode"), explicit_evaluation_mode(rest))
+    case head <> rest:
+      explicit_evaluation_mode(rest)
+    case Nil{}:
+      False{}
+
+def evaluation_context(+context: List<&2, Binding>, strict: Bool) -> List<&2, Binding>:
+  Bool.pick(List<&2, Binding>, explicit_evaluation_mode(context), context, SymbolBound{"__evaluation_mode", SymbolValue{Bool.pick(String, strict, "strict", "permissive")}} <> context)
+
+def mapped_result(mode: Value, +value: Value) -> Value:
+  match mode value:
+    case SymbolValue{mode} Failure{message}:
+      Bool.pick(Value, String.eq(mode, "strict"), value, NullValue{})
+    case mode Failure{message}:
+      NullValue{}
+    case mode value:
+      value
+
+def permissive_result(+value: Value) -> Value:
+  match value:
+    case Failure{message}:
+      Bool.pick(Value, String.eq(message, "Index exceeds Ruby signed long range"), value, NullValue{})
+    case value:
+      value
 
 def round_numeric(value: Value, +target: Nat, before: Nat, mode: Decimal.Rounding) -> Value:
   match value:
@@ -869,6 +989,12 @@ def compare_values(a: Value, b: Value, op: Comparison) -> Value:
       Failure{e}
     case a Failure{e}:
       Failure{e}
+    case HashNil{} b:
+      equality_only(op, Bool.pick(Cmp, value_equal(HashNil{}, b, False{}), EQ{}, LT{}))
+    case HashEntry{key, value, tail} b:
+      equality_only(op, Bool.pick(Cmp, value_equal(HashEntry{key, value, tail}, b, False{}), EQ{}, LT{}))
+    case SymbolValue{x} SymbolValue{y}:
+      apply_order(op, String.order(x, y))
     case TextValue{x} TextValue{y}:
       apply_order(op, String.order(x, y))
     case Logical{x} Logical{y}:
@@ -987,6 +1113,13 @@ def array_length(value: Value) -> Nat:
     case value:
       0n
 
+def hash_length(value: Value) -> Nat:
+  match value:
+    case HashEntry{key, item, tail}:
+      1n+hash_length(tail)
+    case value:
+      0n
+
 def count_single(value: Value) -> Value:
   match value:
     case Failure{e}:
@@ -997,6 +1130,10 @@ def count_single(value: Value) -> Value:
       Number{0n}
     case ArrayCons{head, tail}:
       Number{1n+array_length(tail)}
+    case HashNil{}:
+      Number{0n}
+    case HashEntry{key, value, tail}:
+      Number{1n+hash_length(tail)}
     case value:
       Number{1n}
 
@@ -1116,6 +1253,10 @@ def access_value(value: Value, index: Unit -> Value) -> Value:
       access_index(ArrayCons{head, tail}, index(Unit{}))
     case TextValue{s}:
       access_index(TextValue{s}, index(Unit{}))
+    case HashNil{}:
+      with_value(index(Unit{}), key => hash_get(HashNil{}, key))
+    case HashEntry{key, item, tail}:
+      with_value(index(Unit{}), at => hash_get(HashEntry{key, item, tail}, at))
     case value:
       Failure{"Expected indexable structure"}
 
@@ -1324,6 +1465,10 @@ def collection_nodes(value: Value) -> List<&2, Value>:
       Nil{}
     case ArrayCons{head, tail}:
       ArgumentValue{head} <> collection_nodes(tail)
+    case HashNil{}:
+      Nil{}
+    case HashEntry{key, item, tail}:
+      ArgumentValue{ArrayCons{key, ArrayCons{item, ArrayNil{}}}} <> collection_nodes(tail)
     case value:
       [ArgumentValue{value}]
 
@@ -1697,13 +1842,6 @@ def enumeration_finish(kind: EnumerationKind, result: Value) -> Value:
     case kind:
       result
 
-def with_value(value: Value, next: Value -> Value) -> Value:
-  match value:
-    case Failure{message}:
-      Failure{message}
-    case value:
-      next(value)
-
 # Recursion is lexicographic over expression and batch. An enum enters its body
 # subexpression with a fresh batch; each repeated body evaluation consumes a
 # smaller batch node. Context and mode can then change without unsafe recursion.
@@ -1717,15 +1855,15 @@ def evaluate_machine(e: Expr, +batch: Value, +context: List<&2, Binding>, +sensi
       x y = evaluate_machine(e, a, context, sensitive, subjects, EvaluateItems{kind, binder}) evaluate_machine(e, b, context, sensitive, subjects, EvaluateItems{kind, binder})
       ArgumentPair{x, y}
     case +e ArgumentValue{+item} EvaluateItems{FilterItems{}, binder}:
-      filter_leaf(item, evaluate_machine(e, item, Bound{binder, item} <> context, sensitive, subjects, EvaluateOne{}))
+      filter_leaf(item, evaluate_machine(e, item, item_context(binder, item, context, sensitive), sensitive, subjects, EvaluateOne{}))
     case +e ArgumentValue{+item} EvaluateItems{kind, binder}:
-      enumeration_leaf(kind, item, evaluate_machine(e, item, Bound{binder, item} <> context, sensitive, subjects, EvaluateOne{}))
+      enumeration_leaf(kind, item, mapped_result(lookup(context, "__evaluation_mode", sensitive), evaluate_machine(e, item, item_context(binder, item, context, sensitive), sensitive, subjects, EvaluateOne{})))
     case e EmptyArgumentValues{} EvaluateItems{kind, binder}:
       enumeration_empty(kind)
     case +e ArgumentPair{a, b} EvaluateReduction{+memo_binder, +item_binder, memo}:
       with_value(evaluate_machine(e, a, context, sensitive, subjects, EvaluateReduction{memo_binder, item_binder, memo}), next => evaluate_machine(e, b, context, sensitive, subjects, EvaluateReduction{memo_binder, item_binder, next}))
     case +e ArgumentValue{+item} EvaluateReduction{memo_binder, item_binder, memo}:
-      evaluate_machine(e, item, Bound{item_binder, item} <> Bound{memo_binder, memo} <> context, sensitive, subjects, EvaluateOne{})
+      evaluate_machine(e, item, item_context(item_binder, item, item_context(memo_binder, memo, context, sensitive), sensitive), sensitive, subjects, EvaluateOne{})
     case e EmptyArgumentValues{} EvaluateReduction{memo_binder, item_binder, memo}:
       memo
     case EnumerationExpression{+kind, collection, binder, body} batch EvaluateOne{}:
@@ -1814,6 +1952,12 @@ def evaluate(e: Expr) -> Value:
 
 def show(value: Value) -> String:
   match value:
+    case SymbolValue{s}:
+      s
+    case HashNil{}:
+      "{}"
+    case HashEntry{key, value, tail}:
+      ruby_render(HashEntry{key, value, tail}, False{}, False{})
     case IntegerNumber{n}:
       Decimal.show(n)
     case NegativeInteger{n}:
@@ -1878,6 +2022,14 @@ def snapshot_render(value: Value, +tail_mode: Bool) -> String:
       "null"
     case TextValue{s}:
       "string:" ++ s
+    case SymbolValue{s}:
+      "symbol:" ++ s
+    case HashNil{}:
+      Bool.pick(String, tail_mode, "}", "hash:{}")
+    case HashEntry{key, value, tail}:
+      +a = snapshot_render(key, False{})
+      +b = snapshot_render(value, False{})
+      Bool.pick(String, tail_mode, "", "hash:{") ++ Nat.show(String.length(a)) ++ ":" ++ a ++ Nat.show(String.length(b)) ++ ":" ++ b ++ snapshot_render(tail, True{})
     case Failure{e}:
       failure_snapshot(e)
 
@@ -1886,6 +2038,12 @@ def snapshot(value: Value) -> String:
 
 def class_snapshot(value: Value) -> String:
   match value:
+    case SymbolValue{s}:
+      "class:Symbol"
+    case HashNil{}:
+      "class:Hash"
+    case HashEntry{key, item, tail}:
+      "class:Hash"
     case Number{n}:
       "class:Integer"
     case IntegerNumber{n}:

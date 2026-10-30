@@ -19,6 +19,8 @@ def context_value(value)
   when Array then value.map { |item| context_value(item) }
   when Hash
     return value.fetch('text') if value.key?('text')
+    return value.fetch('symbol').to_sym if value.key?('symbol')
+    return value.fetch('hash').map { |key, item| [context_value(key), context_value(item)] }.to_h if value.key?('hash')
     return Integer(value.fetch('integer')) if value.key?('integer')
     return BigDecimal(value.fetch('decimal')) if value.key?('decimal')
     raise 'unhandled context value'
@@ -32,6 +34,10 @@ def snapshot_value(value)
   when BigDecimal then "number:#{value.to_s('F').sub(/\.0+\z/, '')}"
   when Integer then "number:#{value}"
   when String then "string:#{value}"
+  when Symbol then "symbol:#{value}"
+  when Hash
+    parts = value.flat_map { |key, item| [snapshot_value(key), snapshot_value(item)] }
+    "hash:{#{parts.map { |part| "#{part.length}:#{part}" }.join}}"
   when Array
     parts = value.map { |item| snapshot_value(item) }
     "array:[#{parts.map { |part| "#{part.length}:#{part}" }.join}]"
@@ -41,13 +47,14 @@ end
 File.foreach(ENV.fetch('FORMULA_ORACLE_CORPUS')) do |line|
   id, source, operation, encoded_context, sensitive = line.chomp.split("\t", 5)
   begin
-    context = JSON.parse(encoded_context || '{}').transform_values { |item| context_value(item) }
+    context = JSON.parse(encoded_context || '{}').map { |key, item| [key.start_with?('@symbol:') ? key.delete_prefix('@symbol:').to_sym : key, context_value(item)] }.to_h
     calculator = Dentaku::Calculator.new(case_sensitive: sensitive == 'true')
     value = case operation
     when 'identifiers' then calculator.identifiers(source)
     when 'dependencies' then calculator.dependencies(source, context)
     when 'coerce', 'coerce_class', 'coerce_message' then Dentaku::NumericParser.ensure_numeric!(context.fetch('input'))
     when 'type' then calculator.ast(source).type
+    when 'permissive' then calculator.evaluate(source, context)
     else calculator.evaluate!(source, context)
     end
     snapshot = case operation

@@ -3,6 +3,15 @@ import ./src/core.bend as Core
 import ./src/decimal.bend as Decimal
 import ./LAWS.bend as Laws
 
+def Laws.empty_hash_read(key):
+  {==}
+
+def Laws.strict_item_error(message):
+  {==}
+
+def Laws.permissive_item_error(message):
+  {==}
+
 def Laws.true_branch(yes, no):
   {==}
 

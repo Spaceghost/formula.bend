@@ -6,6 +6,18 @@ import ./src/address.bend as Address
 import ./src/dependencies.bend as Dependencies
 
 import ./src/reference.bend as Ref
+
+law empty_hash_read:
+  for key: Core.Value
+  {Core.hash_get(Core.HashNil{}, key) == Core.NullValue{} : Core.Value}
+
+law strict_item_error:
+  for +message: String
+  {Core.mapped_result(Core.SymbolValue{"strict"}, Core.Failure{message}) == Core.Failure{message} : Core.Value}
+
+law permissive_item_error:
+  for message: String
+  {Core.mapped_result(Core.SymbolValue{"permissive"}, Core.Failure{message}) == Core.NullValue{} : Core.Value}
 # Initial project contracts. Changes must retain or strengthen their guarantees.
 law true_branch:
   for +yes: Core.Expr

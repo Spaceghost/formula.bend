@@ -83,6 +83,8 @@ return {
     {'works with an empty array', 'enum_map_empty'},
     {'works with a single value if needed for some reason', 'enum_map_scalar'},
     {'raises argument error if a string is passed as identifier', {'enum_map_bad_binder', 'enum_map_bad_binder_message'}},
+    {'treats missing keys in hashes as NULL in permissive mode', 'hash_map_permissive'},
+    {'raises an error if accessing a missing key in a hash in strict mode', 'hash_map_evaluate'},
   },
   ['spec/ast/filter_spec.rb'] = {
     {'excludes unmatched values', 'enum_filter_sum'},
@@ -91,10 +93,14 @@ return {
   ['spec/ast/all_spec.rb'] = {
     {'performs ALL operation', 'enum_all'},
     {'works with a single value if needed for some reason', {'enum_all_scalar_false', 'enum_all_scalar_true'}},
+    {'treats missing keys in hashes as NULL in permissive mode', 'hash_all_permissive'},
+    {'raises an error if accessing a missing key in a hash in strict mode', 'hash_all_evaluate'},
   },
   ['spec/ast/any_spec.rb'] = {
     {'performs ANY operation', 'enum_any'},
     {'works with a single value if needed for some reason', {'enum_any_scalar_false', 'enum_any_scalar_true'}},
+    {'treats missing keys in hashes as NULL in permissive mode', 'hash_any_permissive'},
+    {'raises an error if accessing a missing key in a hash in strict mode', 'hash_any_strict_missing_first'},
   },
   ['spec/ast/reduce_spec.rb'] = {
     {'performs REDUCE operation with initial value', 'enum_reduce_initial'},
