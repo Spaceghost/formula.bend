@@ -7,7 +7,7 @@ spec/ast/and_spec.rb	2	partial
 spec/ast/any_spec.rb	5	unassessed
 spec/ast/arithmetic_spec.rb	24	partial
 spec/ast/avg_spec.rb	7	partial
-spec/ast/case_spec.rb	7	unassessed
+spec/ast/case_spec.rb	7	partial
 spec/ast/comparator_spec.rb	5	partial
 spec/ast/count_spec.rb	7	partial
 spec/ast/division_spec.rb	4	partial

@@ -46,7 +46,7 @@ The unchanged upstream suite passes 713 examples with zero failures and 96.82%
 line coverage in the Ruby reference environment. `reference-summary.json` and
 `upstream-spec-catalog.json` record that run. These results describe Ruby only.
 
-The Lua-driven value and dependency corpus has 550 cases matched against Ruby values or parse
+The Lua-driven value and dependency corpus has 592 cases matched against Ruby values or parse
 error classification. It covers truthiness, strings/null, comparisons, selected
 numeric-string coercions, and static operand rejection. It is a small subset of
 the upstream catalog. Native error classes/messages, all calculator methods,
@@ -87,8 +87,8 @@ lua tools/run-oracle.lua PROJECT UPSTREAM GEMS STORAGE RUNROOT OUTPUT
 The probe catches Dentaku errors and records their class; unexpected Ruby failures
 abort without replacing the output. Compare the result before updating committed
 goldens. Parser snapshots currently preserve parse-error classification, while
-full runtime error-class/message parity remains unfinished. The 550-case value and dependency
-corpus passes on JavaScript; the 501-case checkpoint passed native CPU with one
+full runtime error-class/message parity remains unfinished. The 592-case value and dependency
+corpus passes on JavaScript; the 550-case checkpoint passed native CPU with one
 and eight threads. This is correctness verification,
 not the requested performance shootout.
 
@@ -224,4 +224,24 @@ conversion. Integer zero is unsigned. Scalar comparisons, array equality,
 subtraction, and indexes treat both zero signs as equal. MIN/MAX keep the first
 equal value's sign. SUM and AVG retain Ruby's initial positive integer zero;
 MUL retains its initial integer one. These initial values matter for zero signs.
-Native verification of the latest 49 cases is pending.
+The 550-case signed-zero checkpoint passes native CPU with one and eight threads.
+
+## CASE statements
+
+The additional 42 cases cover nested CASE statements, expression switches,
+literal and array keys, first-match behavior, lazy results and later keys,
+static validation, case sensitivity, errors, and dependency analysis. Keys use
+Ruby equality without numeric-string coercion. A missing match without ELSE
+returns the pinned argument error and message.
+
+The evaluator keeps case subjects in an internal value stack, separate from
+user bindings. Recursion remains structural, with no evaluation fuel limit or
+unsafe recursion. Static inspection visits every branch without executing guards.
+Dependency analysis can select a resolvable branch, but a failed switch or WHEN
+probe retains all branch dependencies, including earlier branches and duplicates.
+
+Five behavioral CASE spec scenarios are mapped; Ruby constructor-shape errors
+are not yet mapped. Visitors, volatile/custom-function purity, and complete
+diagnostics remain incomplete. Native verification of the latest 42 cases is
+pending. Generated corpus output is grouped into small IO functions to avoid
+the older compiler's stack limit on a single long IO chain.

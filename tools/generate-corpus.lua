@@ -1,6 +1,7 @@
 local input = assert(arg[1], 'usage: lua tools/generate-corpus.lua CASES.lua OUTPUT_PREFIX')
 local prefix = assert(arg[2], 'missing output prefix')
 local cases = dofile(input)
+assert(#cases > 0, 'corpus must contain at least one case')
 local function bend_string(s)
   return '"' .. s:gsub('\\', '\\\\'):gsub('"', '\\"'):gsub('\n', '\\n'):gsub('\r', '\\r'):gsub('\t', '\\t') .. '"'
 end
@@ -53,8 +54,9 @@ end
 local program = assert(io.open(prefix .. '.bend', 'w'))
 local expected = assert(io.open(prefix .. '.expected', 'w'))
 local formulas = assert(io.open(prefix .. '.formulas.tsv', 'w'))
-program:write('import Base\nimport ../src/core.bend as Core\nimport ../src/parser.bend as Parser\n\ndef main() -> IO(Unit):\n  do IO<Unit>:\n')
+program:write('import Base\nimport ../src/core.bend as Core\nimport ../src/parser.bend as Parser\n\n')
 local ids = {}
+local lines = {}
 for _, case in ipairs(cases) do
   assert(not ids[case.id], 'duplicate id: ' .. case.id)
   ids[case.id] = true
@@ -80,8 +82,19 @@ for _, case in ipairs(cases) do
     assert(operation == 'evaluate', 'unknown operation: ' .. operation)
     call = 'Parser.snapshot(' .. bend_string(case.formula) .. ', ' .. context .. ', ' .. sensitive .. ')'
   end
-  program:write('    IO.print(', bend_string(case.id .. '\t'), ' ++ ', call, ')\n')
+  lines[#lines+1] = '    IO.print(' .. bend_string(case.id .. '\t') .. ' ++ ' .. call .. ')\n'
   expected:write(case.id, '\t', case.expected, '\n')
   formulas:write(case.id, '\t', case.formula, '\t', operation, '\t', encoded_context, '\t', tostring(not not case.sensitive), '\n')
 end
+-- Keep monadic chains shallow enough for older Bend compiler stacks.
+local groups = {}
+for first = 1, #lines, 32 do
+  local name = 'corpus_group_' .. (#groups + 1)
+  groups[#groups+1] = name
+  program:write('def ', name, '() -> IO(Unit):\n  do IO<Unit>:\n')
+  for i = first, math.min(first + 31, #lines) do program:write(lines[i]) end
+  program:write('\n')
+end
+program:write('def main() -> IO(Unit):\n  do IO<Unit>:\n')
+for _, name in ipairs(groups) do program:write('    ', name, '()\n') end
 program:close(); expected:close(); formulas:close()

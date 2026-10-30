@@ -31,6 +31,11 @@ type Token is Data:
   BangWord{}
   Invalid{character: Char}
   InvalidNumeric{}
+  CaseWord{}
+  WhenWord{}
+  ThenWord{}
+  ElseWord{}
+  EndWord{}
 
 type Mode is Data:
   Idle{}
@@ -165,6 +170,9 @@ def flush_scientific(digits: List<&2, U32>, scale: Nat, negative: Bool, exponent
     case head <> tail:
       scientific_token(digits, scale, negative, head <> tail) <> tokens
 
+def reserved_word(+text: String) -> Token:
+  Bool.pick(Token, String.eq(String.to_lower(text), "case"), CaseWord{}, Bool.pick(Token, String.eq(String.to_lower(text), "when"), WhenWord{}, Bool.pick(Token, String.eq(String.to_lower(text), "then"), ThenWord{}, Bool.pick(Token, String.eq(String.to_lower(text), "else"), ElseWord{}, Bool.pick(Token, String.eq(String.to_lower(text), "end"), EndWord{}, Identifier{text})))))
+
 def flush(mode: Mode, tokens: List<&2, Token>) -> List<&2, Token>:
   match mode:
     case Scientific{digits, scale, negative, exponent, sign_allowed, explicit_sign, prefix}:
@@ -188,10 +196,10 @@ def flush(mode: Mode, tokens: List<&2, Token>) -> List<&2, Token>:
     case Fraction{digits, 1n+p}:
       DecimalLiteral{Decimal.Exact{digits, 1n+p}} <> tokens
     case Word{s}:
-      Identifier{String.reverse(s)} <> tokens
+      reserved_word(String.reverse(s)) <> tokens
 
 def spaced_word(+text: String) -> Token:
-  Bool.pick(Token, String.eq(String.to_lower(text), "and"), AndWord{text}, Bool.pick(Token, String.eq(String.to_lower(text), "or"), OrWord{text}, Bool.pick(Token, String.eq(String.to_lower(text), "xor"), XorWord{text}, Bool.pick(Token, String.eq(String.to_lower(text), "not"), NotWord{text}, Identifier{text}))))
+  Bool.pick(Token, String.eq(String.to_lower(text), "and"), AndWord{text}, Bool.pick(Token, String.eq(String.to_lower(text), "or"), OrWord{text}, Bool.pick(Token, String.eq(String.to_lower(text), "xor"), XorWord{text}, Bool.pick(Token, String.eq(String.to_lower(text), "not"), NotWord{text}, reserved_word(text)))))
 
 def space_flush(mode: Mode, tokens: List<&2, Token>) -> List<&2, Token>:
   match mode:

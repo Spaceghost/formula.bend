@@ -9,6 +9,9 @@ type Parsed is Data:
   Accepted{expression: Core.Expr}
   ParseError{message: String}
 
+type CaseClause is Data:
+  ParsedCaseClause{key: Core.Expr, value: Core.Expr}
+
 type Operator is Data:
   AddOp{}
   SubtractOp{}
@@ -24,6 +27,10 @@ type Operator is Data:
   CallFrame{name: String, arguments: List<&2, Core.Expr>, outer: List<&2, Core.Expr>}
   ArrayFrame{elements: List<&2, Core.Expr>, outer: List<&2, Core.Expr>}
   IndexFrame{structure: Core.Expr, outer: List<&2, Core.Expr>}
+  CaseStartFrame{outer: List<&2, Core.Expr>}
+  CaseKeyFrame{subject: Core.Expr, clauses: List<&2, CaseClause>, outer: List<&2, Core.Expr>}
+  CaseValueFrame{subject: Core.Expr, key: Core.Expr, clauses: List<&2, CaseClause>, outer: List<&2, Core.Expr>}
+  CaseElseFrame{subject: Core.Expr, clauses: List<&2, CaseClause>, outer: List<&2, Core.Expr>}
 
 type Stack is Data:
   ParseReady{operators: List<&2, Operator>, values: List<&2, Core.Expr>}
@@ -164,6 +171,14 @@ def precedence(op: Operator) -> Nat:
 
 def reducible(op: Operator) -> Bool:
   match op:
+    case CaseStartFrame{outer}:
+      False{}
+    case CaseKeyFrame{subject, clauses, outer}:
+      False{}
+    case CaseValueFrame{subject, key, clauses, outer}:
+      False{}
+    case CaseElseFrame{subject, clauses, outer}:
+      False{}
     case ArrayFrame{elements, outer}:
       False{}
     case IndexFrame{structure, outer}:
@@ -247,6 +262,53 @@ def call_result(result: Parsed, ops: List<&2, Operator>, outer: List<&2, Core.Ex
     case ParseError{e}:
       Rejected{e}
 
+def case_clauses(clauses: List<&2, CaseClause>, result: Core.Expr) -> Core.Expr:
+  match clauses:
+    case Nil{}:
+      result
+    case ParsedCaseClause{key, value} <> rest:
+      case_clauses(rest, Core.WhenExpression{key, value, result})
+
+def case_when(stack: Stack) -> Stack:
+  match stack:
+    case ParseReady{CaseStartFrame{outer} <> ops, subject <> Nil{}}:
+      ParseReady{CaseKeyFrame{subject, Nil{}, outer} <> ops, Nil{}}
+    case ParseReady{CaseValueFrame{subject, key, clauses, outer} <> ops, value <> Nil{}}:
+      ParseReady{CaseKeyFrame{subject, ParsedCaseClause{key, value} <> clauses, outer} <> ops, Nil{}}
+    case Rejected{e}:
+      Rejected{e}
+    case stack:
+      Rejected{"WHEN outside a complete CASE switch or THEN result"}
+
+def case_then(stack: Stack) -> Stack:
+  match stack:
+    case ParseReady{CaseKeyFrame{subject, clauses, outer} <> ops, key <> Nil{}}:
+      ParseReady{CaseValueFrame{subject, key, clauses, outer} <> ops, Nil{}}
+    case Rejected{e}:
+      Rejected{e}
+    case stack:
+      Rejected{"THEN without WHEN"}
+
+def case_else(stack: Stack) -> Stack:
+  match stack:
+    case ParseReady{CaseValueFrame{subject, key, clauses, outer} <> ops, value <> Nil{}}:
+      ParseReady{CaseElseFrame{subject, ParsedCaseClause{key, value} <> clauses, outer} <> ops, Nil{}}
+    case Rejected{e}:
+      Rejected{e}
+    case stack:
+      Rejected{"ELSE without a complete CASE branch"}
+
+def case_end(stack: Stack) -> Stack:
+  match stack:
+    case ParseReady{CaseValueFrame{subject, key, clauses, outer} <> ops, value <> Nil{}}:
+      ParseReady{ops, Core.CaseExpression{subject, case_clauses(ParsedCaseClause{key, value} <> clauses, Core.NoCaseMatch{})} <> outer}
+    case ParseReady{CaseElseFrame{subject, clauses, outer} <> ops, value <> Nil{}}:
+      ParseReady{ops, Core.CaseExpression{subject, case_clauses(clauses, Core.ElseExpression{value})} <> outer}
+    case Rejected{e}:
+      Rejected{e}
+    case stack:
+      Rejected{"END without a complete CASE expression"}
+
 def close_group(stack: Stack) -> Stack:
   match stack:
     case ParseReady{GroupFrame{outer} <> rest, expr <> Nil{}}:
@@ -307,6 +369,14 @@ def empty_array(stack: Stack) -> Stack:
 # previous operand when one exists, leaving too few operands for its parent.
 def prior_output(ops: List<&2, Operator>) -> Bool:
   match ops:
+    case CaseStartFrame{outer} <> rest:
+      Bool.or(Bool.not(List.is_empty(&2, Core.Expr, outer)), prior_output(rest))
+    case CaseKeyFrame{subject, clauses, outer} <> rest:
+      True{}
+    case CaseValueFrame{subject, key, clauses, outer} <> rest:
+      True{}
+    case CaseElseFrame{subject, clauses, outer} <> rest:
+      True{}
     case Nil{}:
       False{}
     case CallFrame{name, args, outer} <> rest:
@@ -355,6 +425,8 @@ def keyword_operand(+name: String, stack: Stack) -> Stack:
 
 def operand(token: Lex.Token, stack: Stack) -> Stack:
   match token stack:
+    case Lex.CaseWord{} ParseReady{ops, values}:
+      ParseReady{CaseStartFrame{values} <> ops, Nil{}}
     case Lex.LBrace{} ParseReady{ops, values}:
       ParseReady{ArrayFrame{Nil{}, values} <> ops, Nil{}}
     case Lex.RBrace{} stack:
@@ -392,6 +464,14 @@ def operand(token: Lex.Token, stack: Stack) -> Stack:
 
 def operator(token: Lex.Token, stack: Stack) -> Stack:
   match token stack:
+    case Lex.WhenWord{} ParseReady{ops, values}:
+      case_when(reduce_all(ops, values))
+    case Lex.ThenWord{} ParseReady{ops, values}:
+      case_then(reduce_all(ops, values))
+    case Lex.ElseWord{} ParseReady{ops, values}:
+      case_else(reduce_all(ops, values))
+    case Lex.EndWord{} ParseReady{ops, values}:
+      case_end(reduce_all(ops, values))
     case Lex.LBracket{} ParseReady{ops, structure <> outer}:
       ParseReady{IndexFrame{structure, outer} <> ops, Nil{}}
     case Lex.RBracket{} ParseReady{ops, values}:
@@ -435,6 +515,8 @@ def operator(token: Lex.Token, stack: Stack) -> Stack:
 
 def ordinary_expectation(token: Lex.Token) -> Bool:
   match token:
+    case Lex.EndWord{}:
+      False{}
     case Lex.RBrace{}:
       False{}
     case Lex.RBracket{}:

@@ -17,6 +17,7 @@ local partial = {
   ['min_spec.rb']=true, ['max_spec.rb']=true, ['avg_spec.rb']=true,
   ['abs_spec.rb']=true, ['mul_spec.rb']=true, ['count_spec.rb']=true,
   ['string_functions_spec.rb']=true, ['switch_spec.rb']=true,
+  ['case_spec.rb']=true,
   ['round_spec.rb']=true, ['roundup_spec.rb']=true, ['rounddown_spec.rb']=true,
   ['sum_spec.rb']=true, ['negation_spec.rb']=true,
   ['parser_spec.rb']=true, ['tokenizer_spec.rb']=true,

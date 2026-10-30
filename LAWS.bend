@@ -139,3 +139,16 @@ law signed_zero_array_equality:
   for left_scale: Nat
   for right_scale: Nat
   {Core.value_equal(Core.ArrayCons{Core.NegativeNumber{Decimal.Exact{Nil{}, left_scale}}, Core.ArrayNil{}}, Core.ArrayCons{Core.DecimalNumber{Decimal.Exact{Nil{}, right_scale}}, Core.ArrayNil{}}, False{}) == True{} : Bool}
+
+law case_switch_error_first:
+  for +message: String
+  for clauses: Core.Expr
+  {Core.evaluate(Core.CaseExpression{Core.Literal{Core.Failure{message}}, clauses}) == Core.Failure{message} : Core.Value}
+
+law case_first_true_branch:
+  for +yes: Core.Expr
+  for rest: Core.Expr
+  for +context: List<&2, Core.Binding>
+  for +sensitive: Bool
+  for +subjects: List<&2, Core.Value>
+  {Core.evaluate_scoped(Core.CaseExpression{Core.Literal{Core.Logical{True{}}}, Core.WhenExpression{Core.Literal{Core.Logical{True{}}}, yes, rest}}, context, sensitive, subjects) == Core.evaluate_scoped(yes, context, sensitive, Core.Logical{True{}} <> subjects) : Core.Value}

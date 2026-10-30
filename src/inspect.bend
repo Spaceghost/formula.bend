@@ -107,6 +107,14 @@ def function_info(kind: Core.FunctionKind, info: Info) -> Info:
 # This pass inspects syntax only; it never evaluates a guard or user function.
 def analyze(expr: Core.Expr) -> Info:
   match expr:
+    case Core.CaseExpression{subject, clauses}:
+      binary(analyze(subject), analyze(clauses), UnknownKind{}, False{})
+    case Core.WhenExpression{key, value, rest}:
+      binary(analyze(key), binary(analyze(value), analyze(rest), UnknownKind{}, False{}), UnknownKind{}, False{})
+    case Core.ElseExpression{value}:
+      unary(analyze(value), UnknownKind{}, False{})
+    case Core.NoCaseMatch{}:
+      Metadata{UnknownKind{}, False{}, True{}}
     case Core.ArrayLiteral{a}:
       unary(analyze(a), UnknownKind{}, False{})
     case Core.Access{a, b}:

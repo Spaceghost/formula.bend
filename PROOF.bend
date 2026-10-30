@@ -82,3 +82,9 @@ def Laws.signed_zero_divisor(numerator, scale):
 
 def Laws.signed_zero_array_equality(left_scale, right_scale):
   {==}
+
+def Laws.case_switch_error_first(message, clauses):
+  {==}
+
+def Laws.case_first_true_branch(yes, rest, context, sensitive, subjects):
+  {==}

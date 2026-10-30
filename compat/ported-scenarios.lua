@@ -71,4 +71,11 @@ return {
     {'returns the first match if multiple matches exist', 'str_switch_first'},
     {'does not return a match where a value matches the search value', 'str_switch_only_keys'},
   },
+  ['spec/ast/case_spec.rb'] = {
+    {'tests each conditional against the switch variable', 'case_string'},
+    {'raises an exception if the conditional is not matched', {'case_no_match', 'case_missing_message'}},
+    {'uses the else value if provided and conditional is not matched', 'case_else'},
+    {'gathers dependencies from switch and conditionals', 'case_dependencies_unknown'},
+    {'short-circuits to the matched branch when the switch is resolvable', {'case_dependencies_apple', 'case_dependencies_banana', 'case_dependencies_else'}},
+  },
 }

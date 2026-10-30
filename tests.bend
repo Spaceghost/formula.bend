@@ -459,3 +459,21 @@ def negative_zero_index() -> {Parser.snapshot("{1, 2}[-0.0]", Nil{}, False{}) ==
 
 def sum_negative_zero_identity() -> {Parser.snapshot("SUM(-0.0, -0.0)", Nil{}, False{}) == "number:0" : String}:
   {==}
+
+def case_selects_first_match() -> {Parser.snapshot("CASE 1 WHEN 1 THEN 7 WHEN 1 THEN 8 END", Nil{}, False{}) == "number:7" : String}:
+  {==}
+
+def case_skips_later_key() -> {Parser.snapshot("CASE 1 WHEN 1 THEN 7 WHEN 1 / 0 THEN 8 END", Nil{}, False{}) == "number:7" : String}:
+  {==}
+
+def case_keys_do_not_coerce_strings() -> {Parser.snapshot("CASE '1' WHEN 1 THEN 7 ELSE 8 END", Nil{}, False{}) == "number:8" : String}:
+  {==}
+
+def case_failing_probe_retains_all_dependencies() -> {Parser.names_snapshot(Parser.dependencies("CASE 1 WHEN 2 THEN a WHEN missing THEN b ELSE c END", Nil{}, False{})) == "names:a,missing,b,c" : String}:
+  {==}
+
+def case_nested_scopes() -> {Parser.snapshot("CASE CASE 1 WHEN 1 THEN 2 END WHEN 2 THEN 3 END", Nil{}, False{}) == "number:3" : String}:
+  {==}
+
+def case_unknown_static_kind() -> {Parser.type_snapshot("CASE 1 WHEN 1 THEN 2 END") == "type:nil" : String}:
+  {==}

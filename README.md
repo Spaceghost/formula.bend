@@ -18,6 +18,7 @@ Postfix indexing supports arrays and strings, negative indexes, and null-safe
 value evaluation. `COUNT` follows Dentaku's distinct single/multiple argument rules.
 String functions include `LEFT`, `RIGHT`, `MID`, `LEN`, `FIND`, `SUBSTITUTE`,
 `CONCAT`, and `CONTAINS`. `SWITCH` uses its first matching key or a default.
+`CASE … WHEN … THEN … ELSE … END` supports nested cases and lazy branches.
 Function arguments and numeric reductions use balanced trees. `IF` evaluates
 only the selected branch; logical function calls retain eager argument rules.
 Functions are case-insensitive. Malformed expressions return explicit errors.
@@ -34,7 +35,7 @@ digit lists. Coefficients can grow beyond a machine word. Decimal scale uses Nat
 Formatting preserves fractional zeros: `1.25 * .4` displays `0.500`.
 This formatting is not a claim of Ruby BigDecimal display compatibility.
 
-Twenty-six universal laws and one hundred fifty-one concrete regression fixtures cover these
+Twenty-eight universal laws and one hundred fifty-seven concrete regression fixtures cover these
 parts. They do not establish full Ruby or spreadsheet compatibility.
 
 ## Example
@@ -107,7 +108,7 @@ The eight address runtime cases pass on both JavaScript and native CPU.
 
 Parity is measured against the pinned Ruby source and its complete 713-example
 suite. The Ruby reference passes all examples; that is not a claim that Bend does.
-A separate 550-case value and dependency corpus currently matches Ruby on JavaScript for selected values and
+A separate 592-case value and dependency corpus currently matches Ruby on JavaScript for selected values and
 parse-error classification. `make parity-check` generates the fixtures using Lua.
 Use `LUA=/path/to/lua` if Lua is not on PATH.
 
@@ -119,9 +120,9 @@ See [the parity checklist](compat/PARITY.md) for remaining rules and the shootou
 gate. No performance comparison is claimed yet.
 
 The corpus supports exact decimal, integer, string, Boolean, null, and nested
-array bindings plus case-sensitive contexts. The 501-case string-function checkpoint
+array bindings plus case-sensitive contexts. The 550-case signed-zero checkpoint
 passes native CPU with one and eight threads; native verification of the latest
-49 signed-zero cases is pending. Source commits and checksums are recorded in
+42 CASE cases is pending. Source commits and checksums are recorded in
 `compat/backend-verification.json`.
 
 Scientific exponents support at most 14 significant exponent digits; scales and

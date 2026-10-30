@@ -81,60 +81,138 @@ def logical_mode(static: Bool, +a: List<&2, String>, +b: List<&2, String>, left:
     case False{}:
       logical(a, b, left, right, is_and, context, sensitive)
 
-def analyze(expr: Core.Expr, +context: List<&2, Core.Binding>, +sensitive: Bool, +static: Bool) -> List<&2, String>:
+type CaseChoice is Data:
+  CaseUnresolved{}
+  CaseSelected{index: Nat}
+
+def next_case_choice(choice: CaseChoice) -> CaseChoice:
+  match choice:
+    case CaseSelected{n}:
+      CaseSelected{1n+n}
+    case CaseUnresolved{}:
+      CaseUnresolved{}
+
+def case_key_decision(matches: Bool, next: Unit -> CaseChoice) -> CaseChoice:
+  match matches:
+    case True{}:
+      CaseSelected{0n}
+    case False{}:
+      next_case_choice(next(Unit{}))
+
+def case_key(key: Core.Value, subject: Core.Value, next: Unit -> CaseChoice) -> CaseChoice:
+  match key:
+    case Core.Failure{message}:
+      CaseUnresolved{}
+    case key:
+      case_key_decision(Core.value_equal(key, subject, False{}), next)
+
+def select_case(clauses: Core.Expr, +subject: Core.Value, +context: List<&2, Core.Binding>, +sensitive: Bool) -> CaseChoice:
+  match clauses:
+    case Core.WhenExpression{key, value, rest}:
+      case_key(Core.evaluate_in(key, context, sensitive), subject, u => select_case(rest, subject, context, sensitive))
+    case Core.ElseExpression{value}:
+      CaseSelected{0n}
+    case Core.NoCaseMatch{}:
+      CaseSelected{0n}
+    case clauses:
+      CaseUnresolved{}
+
+def select_case_subject(subject: Core.Value, clauses: Core.Expr, context: List<&2, Core.Binding>, sensitive: Bool) -> CaseChoice:
+  match subject:
+    case Core.Failure{message}:
+      CaseUnresolved{}
+    case subject:
+      select_case(clauses, subject, context, sensitive)
+
+def case_choice(static: Bool, subject: Core.Expr, clauses: Core.Expr, +context: List<&2, Core.Binding>, +sensitive: Bool) -> CaseChoice:
+  match static:
+    case True{}:
+      CaseUnresolved{}
+    case False{}:
+      select_case_subject(Core.evaluate_in(subject, context, sensitive), clauses, context, sensitive)
+
+def case_dependencies(choice: CaseChoice, subject: Unit -> List<&2, String>, clauses: List<&2, String>) -> List<&2, String>:
+  match choice:
+    case CaseUnresolved{}:
+      List.append(&2, String, subject(Unit{}), clauses)
+    case CaseSelected{n}:
+      clauses
+
+def when_dependencies(choice: CaseChoice, all: Unit -> List<&2, String>, yes: Unit -> List<&2, String>, no: Nat -> List<&2, String>) -> List<&2, String>:
+  match choice:
+    case CaseUnresolved{}:
+      all(Unit{})
+    case CaseSelected{0n}:
+      yes(Unit{})
+    case CaseSelected{1n+p}:
+      no(p)
+
+def analyze_mode(expr: Core.Expr, +context: List<&2, Core.Binding>, +sensitive: Bool, +static: Bool, choice: CaseChoice) -> List<&2, String>:
   match expr:
+    case Core.CaseExpression{+subject, +clauses}:
+      +selected = case_choice(static, subject, clauses, context, sensitive)
+      case_dependencies(selected, u => analyze_mode(subject, context, sensitive, static, CaseUnresolved{}), analyze_mode(clauses, context, sensitive, static, selected))
+    case Core.WhenExpression{key, +value, +rest}:
+      when_dependencies(choice, u => List.append(&2, String, analyze_mode(key, context, sensitive, static, CaseUnresolved{}), List.append(&2, String, analyze_mode(value, context, sensitive, static, CaseUnresolved{}), analyze_mode(rest, context, sensitive, static, CaseUnresolved{}))), u => analyze_mode(value, context, sensitive, static, CaseUnresolved{}), p => analyze_mode(rest, context, sensitive, static, CaseSelected{p}))
+    case Core.ElseExpression{value}:
+      analyze_mode(value, context, sensitive, static, CaseUnresolved{})
+    case Core.NoCaseMatch{}:
+      Nil{}
     case Core.ArrayLiteral{a}:
-      analyze(a, context, sensitive, static)
+      analyze_mode(a, context, sensitive, static, CaseUnresolved{})
     case Core.Access{a, b}:
-      x y = analyze(a, context, sensitive, static) analyze(b, context, sensitive, static)
+      x y = analyze_mode(a, context, sensitive, static, CaseUnresolved{}) analyze_mode(b, context, sensitive, static, CaseUnresolved{})
       List.append(&2, String, x, y)
     case Core.EmptyArguments{}:
       Nil{}
     case Core.Argument{a, validation}:
-      analyze(a, context, sensitive, static)
+      analyze_mode(a, context, sensitive, static, CaseUnresolved{})
     case Core.Arguments{a, b}:
-      x y = analyze(a, context, sensitive, static) analyze(b, context, sensitive, static)
+      x y = analyze_mode(a, context, sensitive, static, CaseUnresolved{}) analyze_mode(b, context, sensitive, static, CaseUnresolved{})
       List.append(&2, String, x, y)
     case Core.FunctionCall{kind, arguments}:
-      analyze(arguments, context, sensitive, static)
+      analyze_mode(arguments, context, sensitive, static, CaseUnresolved{})
     case Core.Literal{v}:
       Nil{}
     case Core.Variable{name}:
       variable(name, context, sensitive, static)
     case Core.Add{a, b}:
-      x y = analyze(a, context, sensitive, static) analyze(b, context, sensitive, static)
+      x y = analyze_mode(a, context, sensitive, static, CaseUnresolved{}) analyze_mode(b, context, sensitive, static, CaseUnresolved{})
       union(x, y)
     case Core.Subtract{a, b}:
-      x y = analyze(a, context, sensitive, static) analyze(b, context, sensitive, static)
+      x y = analyze_mode(a, context, sensitive, static, CaseUnresolved{}) analyze_mode(b, context, sensitive, static, CaseUnresolved{})
       union(x, y)
     case Core.Multiply{a, b}:
-      x y = analyze(a, context, sensitive, static) analyze(b, context, sensitive, static)
+      x y = analyze_mode(a, context, sensitive, static, CaseUnresolved{}) analyze_mode(b, context, sensitive, static, CaseUnresolved{})
       union(x, y)
     case Core.Divide{a, b}:
-      x y = analyze(a, context, sensitive, static) analyze(b, context, sensitive, static)
+      x y = analyze_mode(a, context, sensitive, static, CaseUnresolved{}) analyze_mode(b, context, sensitive, static, CaseUnresolved{})
       union(x, y)
     case Core.Compare{op, a, b}:
-      x y = analyze(a, context, sensitive, static) analyze(b, context, sensitive, static)
+      x y = analyze_mode(a, context, sensitive, static, CaseUnresolved{}) analyze_mode(b, context, sensitive, static, CaseUnresolved{})
       union(x, y)
     case Core.Xor{a, b}:
-      x y = analyze(a, context, sensitive, static) analyze(b, context, sensitive, static)
+      x y = analyze_mode(a, context, sensitive, static, CaseUnresolved{}) analyze_mode(b, context, sensitive, static, CaseUnresolved{})
       union(x, y)
     case Core.Round{a, places, mode}:
-      x y = analyze(a, context, sensitive, static) analyze(places, context, sensitive, static)
+      x y = analyze_mode(a, context, sensitive, static, CaseUnresolved{}) analyze_mode(places, context, sensitive, static, CaseUnresolved{})
       List.append(&2, String, x, y)
     case Core.Negate{a}:
-      analyze(a, context, sensitive, static)
+      analyze_mode(a, context, sensitive, static, CaseUnresolved{})
     case Core.Not{a}:
-      analyze(a, context, sensitive, static)
+      analyze_mode(a, context, sensitive, static, CaseUnresolved{})
     case Core.PrefixNot{a}:
-      analyze(a, context, sensitive, static)
+      analyze_mode(a, context, sensitive, static, CaseUnresolved{})
     case Core.CoerceNumber{a}:
-      analyze(a, context, sensitive, static)
+      analyze_mode(a, context, sensitive, static, CaseUnresolved{})
     case Core.And{+a, +b}:
-      x y = analyze(a, context, sensitive, static) analyze(b, context, sensitive, static)
+      x y = analyze_mode(a, context, sensitive, static, CaseUnresolved{}) analyze_mode(b, context, sensitive, static, CaseUnresolved{})
       logical_mode(static, x, y, a, b, True{}, context, sensitive)
     case Core.Or{+a, +b}:
-      x y = analyze(a, context, sensitive, static) analyze(b, context, sensitive, static)
+      x y = analyze_mode(a, context, sensitive, static, CaseUnresolved{}) analyze_mode(b, context, sensitive, static, CaseUnresolved{})
       logical_mode(static, x, y, a, b, False{}, context, sensitive)
     case Core.If{+c, +a, +b}:
-      branch(static, u => union(analyze(c, context, sensitive, True{}), union(analyze(a, context, sensitive, True{}), analyze(b, context, sensitive, True{}))), u => conditional(Core.evaluate_in(c, context, sensitive), u => analyze(a, context, sensitive, False{}), u => analyze(b, context, sensitive, False{}), u => union(analyze(c, context, sensitive, False{}), union(analyze(a, context, sensitive, False{}), analyze(b, context, sensitive, False{})))))
+      branch(static, u => union(analyze_mode(c, context, sensitive, True{}, CaseUnresolved{}), union(analyze_mode(a, context, sensitive, True{}, CaseUnresolved{}), analyze_mode(b, context, sensitive, True{}, CaseUnresolved{}))), u => conditional(Core.evaluate_in(c, context, sensitive), u => analyze_mode(a, context, sensitive, False{}, CaseUnresolved{}), u => analyze_mode(b, context, sensitive, False{}, CaseUnresolved{}), u => union(analyze_mode(c, context, sensitive, False{}, CaseUnresolved{}), union(analyze_mode(a, context, sensitive, False{}, CaseUnresolved{}), analyze_mode(b, context, sensitive, False{}, CaseUnresolved{})))))
+
+def analyze(expr: Core.Expr, context: List<&2, Core.Binding>, sensitive: Bool, static: Bool) -> List<&2, String>:
+  analyze_mode(expr, context, sensitive, static, CaseUnresolved{})

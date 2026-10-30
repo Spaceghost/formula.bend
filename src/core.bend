@@ -77,6 +77,10 @@ type Expr is Data:
   FunctionCall{kind: FunctionKind, arguments: Expr}
   ArrayLiteral{elements: Expr}
   Access{structure: Expr, index: Expr}
+  CaseExpression{subject: Expr, clauses: Expr}
+  WhenExpression{key: Expr, value: Expr, rest: Expr}
+  ElseExpression{value: Expr}
+  NoCaseMatch{}
 
 def compact_pick(value: Decimal.Decimal, small: Bool) -> Value:
   match value small:
@@ -1430,68 +1434,102 @@ def call(kind: FunctionKind, tree: Value) -> Value:
     case kind +tree:
       checked_arguments(first_argument_error(tree), kind, tree)
 
-def evaluate_in(e: Expr, +context: List<&2, Binding>, +sensitive: Bool) -> Value:
+def case_subject(subjects: List<&2, Value>) -> Value:
+  match subjects:
+    case head <> tail:
+      head
+    case Nil{}:
+      Failure{"Missing CASE subject"}
+
+def with_case_value(value: Value, next: Value -> Value) -> Value:
+  match value:
+    case Failure{message}:
+      Failure{message}
+    case value:
+      next(value)
+
+def case_when_value(key: Value, subject: Value, yes: Unit -> Value, no: Unit -> Value) -> Value:
+  match key:
+    case Failure{message}:
+      Failure{message}
+    case key:
+      choose(Logical{value_equal(key, subject, False{})}, yes, no)
+
+# CASE subjects use an internal value stack, separate from user bindings.
+# Every recursive evaluation still consumes a structural subexpression.
+def evaluate_scoped(e: Expr, +context: List<&2, Binding>, +sensitive: Bool, +subjects: List<&2, Value>) -> Value:
   match e:
+    case CaseExpression{subject, clauses}:
+      with_case_value(evaluate_scoped(subject, context, sensitive, subjects), value => evaluate_scoped(clauses, context, sensitive, value <> subjects))
+    case WhenExpression{key, value, rest}:
+      case_when_value(evaluate_scoped(key, context, sensitive, subjects), case_subject(subjects), u => evaluate_scoped(value, context, sensitive, subjects), u => evaluate_scoped(rest, context, sensitive, subjects))
+    case ElseExpression{value}:
+      evaluate_scoped(value, context, sensitive, subjects)
+    case NoCaseMatch{}:
+      Failure{"No block matched the switch value '" ++ ruby_render(case_subject(subjects), False{}, False{}) ++ "'"}
     case FunctionCall{MidFunction{}, Arguments{Arguments{Argument{value, vv}, Argument{offset, ov}}, Argument{length, lv}}}:
-      mid_text(evaluate_in(value, context, sensitive), u => evaluate_in(offset, context, sensitive), u => evaluate_in(length, context, sensitive))
+      mid_text(evaluate_scoped(value, context, sensitive, subjects), u => evaluate_scoped(offset, context, sensitive, subjects), u => evaluate_scoped(length, context, sensitive, subjects))
     case FunctionCall{ContainsFunction{}, Arguments{Argument{needle, nv}, Argument{haystack, hv}}}:
-      contains_haystack(evaluate_in(haystack, context, sensitive), u => evaluate_in(needle, context, sensitive))
+      contains_haystack(evaluate_scoped(haystack, context, sensitive, subjects), u => evaluate_scoped(needle, context, sensitive, subjects))
     case ArrayLiteral{elements}:
-      array_value(evaluate_in(elements, context, sensitive))
+      array_value(evaluate_scoped(elements, context, sensitive, subjects))
     case Access{structure, index}:
-      access_value(evaluate_in(structure, context, sensitive), u => evaluate_in(index, context, sensitive))
+      access_value(evaluate_scoped(structure, context, sensitive, subjects), u => evaluate_scoped(index, context, sensitive, subjects))
     case FunctionCall{CountFunction{}, Argument{a, validation}}:
-      count_single(evaluate_in(a, context, sensitive))
+      count_single(evaluate_scoped(a, context, sensitive, subjects))
     case FunctionCall{CountFunction{}, arguments}:
       Number{expression_argument_count(arguments)}
     case EmptyArguments{}:
       EmptyArgumentValues{}
     case Argument{a, validation}:
-      ArgumentValue{validate_argument(validation, evaluate_in(a, context, sensitive))}
+      ArgumentValue{validate_argument(validation, evaluate_scoped(a, context, sensitive, subjects))}
     case Arguments{a, b}:
-      x y = evaluate_in(a, context, sensitive) evaluate_in(b, context, sensitive)
+      x y = evaluate_scoped(a, context, sensitive, subjects) evaluate_scoped(b, context, sensitive, subjects)
       ArgumentPair{x, y}
     case FunctionCall{kind, arguments}:
-      call(kind, evaluate_in(arguments, context, sensitive))
+      call(kind, evaluate_scoped(arguments, context, sensitive, subjects))
     case Literal{v}:
       v
     case Variable{name}:
       lookup(context, name, sensitive)
     case Add{a, b}:
-      x y = evaluate_in(a, context, sensitive) evaluate_in(b, context, sensitive)
+      x y = evaluate_scoped(a, context, sensitive, subjects) evaluate_scoped(b, context, sensitive, subjects)
       add(x, y)
     case Divide{a, b}:
-      x y = evaluate_in(a, context, sensitive) evaluate_in(b, context, sensitive)
+      x y = evaluate_scoped(a, context, sensitive, subjects) evaluate_scoped(b, context, sensitive, subjects)
       divide(x, y)
     case Multiply{a, b}:
-      x y = evaluate_in(a, context, sensitive) evaluate_in(b, context, sensitive)
+      x y = evaluate_scoped(a, context, sensitive, subjects) evaluate_scoped(b, context, sensitive, subjects)
       multiply(x, y)
     case And{a, b}:
-      logical_left(evaluate_in(a, context, sensitive), True{}, u => evaluate_in(b, context, sensitive))
+      logical_left(evaluate_scoped(a, context, sensitive, subjects), True{}, u => evaluate_scoped(b, context, sensitive, subjects))
     case Or{a, b}:
-      logical_left(evaluate_in(a, context, sensitive), False{}, u => evaluate_in(b, context, sensitive))
+      logical_left(evaluate_scoped(a, context, sensitive, subjects), False{}, u => evaluate_scoped(b, context, sensitive, subjects))
     case Xor{a, b}:
-      x y = evaluate_in(a, context, sensitive) evaluate_in(b, context, sensitive)
+      x y = evaluate_scoped(a, context, sensitive, subjects) evaluate_scoped(b, context, sensitive, subjects)
       logical_xor(x, y)
     case PrefixNot{a}:
-      logical_not(evaluate_in(a, context, sensitive))
+      logical_not(evaluate_scoped(a, context, sensitive, subjects))
     case CoerceNumber{a}:
-      require_numeric(evaluate_in(a, context, sensitive))
+      require_numeric(evaluate_scoped(a, context, sensitive, subjects))
     case Compare{op, a, b}:
-      x y = evaluate_in(a, context, sensitive) evaluate_in(b, context, sensitive)
+      x y = evaluate_scoped(a, context, sensitive, subjects) evaluate_scoped(b, context, sensitive, subjects)
       compare(x, y, op)
     case Round{a, places, mode}:
-      x p = evaluate_in(a, context, sensitive) evaluate_in(places, context, sensitive)
+      x p = evaluate_scoped(a, context, sensitive, subjects) evaluate_scoped(places, context, sensitive, subjects)
       round(x, p, mode)
     case Negate{a}:
-      negate(evaluate_in(a, context, sensitive))
+      negate(evaluate_scoped(a, context, sensitive, subjects))
     case Subtract{a, b}:
-      x y = evaluate_in(a, context, sensitive) evaluate_in(b, context, sensitive)
+      x y = evaluate_scoped(a, context, sensitive, subjects) evaluate_scoped(b, context, sensitive, subjects)
       subtract(x, y)
     case Not{a}:
-      logical_not(evaluate_in(a, context, sensitive))
+      logical_not(evaluate_scoped(a, context, sensitive, subjects))
     case If{c, a, b}:
-      choose(evaluate_in(c, context, sensitive), u => evaluate_in(a, context, sensitive), u => evaluate_in(b, context, sensitive))
+      choose(evaluate_scoped(c, context, sensitive, subjects), u => evaluate_scoped(a, context, sensitive, subjects), u => evaluate_scoped(b, context, sensitive, subjects))
+
+def evaluate_in(e: Expr, context: List<&2, Binding>, sensitive: Bool) -> Value:
+  evaluate_scoped(e, context, sensitive, Nil{})
 
 def evaluate(e: Expr) -> Value:
   evaluate_in(e, Nil{}, False{})
