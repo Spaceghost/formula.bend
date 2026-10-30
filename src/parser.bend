@@ -43,23 +43,47 @@ def wrap_args(args: List<&2, Core.Expr>, +validation: Core.ArgumentValidation) -
     case head <> tail:
       Core.Argument{head, validation} <> wrap_args(tail, validation)
 
-def pair_args(args: List<&2, Core.Expr>) -> List<&2, Core.Expr>:
-  match args:
-    case a <> b <> rest:
-      Core.Arguments{a, b} <> pair_args(rest)
-    case args:
-      args
+def prepend_argument_split(head: Core.Expr, parts: List<&2, Core.Expr> & List<&2, Core.Expr>) -> List<&2, Core.Expr> & List<&2, Core.Expr>:
+  (left, right) = parts
+  (head <> left, right)
 
-def balanced_arguments(fuel: Nat, args: List<&2, Core.Expr>) -> Parsed:
-  match fuel args:
-    case fuel Nil{}:
-      Accepted{Core.EmptyArguments{}}
-    case fuel a <> Nil{}:
-      Accepted{a}
+def split_arguments(count: Nat, args: List<&2, Core.Expr>) -> List<&2, Core.Expr> & List<&2, Core.Expr>:
+  match count args:
     case 0n args:
+      (Nil{}, args)
+    case 1n+p Nil{}:
+      (Nil{}, Nil{})
+    case 1n+p head <> rest:
+      prepend_argument_split(head, split_arguments(p, rest))
+
+def join_arguments(left: Parsed, right: Parsed) -> Parsed:
+  match left right:
+    case Accepted{a} Accepted{b}:
+      Accepted{Core.Arguments{a, b}}
+    case ParseError{e} right:
+      ParseError{e}
+    case left ParseError{e}:
+      ParseError{e}
+
+def parallel_argument_split(parts: List<&2, Core.Expr> & List<&2, Core.Expr>, left: List<&2, Core.Expr> -> Parsed, right: List<&2, Core.Expr> -> Parsed) -> Parsed:
+  (a, b) = parts
+  x y = left(a) right(b)
+  join_arguments(x, y)
+
+def balance_argument_count(fuel: Nat, count: Nat, args: List<&2, Core.Expr>) -> Parsed:
+  match fuel count args:
+    case fuel 0n args:
+      Accepted{Core.EmptyArguments{}}
+    case fuel 1n a <> Nil{}:
+      Accepted{a}
+    case 0n count args:
       ParseError{"Internal argument balancing limit"}
-    case 1n+p args:
-      balanced_arguments(p, pair_args(args))
+    case 1n+ +p +count args:
+      +half = Nat.div(count, 2n)
+      parallel_argument_split(split_arguments(half, args), left => balance_argument_count(p, half, left), right => balance_argument_count(p, Nat.sub(count, half), right))
+
+def balanced_arguments(fuel: Nat, +args: List<&2, Core.Expr>) -> Parsed:
+  balance_argument_count(fuel, List.length(&2, Core.Expr, args), args)
 
 def function_tree(tree: Parsed, kind: Core.FunctionKind) -> Parsed:
   match tree:
@@ -144,8 +168,38 @@ def checked_arity(valid: Bool, args: List<&2, Core.Expr>, kind: Core.FunctionKin
 def fixed_function(+args: List<&2, Core.Expr>, kind: Core.FunctionKind, count: Nat) -> Parsed:
   checked_arity(Nat.is_eq(List.length(&2, Core.Expr, args), count), args, kind)
 
-def text_call(+name: String, +args: List<&2, Core.Expr>) -> Parsed:
+def scalar_text_call(+name: String, +args: List<&2, Core.Expr>) -> Parsed:
   choose_call(String.eq(String.to_upper(name), "LEFT"), u => fixed_function(args, Core.LeftFunction{}, 2n), u => choose_call(String.eq(String.to_upper(name), "RIGHT"), u => fixed_function(args, Core.RightFunction{}, 2n), u => choose_call(String.eq(String.to_upper(name), "MID"), u => fixed_function(args, Core.MidFunction{}, 3n), u => choose_call(String.eq(String.to_upper(name), "LEN"), u => fixed_function(args, Core.LenFunction{}, 1n), u => choose_call(String.eq(String.to_upper(name), "FIND"), u => fixed_function(args, Core.FindFunction{}, 2n), u => choose_call(String.eq(String.to_upper(name), "SUBSTITUTE"), u => fixed_function(args, Core.SubstituteFunction{}, 3n), u => choose_call(String.eq(String.to_upper(name), "CONTAINS"), u => fixed_function(args, Core.ContainsFunction{}, 2n), u => choose_call(String.eq(String.to_upper(name), "CONCAT"), u => checked_arity(Bool.not(List.is_empty(&2, Core.Expr, args)), args, Core.ConcatFunction{}), u => choose_call(String.eq(String.to_upper(name), "SWITCH"), u => build_function(args, Core.SwitchFunction{}, Core.RawArgument{}), u => basic_call(name, args))))))))))
+
+def build_enumeration(args: List<&2, Core.Expr>, kind: Core.EnumerationKind, name: String) -> Parsed:
+  match args:
+    case collection <> Core.Variable{binder} <> body <> Nil{}:
+      Accepted{Core.EnumerationExpression{kind, collection, binder, body}}
+    case collection <> binder <> body <> Nil{}:
+      ParseError{name ++ "() requires second argument to be an identifier"}
+    case args:
+      ParseError{"Enumeration expects three arguments"}
+
+def reduction_identifiers(collection: Core.Expr, memo: Core.Expr, item: Core.Expr, body: Core.Expr, initial: Core.Expr) -> Parsed:
+  match memo item:
+    case Core.Variable{memo_name} Core.Variable{item_name}:
+      Accepted{Core.ReductionExpression{collection, memo_name, item_name, body, initial}}
+    case Core.Variable{memo_name} item:
+      ParseError{"REDUCE() requires third argument to be an identifier"}
+    case memo item:
+      ParseError{"REDUCE() requires second argument to be an identifier"}
+
+def build_reduction(args: List<&2, Core.Expr>) -> Parsed:
+  match args:
+    case collection <> memo <> item <> body <> Nil{}:
+      reduction_identifiers(collection, memo, item, body, Core.Literal{Core.NullValue{}})
+    case collection <> memo <> item <> body <> initial <> Nil{}:
+      reduction_identifiers(collection, memo, item, body, initial)
+    case args:
+      ParseError{"REDUCE expects four or five arguments"}
+
+def text_call(+name: String, +args: List<&2, Core.Expr>) -> Parsed:
+  choose_call(String.eq(String.to_upper(name), "MAP"), u => build_enumeration(args, Core.MapItems{}, "MAP"), u => choose_call(String.eq(String.to_upper(name), "FILTER"), u => build_enumeration(args, Core.FilterItems{}, "FILTER"), u => choose_call(String.eq(String.to_upper(name), "ALL"), u => build_enumeration(args, Core.AllItems{}, "ALL"), u => choose_call(String.eq(String.to_upper(name), "ANY"), u => build_enumeration(args, Core.AnyItems{}, "ANY"), u => choose_call(String.eq(String.to_upper(name), "REDUCE"), u => build_reduction(args), u => scalar_text_call(name, args))))))
 
 def build_call(+name: String, +args: List<&2, Core.Expr>) -> Parsed:
   Bool.pick(Parsed, String.eq(String.to_upper(name), "ROUND"), build_round(args, Decimal.HalfAway{}), Bool.pick(Parsed, String.eq(String.to_upper(name), "ROUNDUP"), build_round(args, Decimal.TowardPositive{}), Bool.pick(Parsed, String.eq(String.to_upper(name), "ROUNDDOWN"), build_round(args, Decimal.TowardNegative{}), text_call(name, args))))
@@ -588,7 +642,7 @@ def validated(info: Inspect.Info, expr: Core.Expr) -> Parsed:
 def completed(stack: Stack) -> Parsed:
   match stack:
     case ParseReady{Nil{}, +expr <> Nil{}}:
-      validated(Inspect.analyze(expr), expr)
+      Accepted{expr}
     case ParseReady{ops, values}:
       ParseError{"Unmatched parenthesis or missing operand"}
     case Rejected{e}:
@@ -640,9 +694,22 @@ def parse_numeric_tokens(valid: Bool, +tokens: List<&2, Lex.Token>) -> Parsed:
     case False{}:
       ParseError{"Tokenizer: invalid numeric literal"}
 
-def parse(source: String) -> Parsed:
+def parse_syntax(source: String) -> Parsed:
   +tokens = Lex.tokenize(source)
   parse_numeric_tokens(valid_numeric_tokens(tokens), tokens)
+
+def validate_parsed(parsed: Parsed, sensitive: Bool) -> Parsed:
+  match parsed:
+    case Accepted{+expr}:
+      validated(Inspect.analyze_in(expr, sensitive), expr)
+    case ParseError{message}:
+      ParseError{message}
+
+def parse_in(source: String, sensitive: Bool) -> Parsed:
+  validate_parsed(parse_syntax(source), sensitive)
+
+def parse(source: String) -> Parsed:
+  parse_in(source, False{})
 
 def preflight(missing: List<&2, String>, expr: Core.Expr, context: List<&2, Core.Binding>, sensitive: Bool) -> Core.Value:
   match missing:
@@ -661,8 +728,8 @@ def evaluate_parsed(parsed: Parsed, context: List<&2, Core.Binding>, sensitive: 
     case ParseError{e}:
       Core.Failure{"Parse error: " ++ e}
 
-def evaluate(source: String, context: List<&2, Core.Binding>, sensitive: Bool) -> Core.Value:
-  evaluate_parsed(parse(source), context, sensitive)
+def evaluate(source: String, context: List<&2, Core.Binding>, +sensitive: Bool) -> Core.Value:
+  evaluate_parsed(parse_in(source, sensitive), context, sensitive)
 
 # Differential snapshots preserve parse-error classification before evaluation.
 def snapshot_parsed(parsed: Parsed, context: List<&2, Core.Binding>, sensitive: Bool) -> String:
@@ -672,8 +739,8 @@ def snapshot_parsed(parsed: Parsed, context: List<&2, Core.Binding>, sensitive: 
     case ParseError{e}:
       Bool.pick(String, String.starts_with(e, "Tokenizer: "), "error:Dentaku::TokenizerError", "error:Dentaku::ParseError")
 
-def snapshot(source: String, context: List<&2, Core.Binding>, sensitive: Bool) -> String:
-  snapshot_parsed(parse(source), context, sensitive)
+def snapshot(source: String, context: List<&2, Core.Binding>, +sensitive: Bool) -> String:
+  snapshot_parsed(parse_in(source, sensitive), context, sensitive)
 
 def class_snapshot_parsed(parsed: Parsed, context: List<&2, Core.Binding>, sensitive: Bool) -> String:
   match parsed:
@@ -682,8 +749,18 @@ def class_snapshot_parsed(parsed: Parsed, context: List<&2, Core.Binding>, sensi
     case ParseError{e}:
       Bool.pick(String, String.starts_with(e, "Tokenizer: "), "error:Dentaku::TokenizerError", "error:Dentaku::ParseError")
 
-def class_snapshot(source: String, context: List<&2, Core.Binding>, sensitive: Bool) -> String:
-  class_snapshot_parsed(parse(source), context, sensitive)
+def class_snapshot(source: String, context: List<&2, Core.Binding>, +sensitive: Bool) -> String:
+  class_snapshot_parsed(parse_in(source, sensitive), context, sensitive)
+
+def message_snapshot_parsed(parsed: Parsed, context: List<&2, Core.Binding>, sensitive: Bool) -> String:
+  match parsed:
+    case Accepted{expr}:
+      Core.message_snapshot(evaluate_checked(expr, context, sensitive))
+    case ParseError{message}:
+      "message:" ++ message
+
+def message_snapshot(source: String, context: List<&2, Core.Binding>, +sensitive: Bool) -> String:
+  message_snapshot_parsed(parse_in(source, sensitive), context, sensitive)
 
 def type_snapshot_info(info: Inspect.Info) -> String:
   match info:
@@ -696,15 +773,18 @@ def type_snapshot_info(info: Inspect.Info) -> String:
     case info:
       "type:nil"
 
-def type_snapshot_parsed(parsed: Parsed) -> String:
+def type_snapshot_parsed(parsed: Parsed, sensitive: Bool) -> String:
   match parsed:
     case Accepted{expr}:
-      type_snapshot_info(Inspect.analyze(expr))
+      type_snapshot_info(Inspect.analyze_in(expr, sensitive))
     case ParseError{e}:
       Bool.pick(String, String.starts_with(e, "Tokenizer: "), "error:Dentaku::TokenizerError", "error:Dentaku::ParseError")
 
+def type_snapshot_in(source: String, +sensitive: Bool) -> String:
+  type_snapshot_parsed(parse_in(source, sensitive), sensitive)
+
 def type_snapshot(source: String) -> String:
-  type_snapshot_parsed(parse(source))
+  type_snapshot_in(source, False{})
 
 type NamesResult is Data:
   FoundNames{names: List<&2, String>}
@@ -724,11 +804,11 @@ def names_result(parsed: Parsed, context: List<&2, Core.Binding>, sensitive: Boo
     case ParseError{e}:
       NamesError{e}
 
-def identifiers(source: String, sensitive: Bool) -> NamesResult:
-  names_result(parse(source), Nil{}, sensitive, True{})
+def identifiers(source: String, +sensitive: Bool) -> NamesResult:
+  names_result(parse_in(source, sensitive), Nil{}, sensitive, True{})
 
-def dependencies(source: String, context: List<&2, Core.Binding>, sensitive: Bool) -> NamesResult:
-  names_result(parse(source), context, sensitive, False{})
+def dependencies(source: String, context: List<&2, Core.Binding>, +sensitive: Bool) -> NamesResult:
+  names_result(parse_in(source, sensitive), context, sensitive, False{})
 
 def names_snapshot(result: NamesResult) -> String:
   match result:

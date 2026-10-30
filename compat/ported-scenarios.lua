@@ -78,4 +78,27 @@ return {
     {'gathers dependencies from switch and conditionals', 'case_dependencies_unknown'},
     {'short-circuits to the matched branch when the switch is resolvable', {'case_dependencies_apple', 'case_dependencies_banana', 'case_dependencies_else'}},
   },
+  ['spec/ast/map_spec.rb'] = {
+    {'operates on each value in an array', 'enum_map_sum'},
+    {'works with an empty array', 'enum_map_empty'},
+    {'works with a single value if needed for some reason', 'enum_map_scalar'},
+    {'raises argument error if a string is passed as identifier', {'enum_map_bad_binder', 'enum_map_bad_binder_message'}},
+  },
+  ['spec/ast/filter_spec.rb'] = {
+    {'excludes unmatched values', 'enum_filter_sum'},
+    {'works with a single value if needed for some reason', {'enum_filter_scalar_false', 'enum_filter_scalar_true'}},
+  },
+  ['spec/ast/all_spec.rb'] = {
+    {'performs ALL operation', 'enum_all'},
+    {'works with a single value if needed for some reason', {'enum_all_scalar_false', 'enum_all_scalar_true'}},
+  },
+  ['spec/ast/any_spec.rb'] = {
+    {'performs ANY operation', 'enum_any'},
+    {'works with a single value if needed for some reason', {'enum_any_scalar_false', 'enum_any_scalar_true'}},
+  },
+  ['spec/ast/reduce_spec.rb'] = {
+    {'performs REDUCE operation with initial value', 'enum_reduce_initial'},
+    {'performs REDUCE operation without initial value', 'enum_reduce_default_initial'},
+    {'raises argument error if a string is passed as identifier', {'enum_reduce_bad_memo', 'enum_reduce_bad_item'}},
+  },
 }

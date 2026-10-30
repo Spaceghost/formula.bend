@@ -88,3 +88,144 @@ def Laws.case_switch_error_first(message, clauses):
 
 def Laws.case_first_true_branch(yes, rest, context, sensitive, subjects):
   {==}
+
+def Laws.all_skips_later_predicate(later):
+  {==}
+
+def Laws.any_skips_later_predicate(later):
+  {==}
+
+# Splitting the expression datatype proves an empty batch never enters its body.
+def Laws.empty_enumeration_batch(body, kind, binder, context, sensitive, subjects):
+  match body:
+    case Core.Literal{x0}:
+      {==}
+    case Core.Variable{x0}:
+      {==}
+    case Core.Add{x0, x1}:
+      {==}
+    case Core.Multiply{x0, x1}:
+      {==}
+    case Core.Divide{x0, x1}:
+      {==}
+    case Core.If{x0, x1, x2}:
+      {==}
+    case Core.Not{x0}:
+      {==}
+    case Core.Negate{x0}:
+      {==}
+    case Core.Subtract{x0, x1}:
+      {==}
+    case Core.Round{x0, x1, x2}:
+      {==}
+    case Core.Compare{x0, x1, x2}:
+      {==}
+    case Core.CoerceNumber{x0}:
+      {==}
+    case Core.And{x0, x1}:
+      {==}
+    case Core.Or{x0, x1}:
+      {==}
+    case Core.Xor{x0, x1}:
+      {==}
+    case Core.PrefixNot{x0}:
+      {==}
+    case Core.Argument{x0, x1}:
+      {==}
+    case Core.Arguments{x0, x1}:
+      {==}
+    case Core.EmptyArguments{}:
+      {==}
+    case Core.FunctionCall{x0, x1}:
+      {==}
+    case Core.ArrayLiteral{x0}:
+      {==}
+    case Core.Access{x0, x1}:
+      {==}
+    case Core.CaseExpression{x0, x1}:
+      {==}
+    case Core.WhenExpression{x0, x1, x2}:
+      {==}
+    case Core.ElseExpression{x0}:
+      {==}
+    case Core.NoCaseMatch{}:
+      {==}
+    case Core.EnumerationExpression{x0, x1, x2, x3}:
+      {==}
+    case Core.ReductionExpression{x0, x1, x2, x3, x4}:
+      {==}
+    case Core.MidExpression{x0, x1, x2}:
+      {==}
+    case Core.ContainsExpression{x0, x1}:
+      {==}
+    case Core.CountOneExpression{x0}:
+      {==}
+    case Core.CountManyExpression{x0, x1}:
+      {==}
+
+def Laws.empty_reduction_batch(body, memo_name, item_name, initial, context, sensitive, subjects):
+  match body:
+    case Core.Literal{x0}:
+      {==}
+    case Core.Variable{x0}:
+      {==}
+    case Core.Add{x0, x1}:
+      {==}
+    case Core.Multiply{x0, x1}:
+      {==}
+    case Core.Divide{x0, x1}:
+      {==}
+    case Core.If{x0, x1, x2}:
+      {==}
+    case Core.Not{x0}:
+      {==}
+    case Core.Negate{x0}:
+      {==}
+    case Core.Subtract{x0, x1}:
+      {==}
+    case Core.Round{x0, x1, x2}:
+      {==}
+    case Core.Compare{x0, x1, x2}:
+      {==}
+    case Core.CoerceNumber{x0}:
+      {==}
+    case Core.And{x0, x1}:
+      {==}
+    case Core.Or{x0, x1}:
+      {==}
+    case Core.Xor{x0, x1}:
+      {==}
+    case Core.PrefixNot{x0}:
+      {==}
+    case Core.Argument{x0, x1}:
+      {==}
+    case Core.Arguments{x0, x1}:
+      {==}
+    case Core.EmptyArguments{}:
+      {==}
+    case Core.FunctionCall{x0, x1}:
+      {==}
+    case Core.ArrayLiteral{x0}:
+      {==}
+    case Core.Access{x0, x1}:
+      {==}
+    case Core.CaseExpression{x0, x1}:
+      {==}
+    case Core.WhenExpression{x0, x1, x2}:
+      {==}
+    case Core.ElseExpression{x0}:
+      {==}
+    case Core.NoCaseMatch{}:
+      {==}
+    case Core.EnumerationExpression{x0, x1, x2, x3}:
+      {==}
+    case Core.ReductionExpression{x0, x1, x2, x3, x4}:
+      {==}
+    case Core.MidExpression{x0, x1, x2}:
+      {==}
+    case Core.ContainsExpression{x0, x1}:
+      {==}
+    case Core.CountOneExpression{x0}:
+      {==}
+    case Core.CountManyExpression{x0, x1}:
+      {==}

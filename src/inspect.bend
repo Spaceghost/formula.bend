@@ -1,5 +1,6 @@
 import Base
 import ./core.bend as Core
+import ./dependencies.bend as Dependencies
 
 type ResultKind is Data:
   NumericKind{}
@@ -104,69 +105,89 @@ def function_info(kind: Core.FunctionKind, info: Info) -> Info:
     case Metadata{old, dynamic, valid}:
       Metadata{function_kind(kind), dynamic, valid}
 
+def scoped_info(info: Info, dependencies: List<&2, String>) -> Info:
+  match info:
+    case Metadata{kind, dynamic, valid}:
+      Metadata{kind, Bool.not(List.is_empty(&2, String, dependencies)), valid}
+
 # This pass inspects syntax only; it never evaluates a guard or user function.
-def analyze(expr: Core.Expr) -> Info:
+def analyze_in(+expr: Core.Expr, +sensitive: Bool) -> Info:
   match expr:
+    case Core.MidExpression{value, offset, length}:
+      binary(analyze_in(value, sensitive), binary(analyze_in(offset, sensitive), analyze_in(length, sensitive), UnknownKind{}, False{}), TextKind{}, False{})
+    case Core.ContainsExpression{needle, haystack}:
+      binary(analyze_in(needle, sensitive), analyze_in(haystack, sensitive), LogicalKind{}, False{})
+    case Core.CountOneExpression{value}:
+      unary(analyze_in(value, sensitive), UnknownKind{}, False{})
+    case Core.CountManyExpression{arguments, count}:
+      unary(analyze_in(arguments, sensitive), UnknownKind{}, False{})
+    case Core.EnumerationExpression{kind, collection, binder, body}:
+      scoped_info(binary(analyze_in(collection, sensitive), analyze_in(body, sensitive), UnknownKind{}, False{}), Dependencies.analyze(expr, Nil{}, sensitive, True{}))
+    case Core.ReductionExpression{collection, memo_binder, item_binder, body, initial}:
+      scoped_info(binary(analyze_in(collection, sensitive), binary(analyze_in(body, sensitive), analyze_in(initial, sensitive), UnknownKind{}, False{}), UnknownKind{}, False{}), Dependencies.analyze(expr, Nil{}, sensitive, True{}))
     case Core.CaseExpression{subject, clauses}:
-      binary(analyze(subject), analyze(clauses), UnknownKind{}, False{})
+      binary(analyze_in(subject, sensitive), analyze_in(clauses, sensitive), UnknownKind{}, False{})
     case Core.WhenExpression{key, value, rest}:
-      binary(analyze(key), binary(analyze(value), analyze(rest), UnknownKind{}, False{}), UnknownKind{}, False{})
+      binary(analyze_in(key, sensitive), binary(analyze_in(value, sensitive), analyze_in(rest, sensitive), UnknownKind{}, False{}), UnknownKind{}, False{})
     case Core.ElseExpression{value}:
-      unary(analyze(value), UnknownKind{}, False{})
+      unary(analyze_in(value, sensitive), UnknownKind{}, False{})
     case Core.NoCaseMatch{}:
       Metadata{UnknownKind{}, False{}, True{}}
     case Core.ArrayLiteral{a}:
-      unary(analyze(a), UnknownKind{}, False{})
+      unary(analyze_in(a, sensitive), UnknownKind{}, False{})
     case Core.Access{a, b}:
-      x y = analyze(a) analyze(b)
+      x y = analyze_in(a, sensitive) analyze_in(b, sensitive)
       binary(x, y, UnknownKind{}, False{})
     case Core.EmptyArguments{}:
       Metadata{UnknownKind{}, False{}, True{}}
     case Core.Argument{a, validation}:
-      unary(analyze(a), UnknownKind{}, False{})
+      unary(analyze_in(a, sensitive), UnknownKind{}, False{})
     case Core.Arguments{a, b}:
-      x y = analyze(a) analyze(b)
+      x y = analyze_in(a, sensitive) analyze_in(b, sensitive)
       binary(x, y, UnknownKind{}, False{})
     case Core.FunctionCall{kind, arguments}:
-      function_info(kind, analyze(arguments))
+      function_info(kind, analyze_in(arguments, sensitive))
     case Core.Literal{v}:
       literal(v)
     case Core.Variable{name}:
       Metadata{UnknownKind{}, True{}, True{}}
     case Core.Add{a, b}:
-      x y = analyze(a) analyze(b)
+      x y = analyze_in(a, sensitive) analyze_in(b, sensitive)
       binary(x, y, NumericKind{}, True{})
     case Core.Subtract{a, b}:
-      x y = analyze(a) analyze(b)
+      x y = analyze_in(a, sensitive) analyze_in(b, sensitive)
       binary(x, y, NumericKind{}, True{})
     case Core.Multiply{a, b}:
-      x y = analyze(a) analyze(b)
+      x y = analyze_in(a, sensitive) analyze_in(b, sensitive)
       binary(x, y, NumericKind{}, True{})
     case Core.Divide{a, b}:
-      x y = analyze(a) analyze(b)
+      x y = analyze_in(a, sensitive) analyze_in(b, sensitive)
       binary(x, y, NumericKind{}, True{})
     case Core.Compare{op, a, b}:
-      x y = analyze(a) analyze(b)
+      x y = analyze_in(a, sensitive) analyze_in(b, sensitive)
       binary(x, y, LogicalKind{}, False{})
     case Core.Round{a, places, mode}:
-      x y = analyze(a) analyze(places)
+      x y = analyze_in(a, sensitive) analyze_in(places, sensitive)
       binary(x, y, NumericKind{}, False{})
     case Core.Negate{a}:
-      unary(analyze(a), NumericKind{}, True{})
+      unary(analyze_in(a, sensitive), NumericKind{}, True{})
     case Core.Not{a}:
-      unary(analyze(a), LogicalKind{}, False{})
+      unary(analyze_in(a, sensitive), LogicalKind{}, False{})
     case Core.And{a, b}:
-      x y = analyze(a) analyze(b)
+      x y = analyze_in(a, sensitive) analyze_in(b, sensitive)
       logical_binary(x, y)
     case Core.Or{a, b}:
-      x y = analyze(a) analyze(b)
+      x y = analyze_in(a, sensitive) analyze_in(b, sensitive)
       logical_binary(x, y)
     case Core.Xor{a, b}:
-      x y = analyze(a) analyze(b)
+      x y = analyze_in(a, sensitive) analyze_in(b, sensitive)
       logical_binary(x, y)
     case Core.PrefixNot{a}:
-      logical_unary(analyze(a))
+      logical_unary(analyze_in(a, sensitive))
     case Core.CoerceNumber{a}:
-      unary(analyze(a), NumericKind{}, False{})
+      unary(analyze_in(a, sensitive), NumericKind{}, False{})
     case Core.If{c, a, b}:
-      conditional(analyze(c), analyze(a), analyze(b))
+      conditional(analyze_in(c, sensitive), analyze_in(a, sensitive), analyze_in(b, sensitive))
+
+def analyze(expr: Core.Expr) -> Info:
+  analyze_in(expr, False{})

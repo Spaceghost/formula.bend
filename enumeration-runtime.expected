@@ -1,0 +1,7 @@
+scale_map_sum	number:526850
+scale_filter_sum	number:5115
+scale_all	boolean:true
+scale_any_last	boolean:true
+scale_reduce	number:525825
+scale_map_count	number:1025
+scale_case_body	number:524800

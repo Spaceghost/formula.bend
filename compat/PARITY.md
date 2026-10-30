@@ -46,7 +46,7 @@ The unchanged upstream suite passes 713 examples with zero failures and 96.82%
 line coverage in the Ruby reference environment. `reference-summary.json` and
 `upstream-spec-catalog.json` record that run. These results describe Ruby only.
 
-The Lua-driven value and dependency corpus has 592 cases matched against Ruby values or parse
+The Lua-driven value and dependency corpus has 654 cases matched against Ruby values or parse
 error classification. It covers truthiness, strings/null, comparisons, selected
 numeric-string coercions, and static operand rejection. It is a small subset of
 the upstream catalog. Native error classes/messages, all calculator methods,
@@ -87,8 +87,8 @@ lua tools/run-oracle.lua PROJECT UPSTREAM GEMS STORAGE RUNROOT OUTPUT
 The probe catches Dentaku errors and records their class; unexpected Ruby failures
 abort without replacing the output. Compare the result before updating committed
 goldens. Parser snapshots currently preserve parse-error classification, while
-full runtime error-class/message parity remains unfinished. The 592-case value and dependency
-corpus passes on JavaScript; the 550-case checkpoint passed native CPU with one
+full runtime error-class/message parity remains unfinished. The 654-case value and dependency
+corpus passes on JavaScript; the 592-case checkpoint passed native CPU with one
 and eight threads. This is correctness verification,
 not the requested performance shootout.
 
@@ -242,6 +242,27 @@ probe retains all branch dependencies, including earlier branches and duplicates
 
 Five behavioral CASE spec scenarios are mapped; Ruby constructor-shape errors
 are not yet mapped. Visitors, volatile/custom-function purity, and complete
-diagnostics remain incomplete. Native verification of the latest 42 cases is
-pending. Generated corpus output is grouped into small IO functions to avoid
+diagnostics remain incomplete. The 592-case checkpoint passes native CPU with
+one and eight threads. Generated corpus output is grouped into small IO functions to avoid
 the older compiler's stack limit on a single long IO chain.
+
+## Collection expressions
+
+MAP, FILTER, ALL, ANY, and REDUCE add 62 differential cases. They cover scalar,
+null, empty, nested and array-valued inputs; scoped identifiers; case sensitivity;
+result types; dependency pruning; binder validation; errors; and lazy ALL/ANY.
+REDUCE starts with the explicit initial value or null, even for an empty input.
+Item bindings shadow outer bindings without changing the caller's context.
+
+The total evaluator recurses structurally over the expression and collection
+tree. It has no execution fuel limit or unsafe recursion. Collections and function
+arguments use contiguous balanced halves. MAP/FILTER and numeric aggregate
+subtrees expose independent work to Bend's scheduler. ALL/ANY preserve lazy
+source order; REDUCE threads its memo sequentially. Seven additional oracle
+checks over 1,025-item collections exercise these paths without giant literals.
+Both Bend 2.0.16 and 2.0.39 pass all 654 main cases and seven scale checks on
+JavaScript. The proof gate contains 32 laws and the concrete suite 165 fixtures.
+
+Hash fields, PLUCK, and permissive per-item error recovery remain unfinished.
+Only the mapped scalar/array scenarios are claimed here; the upstream enumeration
+families remain partial. Native verification of this batch is pending.

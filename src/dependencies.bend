@@ -147,8 +147,34 @@ def when_dependencies(choice: CaseChoice, all: Unit -> List<&2, String>, yes: Un
     case CaseSelected{1n+p}:
       no(p)
 
+def binder_dependency(binders: List<&2, String>, +name: String) -> Bool:
+  match binders:
+    case Nil{}:
+      False{}
+    case +binder <> rest:
+      Bool.or(Bool.or(String.eq(name, binder), String.starts_with(name, binder ++ ".")), binder_dependency(rest, name))
+
+def remove_binder_dependencies(names: List<&2, String>, +binders: List<&2, String>) -> List<&2, String>:
+  match names:
+    case Nil{}:
+      Nil{}
+    case +head <> rest:
+      unique_pick(binder_dependency(binders, head), head, u => remove_binder_dependencies(rest, binders))
+
 def analyze_mode(expr: Core.Expr, +context: List<&2, Core.Binding>, +sensitive: Bool, +static: Bool, choice: CaseChoice) -> List<&2, String>:
   match expr:
+    case Core.MidExpression{value, offset, length}:
+      List.append(&2, String, analyze_mode(value, context, sensitive, static, CaseUnresolved{}), List.append(&2, String, analyze_mode(offset, context, sensitive, static, CaseUnresolved{}), analyze_mode(length, context, sensitive, static, CaseUnresolved{})))
+    case Core.ContainsExpression{needle, haystack}:
+      List.append(&2, String, analyze_mode(needle, context, sensitive, static, CaseUnresolved{}), analyze_mode(haystack, context, sensitive, static, CaseUnresolved{}))
+    case Core.CountOneExpression{value}:
+      analyze_mode(value, context, sensitive, static, CaseUnresolved{})
+    case Core.CountManyExpression{arguments, count}:
+      analyze_mode(arguments, context, sensitive, static, CaseUnresolved{})
+    case Core.EnumerationExpression{kind, collection, binder, body}:
+      List.append(&2, String, analyze_mode(collection, context, sensitive, static, CaseUnresolved{}), remove_binder_dependencies(analyze_mode(body, context, sensitive, static, CaseUnresolved{}), [Core.normalize(sensitive, binder)]))
+    case Core.ReductionExpression{collection, memo_binder, item_binder, body, initial}:
+      List.append(&2, String, analyze_mode(collection, context, sensitive, static, CaseUnresolved{}), List.append(&2, String, remove_binder_dependencies(analyze_mode(body, context, sensitive, static, CaseUnresolved{}), [Core.normalize(sensitive, memo_binder), Core.normalize(sensitive, item_binder)]), analyze_mode(initial, context, sensitive, static, CaseUnresolved{})))
     case Core.CaseExpression{+subject, +clauses}:
       +selected = case_choice(static, subject, clauses, context, sensitive)
       case_dependencies(selected, u => analyze_mode(subject, context, sensitive, static, CaseUnresolved{}), analyze_mode(clauses, context, sensitive, static, selected))

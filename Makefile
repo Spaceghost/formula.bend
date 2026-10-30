@@ -1,7 +1,7 @@
 BEND ?= bend
 LUA ?= lua
 
-.PHONY: parity-check check native-check rounding-check division-check address-check
+.PHONY: parity-check check native-check rounding-check division-check address-check enumeration-check
 check:
 	$(BEND) PROOF.bend
 	$(BEND) tests.bend
@@ -11,7 +11,15 @@ check:
 	$(MAKE) rounding-check
 	$(MAKE) division-check
 	$(MAKE) address-check
+	$(MAKE) enumeration-check
 	$(MAKE) parity-check
+
+enumeration-check:
+	mkdir -p build
+	$(LUA) tools/generate-corpus.lua compat/enumeration-scale-cases.lua build/enumeration-scale --metadata-only
+	diff -u enumeration-runtime.expected build/enumeration-scale.expected
+	$(BEND) enumeration-runtime.bend > build/enumeration-scale.actual
+	diff -u enumeration-runtime.expected build/enumeration-scale.actual
 
 rounding-check:
 	mkdir -p build
@@ -54,3 +62,6 @@ native-check:
 	$(BEND) build/scalar-corpus.bend -o build/scalar-corpus
 	./build/scalar-corpus > build/scalar-corpus-native.actual
 	diff -u compat/scalar-oracle.tsv build/scalar-corpus-native.actual
+	$(BEND) enumeration-runtime.bend -o build/enumeration-runtime
+	./build/enumeration-runtime > build/enumeration-native.actual
+	diff -u enumeration-runtime.expected build/enumeration-native.actual

@@ -590,3 +590,65 @@ case_missing_when	error:Dentaku::ParseError
 case_empty_else	error:Dentaku::ParseError
 case_keyword_without_frame	error:Dentaku::ParseError
 case_empty_array_branch	error:Dentaku::ParseError
+enum_map_sum	number:9
+enum_map_empty	array:[]
+enum_map_scalar	array:[8:number:2]
+enum_map_null	array:[]
+enum_map_string	array:[9:string:ab]
+enum_map_nested	array:[28:array:[8:number:28:number:3]18:array:[8:number:4]]
+enum_map_arrays	array:[28:array:[8:number:18:number:2]28:array:[8:number:28:number:3]]
+enum_map_body_error	error:Dentaku::ZeroDivisionError
+enum_map_shadowing	array:[8:number:28:number:3]
+enum_filter_sum	number:5
+enum_filter_scalar_false	array:[]
+enum_filter_scalar_true	array:[8:number:2]
+enum_filter_empty	array:[]
+enum_filter_truthiness	array:[8:number:07:string:8:number:1]
+enum_filter_error	error:Dentaku::ZeroDivisionError
+enum_all	boolean:false
+enum_all_scalar_false	boolean:false
+enum_all_scalar_true	boolean:true
+enum_all_empty	boolean:true
+enum_all_lazy_error	boolean:false
+enum_any	boolean:true
+enum_any_scalar_false	boolean:false
+enum_any_scalar_true	boolean:true
+enum_any_empty	boolean:false
+enum_any_lazy_error	boolean:true
+enum_all_error_first	error:Dentaku::ZeroDivisionError
+enum_any_error_first	error:Dentaku::ZeroDivisionError
+enum_reduce_initial	string:helloworld
+enum_reduce_default_initial	string:world
+enum_reduce_numeric	number:6
+enum_reduce_numeric_default	error:Dentaku::ArgumentError
+enum_reduce_empty	null
+enum_reduce_empty_initial	number:42
+enum_reduce_empty_initial_error	error:Dentaku::ZeroDivisionError
+enum_reduce_same_binder	string:3
+enum_map_missing_external	error:Dentaku::UnboundVariableError
+enum_map_dependencies	names:vals,tax
+enum_map_identifiers	names:vals,tax
+enum_map_duplicate_dependencies	names:vals,tax,tax
+enum_reduce_dependencies	names:vals,tax,start
+enum_reduce_identifiers	names:vals,tax,start
+enum_map_type	type:nil
+enum_all_type	type:nil
+enum_reduce_type	type:nil
+enum_map_local_static_rejection	error:Dentaku::ParseError
+enum_all_local_static_rejection	error:Dentaku::ParseError
+enum_map_case_insensitive_static	error:Dentaku::ParseError
+enum_map_case_sensitive_static	boolean:true
+enum_map_case_sensitive_value	array:[8:number:7]
+enum_map_case_insensitive_value	array:[8:number:1]
+enum_map_bad_binder	error:Dentaku::ParseError
+enum_map_bad_binder_message	message:MAP() requires second argument to be an identifier
+enum_all_bad_binder_message	message:ALL() requires second argument to be an identifier
+enum_filter_bad_binder_message	message:FILTER() requires second argument to be an identifier
+enum_reduce_bad_memo	error:Dentaku::ParseError
+enum_reduce_bad_item	error:Dentaku::ParseError
+enum_reduce_bad_memo_message	message:REDUCE() requires second argument to be an identifier
+enum_reduce_bad_item_message	message:REDUCE() requires third argument to be an identifier
+enum_map_wrong_arity	error:Dentaku::ParseError
+enum_reduce_wrong_arity	error:Dentaku::ParseError
+enum_case_body	array:[8:number:78:number:8]
+enum_case_outer_scope	array:[8:number:28:number:3]

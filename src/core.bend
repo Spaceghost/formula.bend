@@ -54,6 +54,12 @@ type ArgumentValidation is Data:
   RawArgument{}
   LogicalArgument{}
 
+type EnumerationKind is Data:
+  MapItems{}
+  FilterItems{}
+  AllItems{}
+  AnyItems{}
+
 type Expr is Data:
   Literal{value: Value}
   Variable{name: String}
@@ -81,6 +87,17 @@ type Expr is Data:
   WhenExpression{key: Expr, value: Expr, rest: Expr}
   ElseExpression{value: Expr}
   NoCaseMatch{}
+  EnumerationExpression{kind: EnumerationKind, collection: Expr, binder: String, body: Expr}
+  ReductionExpression{collection: Expr, memo_binder: String, item_binder: String, body: Expr, initial: Expr}
+  MidExpression{value: Expr, offset: Expr, length: Expr}
+  ContainsExpression{needle: Expr, haystack: Expr}
+  CountOneExpression{value: Expr}
+  CountManyExpression{arguments: Expr, count: Nat}
+
+type EvaluationMode is Data:
+  EvaluateOne{}
+  EvaluateItems{kind: EnumerationKind, binder: String}
+  EvaluateReduction{memo_binder: String, item_binder: String, memo: Value}
 
 def compact_pick(value: Decimal.Decimal, small: Bool) -> Value:
   match value small:
@@ -1299,6 +1316,72 @@ def abs_argument(tree: Value) -> Value:
     case tree:
       Failure{"ABS expects one argument"}
 
+def collection_nodes(value: Value) -> List<&2, Value>:
+  match value:
+    case NullValue{}:
+      Nil{}
+    case ArrayNil{}:
+      Nil{}
+    case ArrayCons{head, tail}:
+      ArgumentValue{head} <> collection_nodes(tail)
+    case value:
+      [ArgumentValue{value}]
+
+def prepend_batch_split(head: Value, result: List<&2, Value> & List<&2, Value>) -> List<&2, Value> & List<&2, Value>:
+  (left, right) = result
+  (head <> left, right)
+
+def split_batch_nodes(count: Nat, nodes: List<&2, Value>) -> List<&2, Value> & List<&2, Value>:
+  match count nodes:
+    case 0n nodes:
+      (Nil{}, nodes)
+    case 1n+p Nil{}:
+      (Nil{}, Nil{})
+    case 1n+p head <> rest:
+      prepend_batch_split(head, split_batch_nodes(p, rest))
+
+def parallel_batch_split(parts: List<&2, Value> & List<&2, Value>, left: List<&2, Value> -> Value, right: List<&2, Value> -> Value) -> Value:
+  (a, b) = parts
+  x y = left(a) right(b)
+  ArgumentPair{x, y}
+
+def balance_batch(fuel: Nat, count: Nat, nodes: List<&2, Value>) -> Value:
+  match fuel count nodes:
+    case fuel 0n nodes:
+      EmptyArgumentValues{}
+    case fuel 1n node <> Nil{}:
+      node
+    case 0n count nodes:
+      Failure{"Internal batch balancing limit"}
+    case 1n+ +p +count nodes:
+      +half = Nat.div(count, 2n)
+      parallel_batch_split(split_batch_nodes(half, nodes), left => balance_batch(p, half, left), right => balance_batch(p, Nat.sub(count, half), right))
+
+def balanced_nodes(+nodes: List<&2, Value>) -> Value:
+  +size = List.length(&2, Value, nodes)
+  balance_batch(size, size, nodes)
+
+def collection_batch(value: Value) -> Value:
+  balanced_nodes(collection_nodes(value))
+
+def numeric_nodes(tree: Value) -> List<&2, Value>:
+  match tree:
+    case ArgumentValue{value}:
+      numeric_nodes(value)
+    case ArgumentPair{a, b}:
+      List.append(&2, Value, numeric_nodes(a), numeric_nodes(b))
+    case ArrayCons{head, tail}:
+      List.append(&2, Value, numeric_nodes(head), numeric_nodes(tail))
+    case ArrayNil{}:
+      Nil{}
+    case EmptyArgumentValues{}:
+      Nil{}
+    case tree:
+      [ArgumentValue{tree}]
+
+def numeric_batch(tree: Value) -> Value:
+  balanced_nodes(numeric_nodes(tree))
+
 def sum_tree(tree: Value) -> Value:
   match tree:
     case ArgumentValue{value}:
@@ -1393,20 +1476,20 @@ def function_arguments(kind: FunctionKind, tree: Value) -> Value:
     case SwitchFunction{}:
       switch_values(array_elements(tree, ArrayNil{}))
     case ProductFunction{}:
-      product_tree(tree)
+      product_tree(numeric_batch(tree))
     case MinFunction{}:
-      extreme_tree(tree, True{})
+      extreme_tree(numeric_batch(tree), True{})
     case MaxFunction{}:
-      extreme_tree(tree, False{})
+      extreme_tree(numeric_batch(tree), False{})
     case AverageFunction{}:
-      +arguments = tree
-      average_tree(flattened_count(arguments), arguments)
+      +arguments = numeric_batch(tree)
+      average_tree(argument_count(arguments), arguments)
     case CountFunction{}:
       Number{argument_count(tree)}
     case AbsFunction{}:
       abs_argument(tree)
     case SumFunction{}:
-      add(Number{0n}, sum_tree(tree))
+      add(Number{0n}, sum_tree(numeric_batch(tree)))
     case AndFunction{}:
       logical_arguments(tree, Logical{True{}}, AndFunction{})
     case OrFunction{}:
@@ -1457,76 +1540,271 @@ def case_when_value(key: Value, subject: Value, yes: Unit -> Value, no: Unit -> 
 
 # CASE subjects use an internal value stack, separate from user bindings.
 # Every recursive evaluation still consumes a structural subexpression.
-def evaluate_scoped(e: Expr, +context: List<&2, Binding>, +sensitive: Bool, +subjects: List<&2, Value>) -> Value:
-  match e:
-    case CaseExpression{subject, clauses}:
-      with_case_value(evaluate_scoped(subject, context, sensitive, subjects), value => evaluate_scoped(clauses, context, sensitive, value <> subjects))
-    case WhenExpression{key, value, rest}:
-      case_when_value(evaluate_scoped(key, context, sensitive, subjects), case_subject(subjects), u => evaluate_scoped(value, context, sensitive, subjects), u => evaluate_scoped(rest, context, sensitive, subjects))
-    case ElseExpression{value}:
-      evaluate_scoped(value, context, sensitive, subjects)
-    case NoCaseMatch{}:
-      Failure{"No block matched the switch value '" ++ ruby_render(case_subject(subjects), False{}, False{}) ++ "'"}
-    case FunctionCall{MidFunction{}, Arguments{Arguments{Argument{value, vv}, Argument{offset, ov}}, Argument{length, lv}}}:
-      mid_text(evaluate_scoped(value, context, sensitive, subjects), u => evaluate_scoped(offset, context, sensitive, subjects), u => evaluate_scoped(length, context, sensitive, subjects))
-    case FunctionCall{ContainsFunction{}, Arguments{Argument{needle, nv}, Argument{haystack, hv}}}:
-      contains_haystack(evaluate_scoped(haystack, context, sensitive, subjects), u => evaluate_scoped(needle, context, sensitive, subjects))
-    case ArrayLiteral{elements}:
-      array_value(evaluate_scoped(elements, context, sensitive, subjects))
-    case Access{structure, index}:
-      access_value(evaluate_scoped(structure, context, sensitive, subjects), u => evaluate_scoped(index, context, sensitive, subjects))
-    case FunctionCall{CountFunction{}, Argument{a, validation}}:
-      count_single(evaluate_scoped(a, context, sensitive, subjects))
-    case FunctionCall{CountFunction{}, arguments}:
-      Number{expression_argument_count(arguments)}
-    case EmptyArguments{}:
-      EmptyArgumentValues{}
-    case Argument{a, validation}:
-      ArgumentValue{validate_argument(validation, evaluate_scoped(a, context, sensitive, subjects))}
+def argument_expressions(tree: Expr) -> List<&2, Expr>:
+  match tree:
+    case Argument{value, validation}:
+      [value]
     case Arguments{a, b}:
-      x y = evaluate_scoped(a, context, sensitive, subjects) evaluate_scoped(b, context, sensitive, subjects)
-      ArgumentPair{x, y}
+      List.append(&2, Expr, argument_expressions(a), argument_expressions(b))
+    case tree:
+      Nil{}
+
+def prepare_mid(arguments: List<&2, Expr>, fallback: Expr) -> Expr:
+  match arguments:
+    case value <> offset <> length <> Nil{}:
+      MidExpression{value, offset, length}
+    case arguments:
+      fallback
+
+def prepare_contains(arguments: List<&2, Expr>, fallback: Expr) -> Expr:
+  match arguments:
+    case needle <> haystack <> Nil{}:
+      ContainsExpression{needle, haystack}
+    case arguments:
+      fallback
+
+def prepare_count(arguments: List<&2, Expr>, tree: Expr) -> Expr:
+  match arguments:
+    case value <> Nil{}:
+      CountOneExpression{value}
+    case arguments:
+      CountManyExpression{tree, List.length(&2, Expr, arguments)}
+
+def prepare_call(kind: FunctionKind, +arguments: Expr) -> Expr:
+  match kind:
+    case MidFunction{}:
+      prepare_mid(argument_expressions(arguments), FunctionCall{MidFunction{}, arguments})
+    case ContainsFunction{}:
+      prepare_contains(argument_expressions(arguments), FunctionCall{ContainsFunction{}, arguments})
+    case CountFunction{}:
+      prepare_count(argument_expressions(arguments), arguments)
+    case kind:
+      FunctionCall{kind, arguments}
+
+# Normalize call evaluation order without executing any expression. Dedicated
+# nodes keep the evaluator's batch dispatch independent of argument-tree shape.
+def prepare_expression(e: Expr) -> Expr:
+  match e:
     case FunctionCall{kind, arguments}:
-      call(kind, evaluate_scoped(arguments, context, sensitive, subjects))
-    case Literal{v}:
-      v
+      prepare_call(kind, prepare_expression(arguments))
+    case Literal{value}:
+      Literal{value}
     case Variable{name}:
-      lookup(context, name, sensitive)
+      Variable{name}
     case Add{a, b}:
-      x y = evaluate_scoped(a, context, sensitive, subjects) evaluate_scoped(b, context, sensitive, subjects)
-      add(x, y)
-    case Divide{a, b}:
-      x y = evaluate_scoped(a, context, sensitive, subjects) evaluate_scoped(b, context, sensitive, subjects)
-      divide(x, y)
+      Add{prepare_expression(a), prepare_expression(b)}
     case Multiply{a, b}:
-      x y = evaluate_scoped(a, context, sensitive, subjects) evaluate_scoped(b, context, sensitive, subjects)
-      multiply(x, y)
-    case And{a, b}:
-      logical_left(evaluate_scoped(a, context, sensitive, subjects), True{}, u => evaluate_scoped(b, context, sensitive, subjects))
-    case Or{a, b}:
-      logical_left(evaluate_scoped(a, context, sensitive, subjects), False{}, u => evaluate_scoped(b, context, sensitive, subjects))
-    case Xor{a, b}:
-      x y = evaluate_scoped(a, context, sensitive, subjects) evaluate_scoped(b, context, sensitive, subjects)
-      logical_xor(x, y)
-    case PrefixNot{a}:
-      logical_not(evaluate_scoped(a, context, sensitive, subjects))
-    case CoerceNumber{a}:
-      require_numeric(evaluate_scoped(a, context, sensitive, subjects))
-    case Compare{op, a, b}:
-      x y = evaluate_scoped(a, context, sensitive, subjects) evaluate_scoped(b, context, sensitive, subjects)
-      compare(x, y, op)
-    case Round{a, places, mode}:
-      x p = evaluate_scoped(a, context, sensitive, subjects) evaluate_scoped(places, context, sensitive, subjects)
-      round(x, p, mode)
-    case Negate{a}:
-      negate(evaluate_scoped(a, context, sensitive, subjects))
-    case Subtract{a, b}:
-      x y = evaluate_scoped(a, context, sensitive, subjects) evaluate_scoped(b, context, sensitive, subjects)
-      subtract(x, y)
+      Multiply{prepare_expression(a), prepare_expression(b)}
+    case Divide{a, b}:
+      Divide{prepare_expression(a), prepare_expression(b)}
+    case If{condition, yes, no}:
+      If{prepare_expression(condition), prepare_expression(yes), prepare_expression(no)}
     case Not{a}:
-      logical_not(evaluate_scoped(a, context, sensitive, subjects))
-    case If{c, a, b}:
-      choose(evaluate_scoped(c, context, sensitive, subjects), u => evaluate_scoped(a, context, sensitive, subjects), u => evaluate_scoped(b, context, sensitive, subjects))
+      Not{prepare_expression(a)}
+    case Negate{a}:
+      Negate{prepare_expression(a)}
+    case Subtract{a, b}:
+      Subtract{prepare_expression(a), prepare_expression(b)}
+    case Round{a, places, mode}:
+      Round{prepare_expression(a), prepare_expression(places), mode}
+    case Compare{operation, a, b}:
+      Compare{operation, prepare_expression(a), prepare_expression(b)}
+    case CoerceNumber{a}:
+      CoerceNumber{prepare_expression(a)}
+    case And{a, b}:
+      And{prepare_expression(a), prepare_expression(b)}
+    case Or{a, b}:
+      Or{prepare_expression(a), prepare_expression(b)}
+    case Xor{a, b}:
+      Xor{prepare_expression(a), prepare_expression(b)}
+    case PrefixNot{a}:
+      PrefixNot{prepare_expression(a)}
+    case Argument{a, validation}:
+      Argument{prepare_expression(a), validation}
+    case Arguments{a, b}:
+      Arguments{prepare_expression(a), prepare_expression(b)}
+    case EmptyArguments{}:
+      EmptyArguments{}
+    case ArrayLiteral{a}:
+      ArrayLiteral{prepare_expression(a)}
+    case Access{a, index}:
+      Access{prepare_expression(a), prepare_expression(index)}
+    case CaseExpression{subject, clauses}:
+      CaseExpression{prepare_expression(subject), prepare_expression(clauses)}
+    case WhenExpression{key, value, rest}:
+      WhenExpression{prepare_expression(key), prepare_expression(value), prepare_expression(rest)}
+    case ElseExpression{value}:
+      ElseExpression{prepare_expression(value)}
+    case NoCaseMatch{}:
+      NoCaseMatch{}
+    case EnumerationExpression{kind, collection, binder, body}:
+      EnumerationExpression{kind, prepare_expression(collection), binder, prepare_expression(body)}
+    case ReductionExpression{collection, memo_binder, item_binder, body, initial}:
+      ReductionExpression{prepare_expression(collection), memo_binder, item_binder, prepare_expression(body), prepare_expression(initial)}
+    case MidExpression{value, offset, length}:
+      MidExpression{prepare_expression(value), prepare_expression(offset), prepare_expression(length)}
+    case ContainsExpression{needle, haystack}:
+      ContainsExpression{prepare_expression(needle), prepare_expression(haystack)}
+    case CountOneExpression{value}:
+      CountOneExpression{prepare_expression(value)}
+    case CountManyExpression{arguments, count}:
+      CountManyExpression{prepare_expression(arguments), count}
+
+def enumeration_leaf(kind: EnumerationKind, item: Value, mapped: Value) -> Value:
+  match kind mapped:
+    case MapItems{} mapped:
+      ArgumentValue{mapped}
+    case kind Failure{message}:
+      Failure{message}
+    case FilterItems{} mapped:
+      Bool.pick(Value, truthy(mapped), ArgumentValue{item}, EmptyArgumentValues{})
+    case AllItems{} mapped:
+      Logical{truthy(mapped)}
+    case AnyItems{} mapped:
+      Logical{truthy(mapped)}
+
+def filter_leaf(item: Value, mapped: Value) -> Value:
+  match mapped:
+    case Failure{message}:
+      ArgumentValue{Failure{message}}
+    case mapped:
+      Bool.pick(Value, truthy(mapped), ArgumentValue{item}, EmptyArgumentValues{})
+
+def enumeration_empty(kind: EnumerationKind) -> Value:
+  match kind:
+    case AllItems{}:
+      Logical{True{}}
+    case AnyItems{}:
+      Logical{False{}}
+    case kind:
+      EmptyArgumentValues{}
+
+def enumeration_decide(left: Value, decisive_value: Bool, next: Unit -> Value) -> Value:
+  match left:
+    case Failure{message}:
+      Failure{message}
+    case Logical{+b}:
+      logical_chosen(Cmp.is_eq(Bool.cmp(b, decisive_value)), Logical{b}, next)
+    case left:
+      Failure{"Invalid enumeration predicate"}
+
+def enumeration_finish(kind: EnumerationKind, result: Value) -> Value:
+  match kind:
+    case MapItems{}:
+      array_value(result)
+    case FilterItems{}:
+      array_value(result)
+    case kind:
+      result
+
+def with_value(value: Value, next: Value -> Value) -> Value:
+  match value:
+    case Failure{message}:
+      Failure{message}
+    case value:
+      next(value)
+
+# Recursion is lexicographic over expression and batch. An enum enters its body
+# subexpression with a fresh batch; each repeated body evaluation consumes a
+# smaller batch node. Context and mode can then change without unsafe recursion.
+def evaluate_machine(e: Expr, +batch: Value, +context: List<&2, Binding>, +sensitive: Bool, +subjects: List<&2, Value>, mode: EvaluationMode) -> Value:
+  match e batch mode:
+    case +e ArgumentPair{a, b} EvaluateItems{AllItems{}, +binder}:
+      enumeration_decide(evaluate_machine(e, a, context, sensitive, subjects, EvaluateItems{AllItems{}, binder}), False{}, u => evaluate_machine(e, b, context, sensitive, subjects, EvaluateItems{AllItems{}, binder}))
+    case +e ArgumentPair{a, b} EvaluateItems{AnyItems{}, +binder}:
+      enumeration_decide(evaluate_machine(e, a, context, sensitive, subjects, EvaluateItems{AnyItems{}, binder}), True{}, u => evaluate_machine(e, b, context, sensitive, subjects, EvaluateItems{AnyItems{}, binder}))
+    case +e ArgumentPair{a, b} EvaluateItems{+kind, +binder}:
+      x y = evaluate_machine(e, a, context, sensitive, subjects, EvaluateItems{kind, binder}) evaluate_machine(e, b, context, sensitive, subjects, EvaluateItems{kind, binder})
+      ArgumentPair{x, y}
+    case +e ArgumentValue{+item} EvaluateItems{FilterItems{}, binder}:
+      filter_leaf(item, evaluate_machine(e, item, Bound{binder, item} <> context, sensitive, subjects, EvaluateOne{}))
+    case +e ArgumentValue{+item} EvaluateItems{kind, binder}:
+      enumeration_leaf(kind, item, evaluate_machine(e, item, Bound{binder, item} <> context, sensitive, subjects, EvaluateOne{}))
+    case e EmptyArgumentValues{} EvaluateItems{kind, binder}:
+      enumeration_empty(kind)
+    case +e ArgumentPair{a, b} EvaluateReduction{+memo_binder, +item_binder, memo}:
+      with_value(evaluate_machine(e, a, context, sensitive, subjects, EvaluateReduction{memo_binder, item_binder, memo}), next => evaluate_machine(e, b, context, sensitive, subjects, EvaluateReduction{memo_binder, item_binder, next}))
+    case +e ArgumentValue{+item} EvaluateReduction{memo_binder, item_binder, memo}:
+      evaluate_machine(e, item, Bound{item_binder, item} <> Bound{memo_binder, memo} <> context, sensitive, subjects, EvaluateOne{})
+    case e EmptyArgumentValues{} EvaluateReduction{memo_binder, item_binder, memo}:
+      memo
+    case EnumerationExpression{+kind, collection, binder, body} batch EvaluateOne{}:
+      with_value(evaluate_machine(collection, batch, context, sensitive, subjects, EvaluateOne{}), value => enumeration_finish(kind, evaluate_machine(body, collection_batch(value), context, sensitive, subjects, EvaluateItems{kind, binder})))
+    case ReductionExpression{collection, memo_binder, item_binder, body, initial} batch EvaluateOne{}:
+      with_value(evaluate_machine(collection, batch, context, sensitive, subjects, EvaluateOne{}), values => with_value(evaluate_machine(initial, batch, context, sensitive, subjects, EvaluateOne{}), memo => evaluate_machine(body, collection_batch(values), context, sensitive, subjects, EvaluateReduction{memo_binder, item_binder, memo})))
+    case CaseExpression{subject, clauses} batch EvaluateOne{}:
+      with_case_value(evaluate_machine(subject, batch, context, sensitive, subjects, EvaluateOne{}), value => evaluate_machine(clauses, batch, context, sensitive, value <> subjects, EvaluateOne{}))
+    case WhenExpression{key, value, rest} batch EvaluateOne{}:
+      case_when_value(evaluate_machine(key, batch, context, sensitive, subjects, EvaluateOne{}), case_subject(subjects), u => evaluate_machine(value, batch, context, sensitive, subjects, EvaluateOne{}), u => evaluate_machine(rest, batch, context, sensitive, subjects, EvaluateOne{}))
+    case ElseExpression{value} batch EvaluateOne{}:
+      evaluate_machine(value, batch, context, sensitive, subjects, EvaluateOne{})
+    case NoCaseMatch{} batch EvaluateOne{}:
+      Failure{"No block matched the switch value '" ++ ruby_render(case_subject(subjects), False{}, False{}) ++ "'"}
+    case MidExpression{value, offset, length} batch EvaluateOne{}:
+      mid_text(evaluate_machine(value, batch, context, sensitive, subjects, EvaluateOne{}), u => evaluate_machine(offset, batch, context, sensitive, subjects, EvaluateOne{}), u => evaluate_machine(length, batch, context, sensitive, subjects, EvaluateOne{}))
+    case ContainsExpression{needle, haystack} batch EvaluateOne{}:
+      contains_haystack(evaluate_machine(haystack, batch, context, sensitive, subjects, EvaluateOne{}), u => evaluate_machine(needle, batch, context, sensitive, subjects, EvaluateOne{}))
+    case ArrayLiteral{elements} batch EvaluateOne{}:
+      array_value(evaluate_machine(elements, batch, context, sensitive, subjects, EvaluateOne{}))
+    case Access{structure, index} batch EvaluateOne{}:
+      access_value(evaluate_machine(structure, batch, context, sensitive, subjects, EvaluateOne{}), u => evaluate_machine(index, batch, context, sensitive, subjects, EvaluateOne{}))
+    case CountOneExpression{a} batch EvaluateOne{}:
+      count_single(evaluate_machine(a, batch, context, sensitive, subjects, EvaluateOne{}))
+    case CountManyExpression{arguments, count} batch EvaluateOne{}:
+      Number{count}
+    case EmptyArguments{} batch EvaluateOne{}:
+      EmptyArgumentValues{}
+    case Argument{a, validation} batch EvaluateOne{}:
+      ArgumentValue{validate_argument(validation, evaluate_machine(a, batch, context, sensitive, subjects, EvaluateOne{}))}
+    case Arguments{a, b} batch EvaluateOne{}:
+      x y = evaluate_machine(a, batch, context, sensitive, subjects, EvaluateOne{}) evaluate_machine(b, batch, context, sensitive, subjects, EvaluateOne{})
+      ArgumentPair{x, y}
+    case FunctionCall{kind, arguments} batch EvaluateOne{}:
+      call(kind, evaluate_machine(arguments, batch, context, sensitive, subjects, EvaluateOne{}))
+    case Literal{v} batch EvaluateOne{}:
+      v
+    case Variable{name} batch EvaluateOne{}:
+      lookup(context, name, sensitive)
+    case Add{a, b} batch EvaluateOne{}:
+      x y = evaluate_machine(a, batch, context, sensitive, subjects, EvaluateOne{}) evaluate_machine(b, batch, context, sensitive, subjects, EvaluateOne{})
+      add(x, y)
+    case Divide{a, b} batch EvaluateOne{}:
+      x y = evaluate_machine(a, batch, context, sensitive, subjects, EvaluateOne{}) evaluate_machine(b, batch, context, sensitive, subjects, EvaluateOne{})
+      divide(x, y)
+    case Multiply{a, b} batch EvaluateOne{}:
+      x y = evaluate_machine(a, batch, context, sensitive, subjects, EvaluateOne{}) evaluate_machine(b, batch, context, sensitive, subjects, EvaluateOne{})
+      multiply(x, y)
+    case And{a, b} batch EvaluateOne{}:
+      logical_left(evaluate_machine(a, batch, context, sensitive, subjects, EvaluateOne{}), True{}, u => evaluate_machine(b, batch, context, sensitive, subjects, EvaluateOne{}))
+    case Or{a, b} batch EvaluateOne{}:
+      logical_left(evaluate_machine(a, batch, context, sensitive, subjects, EvaluateOne{}), False{}, u => evaluate_machine(b, batch, context, sensitive, subjects, EvaluateOne{}))
+    case Xor{a, b} batch EvaluateOne{}:
+      x y = evaluate_machine(a, batch, context, sensitive, subjects, EvaluateOne{}) evaluate_machine(b, batch, context, sensitive, subjects, EvaluateOne{})
+      logical_xor(x, y)
+    case PrefixNot{a} batch EvaluateOne{}:
+      logical_not(evaluate_machine(a, batch, context, sensitive, subjects, EvaluateOne{}))
+    case CoerceNumber{a} batch EvaluateOne{}:
+      require_numeric(evaluate_machine(a, batch, context, sensitive, subjects, EvaluateOne{}))
+    case Compare{op, a, b} batch EvaluateOne{}:
+      x y = evaluate_machine(a, batch, context, sensitive, subjects, EvaluateOne{}) evaluate_machine(b, batch, context, sensitive, subjects, EvaluateOne{})
+      compare(x, y, op)
+    case Round{a, places, mode} batch EvaluateOne{}:
+      x p = evaluate_machine(a, batch, context, sensitive, subjects, EvaluateOne{}) evaluate_machine(places, batch, context, sensitive, subjects, EvaluateOne{})
+      round(x, p, mode)
+    case Negate{a} batch EvaluateOne{}:
+      negate(evaluate_machine(a, batch, context, sensitive, subjects, EvaluateOne{}))
+    case Subtract{a, b} batch EvaluateOne{}:
+      x y = evaluate_machine(a, batch, context, sensitive, subjects, EvaluateOne{}) evaluate_machine(b, batch, context, sensitive, subjects, EvaluateOne{})
+      subtract(x, y)
+    case Not{a} batch EvaluateOne{}:
+      logical_not(evaluate_machine(a, batch, context, sensitive, subjects, EvaluateOne{}))
+    case If{c, a, b} batch EvaluateOne{}:
+      choose(evaluate_machine(c, batch, context, sensitive, subjects, EvaluateOne{}), u => evaluate_machine(a, batch, context, sensitive, subjects, EvaluateOne{}), u => evaluate_machine(b, batch, context, sensitive, subjects, EvaluateOne{}))
+    case e batch mode:
+      Failure{"Invalid evaluation batch"}
+
+def evaluate_scoped(e: Expr, context: List<&2, Binding>, sensitive: Bool, subjects: List<&2, Value>) -> Value:
+  evaluate_machine(prepare_expression(e), EmptyArgumentValues{}, context, sensitive, subjects, EvaluateOne{})
 
 def evaluate_in(e: Expr, context: List<&2, Binding>, sensitive: Bool) -> Value:
   evaluate_scoped(e, context, sensitive, Nil{})

@@ -28,4 +28,12 @@ diff -u compat/scalar-oracle.tsv build/scalar-corpus-native-1.actual
 ./build/scalar-corpus-native +RTS --threads 8 > build/scalar-corpus-native-8.actual
 diff -u compat/scalar-oracle.tsv build/scalar-corpus-native-8.actual
 sha256sum build/scalar-corpus-native
+if test -f enumeration-runtime.bend; then
+  /compiler/bin/bend enumeration-runtime.bend -o build/enumeration-native
+  ./build/enumeration-native +RTS --threads 1 > build/enumeration-native-1.actual
+  diff -u enumeration-runtime.expected build/enumeration-native-1.actual
+  ./build/enumeration-native +RTS --threads 8 > build/enumeration-native-8.actual
+  diff -u enumeration-runtime.expected build/enumeration-native-8.actual
+  sha256sum build/enumeration-native
+fi
 ]]})

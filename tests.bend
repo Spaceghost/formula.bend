@@ -477,3 +477,27 @@ def case_nested_scopes() -> {Parser.snapshot("CASE CASE 1 WHEN 1 THEN 2 END WHEN
 
 def case_unknown_static_kind() -> {Parser.type_snapshot("CASE 1 WHEN 1 THEN 2 END") == "type:nil" : String}:
   {==}
+
+def map_values() -> {Parser.snapshot("MAP({1, 2}, v, v + 1)", Nil{}, False{}) == "array:[8:number:28:number:3]" : String}:
+  {==}
+
+def filter_values() -> {Parser.snapshot("FILTER({0, 1, 2}, v, v > 1)", Nil{}, False{}) == "array:[8:number:2]" : String}:
+  {==}
+
+def any_predicate_is_lazy() -> {Parser.snapshot("ANY({1, 0}, v, 1 / v > 0)", Nil{}, False{}) == "boolean:true" : String}:
+  {==}
+
+def reduce_nil_initial_string() -> {Parser.snapshot("REDUCE({'a', 'b'}, memo, v, CONCAT(memo, v))", Nil{}, False{}) == "string:ab" : String}:
+  {==}
+
+def map_binder_message() -> {Parser.message_snapshot("MAP({1}, 'v', v)", Nil{}, False{}) == "message:MAP() requires second argument to be an identifier" : String}:
+  {==}
+
+def local_enum_dependencies_do_not_validate_as_logical() -> {Parser.snapshot("MAP({1}, X, x) AND true", Nil{}, False{}) == "error:Dentaku::ParseError" : String}:
+  {==}
+
+def enum_sensitive_external_name_validates_as_dynamic() -> {Parser.snapshot("MAP({1}, X, x) AND true", [Core.Bound{"x", Core.Logical{True{}}}], True{}) == "boolean:true" : String}:
+  {==}
+
+def enum_static_identifiers_exclude_binder() -> {Parser.names_snapshot(Parser.identifiers("MAP(vals, v, v + tax)", False{})) == "names:vals,tax" : String}:
+  {==}

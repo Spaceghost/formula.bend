@@ -152,3 +152,30 @@ law case_first_true_branch:
   for +sensitive: Bool
   for +subjects: List<&2, Core.Value>
   {Core.evaluate_scoped(Core.CaseExpression{Core.Literal{Core.Logical{True{}}}, Core.WhenExpression{Core.Literal{Core.Logical{True{}}}, yes, rest}}, context, sensitive, subjects) == Core.evaluate_scoped(yes, context, sensitive, Core.Logical{True{}} <> subjects) : Core.Value}
+
+law empty_enumeration_batch:
+  for body: Core.Expr
+  for +kind: Core.EnumerationKind
+  for binder: String
+  for context: List<&2, Core.Binding>
+  for sensitive: Bool
+  for subjects: List<&2, Core.Value>
+  {Core.evaluate_machine(body, Core.EmptyArgumentValues{}, context, sensitive, subjects, Core.EvaluateItems{kind, binder}) == Core.enumeration_empty(kind) : Core.Value}
+
+law empty_reduction_batch:
+  for body: Core.Expr
+  for memo_name: String
+  for item_name: String
+  for +initial: Core.Value
+  for context: List<&2, Core.Binding>
+  for sensitive: Bool
+  for subjects: List<&2, Core.Value>
+  {Core.evaluate_machine(body, Core.EmptyArgumentValues{}, context, sensitive, subjects, Core.EvaluateReduction{memo_name, item_name, initial}) == initial : Core.Value}
+
+law all_skips_later_predicate:
+  for later: Core.Expr
+  {Core.evaluate(Core.EnumerationExpression{Core.AllItems{}, Core.Literal{Core.ArrayCons{Core.Logical{False{}}, Core.ArrayCons{Core.Logical{True{}}, Core.ArrayNil{}}}}, "x", Core.If{Core.Variable{"x"}, later, Core.Literal{Core.Logical{False{}}}}}) == Core.Logical{False{}} : Core.Value}
+
+law any_skips_later_predicate:
+  for later: Core.Expr
+  {Core.evaluate(Core.EnumerationExpression{Core.AnyItems{}, Core.Literal{Core.ArrayCons{Core.Logical{True{}}, Core.ArrayCons{Core.Logical{False{}}, Core.ArrayNil{}}}}, "x", Core.If{Core.Variable{"x"}, Core.Literal{Core.Logical{True{}}}, later}}) == Core.Logical{True{}} : Core.Value}

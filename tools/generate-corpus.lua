@@ -1,5 +1,7 @@
 local input = assert(arg[1], 'usage: lua tools/generate-corpus.lua CASES.lua OUTPUT_PREFIX')
 local prefix = assert(arg[2], 'missing output prefix')
+local metadata_only = arg[3] == '--metadata-only'
+assert(arg[3] == nil or metadata_only, 'unknown generator option')
 local cases = dofile(input)
 assert(#cases > 0, 'corpus must contain at least one case')
 local function bend_string(s)
@@ -51,10 +53,10 @@ local function context_values(context)
   end
   return #expressions == 0 and 'Nil{}' or '[' .. table.concat(expressions, ', ') .. ']', '{' .. table.concat(encoded, ',') .. '}'
 end
-local program = assert(io.open(prefix .. '.bend', 'w'))
+local program = not metadata_only and assert(io.open(prefix .. '.bend', 'w'))
 local expected = assert(io.open(prefix .. '.expected', 'w'))
 local formulas = assert(io.open(prefix .. '.formulas.tsv', 'w'))
-program:write('import Base\nimport ../src/core.bend as Core\nimport ../src/parser.bend as Parser\n\n')
+if program then program:write('import Base\nimport ../src/core.bend as Core\nimport ../src/parser.bend as Parser\n\n') end
 local ids = {}
 local lines = {}
 for _, case in ipairs(cases) do
@@ -72,9 +74,9 @@ for _, case in ipairs(cases) do
   elseif operation == 'class' then
     call = 'Parser.class_snapshot(' .. bend_string(case.formula) .. ', ' .. context .. ', ' .. sensitive .. ')'
   elseif operation == 'type' then
-    call = 'Parser.type_snapshot(' .. bend_string(case.formula) .. ')'
+    call = 'Parser.type_snapshot_in(' .. bend_string(case.formula) .. ', ' .. sensitive .. ')'
   elseif operation == 'message' then
-    call = 'Core.message_snapshot(Parser.evaluate(' .. bend_string(case.formula) .. ', ' .. context .. ', ' .. sensitive .. '))'
+    call = 'Parser.message_snapshot(' .. bend_string(case.formula) .. ', ' .. context .. ', ' .. sensitive .. ')'
   elseif operation == 'coerce' or operation == 'coerce_class' or operation == 'coerce_message' then
     local show = operation == 'coerce' and 'snapshot' or operation == 'coerce_class' and 'class_snapshot' or 'message_snapshot'
     call = 'Core.' .. show .. '(Core.require_numeric(Core.lookup(' .. context .. ', "input", ' .. sensitive .. ')))'
@@ -87,14 +89,17 @@ for _, case in ipairs(cases) do
   formulas:write(case.id, '\t', case.formula, '\t', operation, '\t', encoded_context, '\t', tostring(not not case.sensitive), '\n')
 end
 -- Keep monadic chains shallow enough for older Bend compiler stacks.
-local groups = {}
-for first = 1, #lines, 32 do
-  local name = 'corpus_group_' .. (#groups + 1)
-  groups[#groups+1] = name
-  program:write('def ', name, '() -> IO(Unit):\n  do IO<Unit>:\n')
-  for i = first, math.min(first + 31, #lines) do program:write(lines[i]) end
-  program:write('\n')
+if program then
+  local groups = {}
+  for first = 1, #lines, 32 do
+    local name = 'corpus_group_' .. (#groups + 1)
+    groups[#groups+1] = name
+    program:write('def ', name, '() -> IO(Unit):\n  do IO<Unit>:\n')
+    for i = first, math.min(first + 31, #lines) do program:write(lines[i]) end
+    program:write('\n')
+  end
+  program:write('def main() -> IO(Unit):\n  do IO<Unit>:\n')
+  for _, name in ipairs(groups) do program:write('    ', name, '()\n') end
+  program:close()
 end
-program:write('def main() -> IO(Unit):\n  do IO<Unit>:\n')
-for _, name in ipairs(groups) do program:write('    ', name, '()\n') end
-program:close(); expected:close(); formulas:close()
+expected:close(); formulas:close()
