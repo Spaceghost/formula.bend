@@ -83,6 +83,11 @@ def logical_mode(static: Bool, +a: List<&2, String>, +b: List<&2, String>, left:
 
 def analyze(expr: Core.Expr, +context: List<&2, Core.Binding>, +sensitive: Bool, +static: Bool) -> List<&2, String>:
   match expr:
+    case Core.ArrayLiteral{a}:
+      analyze(a, context, sensitive, static)
+    case Core.Access{a, b}:
+      x y = analyze(a, context, sensitive, static) analyze(b, context, sensitive, static)
+      List.append(&2, String, x, y)
     case Core.EmptyArguments{}:
       Nil{}
     case Core.Argument{a, validation}:

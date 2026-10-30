@@ -98,3 +98,17 @@ law sum_dependency_duplicates:
   for +name: String
   for +sensitive: Bool
   {Dependencies.analyze(Core.FunctionCall{Core.SumFunction{}, Core.Arguments{Core.Argument{Core.Variable{name}, Core.RawArgument{}}, Core.Argument{Core.Variable{name}, Core.RawArgument{}}}}, Nil{}, sensitive, False{}) == [Core.normalize(sensitive, name), Core.normalize(sensitive, name)] : List<&2, String>}
+
+law null_access_skips_index:
+  for index: Core.Expr
+  {Core.evaluate(Core.Access{Core.Literal{Core.NullValue{}}, index}) == Core.NullValue{} : Core.Value}
+
+law count_pair_skips_values:
+  for left: Core.Expr
+  for right: Core.Expr
+  {Core.evaluate(Core.FunctionCall{Core.CountFunction{}, Core.Arguments{Core.Argument{left, Core.RawArgument{}}, Core.Argument{right, Core.RawArgument{}}}}) == Core.Number{2n} : Core.Value}
+
+law array_head_access:
+  for +head: Core.Value
+  for tail: Core.Value
+  {Core.array_at(Core.ArrayCons{head, tail}, 0n) == head : Core.Value}

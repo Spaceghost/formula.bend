@@ -52,7 +52,7 @@ def empty_group() -> {Parser.parse("()") == Parser.ParseError{"Expected an opera
 def unsupported_character() -> {Parser.parse("1 @ 2") == Parser.ParseError{"Expected an operator"} : Parser.Parsed}:
   {==}
 
-def unmatched_group() -> {Parser.parse("(1 + 2") == Parser.ParseError{"Unmatched parenthesis or missing operand"} : Parser.Parsed}:
+def unmatched_group() -> {Parser.parse("(1 + 2") == Parser.ParseError{"Tokenizer: unbalanced parentheses"} : Parser.Parsed}:
   {==}
 
 def adjacent_operands() -> {Parser.parse("1 2") == Parser.ParseError{"Expected an operator"} : Parser.Parsed}:
@@ -377,4 +377,25 @@ def logical_xor_parity() -> {Parser.evaluate("XOR(true, true, true)", Nil{}, Fal
   {==}
 
 def sum_empty_branch_is_lazy() -> {Parser.evaluate("IF(true, 7, SUM())", Nil{}, False{}) == Core.Number{7n} : Core.Value}:
+  {==}
+
+def count_bound_string() -> {Parser.evaluate("COUNT(x)", [Core.Bound{"x", Core.TextValue{"dentaku"}}], False{}) == Core.Number{7n} : Core.Value}:
+  {==}
+
+def count_bound_array() -> {Parser.evaluate("COUNT(x)", [Core.Bound{"x", Core.ArrayCons{Core.Number{4n}, Core.ArrayCons{Core.Number{5n}, Core.ArrayNil{}}}}], False{}) == Core.Number{2n} : Core.Value}:
+  {==}
+
+def array_bound_access() -> {Parser.evaluate("a[1]", [Core.Bound{"a", Core.ArrayCons{Core.Number{1n}, Core.ArrayCons{Core.Number{2n}, Core.ArrayNil{}}}}], False{}) == Core.Number{2n} : Core.Value}:
+  {==}
+
+def count_multiple_skips_values() -> {Parser.evaluate("COUNT(1 / 0, 2)", Nil{}, False{}) == Core.Number{2n} : Core.Value}:
+  {==}
+
+def null_access_skips_division() -> {Parser.evaluate("null[1 / 0]", Nil{}, False{}) == Core.NullValue{} : Core.Value}:
+  {==}
+
+def array_nested_index() -> {Parser.evaluate("{{1, 2}, {3, 4}}[1][0]", Nil{}, False{}) == Core.Number{3n} : Core.Value}:
+  {==}
+
+def array_nested_sum() -> {Parser.evaluate("SUM({1, {2, 3}}, 4)", Nil{}, False{}) == Core.Number{10n} : Core.Value}:
   {==}

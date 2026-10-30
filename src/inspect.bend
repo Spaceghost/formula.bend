@@ -68,6 +68,8 @@ def logical_unary(a: Info) -> Info:
 
 def function_kind(kind: Core.FunctionKind) -> ResultKind:
   match kind:
+    case Core.CountFunction{}:
+      UnknownKind{}
     case Core.SumFunction{}:
       NumericKind{}
     case Core.XorFunction{}:
@@ -87,6 +89,11 @@ def function_info(kind: Core.FunctionKind, info: Info) -> Info:
 # This pass inspects syntax only; it never evaluates a guard or user function.
 def analyze(expr: Core.Expr) -> Info:
   match expr:
+    case Core.ArrayLiteral{a}:
+      unary(analyze(a), UnknownKind{}, False{})
+    case Core.Access{a, b}:
+      x y = analyze(a) analyze(b)
+      binary(x, y, UnknownKind{}, False{})
     case Core.EmptyArguments{}:
       Metadata{UnknownKind{}, False{}, True{}}
     case Core.Argument{a, validation}:

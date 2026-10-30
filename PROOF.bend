@@ -55,3 +55,12 @@ def Laws.argument_error_left(message, right):
 
 def Laws.sum_dependency_duplicates(name, sensitive):
   {==}
+
+def Laws.null_access_skips_index(index):
+  {==}
+
+def Laws.count_pair_skips_values(left, right):
+  {==}
+
+def Laws.array_head_access(head, tail):
+  {==}

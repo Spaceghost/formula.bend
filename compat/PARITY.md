@@ -46,11 +46,11 @@ The unchanged upstream suite passes 713 examples with zero failures and 96.82%
 line coverage in the Ruby reference environment. `reference-summary.json` and
 `upstream-spec-catalog.json` record that run. These results describe Ruby only.
 
-The Lua-driven scalar and dependency corpus has 114 cases matched against Ruby values or parse
+The Lua-driven value and dependency corpus has 234 cases matched against Ruby values or parse
 error classification. It covers truthiness, strings/null, comparisons, selected
 numeric-string coercions, and static operand rejection. It is a small subset of
 the upstream catalog. Native error classes/messages, all calculator methods,
-arrays, other built-ins, custom functions, complete dependency graphs, and
+complete array semantics, other built-ins, custom functions, complete dependency graphs, and
 visitors still require parity work. Hex/exponent numeric-string coercion remains
 unfinished. No spec family is marked complete merely because this subset passes.
 
@@ -86,8 +86,8 @@ lua tools/run-oracle.lua PROJECT UPSTREAM GEMS STORAGE RUNROOT OUTPUT
 The probe catches Dentaku errors and records their class; unexpected Ruby failures
 abort without replacing the output. Compare the result before updating committed
 goldens. Parser snapshots currently preserve parse-error classification, while
-full runtime error-class/message parity remains unfinished. The 114-case scalar and dependency
-corpus passes on JavaScript and native CPU. This is correctness verification,
+full runtime error-class/message parity remains unfinished. The 234-case value and dependency
+corpus passes on JavaScript; the previous 114 cases passed native CPU. This is correctness verification,
 not the requested performance shootout.
 
 The upstream catalog and scenario inventory derive from MIT-licensed Dentaku;
@@ -129,10 +129,33 @@ argument. Function dependencies do not prune such arguments.
 The corpus includes empty-call behavior: MIN/MAX return null, SUM/MUL/AVG/AND/OR
 raise runtime argument errors, and empty XOR is a parse error. XOR's static result
 type follows the pinned custom-node implementation rather than being inferred
-from its returned Boolean value. Arrays and flattening remain unimplemented.
+from its returned Boolean value. Numeric aggregates flatten nested arrays while
+COUNT counts a single array's outer length and multiple arguments without
+evaluating their values. Dependencies are still checked before COUNT evaluation.
 
 The 114-case corpus passes on JavaScript and native CPU with Bend 2.0.16 and
 2.0.39. Native checks run from frozen Git worktrees, with source commit and
 artifact checksums recorded in backend-verification.json. The parser uses the
 internal constructor ParseReady to avoid a collision with the newer Base library.
 CUDA and Metal are still unverified; this is not a performance shootout.
+
+## Arrays, indexing, and COUNT
+
+The expanded 234-case corpus covers nested array values, aggregate flattening,
+concatenation, subtraction, repetition, equality, array/string access, negative
+and fractional indexes, null access, and all seven COUNT spec scenarios. Bound
+values include exact decimals and nested arrays; case sensitivity and resolved
+dependencies are exercised with the same contexts in Ruby and Bend.
+
+Snapshots frame each array element by its Unicode character length, preserving
+nesting and distinguishing embedded delimiters in strings. The oracle records
+the pinned Access node's raw RangeError for signed-long index overflow. Parser
+quirks are fixtures too: a two-element open array can be consumed at EOF, and an
+empty array after an existing operand can leave too few operands for its parent.
+These cases preserve observed behavior, not a general promise of complete parser
+diagnostics. Full TokenizerError classification remains unfinished.
+
+Array repetition currently narrows decimal counts with at most 14 integer digits;
+larger counts return an argument error. Numeric representation/class parity,
+hash/member access, custom indexable objects, ranges, and all array-oriented
+built-ins remain incomplete. Native verification of this expanded corpus is pending.

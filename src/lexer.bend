@@ -12,6 +12,10 @@ type Token is Data:
   Slash{}
   LParen{}
   RParen{}
+  LBrace{}
+  RBrace{}
+  LBracket{}
+  RBracket{}
   Comma{}
   EqualToken{}
   NotEqualToken{}
@@ -53,6 +57,14 @@ def integer_token(+digits: List<&2, U32>, small: Bool) -> Token:
 
 def symbol(c: Char) -> Token:
   match c:
+    case Chr{123}:
+      LBrace{}
+    case Chr{125}:
+      RBrace{}
+    case Chr{91}:
+      LBracket{}
+    case Chr{93}:
+      RBracket{}
     case Chr{33}:
       BangWord{}
     case Chr{61}:

@@ -11,6 +11,8 @@ type Value is Data:
   Logical{value: Bool}
   NullValue{}
   TextValue{value: String}
+  ArrayNil{}
+  ArrayCons{head: Value, tail: Value}
   ArgumentValue{value: Value}
   ArgumentPair{left: Value, right: Value}
   EmptyArgumentValues{}
@@ -34,6 +36,7 @@ type FunctionKind is Data:
   AndFunction{}
   OrFunction{}
   XorFunction{}
+  CountFunction{}
 
 type ArgumentValidation is Data:
   RawArgument{}
@@ -60,6 +63,8 @@ type Expr is Data:
   Arguments{left: Expr, right: Expr}
   EmptyArguments{}
   FunctionCall{kind: FunctionKind, arguments: Expr}
+  ArrayLiteral{elements: Expr}
+  Access{structure: Expr, index: Expr}
 
 def compact_pick(value: Decimal.Decimal, small: Bool) -> Value:
   match value small:
@@ -136,9 +141,130 @@ def require_numeric_value(value: Value) -> Value:
 def require_numeric(value: Value) -> Value:
   require_numeric_value(cast_numeric(value))
 
+def array_append(left: Value, right: Value) -> Value:
+  match left:
+    case ArrayCons{head, tail}:
+      ArrayCons{head, array_append(tail, right)}
+    case left:
+      right
+
+def array_join(left: Value, right: Value) -> Value:
+  match right:
+    case ArrayNil{}:
+      left
+    case ArrayCons{head, tail}:
+      array_append(left, ArrayCons{head, tail})
+    case Failure{e}:
+      Failure{e}
+    case right:
+      Failure{"Expected an array"}
+
+# Ruby array equality does not coerce string elements to numbers. The pinned
+# BigDecimal implementation compares equal to integral values in subtraction.
+def value_equal(a: Value, b: Value, +strict: Bool) -> Bool:
+  match a b:
+    case ArrayNil{} ArrayNil{}:
+      True{}
+    case ArrayCons{ah, at} ArrayCons{bh, bt}:
+      x y = value_equal(ah, bh, strict) value_equal(at, bt, strict)
+      Bool.and(x, y)
+    case Number{x} Number{y}:
+      Nat.is_eq(x, y)
+    case DecimalNumber{x} DecimalNumber{y}:
+      Cmp.is_eq(Decimal.compare(x, y))
+    case NegativeNumber{x} NegativeNumber{y}:
+      Cmp.is_eq(Decimal.compare(x, y))
+    case Number{x} DecimalNumber{y}:
+      Cmp.is_eq(Decimal.compare(Decimal.from_nat(x), y))
+    case DecimalNumber{x} Number{y}:
+      Cmp.is_eq(Decimal.compare(x, Decimal.from_nat(y)))
+    case TextValue{x} TextValue{y}:
+      String.eq(x, y)
+    case Logical{x} Logical{y}:
+      Cmp.is_eq(Bool.cmp(x, y))
+    case NullValue{} NullValue{}:
+      True{}
+    case a b:
+      False{}
+
+def array_contains(array: Value, +candidate: Value) -> Bool:
+  match array:
+    case ArrayCons{head, tail}:
+      Bool.or(value_equal(head, candidate, True{}), array_contains(tail, candidate))
+    case array:
+      False{}
+
+def array_keep(remove: Bool, head: Value, tail: Value) -> Value:
+  match remove:
+    case True{}:
+      tail
+    case False{}:
+      ArrayCons{head, tail}
+
+def array_difference(left: Value, +right: Value) -> Value:
+  match left:
+    case ArrayCons{+head, tail}:
+      array_keep(array_contains(right, head), head, array_difference(tail, right))
+    case left:
+      ArrayNil{}
+
+def array_subtract(left: Value, right: Value) -> Value:
+  match right:
+    case ArrayNil{}:
+      left
+    case ArrayCons{head, tail}:
+      array_difference(left, ArrayCons{head, tail})
+    case Failure{e}:
+      Failure{e}
+    case right:
+      Failure{"Expected an array"}
+
+def array_repeat(count: Nat, +array: Value) -> Value:
+  match count:
+    case 0n:
+      ArrayNil{}
+    case 1n+p:
+      array_append(array, array_repeat(p, array))
+
+def array_repeat_fits(fits: Bool, digits: List<&2, U32>, array: Value) -> Value:
+  match fits:
+    case True{}:
+      array_repeat(Decimal.coefficient(digits), array)
+    case False{}:
+      Failure{"Array repetition exceeds supported index range"}
+
+def array_repeat_digits(negative_count: Bool, +digits: List<&2, U32>, array: Value) -> Value:
+  match negative_count:
+    case True{}:
+      Bool.pick(Value, List.is_empty(&2, U32, digits), ArrayNil{}, Failure{"Negative array repetition count"})
+    case False{}:
+      array_repeat_fits(Nat.is_le(List.length(&2, U32, digits), 14n), digits, array)
+
+def array_repeat_decimal(value: Decimal.Decimal, negative_count: Bool, array: Value) -> Value:
+  match value:
+    case Decimal.Exact{digits, scale}:
+      array_repeat_digits(negative_count, Decimal.normalize_digits(Decimal.integer_digits(scale, digits)), array)
+
+def array_multiply(array: Value, count: Value) -> Value:
+  match count:
+    case Number{n}:
+      array_repeat(n, array)
+    case DecimalNumber{n}:
+      array_repeat_decimal(n, False{}, array)
+    case NegativeNumber{n}:
+      array_repeat_decimal(n, True{}, array)
+    case Failure{e}:
+      Failure{e}
+    case count:
+      Failure{"Expected numeric repetition count"}
+
 # Error precedence stays deterministic even when operands run concurrently.
 def add_values(a: Value, b: Value) -> Value:
   match a b:
+    case ArrayNil{} b:
+      array_join(ArrayNil{}, b)
+    case ArrayCons{head, tail} b:
+      array_join(ArrayCons{head, tail}, b)
     case NegativeNumber{x} NegativeNumber{y}:
       negative(Decimal.add(x, y))
     case NegativeNumber{x} Number{y}:
@@ -173,6 +299,10 @@ def add(a: Value, b: Value) -> Value:
 
 def multiply_values(a: Value, b: Value) -> Value:
   match a b:
+    case ArrayNil{} b:
+      array_multiply(ArrayNil{}, b)
+    case ArrayCons{head, tail} b:
+      array_multiply(ArrayCons{head, tail}, b)
     case NegativeNumber{x} NegativeNumber{y}:
       compact(Decimal.multiply(x, y))
     case NegativeNumber{x} Number{y}:
@@ -218,7 +348,13 @@ def negate(value: Value) -> Value:
   negate_value(cast_numeric(value))
 
 def subtract(a: Value, b: Value) -> Value:
-  add(a, negate(b))
+  match a:
+    case ArrayNil{}:
+      array_subtract(ArrayNil{}, b)
+    case ArrayCons{head, tail}:
+      array_subtract(ArrayCons{head, tail}, b)
+    case a:
+      add(a, negate(b))
 
 # Branches are closures so the unselected branch is never evaluated.
 # Ruby truthiness: only false and null select the false branch.
@@ -526,6 +662,10 @@ def compare_values(a: Value, b: Value, op: Comparison) -> Value:
       equality_only(op, Bool.cmp(x, y))
     case NullValue{} NullValue{}:
       equality_only(op, EQ{})
+    case ArrayNil{} b:
+      equality_only(op, Bool.pick(Cmp, value_equal(ArrayNil{}, b, False{}), EQ{}, LT{}))
+    case ArrayCons{head, tail} b:
+      equality_only(op, Bool.pick(Cmp, value_equal(ArrayCons{head, tail}, b, False{}), EQ{}, LT{}))
     case a b:
       numeric_comparison(numeric_operand(a), numeric_operand(b), op)
 
@@ -607,6 +747,161 @@ def argument_count(tree: Value) -> Nat:
     case tree:
       0n
 
+# Array literals retain nesting; only numeric aggregate functions flatten it.
+def array_elements(tree: Value, tail: Value) -> Value:
+  match tree:
+    case ArgumentValue{value}:
+      ArrayCons{value, tail}
+    case ArgumentPair{a, b}:
+      array_elements(a, array_elements(b, tail))
+    case tree:
+      tail
+
+def array_checked(error: Maybe<&2, Value>, tree: Value) -> Value:
+  match error:
+    case Some{value}:
+      value
+    case None{}:
+      array_elements(tree, ArrayNil{})
+
+def array_value(+tree: Value) -> Value:
+  array_checked(first_argument_error(tree), tree)
+
+def array_length(value: Value) -> Nat:
+  match value:
+    case ArrayCons{head, tail}:
+      1n+array_length(tail)
+    case value:
+      0n
+
+def count_single(value: Value) -> Value:
+  match value:
+    case Failure{e}:
+      Failure{e}
+    case TextValue{s}:
+      Number{String.length(s)}
+    case ArrayNil{}:
+      Number{0n}
+    case ArrayCons{head, tail}:
+      Number{1n+array_length(tail)}
+    case value:
+      Number{1n}
+
+def expression_argument_count(tree: Expr) -> Nat:
+  match tree:
+    case Argument{value, validation}:
+      1n
+    case Arguments{a, b}:
+      Nat.add(expression_argument_count(a), expression_argument_count(b))
+    case tree:
+      0n
+
+def array_at(value: Value, index: Nat) -> Value:
+  match value index:
+    case ArrayCons{head, tail} 0n:
+      head
+    case ArrayCons{head, tail} 1n+p:
+      array_at(tail, p)
+    case value index:
+      NullValue{}
+
+def string_at(text: String, index: Nat) -> Value:
+  match text index:
+    case SCon{c, rest} 0n:
+      TextValue{SCon{c, SNil{}}}
+    case SCon{c, rest} 1n+p:
+      string_at(rest, p)
+    case SNil{} index:
+      NullValue{}
+
+def structure_length(value: Value) -> Nat:
+  match value:
+    case TextValue{s}:
+      String.length(s)
+    case value:
+      array_length(value)
+
+def structure_at(value: Value, index: Nat) -> Value:
+  match value:
+    case TextValue{s}:
+      string_at(s, index)
+    case value:
+      array_at(value, index)
+
+# Compare arbitrary precision indexes to the structure length before narrowing.
+def access_position(in_range: Bool, value: Value, negative_index: Bool, +digits: List<&2, U32>, +length: Nat) -> Value:
+  match in_range:
+    case False{}:
+      NullValue{}
+    case True{}:
+      structure_at(value, Bool.pick(Nat, negative_index, Nat.sub(length, Decimal.coefficient(digits)), Decimal.coefficient(digits)))
+
+def access_bounded(fits: Bool, +digits: List<&2, U32>, negative_index: Bool, +value: Value) -> Value:
+  match fits:
+    case False{}:
+      Failure{"Index exceeds Ruby signed long range"}
+    case True{}:
+      access_position(Bool.not(Cmp.is_gt(Decimal.compare(Decimal.Exact{digits, 0n}, Decimal.from_nat(structure_length(value))))), value, negative_index, digits, structure_length(value))
+
+def access_digits(+digits: List<&2, U32>, +negative_index: Bool, value: Value) -> Value:
+  access_bounded(Bool.not(Cmp.is_gt(Decimal.compare(Decimal.Exact{digits, 0n}, Decimal.Exact{Bool.pick(U32, negative_index, 8, 7) <> [0, 8, 5, 7, 7, 4, 5, 8, 6, 3, 0, 2, 7, 3, 3, 2, 2, 9], 0n}))), digits, negative_index, value)
+
+def access_numeric(index: Decimal.Decimal, negative_index: Bool, value: Value) -> Value:
+  match index:
+    case Decimal.Exact{digits, scale}:
+      access_digits(Decimal.normalize_digits(Decimal.integer_digits(scale, digits)), negative_index, value)
+
+def substring_result(found: Bool, text: String) -> Value:
+  match found:
+    case True{}:
+      TextValue{text}
+    case False{}:
+      NullValue{}
+
+def contains_text(+haystack: String, +needle: String) -> Bool:
+  match haystack:
+    case SNil{}:
+      String.eq(needle, "")
+    case SCon{c, rest}:
+      Bool.or(String.starts_with(SCon{c, rest}, needle), contains_text(rest, needle))
+
+def access_substring(value: Value, +s: String) -> Value:
+  match value:
+    case TextValue{text}:
+      substring_result(contains_text(text, s), s)
+    case value:
+      Failure{"Invalid index type"}
+
+def access_index(value: Value, index: Value) -> Value:
+  match index:
+    case Failure{e}:
+      Failure{e}
+    case Number{n}:
+      structure_at(value, n)
+    case DecimalNumber{n}:
+      access_numeric(n, False{}, value)
+    case NegativeNumber{n}:
+      access_numeric(n, True{}, value)
+    case TextValue{s}:
+      access_substring(value, s)
+    case index:
+      Failure{"Invalid index type"}
+
+def access_value(value: Value, index: Unit -> Value) -> Value:
+  match value:
+    case NullValue{}:
+      NullValue{}
+    case Failure{e}:
+      Failure{e}
+    case ArrayNil{}:
+      access_index(ArrayNil{}, index(Unit{}))
+    case ArrayCons{head, tail}:
+      access_index(ArrayCons{head, tail}, index(Unit{}))
+    case TextValue{s}:
+      access_index(TextValue{s}, index(Unit{}))
+    case value:
+      Failure{"Expected indexable structure"}
+
 def extreme_pick(order: Value, a: Value, b: Value) -> Value:
   match order:
     case Logical{True{}}:
@@ -633,6 +928,8 @@ def extreme_value(accumulator: Value, candidate: Value, is_min: Bool) -> Value:
       Failure{e}
     case NullValue{} candidate:
       candidate
+    case accumulator NullValue{}:
+      accumulator
     case accumulator candidate:
       extreme_compare(is_min, accumulator, candidate)
 
@@ -653,38 +950,75 @@ def abs_argument(tree: Value) -> Value:
 def sum_tree(tree: Value) -> Value:
   match tree:
     case ArgumentValue{value}:
-      require_numeric(value)
+      sum_tree(value)
+    case ArrayNil{}:
+      Number{0n}
+    case ArrayCons{head, tail}:
+      x y = sum_tree(head) sum_tree(tail)
+      add(x, y)
     case ArgumentPair{a, b}:
       x y = sum_tree(a) sum_tree(b)
       add(x, y)
     case EmptyArgumentValues{}:
       Number{0n}
     case tree:
-      Failure{"Invalid argument tree"}
+      require_numeric(tree)
 
 def product_tree(tree: Value) -> Value:
   match tree:
     case ArgumentValue{value}:
-      require_numeric(value)
+      product_tree(value)
+    case ArrayNil{}:
+      Number{1n}
+    case ArrayCons{head, tail}:
+      x y = product_tree(head) product_tree(tail)
+      multiply(x, y)
     case ArgumentPair{a, b}:
       x y = product_tree(a) product_tree(b)
       multiply(x, y)
     case EmptyArgumentValues{}:
       Number{1n}
     case tree:
-      Failure{"Invalid argument tree"}
+      require_numeric(tree)
 
 def extreme_tree(tree: Value, +is_min: Bool) -> Value:
   match tree:
     case ArgumentValue{value}:
-      require_numeric(value)
+      extreme_tree(value, is_min)
+    case ArrayNil{}:
+      NullValue{}
+    case ArrayCons{head, tail}:
+      x y = extreme_tree(head, is_min) extreme_tree(tail, is_min)
+      extreme_value(x, y, is_min)
     case ArgumentPair{a, b}:
       x y = extreme_tree(a, is_min) extreme_tree(b, is_min)
       extreme_value(x, y, is_min)
     case EmptyArgumentValues{}:
       NullValue{}
     case tree:
-      Failure{"Invalid argument tree"}
+      require_numeric(tree)
+
+def flattened_count(tree: Value) -> Nat:
+  match tree:
+    case ArgumentValue{value}:
+      flattened_count(value)
+    case ArgumentPair{a, b}:
+      Nat.add(flattened_count(a), flattened_count(b))
+    case ArrayCons{a, b}:
+      Nat.add(flattened_count(a), flattened_count(b))
+    case ArrayNil{}:
+      0n
+    case EmptyArgumentValues{}:
+      0n
+    case tree:
+      1n
+
+def average_tree(count: Nat, tree: Value) -> Value:
+  match count:
+    case 0n:
+      Failure{"AVG expects at least one value"}
+    case 1n+p:
+      divide(sum_tree(tree), Number{1n+p})
 
 def function_arguments(kind: FunctionKind, tree: Value) -> Value:
   match kind:
@@ -696,7 +1030,9 @@ def function_arguments(kind: FunctionKind, tree: Value) -> Value:
       extreme_tree(tree, False{})
     case AverageFunction{}:
       +arguments = tree
-      divide(sum_tree(arguments), Number{argument_count(arguments)})
+      average_tree(flattened_count(arguments), arguments)
+    case CountFunction{}:
+      Number{argument_count(tree)}
     case AbsFunction{}:
       abs_argument(tree)
     case SumFunction{}:
@@ -728,6 +1064,14 @@ def call(kind: FunctionKind, tree: Value) -> Value:
 
 def evaluate_in(e: Expr, +context: List<&2, Binding>, +sensitive: Bool) -> Value:
   match e:
+    case ArrayLiteral{elements}:
+      array_value(evaluate_in(elements, context, sensitive))
+    case Access{structure, index}:
+      access_value(evaluate_in(structure, context, sensitive), u => evaluate_in(index, context, sensitive))
+    case FunctionCall{CountFunction{}, Argument{a, validation}}:
+      count_single(evaluate_in(a, context, sensitive))
+    case FunctionCall{CountFunction{}, arguments}:
+      Number{expression_argument_count(arguments)}
     case EmptyArguments{}:
       EmptyArgumentValues{}
     case Argument{a, validation}:
@@ -782,6 +1126,10 @@ def evaluate(e: Expr) -> Value:
 
 def show(value: Value) -> String:
   match value:
+    case ArrayNil{}:
+      "{}"
+    case ArrayCons{head, tail}:
+      "{" ++ show(head) ++ ", " ++ show(tail) ++ "}"
     case ArgumentValue{value}:
       "Internal argument value"
     case ArgumentPair{a, b}:
@@ -805,10 +1153,15 @@ def show(value: Value) -> String:
 
 # Typed, canonical snapshots for cross-runtime differential fixtures.
 def failure_snapshot(+message: String) -> String:
-  Bool.pick(String, String.starts_with(message, "Unbound variable: "), "error:Dentaku::UnboundVariableError", Bool.pick(String, String.eq(message, "Division by zero"), "error:Dentaku::ZeroDivisionError", "error:Dentaku::ArgumentError"))
+  Bool.pick(String, String.starts_with(message, "Unbound variable: "), "error:Dentaku::UnboundVariableError", Bool.pick(String, String.eq(message, "Division by zero"), "error:Dentaku::ZeroDivisionError", Bool.pick(String, String.eq(message, "Index exceeds Ruby signed long range"), "error:RangeError", "error:Dentaku::ArgumentError")))
 
-def snapshot(value: Value) -> String:
+def snapshot_render(value: Value, +tail_mode: Bool) -> String:
   match value:
+    case ArrayNil{}:
+      Bool.pick(String, tail_mode, "]", "array:[]")
+    case ArrayCons{head, tail}:
+      +part = snapshot_render(head, False{})
+      Bool.pick(String, tail_mode, "", "array:[") ++ Nat.show(String.length(part)) ++ ":" ++ part ++ snapshot_render(tail, True{})
     case ArgumentValue{value}:
       "internal:argument"
     case ArgumentPair{a, b}:
@@ -831,3 +1184,6 @@ def snapshot(value: Value) -> String:
       "string:" ++ s
     case Failure{e}:
       failure_snapshot(e)
+
+def snapshot(value: Value) -> String:
+  snapshot_render(value, False{})

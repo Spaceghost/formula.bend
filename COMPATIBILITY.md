@@ -63,9 +63,11 @@ numeric compatibility corpus. Exponent and hexadecimal parsing, modulo,
 percentages, powers, complete rounding profiles, and coercions remain required.
 
 Current scalar functions: SUM, MUL, MIN, MAX, AVG, ABS, IF, NOT, AND, OR, XOR,
-ROUND, ROUNDUP, and ROUNDDOWN. IF uses Ruby truthiness and lazy branches; NOT
-uses Ruby truthiness. Arrays, complete numeric-string coercion, COUNT, and the
-remaining built-ins are still pending.
+COUNT, ROUND, ROUNDUP, and ROUNDDOWN. IF uses Ruby truthiness and lazy branches;
+NOT uses Ruby truthiness. Arrays support nesting, numeric aggregate flattening,
+concatenation, subtraction, repetition, equality, and postfix access. String
+indexing and null-safe access are implemented. Complete numeric-string coercion,
+array-oriented built-ins, hash/member access, and other built-ins remain pending.
 
 Unary minus binds more tightly than multiplication; binary subtraction shares
 addition precedence and is left-associative. Positive and negative operands use
