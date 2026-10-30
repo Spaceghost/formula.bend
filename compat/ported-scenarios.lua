@@ -2,6 +2,9 @@
 -- COUNT's Float input is represented as exact decimal 2.3 in Bend; COUNT only
 -- inspects its length capability, so this adaptation does not alter the result.
 return {
+  ['spec/parser_spec.rb'] = {
+    {'calculates bitwise OR', {'bit_upstream_or', 'bit_upstream_parentheses'}},
+  },
   ['spec/ast/count_spec.rb'] = {
     {'returns the length of an array', 'upstream_count_three'},
     {'returns the length of a single number object', 'upstream_count_number'},

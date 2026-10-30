@@ -35,7 +35,7 @@ digit lists. Coefficients can grow beyond a machine word. Decimal scale uses Nat
 Formatting preserves fractional zeros: `1.25 * .4` displays `0.500`.
 This formatting is not a claim of Ruby BigDecimal display compatibility.
 
-Twenty-eight universal laws and one hundred fifty-seven concrete regression fixtures cover these
+Universal laws and concrete regression fixtures cover these
 parts. They do not establish full Ruby or spreadsheet compatibility.
 
 ## Example
@@ -108,7 +108,7 @@ The eight address runtime cases pass on both JavaScript and native CPU.
 
 Parity is measured against the pinned Ruby source and its complete 713-example
 suite. The Ruby reference passes all examples; that is not a claim that Bend does.
-A separate 1083-case value and dependency corpus currently matches Ruby on JavaScript for selected values and
+A separate 1462-case value and dependency corpus currently matches Ruby on JavaScript for selected values and
 parse-error classification. `make parity-check` generates the fixtures using Lua.
 Use `LUA=/path/to/lua` if Lua is not on PATH.
 
@@ -122,8 +122,10 @@ gate. No performance comparison is claimed yet.
 The corpus supports exact decimal, integer, string, Boolean, null, and nested
 array and ordered hash bindings plus case-sensitive contexts. MAP, FILTER, ALL, ANY, and REDUCE
 also pass seven reference checks over 1,025-item collections. Both Bend 2.0.16
-and 2.0.39 pass all 1,083 cases on JavaScript. Bend 2.0.39 also passes 42 laws
-with Lean-backed kernel verification. The 951-case checkpoint and seven scale
+and 2.0.39 pass all 1,462 cases on JavaScript, with 45 laws and 175 concrete
+fixtures. The checker runs the corpus in batches of 256 to bound peak memory.
+All 45 laws pass Lean-backed kernel verification on Bend 2.0.39.
+The 1,083-case checkpoint and seven scale
 checks pass native CPU with one and eight threads at `-O3`.
 Source commits and checksums are recorded in
 `compat/backend-verification.json`.

@@ -76,9 +76,9 @@ File.foreach(ENV.fetch('FORMULA_ORACLE_CORPUS')) do |line|
   rescue Dentaku::Error => error
     snapshot = ['message', 'coerce_message'].include?(operation) ? "message:#{error.message}" : "error:#{error.class.name}"
   rescue RangeError => error
-    # Access#read leaks Ruby's signed-long conversion failure in this baseline.
-    raise unless error.message.include?('too big to convert')
-    snapshot = "error:#{error.class.name}"
+    # These source operations leak native Ruby range failures in this baseline.
+    raise unless error.message.include?('too big to convert') || error.message == 'shift width too big'
+    snapshot = ['message', 'coerce_message'].include?(operation) ? "message:#{error.message}" : "error:#{error.class.name}"
   end
   snapshot = "json:#{JSON.generate(snapshot)}" if json_output
   puts "#{id}\t#{snapshot}"

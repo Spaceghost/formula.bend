@@ -1,9 +1,16 @@
-local input = assert(arg[1], 'usage: lua tools/generate-corpus.lua CASES.lua OUTPUT_PREFIX')
+local input = assert(arg[1], 'usage: lua tools/generate-corpus.lua CASES.lua OUTPUT_PREFIX [--metadata-only | --slice START COUNT]')
 local prefix = assert(arg[2], 'missing output prefix')
 local metadata_only = arg[3] == '--metadata-only'
-assert(arg[3] == nil or metadata_only, 'unknown generator option')
+assert(arg[3] == nil or metadata_only or arg[3] == '--slice', 'unknown generator option')
 local cases = dofile(input)
 assert(#cases > 0, 'corpus must contain at least one case')
+if arg[3] == '--slice' then
+  local start, count = assert(tonumber(arg[4]), 'missing slice start'), assert(tonumber(arg[5]), 'missing slice count')
+  assert(math.type(start) == 'integer' and math.type(count) == 'integer' and start >= 1 and count >= 1 and start <= #cases, 'invalid corpus slice')
+  local selected = {}
+  for i = start, math.min(start + count - 1, #cases) do selected[#selected+1] = cases[i] end
+  cases = selected
+end
 local function bend_string(s)
   if s:find('[%z\1-\8\11\12\14-\31]') then
     local points = {}
@@ -61,7 +68,15 @@ local function context_value(value)
     local key = value.decimal and 'decimal' or 'integer'
     local text = value[key]
     local expression = 'Parser.evaluate(' .. bend_string(text) .. ', Nil{}, False{})'
-    if key == 'decimal' then expression = 'Core.decimal_result(' .. expression .. ')' end
+    if key == 'decimal' then
+      -- Parse the magnitude before applying the decimal sign. Parsing "-0"
+      -- as an Integer first would discard BigDecimal's negative zero.
+      if text:sub(1, 1) == '-' then
+        expression = 'Core.negate_value(Core.decimal_result(Parser.evaluate(' .. bend_string(text:sub(2)) .. ', Nil{}, False{})))'
+      else
+        expression = 'Core.decimal_result(' .. expression .. ')'
+      end
+    end
     return expression, '{' .. json_string(key) .. ':' .. json_string(text) .. '}'
   end
   local expressions, encoded = {}, {}

@@ -221,6 +221,9 @@ def analyze_mode(expr: Core.Expr, +context: List<&2, Core.Binding>, +sensitive: 
     case Core.Modulo{a, b}:
       x y = analyze_mode(a, context, sensitive, static, CaseUnresolved{}) analyze_mode(b, context, sensitive, static, CaseUnresolved{})
       union(x, y)
+    case Core.Bitwise{kind, a, b}:
+      x y = analyze_mode(a, context, sensitive, static, CaseUnresolved{}) analyze_mode(b, context, sensitive, static, CaseUnresolved{})
+      union(x, y)
     case Core.Compare{op, a, b}:
       x y = analyze_mode(a, context, sensitive, static, CaseUnresolved{}) analyze_mode(b, context, sensitive, static, CaseUnresolved{})
       union(x, y)

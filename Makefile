@@ -47,7 +47,7 @@ parity-check:
 	$(LUA) tools/generate-corpus.lua compat/scalar-cases.lua build/scalar-corpus
 	$(LUA) tools/check-scenario-map.lua
 	diff -u compat/scalar-oracle.tsv build/scalar-corpus.expected
-	$(BEND) build/scalar-corpus.bend > build/scalar-corpus.actual
+	$(LUA) tools/run-corpus.lua compat/scalar-cases.lua build/scalar-corpus $(BEND)
 	diff -u compat/scalar-oracle.tsv build/scalar-corpus.actual
 
 native-check:

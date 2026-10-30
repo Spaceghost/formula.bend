@@ -5,6 +5,7 @@ import ./lexer.bend as Lex
 import ./string.bend as StringOps
 import ./unicode.bend as Unicode
 import ./remainder.bend as Remainder
+import ./bits.bend as Bits
 
 # Small integers use Nat; larger integers and decimals use exact digit lists.
 type Value is Data:
@@ -74,6 +75,7 @@ type Expr is Data:
   Multiply{left: Expr, right: Expr}
   Divide{left: Expr, right: Expr}
   Modulo{left: Expr, right: Expr}
+  Bitwise{operation: Bits.BitwiseOperation, left: Expr, right: Expr}
   If{condition: Expr, yes: Expr, no: Expr}
   Not{operand: Expr}
   Negate{operand: Expr}
@@ -109,6 +111,9 @@ type EvaluationMode is Data:
 
 def is_unbound_message(+message: String) -> Bool:
   Bool.or(String.starts_with(message, "no value provided for variables: "), String.starts_with(message, "Unbound variable: "))
+
+def is_range_message(+message: String) -> Bool:
+  Bool.or(String.eq(message, "Index exceeds Ruby signed long range"), String.eq(message, "shift width too big"))
 
 def compact_pick(value: Decimal.Decimal, small: Bool) -> Value:
   match value small:
@@ -441,12 +446,132 @@ def value_equal(a: Value, b: Value, +strict: Bool) -> Bool:
     case a b:
       False{}
 
-def array_contains(array: Value, +candidate: Value) -> Bool:
+# Ruby eql? is directional: BigDecimal accepts equal Integers, while Integer
+# rejects BigDecimal. Hash-backed set operations additionally require matching
+# hashes; the pinned BigDecimal hashes distinguish numeric classes and zero sign.
+type NumericOperand is Data:
+  Magnitude{negative: Bool, value: Decimal.Decimal}
+  InvalidNumeric{message: String}
+
+def numeric_operand_value(value: Value) -> NumericOperand:
+  match value:
+    case IntegerNumber{n}:
+      Magnitude{False{}, n}
+    case NegativeInteger{n}:
+      Magnitude{True{}, n}
+    case Number{n}:
+      Magnitude{False{}, Decimal.from_nat(n)}
+    case DecimalNumber{n}:
+      Magnitude{False{}, n}
+    case NegativeNumber{n}:
+      Magnitude{True{}, n}
+    case Failure{e}:
+      InvalidNumeric{e}
+    case value:
+      InvalidNumeric{"Expected numbers"}
+
+def ruby_type_name(value: Value) -> String:
+  match value:
+    case Number{n}:
+      "Integer"
+    case IntegerNumber{n}:
+      "Integer"
+    case NegativeInteger{n}:
+      "Integer"
+    case DecimalNumber{n}:
+      "BigDecimal"
+    case NegativeNumber{n}:
+      "BigDecimal"
+    case TextValue{s}:
+      "String"
+    case SymbolValue{s}:
+      "Symbol"
+    case Logical{True{}}:
+      "TrueClass"
+    case Logical{False{}}:
+      "FalseClass"
+    case NullValue{}:
+      "NilClass"
+    case ArrayNil{}:
+      "Array"
+    case ArrayCons{head, tail}:
+      "Array"
+    case HashNil{}:
+      "Hash"
+    case HashEntry{key, value, tail}:
+      "Hash"
+    case value:
+      "Object"
+
+def array_length(value: Value) -> Nat:
+  match value:
+    case ArrayCons{head, tail}:
+      1n+array_length(tail)
+    case value:
+      0n
+
+def bitwise_name(kind: Bits.BitwiseOperation) -> String:
+  match kind:
+    case Bits.BitOr{}:
+      "BitwiseOr"
+    case Bits.BitAnd{}:
+      "BitwiseAnd"
+    case Bits.ShiftLeft{}:
+      "BitwiseShiftLeft"
+    case Bits.ShiftRight{}:
+      "BitwiseShiftRight"
+
+def value_equal_same_type(+a: Value, +b: Value) -> Bool:
+  match a:
+    case Number{n}:
+      False{}
+    case IntegerNumber{n}:
+      False{}
+    case NegativeInteger{n}:
+      False{}
+    case DecimalNumber{n}:
+      False{}
+    case NegativeNumber{n}:
+      False{}
+    case a:
+      value_equal(a, b, True{})
+
+def set_numeric_magnitudes(a: NumericOperand, b: NumericOperand) -> Bool:
+  match a b:
+    case Magnitude{sa, +x} Magnitude{sb, +y}:
+      Bool.and(Cmp.is_eq(Decimal.compare(x, y)), Bool.or(Cmp.is_eq(Bool.cmp(sa, sb)), Bool.and(Decimal.is_zero(x), Decimal.is_zero(y))))
+    case a b:
+      False{}
+
+def set_numeric_equal(+a: Value, +b: Value, +hashed: Bool) -> Bool:
+  numeric = set_numeric_magnitudes(numeric_operand_value(a), numeric_operand_value(b))
+  same_class = String.eq(ruby_type_name(a), ruby_type_name(b))
+  class_ok = Bool.or(same_class, Bool.and(Bool.not(hashed), String.eq(ruby_type_name(a), "BigDecimal")))
+  sign_ok = Bool.or(Bool.not(hashed), Cmp.is_eq(Bool.cmp(has_negative_sign(a), has_negative_sign(b))))
+  Bool.and(numeric, Bool.and(class_ok, sign_ok))
+
+def set_equal(a: Value, b: Value, +hashed: Bool) -> Bool:
+  match a b:
+    case HashNil{} HashNil{}:
+      True{}
+    case HashEntry{+key, value, tail} +b:
+      Bool.and(hash_equal_found(hash_find(b, key), other => set_equal(value, other, hashed)), set_equal(tail, hash_remove(b, key), hashed))
+    case ArrayNil{} ArrayNil{}:
+      True{}
+    case ArrayCons{ah, at} ArrayCons{bh, bt}:
+      Bool.and(set_equal(ah, bh, hashed), set_equal(at, bt, hashed))
+    case +a +b:
+      Bool.or(set_numeric_equal(a, b, hashed), value_equal_same_type(a, b))
+
+def set_contains(array: Value, +candidate: Value, +hashed: Bool) -> Bool:
   match array:
     case ArrayCons{head, tail}:
-      Bool.or(value_equal(head, candidate, True{}), array_contains(tail, candidate))
+      Bool.or(set_equal(candidate, head, hashed), set_contains(tail, candidate, hashed))
     case array:
       False{}
+
+def array_contains(array: Value, candidate: Value) -> Bool:
+  set_contains(array, candidate, False{})
 
 def array_keep(remove: Bool, head: Value, tail: Value) -> Value:
   match remove:
@@ -455,12 +580,39 @@ def array_keep(remove: Bool, head: Value, tail: Value) -> Value:
     case False{}:
       ArrayCons{head, tail}
 
-def array_difference(left: Value, +right: Value) -> Value:
+def array_difference_items(left: Value, +right: Value, +hashed: Bool) -> Value:
   match left:
     case ArrayCons{+head, tail}:
-      array_keep(array_contains(right, head), head, array_difference(tail, right))
+      array_keep(set_contains(right, head, hashed), head, array_difference_items(tail, right, hashed))
     case left:
       ArrayNil{}
+
+def array_difference(+left: Value, +right: Value) -> Value:
+  array_difference_items(left, right, Bool.and(Nat.is_gt(array_length(left), 16n), Nat.is_gt(array_length(right), 16n)))
+
+def array_set_items(items: Value, +right: Value, +seen: Value, +intersection: Bool, +hashed: Bool) -> Value:
+  match items:
+    case ArrayCons{+head, tail}:
+      +keep = Bool.and(Bool.not(set_contains(seen, head, hashed)), Bool.or(Bool.not(intersection), set_contains(right, head, hashed)))
+      array_keep(Bool.not(keep), head, array_set_items(tail, right, Bool.pick(Value, keep, ArrayCons{head, seen}, seen), intersection, hashed))
+    case items:
+      ArrayNil{}
+
+def array_set_operation(kind: Bits.BitwiseOperation, +left: Value, +right: Value) -> Value:
+  match kind:
+    case Bits.BitOr{}:
+      array_set_items(array_append(left, right), ArrayNil{}, ArrayNil{}, False{}, Nat.is_gt(Nat.add(array_length(left), array_length(right)), 16n))
+    case kind:
+      array_set_items(left, right, ArrayNil{}, True{}, Bool.or(Nat.is_gt(array_length(left), 16n), Nat.is_gt(array_length(right), 16n)))
+
+def array_bitwise(+kind: Bits.BitwiseOperation, left: Value, right: Value) -> Value:
+  match right:
+    case ArrayNil{}:
+      array_set_operation(kind, left, ArrayNil{})
+    case ArrayCons{head, tail}:
+      array_set_operation(kind, left, ArrayCons{head, tail})
+    case right:
+      Failure{"Dentaku::AST::" ++ bitwise_name(kind) ++ " requires integer operands, but got " ++ ruby_type_name(right)}
 
 def array_subtract(left: Value, right: Value) -> Value:
   match right:
@@ -792,7 +944,7 @@ def mapped_result(mode: Value, +value: Value) -> Value:
 def permissive_result(+value: Value) -> Value:
   match value:
     case Failure{message}:
-      Bool.pick(Value, String.eq(message, "Index exceeds Ruby signed long range"), value, NullValue{})
+      Bool.pick(Value, is_range_message(message), value, NullValue{})
     case value:
       value
 
@@ -857,27 +1009,6 @@ def round_values(value: Value, places: Value, mode: Decimal.Rounding) -> Value:
 
 def round(value: Value, places: Value, mode: Decimal.Rounding) -> Value:
   round_values(cast_numeric(value), cast_numeric(places), mode)
-
-type NumericOperand is Data:
-  Magnitude{negative: Bool, value: Decimal.Decimal}
-  InvalidNumeric{message: String}
-
-def numeric_operand_value(value: Value) -> NumericOperand:
-  match value:
-    case IntegerNumber{n}:
-      Magnitude{False{}, n}
-    case NegativeInteger{n}:
-      Magnitude{True{}, n}
-    case Number{n}:
-      Magnitude{False{}, Decimal.from_nat(n)}
-    case DecimalNumber{n}:
-      Magnitude{False{}, n}
-    case NegativeNumber{n}:
-      Magnitude{True{}, n}
-    case Failure{e}:
-      InvalidNumeric{e}
-    case value:
-      InvalidNumeric{"Expected numbers"}
 
 def numeric_operand(value: Value) -> NumericOperand:
   numeric_operand_value(cast_numeric(value))
@@ -1154,13 +1285,6 @@ def array_checked(error: Maybe<&2, Value>, tree: Value) -> Value:
 def array_value(+tree: Value) -> Value:
   array_checked(first_argument_error(tree), tree)
 
-def array_length(value: Value) -> Nat:
-  match value:
-    case ArrayCons{head, tail}:
-      1n+array_length(tail)
-    case value:
-      0n
-
 def hash_length(value: Value) -> Nat:
   match value:
     case HashEntry{key, item, tail}:
@@ -1289,38 +1413,91 @@ def access_index(value: Value, index: Value) -> Value:
     case index:
       Failure{"Invalid index type"}
 
-def ruby_type_name(value: Value) -> String:
+def truncate_magnitude(value: Decimal.Decimal) -> Decimal.Decimal:
   match value:
-    case Number{n}:
-      "Integer"
-    case IntegerNumber{n}:
-      "Integer"
-    case NegativeInteger{n}:
-      "Integer"
-    case DecimalNumber{n}:
-      "BigDecimal"
-    case NegativeNumber{n}:
-      "BigDecimal"
-    case TextValue{s}:
-      "String"
-    case SymbolValue{s}:
-      "Symbol"
-    case Logical{True{}}:
-      "TrueClass"
-    case Logical{False{}}:
-      "FalseClass"
-    case NullValue{}:
-      "NilClass"
-    case ArrayNil{}:
-      "Array"
-    case ArrayCons{head, tail}:
-      "Array"
-    case HashNil{}:
-      "Hash"
-    case HashEntry{key, value, tail}:
-      "Hash"
-    case value:
-      "Object"
+    case Decimal.Exact{digits, places}:
+      Decimal.Exact{Decimal.normalize_digits(Decimal.integer_digits(places, digits)), 0n}
+
+def bitwise_decimal_operand(+kind: Bits.BitwiseOperation, sign: Bool, value: Decimal.Decimal) -> NumericOperand:
+  match kind:
+    case Bits.ShiftLeft{}:
+      Magnitude{sign, truncate_magnitude(value)}
+    case Bits.ShiftRight{}:
+      Magnitude{sign, truncate_magnitude(value)}
+    case kind:
+      InvalidNumeric{"Dentaku::AST::" ++ bitwise_name(kind) ++ " requires integer operands, but got BigDecimal"}
+
+def bitwise_operand(value: Value, kind: Bits.BitwiseOperation, left: Bool) -> NumericOperand:
+  match value left:
+    case Number{n} left:
+      Magnitude{False{}, Decimal.from_nat(n)}
+    case IntegerNumber{n} left:
+      Magnitude{False{}, n}
+    case NegativeInteger{n} left:
+      Magnitude{True{}, n}
+    case DecimalNumber{n} False{}:
+      bitwise_decimal_operand(kind, False{}, n)
+    case NegativeNumber{n} False{}:
+      bitwise_decimal_operand(kind, True{}, n)
+    case value left:
+      InvalidNumeric{"Dentaku::AST::" ++ bitwise_name(kind) ++ " requires integer operands, but got " ++ ruby_type_name(value)}
+
+def bitwise_result(result: Bits.BitwiseResult) -> Value:
+  match result:
+    case Bits.IntegerResult{sign, value}:
+      integer_result(signed_result(sign, value))
+    case Bits.ShiftTooWide{}:
+      Failure{"shift width too big"}
+
+def bitwise_operands(kind: Bits.BitwiseOperation, a: NumericOperand, b: NumericOperand) -> Value:
+  match a b:
+    case InvalidNumeric{message} b:
+      Failure{message}
+    case a InvalidNumeric{message}:
+      Failure{message}
+    case Magnitude{sa, a} Magnitude{sb, b}:
+      bitwise_result(Bits.calculate(kind, sa, a, sb, b))
+
+def bitwise_values(kind: Bits.BitwiseOperation, a: Value, b: Value) -> Value:
+  match kind a:
+    case Bits.BitAnd{} Logical{x}:
+      Logical{Bool.and(x, truthy(b))}
+    case Bits.BitOr{} Logical{x}:
+      Logical{Bool.or(x, truthy(b))}
+    case Bits.BitAnd{} NullValue{}:
+      Logical{False{}}
+    case Bits.BitOr{} NullValue{}:
+      Logical{truthy(b)}
+    case Bits.ShiftLeft{} TextValue{text}:
+      Failure{"Mutable string shifts are not implemented"}
+    case Bits.ShiftLeft{} ArrayNil{}:
+      Failure{"Mutable array shifts are not implemented"}
+    case Bits.ShiftLeft{} ArrayCons{head, tail}:
+      Failure{"Mutable array shifts are not implemented"}
+    case Bits.BitAnd{} ArrayNil{}:
+      array_bitwise(Bits.BitAnd{}, ArrayNil{}, b)
+    case Bits.BitAnd{} ArrayCons{head, tail}:
+      array_bitwise(Bits.BitAnd{}, ArrayCons{head, tail}, b)
+    case Bits.BitOr{} ArrayNil{}:
+      array_bitwise(Bits.BitOr{}, ArrayNil{}, b)
+    case Bits.BitOr{} ArrayCons{head, tail}:
+      array_bitwise(Bits.BitOr{}, ArrayCons{head, tail}, b)
+    case +kind a:
+      bitwise_operands(kind, bitwise_operand(a, kind, True{}), bitwise_operand(b, kind, False{}))
+
+def bitwise_right(kind: Bits.BitwiseOperation, a: Value, b: Value) -> Value:
+  match b:
+    case Failure{message}:
+      Failure{message}
+    case b:
+      bitwise_values(kind, a, b)
+
+def bitwise(kind: Bits.BitwiseOperation, a: Value, b: Value) -> Value:
+  match a:
+    case Failure{message}:
+      Failure{message}
+    case a:
+      bitwise_right(kind, a, b)
 
 def hash_keys(hash: Value) -> Value:
   match hash:
@@ -1931,6 +2108,8 @@ def prepare_expression(e: Expr) -> Expr:
       Divide{prepare_expression(a), prepare_expression(b)}
     case Modulo{a, b}:
       Modulo{prepare_expression(a), prepare_expression(b)}
+    case Bitwise{kind, a, b}:
+      Bitwise{kind, prepare_expression(a), prepare_expression(b)}
     case If{condition, yes, no}:
       If{prepare_expression(condition), prepare_expression(yes), prepare_expression(no)}
     case Not{a}:
@@ -2106,6 +2285,8 @@ def evaluate_machine(e: Expr, +batch: Value, +context: List<&2, Binding>, +sensi
       divide(x, y)
     case Modulo{a, b} batch EvaluateOne{}:
       modulo_right(numeric_operand(evaluate_machine(b, batch, context, sensitive, subjects, EvaluateOne{})), u => evaluate_machine(a, batch, context, sensitive, subjects, EvaluateOne{}))
+    case Bitwise{kind, a, b} batch EvaluateOne{}:
+      with_value(evaluate_machine(a, batch, context, sensitive, subjects, EvaluateOne{}), left => with_value(evaluate_machine(b, batch, context, sensitive, subjects, EvaluateOne{}), right => bitwise(kind, left, right)))
     case Multiply{a, b} batch EvaluateOne{}:
       x y = evaluate_machine(a, batch, context, sensitive, subjects, EvaluateOne{}) evaluate_machine(b, batch, context, sensitive, subjects, EvaluateOne{})
       multiply(x, y)
@@ -2188,7 +2369,7 @@ def show(value: Value) -> String:
 
 # Typed, canonical snapshots for cross-runtime differential fixtures.
 def failure_snapshot(+message: String) -> String:
-  Bool.pick(String, is_unbound_message(message), "error:Dentaku::UnboundVariableError", Bool.pick(String, String.eq(message, "Division by zero"), "error:Dentaku::ZeroDivisionError", Bool.pick(String, String.eq(message, "Index exceeds Ruby signed long range"), "error:RangeError", "error:Dentaku::ArgumentError")))
+  Bool.pick(String, is_unbound_message(message), "error:Dentaku::UnboundVariableError", Bool.pick(String, String.eq(message, "Division by zero"), "error:Dentaku::ZeroDivisionError", Bool.pick(String, is_range_message(message), "error:RangeError", "error:Dentaku::ArgumentError")))
 
 def snapshot_render(value: Value, +tail_mode: Bool) -> String:
   match value:

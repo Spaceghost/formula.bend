@@ -17,6 +17,10 @@ type Token is Data:
   Times{}
   Slash{}
   ModuloToken{}
+  BitOrToken{}
+  BitAndToken{}
+  ShiftLeftToken{}
+  ShiftRightToken{}
   LParen{}
   RParen{}
   LBrace{}
@@ -101,6 +105,10 @@ def symbol(c: Char) -> Token:
       Slash{}
     case Chr{37}:
       ModuloToken{}
+    case Chr{124}:
+      BitOrToken{}
+    case Chr{38}:
+      BitAndToken{}
     case Chr{42}:
       Times{}
     case Chr{40}:
@@ -316,6 +324,10 @@ def normal_step(mode: Mode, c: Char, tokens: List<&2, Token>) -> Mode & List<&2,
 
 def pending_step(first: Char, c: Char, tokens: List<&2, Token>) -> Mode & List<&2, Token>:
   match first c:
+    case Chr{60} Chr{60}:
+      (Idle{}, ShiftLeftToken{} <> tokens)
+    case Chr{62} Chr{62}:
+      (Idle{}, ShiftRightToken{} <> tokens)
     case Chr{38} Chr{38}:
       (AliasPending{True{}}, tokens)
     case Chr{124} Chr{124}:
@@ -347,7 +359,7 @@ def scientific_word(explicit_sign: Bool, negative: Bool, exponent: List<&2, U32>
     case False{}:
       numeric_word(SCon{c, Decimal.digit_text(exponent) ++ prefix}, tokens)
 
-def scientific_step(digits: List<&2, U32>, scale: Nat, negative: Bool, exponent: List<&2, U32>, sign_allowed: Bool, explicit_sign: Bool, prefix: String, kind: CharacterClass, tokens: List<&2, Token>) -> Mode & List<&2, Token>:
+def scientific_step(digits: List<&2, U32>, scale: Nat, negative: Bool, exponent: List<&2, U32>, sign_allowed: Bool, explicit_sign: Bool, prefix: String, kind: CharacterClass, current: Char, tokens: List<&2, Token>) -> Mode & List<&2, Token>:
   match sign_allowed kind:
     case sign_allowed Digit{n, c}:
       (Scientific{digits, scale, negative, U32.from_nat(n) <> exponent, False{}, explicit_sign, prefix}, tokens)
@@ -358,25 +370,25 @@ def scientific_step(digits: List<&2, U32>, scale: Nat, negative: Bool, exponent:
     case sign_allowed Letter{c}:
       scientific_word(explicit_sign, negative, exponent, prefix, c, tokens)
     case sign_allowed kind:
-      step(kind, Idle{}, flush_scientific(digits, scale, negative, exponent, explicit_sign, prefix, tokens))
+      normal_step(Idle{}, current, flush_scientific(digits, scale, negative, exponent, explicit_sign, prefix, tokens))
 
 def hexadecimal_digit(+c: Char) -> Maybe<&2, U32>:
   +code = Char.to_u32(Char.to_lower(c))
   Bool.pick(Maybe<&2, U32>, Char.is_digit(c), Some{U32.sub(Char.to_u32(c), 48)}, Bool.pick(Maybe<&2, U32>, Bool.and(U32.is_ge(code, 97), U32.is_le(code, 102)), Some{U32.sub(code, 87)}, None{}))
 
-def hexadecimal_done(kind: CharacterClass, digits: List<&2, U32>, seen: Bool, raw: String, tokens: List<&2, Token>) -> Mode & List<&2, Token>:
+def hexadecimal_done(kind: CharacterClass, current: Char, digits: List<&2, U32>, seen: Bool, raw: String, tokens: List<&2, Token>) -> Mode & List<&2, Token>:
   match kind:
     case Letter{c}:
       (Word{SCon{c, raw}}, tokens)
     case kind:
-      step(kind, Idle{}, flush(Hexadecimal{digits, seen, raw}, tokens))
+      normal_step(Idle{}, current, flush(Hexadecimal{digits, seen, raw}, tokens))
 
 def hexadecimal_step(digit: Maybe<&2, U32>, digits: List<&2, U32>, seen: Bool, +c: Char, raw: String, tokens: List<&2, Token>) -> Mode & List<&2, Token>:
   match digit:
     case Some{n}:
       (Hexadecimal{Decimal.add_digits(Decimal.multiply_digit(digits, 16, 0), [n], 0), True{}, SCon{c, raw}}, tokens)
     case None{}:
-      hexadecimal_done(classify(c), digits, seen, raw, tokens)
+      hexadecimal_done(classify(c), c, digits, seen, raw, tokens)
 
 def scan_step(mode: Mode, c: Char, +tokens: List<&2, Token>) -> Mode & List<&2, Token>:
   match mode c:
@@ -398,8 +410,8 @@ def scan_step(mode: Mode, c: Char, +tokens: List<&2, Token>) -> Mode & List<&2, 
       (MemberStart{}, MemberName{String.reverse(s)} <> tokens)
     case MemberWord{+s} +c:
       Bool.pick(Mode & List<&2, Token>, Unicode.is_word(c), (MemberWord{SCon{c, s}}, tokens), Bool.pick(Mode & List<&2, Token>, Char.is_space(c), (AfterCloseSpace{}, MemberName{String.reverse(s)} <> tokens), normal_step(Idle{}, c, MemberName{String.reverse(s)} <> tokens)))
-    case Scientific{digits, scale, negative, exponent, sign_allowed, explicit_sign, prefix} c:
-      scientific_step(digits, scale, negative, exponent, sign_allowed, explicit_sign, prefix, classify(c), tokens)
+    case Scientific{digits, scale, negative, exponent, sign_allowed, explicit_sign, prefix} +c:
+      scientific_step(digits, scale, negative, exponent, sign_allowed, explicit_sign, prefix, classify(c), c, tokens)
     case Hexadecimal{digits, seen, raw} +c:
       hexadecimal_step(hexadecimal_digit(c), digits, seen, c, raw, tokens)
     case AliasPending{is_and} +c:

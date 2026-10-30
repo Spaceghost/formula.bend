@@ -34,6 +34,9 @@ numeric profile on every backend. Benchmark parsing, cached AST evaluation,
 independent batches, and dependency-driven recalculation separately.
 
 Targets: JavaScript; native CPU with one thread and multiple threads; CUDA; Metal.
+Metal execution on Linux through a translation runtime is a candidate route;
+record its translator revision, compiler, precision settings, and Vulkan driver
+separately from Apple's native Metal runtime. A Mac is not a project prerequisite.
 Record compiler/runtime versions, hardware, memory, thread counts, GPU use and
 fallback status, workload and sizes, warmup, repetitions, timings, and result
 checksums. Include Ruby Dentaku as a baseline. Report unsupported hardware as
@@ -46,7 +49,7 @@ The unchanged upstream suite passes 713 examples with zero failures and 96.82%
 line coverage in the Ruby reference environment. `reference-summary.json` and
 `upstream-spec-catalog.json` record that run. These results describe Ruby only.
 
-The Lua-driven value and dependency corpus has 1083 cases matched against Ruby values or parse
+The Lua-driven value and dependency corpus has 1462 cases matched against Ruby values or parse
 error classification. It covers truthiness, strings/null, comparisons, selected
 numeric-string coercions, and static operand rejection. It is a small subset of
 the upstream catalog. Native error classes/messages, all calculator methods,
@@ -87,7 +90,7 @@ lua tools/run-oracle.lua PROJECT UPSTREAM GEMS STORAGE RUNROOT OUTPUT
 The probe catches Dentaku errors and records their class; unexpected Ruby failures
 abort without replacing the output. Compare the result before updating committed
 goldens. Parser snapshots currently preserve parse-error classification, while
-full runtime error-class/message parity remains unfinished. The 1083-case value and dependency
+full runtime error-class/message parity remains unfinished. The 1462-case value and dependency
 corpus passes on JavaScript; the 951-case checkpoint passed native CPU with one
 and eight threads. This is correctness verification,
 not the requested performance shootout.
@@ -382,6 +385,49 @@ and ordered deduplication. Scoped missing fields and names containing control
 characters have exact message checks. Legacy unbound failures still retain their
 class and logical recovery behavior. Structured diagnostics and complete error
 metadata remain unfinished. The proof gate contains 42 laws and the concrete
-suite 169 fixtures. Native verification of the 1,083-case corpus is pending.
+suite 169 fixtures. The 1,083-case checkpoint and seven scale checks pass native
+CPU at `-O3` with one and eight threads; artifact hashes are recorded in
+`backend-verification.json`.
 Both Bend 2.0.16 and 2.0.39 pass the full checks. Bend 2.0.39 also passes the
 42-law proof book with --verdict, including the imported parser implementation.
+
+## Bitwise operators and array set rules
+
+The next 379 reference-matched cases add integer OR, AND, left and arithmetic
+right shifts, Boolean/null overloads, and array union/intersection. All four
+operators retain the source's precedence zero and left associativity. Both
+operands are evaluated before Boolean/null operations. Static type inspection
+and dependency traversal include both children. The parser's bitwise OR
+scenario is mapped, bringing the scenario correspondence count to 120.
+
+Integer operations use arbitrary-length signed bit lists with infinite sign
+extension. Negative counts reverse shifts; fractional BigDecimal shift counts
+truncate toward zero, while BigDecimal OR/AND operands retain their source type
+errors. Huge right shifts saturate to zero or minus one. Huge left shifts check
+the pinned 64-bit Ruby allocation-width rule before building padding, preserving
+the native RangeError and its exact message. Zero shifted by a huge count stays
+zero. No fixed integer width or evaluation fuel was introduced.
+
+Array set operations preserve first-occurrence ordering and remove duplicates.
+Their equality is directional: Integer#eql? rejects BigDecimal, whereas the
+pinned BigDecimal#eql? accepts equal Integers. Ruby's size-dependent hash paths
+also distinguish numeric classes and signed decimal zero; nested arrays and
+hashes follow these rules recursively. The same distinctions fix array
+subtraction. Boundary checks cover total union lengths 16 and 17, and both
+operands around the intersection/subtraction threshold. Typed decimal contexts
+now preserve negative zero before evaluation instead of parsing it as an
+Integer first.
+
+Six concrete tokenizer fixtures cover the four operators and hex/scientific
+literal boundaries. The latter previously bypassed pending double-character
+operators. Three additional universal laws preserve left-error priority,
+right-error propagation, and eager false-AND error handling. The proof book
+contains 45 laws and the concrete suite 175 fixtures. Mutable String/Array
+left-shift overloads remain incomplete; the bitwise family is not marked
+complete. Both Bend 2.0.16 and 2.0.39 pass all 1,462 differential cases and the
+full supporting checks. The 2.0.16 corpus run completed as one program;
+`make parity-check` now checks all cases in ordered batches of 256, avoiding
+the earlier run's greater-than-8-GB checker peak. The new runner also passes on
+2.0.39. All 45 laws also pass its Lean-backed kernel verification. Native
+verification of this checkpoint remains in progress; no GPU results or
+performance measurements are claimed.

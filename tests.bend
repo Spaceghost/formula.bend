@@ -7,7 +7,26 @@ import ./src/decimal.bend as Decimal
 import ./src/division.bend as Division
 import ./src/address.bend as Address
 import ./src/comments.bend as Comments
+import ./src/lexer.bend as Lex
 # Concrete regression fixtures complement the universal laws.
+def token_bitwise_or() -> {Lex.tokenize("2 | 3") == [Lex.Integer{2n}, Lex.BitOrToken{}, Lex.Integer{3n}] : List<&2, Lex.Token>}:
+  {==}
+
+def token_bitwise_and() -> {Lex.tokenize("2 & 3") == [Lex.Integer{2n}, Lex.BitAndToken{}, Lex.Integer{3n}] : List<&2, Lex.Token>}:
+  {==}
+
+def token_shift_left() -> {Lex.tokenize("2 << 3") == [Lex.Integer{2n}, Lex.ShiftLeftToken{}, Lex.Integer{3n}] : List<&2, Lex.Token>}:
+  {==}
+
+def token_shift_right() -> {Lex.tokenize("2 >> 3") == [Lex.Integer{2n}, Lex.ShiftRightToken{}, Lex.Integer{3n}] : List<&2, Lex.Token>}:
+  {==}
+
+def token_hex_shift_boundary() -> {Lex.tokenize("0xff>>6") == [Lex.Integer{255n}, Lex.ShiftRightToken{}, Lex.Integer{6n}] : List<&2, Lex.Token>}:
+  {==}
+
+def token_scientific_comparison_boundary() -> {Lex.tokenize("1e2>=1") == [Lex.DecimalLiteral{Decimal.from_nat(100n)}, Lex.GreaterEqualToken{}, Lex.Integer{1n}] : List<&2, Lex.Token>}:
+  {==}
+
 def quoted_keyword_node() -> {Parser.parse("`true`") == Parser.Accepted{Core.Variable{"true"}} : Parser.Parsed}:
   {==}
 

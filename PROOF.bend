@@ -2,6 +2,32 @@ import Base
 import ./src/core.bend as Core
 import ./src/decimal.bend as Decimal
 import ./LAWS.bend as Laws
+import ./src/bits.bend as Bits
+
+def Laws.bitwise_left_error(kind, message, right):
+  match kind:
+    case Bits.BitOr{}:
+      {==}
+    case Bits.BitAnd{}:
+      {==}
+    case Bits.ShiftLeft{}:
+      {==}
+    case Bits.ShiftRight{}:
+      {==}
+
+def Laws.bitwise_right_error(kind, left, message):
+  match kind:
+    case Bits.BitOr{}:
+      {==}
+    case Bits.BitAnd{}:
+      {==}
+    case Bits.ShiftLeft{}:
+      {==}
+    case Bits.ShiftRight{}:
+      {==}
+
+def Laws.bitwise_false_and_eager(message):
+  {==}
 
 def Laws.empty_hash_read(key):
   {==}
@@ -140,6 +166,8 @@ def Laws.empty_enumeration_batch(body, kind, binder, context, sensitive, subject
       {==}
     case Core.Modulo{x0, x1}:
       {==}
+    case Core.Bitwise{x0, x1, x2}:
+      {==}
     case Core.If{x0, x1, x2}:
       {==}
     case Core.Not{x0}:
@@ -208,6 +236,8 @@ def Laws.empty_reduction_batch(body, memo_name, item_name, initial, context, sen
     case Core.Divide{x0, x1}:
       {==}
     case Core.Modulo{x0, x1}:
+      {==}
+    case Core.Bitwise{x0, x1, x2}:
       {==}
     case Core.If{x0, x1, x2}:
       {==}

@@ -5,6 +5,7 @@ import ./decimal.bend as Decimal
 import ./inspect.bend as Inspect
 import ./dependencies.bend as Dependencies
 import ./comments.bend as Comments
+import ./bits.bend as Bits
 
 type Parsed is Data:
   Accepted{expression: Core.Expr}
@@ -20,6 +21,7 @@ type Operator is Data:
   MultiplyOp{}
   DivideOp{}
   ModuloOp{}
+  BitwiseOp{kind: Bits.BitwiseOperation}
   CompareOp{operation: Core.Comparison}
   AndOp{}
   OrOp{}
@@ -232,6 +234,8 @@ def precedence(op: Operator) -> Nat:
       20n
     case ModuloOp{}:
       20n
+    case BitwiseOp{kind}:
+      0n
     case AddOp{}:
       10n
     case SubtractOp{}:
@@ -276,6 +280,8 @@ def reduce_one(op: Operator, tail: List<&2, Operator>, values: List<&2, Core.Exp
       ParseReady{tail, Core.Divide{left, right} <> rest}
     case ModuloOp{} right <> left <> rest:
       ParseReady{tail, Core.Modulo{left, right} <> rest}
+    case BitwiseOp{kind} right <> left <> rest:
+      ParseReady{tail, Core.Bitwise{kind, left, right} <> rest}
     case AddOp{} right <> left <> rest:
       ParseReady{tail, Core.Add{left, right} <> rest}
     case SubtractOp{} right <> left <> rest:
@@ -542,6 +548,14 @@ def operand(token: Lex.Token, stack: Stack) -> Stack:
 
 def operator(token: Lex.Token, stack: Stack) -> Stack:
   match token stack:
+    case Lex.BitOrToken{} ParseReady{ops, values}:
+      push_operator(reduce_all(ops, values), BitwiseOp{Bits.BitOr{}})
+    case Lex.BitAndToken{} ParseReady{ops, values}:
+      push_operator(reduce_all(ops, values), BitwiseOp{Bits.BitAnd{}})
+    case Lex.ShiftLeftToken{} ParseReady{ops, values}:
+      push_operator(reduce_all(ops, values), BitwiseOp{Bits.ShiftLeft{}})
+    case Lex.ShiftRightToken{} ParseReady{ops, values}:
+      push_operator(reduce_all(ops, values), BitwiseOp{Bits.ShiftRight{}})
     case Lex.ModuloToken{} ParseReady{ops, values}:
       push_operator(reduce_times(ops, values), ModuloOp{})
     case Lex.MemberName{name} ParseReady{ops, structure <> outer}:
@@ -660,6 +674,14 @@ def binary_percent(tokens: List<&2, Lex.Token>) -> Bool:
     case Lex.Slash{} <> rest:
       False{}
     case Lex.ModuloToken{} <> rest:
+      False{}
+    case Lex.BitOrToken{} <> rest:
+      False{}
+    case Lex.BitAndToken{} <> rest:
+      False{}
+    case Lex.ShiftLeftToken{} <> rest:
+      False{}
+    case Lex.ShiftRightToken{} <> rest:
       False{}
     case Lex.RParen{} <> rest:
       False{}

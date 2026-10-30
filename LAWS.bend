@@ -6,6 +6,7 @@ import ./src/address.bend as Address
 import ./src/dependencies.bend as Dependencies
 import ./src/comments.bend as Comments
 import ./src/parser.bend as Parser
+import ./src/bits.bend as Bits
 
 import ./src/reference.bend as Ref
 
@@ -45,6 +46,22 @@ law empty_formula:
   for context: List<&2, Core.Binding>
   for sensitive: Bool
   {Parser.evaluate("", context, sensitive) == Core.NullValue{} : Core.Value}
+
+law bitwise_left_error:
+  for kind: Bits.BitwiseOperation
+  for +message: String
+  for right: Core.Value
+  {Core.bitwise(kind, Core.Failure{message}, right) == Core.Failure{message} : Core.Value}
+
+law bitwise_right_error:
+  for kind: Bits.BitwiseOperation
+  for left: Nat
+  for +message: String
+  {Core.bitwise(kind, Core.Number{left}, Core.Failure{message}) == Core.Failure{message} : Core.Value}
+
+law bitwise_false_and_eager:
+  for +message: String
+  {Core.evaluate(Core.Bitwise{Bits.BitAnd{}, Core.Literal{Core.Logical{False{}}}, Core.Literal{Core.Failure{message}}}) == Core.Failure{message} : Core.Value}
 
 law strict_item_error:
   for +message: String
