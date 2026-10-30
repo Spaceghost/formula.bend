@@ -18,3 +18,6 @@ def Laws.mixed_row_anchor(row, column, rows, columns):
 
 def Laws.bound_literal(value, context, sensitive):
   {==}
+
+def Laws.product_scale(x, y, sx, sy):
+  {==}

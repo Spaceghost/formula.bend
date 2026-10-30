@@ -2,45 +2,125 @@ import Base
 import ./core.bend as Core
 import ./lexer.bend as Lex
 
+type Parsed is Data:
+  Accepted{expression: Core.Expr}
+  ParseError{message: String}
+
+type Operator is Data:
+  AddOp{}
+  MultiplyOp{}
+  GroupFrame{outer: List<&2, Core.Expr>}
+  CallFrame{name: String, arguments: List<&2, Core.Expr>, outer: List<&2, Core.Expr>}
+
 type Stack is Data:
-  Ready{operators: List<&2, Lex.Token>, values: List<&2, Core.Expr>}
+  Ready{operators: List<&2, Operator>, values: List<&2, Core.Expr>}
   Rejected{message: String}
 
-def reduce_times(ops: List<&2, Lex.Token>, values: List<&2, Core.Expr>) -> Stack:
+def pair_args(args: List<&2, Core.Expr>) -> List<&2, Core.Expr>:
+  match args:
+    case a <> b <> tail:
+      Core.Add{a, b} <> pair_args(tail)
+    case args:
+      args
+
+# Pair adjacent arguments in rounds to produce a balanced parallel reduction.
+def balanced_sum(fuel: Nat, args: List<&2, Core.Expr>) -> Parsed:
+  match fuel args:
+    case fuel a <> Nil{}:
+      Accepted{a}
+    case fuel Nil{}:
+      ParseError{"SUM expects at least one argument"}
+    case 0n args:
+      ParseError{"Internal argument balancing limit"}
+    case 1n+p args:
+      balanced_sum(p, pair_args(args))
+
+def build_if(args: List<&2, Core.Expr>) -> Parsed:
+  match args:
+    case c <> yes <> no <> Nil{}:
+      Accepted{Core.If{c, yes, no}}
+    case args:
+      ParseError{"IF expects three arguments"}
+
+def build_not(args: List<&2, Core.Expr>) -> Parsed:
+  match args:
+    case a <> Nil{}:
+      Accepted{Core.Not{a}}
+    case args:
+      ParseError{"NOT expects one argument"}
+
+def build_call(+name: String, +args: List<&2, Core.Expr>) -> Parsed:
+  Bool.pick(Parsed, String.eq(String.to_upper(name), "SUM"), balanced_sum(List.length(&2, Core.Expr, args), args), Bool.pick(Parsed, String.eq(String.to_upper(name), "IF"), build_if(args), Bool.pick(Parsed, String.eq(String.to_upper(name), "NOT"), build_not(args), ParseError{"Unknown function: " ++ name})))
+
+def reduce_times(ops: List<&2, Operator>, values: List<&2, Core.Expr>) -> Stack:
   match ops values:
-    case Lex.Times{} <> tail right <> left <> rest:
+    case MultiplyOp{} <> tail right <> left <> rest:
       reduce_times(tail, Core.Multiply{left, right} <> rest)
-    case Lex.Times{} <> tail values:
+    case MultiplyOp{} <> tail values:
       Rejected{"Missing operand"}
     case ops values:
       Ready{ops, values}
 
-def reduce_all(ops: List<&2, Lex.Token>, values: List<&2, Core.Expr>) -> Stack:
+def reduce_all(ops: List<&2, Operator>, values: List<&2, Core.Expr>) -> Stack:
   match ops values:
-    case Lex.Times{} <> tail right <> left <> rest:
+    case MultiplyOp{} <> tail right <> left <> rest:
       reduce_all(tail, Core.Multiply{left, right} <> rest)
-    case Lex.Plus{} <> tail right <> left <> rest:
+    case AddOp{} <> tail right <> left <> rest:
       reduce_all(tail, Core.Add{left, right} <> rest)
-    case Lex.Times{} <> tail values:
+    case MultiplyOp{} <> tail values:
       Rejected{"Missing operand"}
-    case Lex.Plus{} <> tail values:
+    case AddOp{} <> tail values:
       Rejected{"Missing operand"}
     case ops values:
       Ready{ops, values}
 
-def push_operator(stack: Stack, op: Lex.Token) -> Stack:
+def push_operator(stack: Stack, op: Operator) -> Stack:
   match stack:
     case Ready{ops, values}:
       Ready{op <> ops, values}
     case Rejected{e}:
       Rejected{e}
 
+def call_result(result: Parsed, ops: List<&2, Operator>, outer: List<&2, Core.Expr>) -> Stack:
+  match result:
+    case Accepted{expr}:
+      Ready{ops, expr <> outer}
+    case ParseError{e}:
+      Rejected{e}
+
 def close_group(stack: Stack) -> Stack:
   match stack:
-    case Ready{Lex.LParen{} <> rest, values}:
-      Ready{rest, values}
+    case Ready{GroupFrame{outer} <> rest, expr <> Nil{}}:
+      Ready{rest, expr <> outer}
+    case Ready{CallFrame{name, args, outer} <> rest, expr <> Nil{}}:
+      call_result(build_call(name, List.reverse(&2, Core.Expr, expr <> args)), rest, outer)
     case Ready{ops, values}:
       Rejected{"Unmatched closing parenthesis"}
+    case Rejected{e}:
+      Rejected{e}
+
+def comma(stack: Stack) -> Stack:
+  match stack:
+    case Ready{CallFrame{name, args, outer} <> rest, expr <> Nil{}}:
+      Ready{CallFrame{name, expr <> args, outer} <> rest, Nil{}}
+    case Rejected{e}:
+      Rejected{e}
+    case stack:
+      Rejected{"Comma outside a function argument list"}
+
+def empty_call(stack: Stack) -> Stack:
+  match stack:
+    case Ready{CallFrame{name, Nil{}, outer} <> rest, Nil{}}:
+      call_result(build_call(name, Nil{}), rest, outer)
+    case Rejected{e}:
+      Rejected{e}
+    case stack:
+      Rejected{"Expected an operand"}
+
+def start_call(name: String, stack: Stack) -> Stack:
+  match stack:
+    case Ready{ops, outer}:
+      Ready{CallFrame{name, Nil{}, outer} <> ops, Nil{}}
     case Rejected{e}:
       Rejected{e}
 
@@ -49,12 +129,16 @@ def identifier(+name: String) -> Core.Expr:
 
 def operand(token: Lex.Token, stack: Stack) -> Stack:
   match token stack:
+    case Lex.DecimalLiteral{n} Ready{ops, values}:
+      Ready{ops, Core.Literal{Core.DecimalNumber{n}} <> values}
     case Lex.Integer{n} Ready{ops, values}:
       Ready{ops, Core.Literal{Core.Number{n}} <> values}
     case Lex.Identifier{name} Ready{ops, values}:
       Ready{ops, identifier(name) <> values}
     case Lex.LParen{} Ready{ops, values}:
-      Ready{Lex.LParen{} <> ops, values}
+      Ready{GroupFrame{values} <> ops, Nil{}}
+    case Lex.RParen{} stack:
+      empty_call(stack)
     case token Rejected{e}:
       Rejected{e}
     case token stack:
@@ -63,11 +147,13 @@ def operand(token: Lex.Token, stack: Stack) -> Stack:
 def operator(token: Lex.Token, stack: Stack) -> Stack:
   match token stack:
     case Lex.Plus{} Ready{ops, values}:
-      push_operator(reduce_all(ops, values), Lex.Plus{})
+      push_operator(reduce_all(ops, values), AddOp{})
     case Lex.Times{} Ready{ops, values}:
-      push_operator(reduce_times(ops, values), Lex.Times{})
+      push_operator(reduce_times(ops, values), MultiplyOp{})
     case Lex.RParen{} Ready{ops, values}:
       close_group(reduce_all(ops, values))
+    case Lex.Comma{} Ready{ops, values}:
+      comma(reduce_all(ops, values))
     case token Rejected{e}:
       Rejected{e}
     case token stack:
@@ -75,6 +161,8 @@ def operator(token: Lex.Token, stack: Stack) -> Stack:
 
 def next_expectation(token: Lex.Token) -> Bool:
   match token:
+    case Lex.DecimalLiteral{n}:
+      False{}
     case Lex.Integer{n}:
       False{}
     case Lex.Identifier{name}:
@@ -99,15 +187,13 @@ def finish(expected: Bool, stack: Stack) -> Stack:
       stack
 
 def scan(tokens: List<&2, Lex.Token>, stack: Stack, expected: Bool) -> Stack:
-  match tokens:
-    case Nil{}:
+  match tokens expected:
+    case Lex.Identifier{name} <> Lex.LParen{} <> tail True{}:
+      scan(tail, start_call(name, stack), True{})
+    case Nil{} expected:
       finish(expected, stack)
-    case +head <> tail:
+    case +head <> tail expected:
       scan(tail, step(expected, head, stack), next_expectation(head))
-
-type Parsed is Data:
-  Accepted{expression: Core.Expr}
-  ParseError{message: String}
 
 def completed(stack: Stack) -> Parsed:
   match stack:

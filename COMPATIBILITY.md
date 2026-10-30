@@ -4,7 +4,7 @@
 
 Reference: rubysolo/dentaku commit
 `1b9950be405ecb0d425f8683447b58cf29796d1f` (MIT).
-This implementation currently shares only the small AST subset listed in README.
+The implemented parser, bindings, functions, and numeric subset are listed in README.
 
 The upstream README, lib/dentaku/calculator.rb, parser.rb, tokenizer.rb,
 numeric_parser.rb, ast/functions/if.rb, and spec suite are authoritative evidence
@@ -48,5 +48,19 @@ short-circuit branches lazy and deterministic errors stable. Test JS, native CPU
 CUDA, and Metal separately. Record benchmark inputs, sizes, backend, hardware,
 thread count, and timings before making performance claims.
 
-Remaining delivery: public formula.bend and nelua-bend repositories, Nelua backend,
+The formula.bend repository is public. Remaining delivery: the public nelua-bend repository, Nelua backend,
 Imba interface, and clean project sites under spacegho.st on Cloudflare.
+
+## Numeric implementation status
+
+Unsigned integer and fixed-point decimal addition and multiplication use exact
+base-10 coefficients. Parsed integers with more than three digits remain in this
+representation; arithmetic avoids machine-word coefficient overflow. This also
+avoids large unary Nat reductions in proof checking. The regression suite covers
+24-digit carry and products above the native Nat limit, but is not a complete
+numeric compatibility corpus. Signed values, division, exponent parsing,
+rounding policies, and coercions remain required work.
+
+Current functions: SUM (one or more numeric scalar arguments), IF (three arguments,
+Boolean guard, lazy branches), and NOT (one Boolean argument). Arrays, numeric
+string coercion, Ruby truthiness, and remaining built-ins are still pending.

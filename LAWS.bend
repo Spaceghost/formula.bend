@@ -1,5 +1,6 @@
 import Base
 import ./src/core.bend as Core
+import ./src/decimal.bend as Decimal
 
 import ./src/reference.bend as Ref
 # Initial project contracts. Changes must retain or strengthen their guarantees.
@@ -35,3 +36,10 @@ law bound_literal:
   for context: List<&2, Core.Binding>
   for sensitive: Bool
   {Core.evaluate_in(Core.Literal{value}, context, sensitive) == value : Core.Value}
+
+law product_scale:
+  for x: List<&2, U32>
+  for y: List<&2, U32>
+  for +sx: Nat
+  for +sy: Nat
+  {Decimal.scale(Decimal.multiply(Decimal.Exact{x, sx}, Decimal.Exact{y, sy})) == Nat.add(sx, sy) : Nat}

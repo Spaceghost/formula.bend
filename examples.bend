@@ -1,8 +1,11 @@
 import Base
+import ./src/decimal.bend as Decimal
 import ./src/core.bend as Core
 
 def show(v: Core.Value) -> String:
   match v:
+    case Core.DecimalNumber{n}:
+      Decimal.show(n)
     case Core.Number{n}:
       Nat.show(n)
     case Core.Logical{b}:
