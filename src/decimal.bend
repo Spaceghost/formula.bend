@@ -256,7 +256,7 @@ def ruby_exponent(+length: Nat, +scale: Nat) -> String:
 def ruby_digits(digits: List<&2, U32>, scale: Nat, negative: Bool) -> String:
   match digits:
     case Nil{}:
-      "0.0"
+      Bool.pick(String, negative, "-0.0", "0.0")
     case +head <> +tail:
       Bool.pick(String, negative, "-", "") ++ "0." ++ String.reverse(digit_text(trim_low_zeros(head <> tail))) ++ "e" ++ ruby_exponent(List.length(&2, U32, head <> tail), scale)
 

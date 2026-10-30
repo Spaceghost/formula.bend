@@ -160,7 +160,7 @@ def decimal_borrow() -> {Core.show(Parser.evaluate("1000.00 - .01", Nil{}, False
 def subtract_negative() -> {Core.show(Parser.evaluate("1 - -2", Nil{}, False{})) == "3" : String}:
   {==}
 
-def zero_sign() -> {Core.show(Parser.evaluate("-.0", Nil{}, False{})) == "0.0" : String}:
+def zero_sign() -> {Core.show(Parser.evaluate("-.0", Nil{}, False{})) == "-0.0" : String}:
   {==}
 
 def repeated_negation() -> {Core.show(Parser.evaluate("--2", Nil{}, False{})) == "2" : String}:
@@ -446,4 +446,16 @@ def switch_uses_first_match() -> {Parser.snapshot("SWITCH(1, 1, 'one', 1, 'two')
   {==}
 
 def switch_values_are_eager() -> {Parser.snapshot("SWITCH(1, 1, 7, 2, 1 / 0)", Nil{}, False{}) == "error:Dentaku::ZeroDivisionError" : String}:
+  {==}
+
+def negative_zero_string() -> {Parser.snapshot("CONCAT(-0.0)", Nil{}, False{}) == "string:-0.0" : String}:
+  {==}
+
+def negative_zero_ordering() -> {Parser.snapshot("-0.0 < 0", Nil{}, False{}) == "boolean:false" : String}:
+  {==}
+
+def negative_zero_index() -> {Parser.snapshot("{1, 2}[-0.0]", Nil{}, False{}) == "number:1" : String}:
+  {==}
+
+def sum_negative_zero_identity() -> {Parser.snapshot("SUM(-0.0, -0.0)", Nil{}, False{}) == "number:0" : String}:
   {==}

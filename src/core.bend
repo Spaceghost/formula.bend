@@ -156,6 +156,22 @@ def strip_integer(value: Value) -> Value:
     case value:
       value
 
+def has_negative_sign(value: Value) -> Bool:
+  match value:
+    case NegativeNumber{n}:
+      True{}
+    case NegativeInteger{n}:
+      True{}
+    case value:
+      False{}
+
+def decimal_zero_sign(negative_zero: Bool, value: Value) -> Value:
+  match value:
+    case DecimalNumber{+n}:
+      Bool.pick(Value, Bool.and(negative_zero, Decimal.is_zero(n)), NegativeNumber{n}, DecimalNumber{n})
+    case value:
+      value
+
 def difference_pick(order: Cmp, +a: Decimal.Decimal, +b: Decimal.Decimal) -> Value:
   match order:
     case LT{}:
@@ -179,7 +195,7 @@ def numeric_text(tokens: List<&2, Lex.Token>, original: String) -> Value:
     case Lex.Minus{} <> Lex.BigIntegerLiteral{n} <> Nil{}:
       integer_result(negative(n))
     case Lex.Minus{} <> Lex.DecimalLiteral{n} <> Nil{}:
-      decimal_result(negative(n))
+      NegativeNumber{n}
     case tokens:
       TextValue{original}
 
@@ -282,6 +298,18 @@ def array_join(left: Value, right: Value) -> Value:
 # BigDecimal implementation compares equal to integral values in subtraction.
 def value_equal(a: Value, b: Value, +strict: Bool) -> Bool:
   match a b:
+    case NegativeNumber{x} Number{y}:
+      Bool.and(Decimal.is_zero(x), Nat.is_eq(y, 0n))
+    case Number{x} NegativeNumber{y}:
+      Bool.and(Nat.is_eq(x, 0n), Decimal.is_zero(y))
+    case NegativeNumber{x} DecimalNumber{y}:
+      Bool.and(Decimal.is_zero(x), Decimal.is_zero(y))
+    case DecimalNumber{x} NegativeNumber{y}:
+      Bool.and(Decimal.is_zero(x), Decimal.is_zero(y))
+    case NegativeNumber{x} IntegerNumber{y}:
+      Bool.and(Decimal.is_zero(x), Decimal.is_zero(y))
+    case IntegerNumber{x} NegativeNumber{y}:
+      Bool.and(Decimal.is_zero(x), Decimal.is_zero(y))
     case IntegerNumber{x} IntegerNumber{y}:
       Cmp.is_eq(Decimal.compare(x, y))
     case IntegerNumber{x} Number{y}:
@@ -430,7 +458,7 @@ def add_values(a: Value, b: Value) -> Value:
       Failure{"Expected numbers"}
 
 def add_cast(+a: Value, +b: Value) -> Value:
-  numeric_result(Bool.and(is_integer(a), is_integer(b)), add_values(strip_integer(a), strip_integer(b)))
+  decimal_zero_sign(Bool.and(has_negative_sign(a), has_negative_sign(b)), numeric_result(Bool.and(is_integer(a), is_integer(b)), add_values(strip_integer(a), strip_integer(b))))
 
 def add(a: Value, b: Value) -> Value:
   match a:
@@ -471,7 +499,7 @@ def multiply_values(a: Value, b: Value) -> Value:
       Failure{"Expected numbers"}
 
 def multiply_cast(+a: Value, +b: Value) -> Value:
-  numeric_result(Bool.and(is_integer(a), is_integer(b)), multiply_values(strip_integer(a), strip_integer(b)))
+  decimal_zero_sign(Bool.xor(has_negative_sign(a), has_negative_sign(b)), numeric_result(Bool.and(is_integer(a), is_integer(b)), multiply_values(strip_integer(a), strip_integer(b))))
 
 def multiply(a: Value, b: Value) -> Value:
   multiply_cast(cast_numeric(a), cast_numeric(b))
@@ -485,7 +513,7 @@ def negate_value(value: Value) -> Value:
     case NegativeInteger{n}:
       compact(n)
     case DecimalNumber{n}:
-      decimal_result(negative(n))
+      NegativeNumber{n}
     case NegativeNumber{n}:
       DecimalNumber{n}
     case Failure{e}:
@@ -630,7 +658,7 @@ def round_numeric(value: Value, +target: Nat, before: Nat, mode: Decimal.Roundin
     case DecimalNumber{n}:
       numeric_result(Nat.is_eq(target, 0n), compact(Decimal.round(n, target, before, mode, False{})))
     case NegativeNumber{n}:
-      numeric_result(Nat.is_eq(target, 0n), negative(Decimal.round(n, target, before, mode, True{})))
+      decimal_zero_sign(True{}, numeric_result(Nat.is_eq(target, 0n), negative(Decimal.round(n, target, before, mode, True{}))))
     case Failure{e}:
       Failure{e}
     case value:
@@ -708,7 +736,7 @@ def numeric_operand(value: Value) -> NumericOperand:
 def signed_result(neg: Bool, value: Decimal.Decimal) -> Value:
   match neg:
     case True{}:
-      decimal_result(negative(value))
+      NegativeNumber{value}
     case False{}:
       DecimalNumber{value}
 
@@ -784,7 +812,7 @@ def reverse_order(order: Cmp) -> Cmp:
     case EQ{}:
       EQ{}
 
-def signed_order(sa: Bool, a: Decimal.Decimal, sb: Bool, b: Decimal.Decimal) -> Cmp:
+def signed_order_magnitude(sa: Bool, a: Decimal.Decimal, sb: Bool, b: Decimal.Decimal) -> Cmp:
   match sa sb:
     case False{} False{}:
       Decimal.compare(a, b)
@@ -794,6 +822,9 @@ def signed_order(sa: Bool, a: Decimal.Decimal, sb: Bool, b: Decimal.Decimal) -> 
       LT{}
     case False{} True{}:
       GT{}
+
+def signed_order(sa: Bool, +a: Decimal.Decimal, sb: Bool, +b: Decimal.Decimal) -> Cmp:
+  signed_order_magnitude(Bool.and(sa, Bool.not(Decimal.is_zero(a))), a, Bool.and(sb, Bool.not(Decimal.is_zero(b))), b)
 
 def numeric_comparison(a: NumericOperand, b: NumericOperand, op: Comparison) -> Value:
   match a b:
@@ -1005,7 +1036,7 @@ def access_bounded(fits: Bool, +digits: List<&2, U32>, negative_index: Bool, +va
       access_position(Bool.not(Cmp.is_gt(Decimal.compare(Decimal.Exact{digits, 0n}, Decimal.from_nat(structure_length(value))))), value, negative_index, digits, structure_length(value))
 
 def access_digits(+digits: List<&2, U32>, +negative_index: Bool, value: Value) -> Value:
-  access_bounded(Bool.not(Cmp.is_gt(Decimal.compare(Decimal.Exact{digits, 0n}, Decimal.Exact{Bool.pick(U32, negative_index, 8, 7) <> [0, 8, 5, 7, 7, 4, 5, 8, 6, 3, 0, 2, 7, 3, 3, 2, 2, 9], 0n}))), digits, negative_index, value)
+  access_bounded(Bool.not(Cmp.is_gt(Decimal.compare(Decimal.Exact{digits, 0n}, Decimal.Exact{Bool.pick(U32, negative_index, 8, 7) <> [0, 8, 5, 7, 7, 4, 5, 8, 6, 3, 0, 2, 7, 3, 3, 2, 2, 9], 0n}))), digits, Bool.and(negative_index, Bool.not(Decimal.is_zero_digits(digits))), value)
 
 def access_numeric(index: Decimal.Decimal, negative_index: Bool, value: Value) -> Value:
   match index:
@@ -1335,7 +1366,7 @@ def average_tree(count: Nat, tree: Value) -> Value:
     case 0n:
       Failure{"AVG expects at least one value"}
     case 1n+p:
-      divide(sum_tree(tree), Number{1n+p})
+      divide(add(Number{0n}, sum_tree(tree)), Number{1n+p})
 
 def function_arguments(kind: FunctionKind, tree: Value) -> Value:
   match kind:
@@ -1371,7 +1402,7 @@ def function_arguments(kind: FunctionKind, tree: Value) -> Value:
     case AbsFunction{}:
       abs_argument(tree)
     case SumFunction{}:
-      sum_tree(tree)
+      add(Number{0n}, sum_tree(tree))
     case AndFunction{}:
       logical_arguments(tree, Logical{True{}}, AndFunction{})
     case OrFunction{}:

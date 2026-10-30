@@ -76,3 +76,9 @@ def Laws.mid_invalid_offset_skips_length(length):
 
 def Laws.contains_haystack_error_first(needle, message):
   {==}
+
+def Laws.signed_zero_divisor(numerator, scale):
+  {==}
+
+def Laws.signed_zero_array_equality(left_scale, right_scale):
+  {==}

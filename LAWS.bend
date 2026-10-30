@@ -129,3 +129,13 @@ law contains_haystack_error_first:
   for needle: Core.Expr
   for +message: String
   {Core.evaluate(Core.FunctionCall{Core.ContainsFunction{}, Core.Arguments{Core.Argument{needle, Core.RawArgument{}}, Core.Argument{Core.Literal{Core.Failure{message}}, Core.RawArgument{}}}}) == Core.Failure{message} : Core.Value}
+
+law signed_zero_divisor:
+  for numerator: Core.Value
+  for scale: Nat
+  {Core.divide(numerator, Core.NegativeNumber{Decimal.Exact{Nil{}, scale}}) == Core.Failure{"Division by zero"} : Core.Value}
+
+law signed_zero_array_equality:
+  for left_scale: Nat
+  for right_scale: Nat
+  {Core.value_equal(Core.ArrayCons{Core.NegativeNumber{Decimal.Exact{Nil{}, left_scale}}, Core.ArrayNil{}}, Core.ArrayCons{Core.DecimalNumber{Decimal.Exact{Nil{}, right_scale}}, Core.ArrayNil{}}, False{}) == True{} : Bool}

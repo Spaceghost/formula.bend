@@ -46,7 +46,7 @@ The unchanged upstream suite passes 713 examples with zero failures and 96.82%
 line coverage in the Ruby reference environment. `reference-summary.json` and
 `upstream-spec-catalog.json` record that run. These results describe Ruby only.
 
-The Lua-driven value and dependency corpus has 501 cases matched against Ruby values or parse
+The Lua-driven value and dependency corpus has 550 cases matched against Ruby values or parse
 error classification. It covers truthiness, strings/null, comparisons, selected
 numeric-string coercions, and static operand rejection. It is a small subset of
 the upstream catalog. Native error classes/messages, all calculator methods,
@@ -87,8 +87,8 @@ lua tools/run-oracle.lua PROJECT UPSTREAM GEMS STORAGE RUNROOT OUTPUT
 The probe catches Dentaku errors and records their class; unexpected Ruby failures
 abort without replacing the output. Compare the result before updating committed
 goldens. Parser snapshots currently preserve parse-error classification, while
-full runtime error-class/message parity remains unfinished. The 501-case value and dependency
-corpus passes on JavaScript; the 370-case checkpoint passed native CPU with one
+full runtime error-class/message parity remains unfinished. The 550-case value and dependency
+corpus passes on JavaScript; the 501-case checkpoint passed native CPU with one
 and eight threads. This is correctness verification,
 not the requested performance shootout.
 
@@ -175,7 +175,7 @@ fallback, including spelling; they are not uniformly tokenizer errors.
 
 Scientific exponents currently narrow at most 14 significant exponent digits to
 Nat. Extremely large scales and coefficients still depend on available memory;
-infinities, signed zero, complete Ruby numeric classes, and global BigDecimal
+infinities, complete Ruby numeric classes, and global BigDecimal
 modes remain incomplete. The 296-case numeric literal checkpoint passes native
 CPU with one and eight threads. The following 370-case class/coercion checkpoint
 also passes both native thread counts.
@@ -191,7 +191,7 @@ precision. Explicit context tags preserve integral BigDecimal inputs.
 
 These checks cover the pinned NumericParser string scenarios and its rejection
 cases through the direct Core.require_numeric adapter. They do not establish
-Ruby Float, Rational, signed decimal zero, non-finite values, subclass behavior,
+Ruby Float, Rational, non-finite values, subclass behavior,
 or complete error metadata compatibility. Full parity remains incomplete.
 
 ## String functions and SWITCH
@@ -213,4 +213,15 @@ The scenario map records all 40 string-function and five SWITCH example titles,
 in addition to COUNT and NumericParser. Each entry references existing cases;
 the map is checked by make parity-check. This is scenario correspondence through
 language adapters, not an execution of all 713 upstream tests against Bend.
-Native verification of these latest 131 cases is pending.
+The 501-case string-function checkpoint passes native CPU with one and eight
+threads; its source commit and artifact checksum are recorded.
+
+## Signed decimal zero
+
+The additional 49 cases preserve negative BigDecimal zero through literals,
+numeric strings, arithmetic, division, positive-precision rounding, and string
+conversion. Integer zero is unsigned. Scalar comparisons, array equality,
+subtraction, and indexes treat both zero signs as equal. MIN/MAX keep the first
+equal value's sign. SUM and AVG retain Ruby's initial positive integer zero;
+MUL retains its initial integer one. These initial values matter for zero signs.
+Native verification of the latest 49 cases is pending.

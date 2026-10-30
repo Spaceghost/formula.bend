@@ -75,9 +75,11 @@ Nat scales; special BigDecimal values and full numeric-class parity are pending.
 
 Unary minus binds more tightly than multiplication; binary subtraction shares
 addition precedence and is left-associative. Positive and negative operands use
-aligned exact magnitudes with decimal borrowing. Negative zero is normalized to
-ordinary zero, which differs from some BigDecimal representations and still
-needs an explicit compatibility policy.
+aligned exact magnitudes with decimal borrowing. BigDecimal signed zero is
+retained through arithmetic, division, positive-precision rounding, and string
+conversion. Integer zero remains unsigned. Comparisons and zero-valued indexes
+treat positive and negative zero as equal. SUM retains Ruby's initial integer
+zero, producing positive decimal zero when summing only negative zeros.
 
 ## Rounding profile
 
