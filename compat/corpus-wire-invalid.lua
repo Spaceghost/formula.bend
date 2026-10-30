@@ -1,0 +1,16 @@
+return {
+  {input='', message='Incomplete corpus input'},
+  {input='a', message='Incomplete corpus input'},
+  {input='a}', message='Unmatched container end in corpus input'},
+  {input='h s1:x }', message='Odd number of hash fields in corpus input'},
+  {input='s999999999999999999999999:payload', message='Text length exceeds corpus input'},
+  {input='s-1:x', message='Invalid text length in corpus input'},
+  {input='s:x', message='Missing text length in corpus input'},
+  {input='s2:x', message='Incomplete corpus input'},
+  {input='a]n', message='Trailing data in corpus input'},
+  {input='i3:1.5', message='Non-integer corpus input'},
+  {input='aa]]', message='Invalid corpus row'},
+  {input='a]', message='Corpus input must be a nonempty array'},
+  {input='aa s3:bad s1:1 s7:unknown a] ff ]]', message='Unknown corpus operation'},
+  {input='aa s3:bad s1:1 s8:evaluate aa s1:x ]] ff ]]', message='Invalid corpus bindings'},
+}

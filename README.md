@@ -125,7 +125,7 @@ also pass seven reference checks over 1,025-item collections. Both Bend 2.0.16
 and 2.0.39 pass all 2,516 cases on JavaScript, with 48 laws and 175 concrete
 fixtures. The checker runs the corpus in batches of 256 to bound peak memory.
 All 48 laws pass Lean-backed kernel verification on Bend 2.0.39.
-The 1,462-case checkpoint and seven scale
+The 2,516-case checkpoint and seven scale
 checks pass native CPU with one and eight threads at `-O3`.
 Source commits and checksums are recorded in
 `compat/backend-verification.json`.

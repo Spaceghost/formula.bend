@@ -1,7 +1,8 @@
 BEND ?= bend
 LUA ?= lua
+BUN ?= bun
 
-.PHONY: parity-check check native-check rounding-check division-check address-check enumeration-check unicode-check
+.PHONY: parity-check check native-check rounding-check division-check address-check enumeration-check unicode-check wire-check
 check:
 	$(BEND) PROOF.bend
 	$(BEND) tests.bend
@@ -49,6 +50,17 @@ parity-check:
 	diff -u compat/scalar-oracle.tsv build/scalar-corpus.expected
 	$(LUA) tools/run-corpus.lua compat/scalar-cases.lua build/scalar-corpus $(BEND)
 	diff -u compat/scalar-oracle.tsv build/scalar-corpus.actual
+
+wire-check:
+	mkdir -p build/wire-check
+	$(LUA) tools/generate-wire.lua compat/scalar-cases.lua build/corpus.input
+	$(LUA) tools/generate-wire.lua compat/enumeration-scale-cases.lua build/scale.input
+	$(BEND) compat/corpus-runtime.bend -o build/corpus-runtime.js
+	$(BUN) build/corpus-runtime.js build/corpus.input > build/corpus-runtime-js.actual
+	diff -u compat/scalar-oracle.tsv build/corpus-runtime-js.actual
+	$(BUN) build/corpus-runtime.js build/scale.input > build/corpus-runtime-scale-js.actual
+	diff -u enumeration-runtime.expected build/corpus-runtime-scale-js.actual
+	$(LUA) tools/check-wire.lua $(BUN) build/corpus-runtime.js build/wire-check
 
 native-check:
 	mkdir -p build

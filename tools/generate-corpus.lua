@@ -1,10 +1,11 @@
-local input = assert(arg[1], 'usage: lua tools/generate-corpus.lua CASES.lua OUTPUT_PREFIX [--metadata-only | --slice START COUNT]')
+local input = assert(arg[1], 'usage: lua tools/generate-corpus.lua CASES.lua OUTPUT_PREFIX [--metadata-only | --slice START COUNT | --gpu | --gpu-slice START COUNT]')
 local prefix = assert(arg[2], 'missing output prefix')
 local metadata_only = arg[3] == '--metadata-only'
-assert(arg[3] == nil or metadata_only or arg[3] == '--slice', 'unknown generator option')
+local gpu = arg[3] == '--gpu' or arg[3] == '--gpu-slice'
+assert(arg[3] == nil or metadata_only or arg[3] == '--slice' or gpu, 'unknown generator option')
 local cases = dofile(input)
 assert(#cases > 0, 'corpus must contain at least one case')
-if arg[3] == '--slice' then
+if arg[3] == '--slice' or arg[3] == '--gpu-slice' then
   local start, count = assert(tonumber(arg[4]), 'missing slice start'), assert(tonumber(arg[5]), 'missing slice count')
   assert(math.type(start) == 'integer' and math.type(count) == 'integer' and start >= 1 and count >= 1 and start <= #cases, 'invalid corpus slice')
   local selected = {}
@@ -112,6 +113,7 @@ local program = not metadata_only and assert(io.open(prefix .. '.bend', 'w'))
 local expected = assert(io.open(prefix .. '.expected', 'w'))
 local formulas = assert(io.open(prefix .. '.formulas.tsv', 'w'))
 if program then program:write('import Base\nimport ../src/core.bend as Core\nimport ../src/parser.bend as Parser\nimport ../src/string.bend as StringOps\n\n') end
+if program and gpu then program:write('import ../compat/gpu-corpus.bend as Gpu\n\n') end
 if program then
   for _, case in ipairs(cases) do
     if (case.operation or ''):match('resolve_') then
@@ -122,6 +124,12 @@ if program then
 end
 local ids = {}
 local lines = {}
+local gpu_inputs = {}
+local gpu_operations = {
+  evaluate='Evaluate', permissive='Permissive', identifiers='Identifiers', dependencies='Dependencies',
+  class='Class', type='StaticType', message='Message', coerce='Coerce', coerce_class='CoerceClass',
+  coerce_message='CoerceMessage', resolve_order='ResolveOrder', resolve_cycles='ResolveCycles',
+}
 for _, case in ipairs(cases) do
   assert(not ids[case.id], 'duplicate id: ' .. case.id)
   ids[case.id] = true
@@ -157,11 +165,22 @@ for _, case in ipairs(cases) do
   end
   if json_output then call = '"json:" ++ StringOps.json_quote(' .. call .. ')' end
   lines[#lines+1] = '    IO.print(' .. bend_string(case.id .. '\t') .. ' ++ ' .. call .. ')\n'
+  if gpu then
+    gpu_inputs[#gpu_inputs+1] = 'Gpu.Leaf{Gpu.Check{' .. bend_string(case.id) .. ', ' .. bend_string(case.formula) .. ', Gpu.' .. assert(gpu_operations[operation]) .. '{}, ' .. context .. ', ' .. sensitive .. ', ' .. (json_output and 'True{}' or 'False{}') .. '}}'
+  end
   expected:write(case.id, '\t', case.expected, '\n')
   formulas:write(case.id, '\t', json_string(case.formula), '\t', wire_operation, '\t', encoded_context, '\t', tostring(not not case.sensitive), '\tjson\n')
 end
 -- Keep monadic chains shallow enough for older Bend compiler stacks.
-if program then
+if program and gpu then
+  local function tree(first, last)
+    if first == last then return gpu_inputs[first] end
+    local middle = (first + last) // 2
+    return 'Gpu.Fork{' .. tree(first, middle) .. ', ' .. tree(middle + 1, last) .. '}'
+  end
+  program:write('def main() -> IO(Unit):\n  Gpu.emit(Gpu.evaluate!(', tree(1, #gpu_inputs), '))\n')
+  program:close()
+elseif program then
   local groups = {}
   for first = 1, #lines, 32 do
     local name = 'corpus_group_' .. (#groups + 1)

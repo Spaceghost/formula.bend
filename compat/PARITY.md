@@ -461,8 +461,8 @@ ordered hashes of array dependency lists; malformed graph inputs and arbitrary
 Ruby duck-typed objects do not yet have compatible diagnostics.
 Both Bend 2.0.16 and 2.0.39 pass the full 2,516-case checks, all 48 laws, and
 175 concrete fixtures. All 48 laws also pass its Lean-backed kernel check,
-including the imported resolver implementation. Native verification of this
-checkpoint is still in progress.
+including the imported resolver implementation. All 2,516 cases and seven
+scale checks also pass native CPU at `-O3` with one and eight threads.
 
 ## Linux CUDA toolchain check
 
@@ -476,3 +476,38 @@ CUDA toolkit. Toolkit archives were checked against NVIDIA's redistribution
 manifest. Source, binary and GPU artifact hashes are recorded separately from
 formula correctness evidence. This is a compiler/runtime check; the formula
 corpus has not yet run on CUDA, and it supplies no performance comparison.
+
+## Runtime-loaded correctness harness
+
+The corpus can now be loaded as data by `compat/corpus-runtime.bend`. A balanced
+fork tree runs each complete check inside one GPU call; file input and ordered
+printing run on the host. Evaluation, parsing, dependencies, coercion, resolver
+queries, and snapshot generation share the same operation dispatcher. The
+executable and shader do not depend on fixture values, so adding cases does not
+require a separate program or shader for each batch.
+
+`tools/generate-wire.lua` preserves Integer/BigDecimal identity, negative decimal
+zero, ordered hashes, symbol keys, original binding order, Unicode, and embedded
+controls. Text lengths count codepoints. The decoder consumes the input
+structurally and checks declared lengths against its actual size. Invalid
+containers, truncated input, bad scalar types, malformed rows and unknown
+operations fail before any result is emitted. Fourteen rejection cases pass on
+both native CPU and JavaScript/Bun. All 2,516 reference cases and seven scale
+checks pass through this transport on Bun 1.3.1 and native CPU with one and
+eight threads at `-O3`.
+
+`make wire-check` runs the JavaScript transport gate; provide `BUN=/path/to/bun`
+when it is not on PATH. Bend 2.0.39's JavaScript File.read effect uses bun:ffi,
+so this file-input harness requires Bun. The pinned 1.3.1 archive was checked
+against its [official release digest](https://github.com/oven-sh/bun/releases/tag/bun-v1.3.1). Runtime and artifact hashes are separate
+from the earlier generated-program checkpoints.
+
+`tools/run-cuda-corpus.lua FROZEN_WORKTREE BEND_PACKAGE CUDA_TOOLKIT SCRATCH`
+builds one native executable and shader, checks both CPU pool sizes, and checks
+the shared corpus and scale inputs in required CUDA mode. CUDA formula
+correctness is still unverified: the default NVRTC builds have a long
+optimization phase. The optional `tools/configure-cuda.lua` changes only the
+generated host invocation to request a labeled --Ofast-compile profile, retaining
+the existing --fmad=false setting and shader source. [NVIDIA documents this](https://docs.nvidia.com/cuda/archive/13.0.2/nvrtc/index.html#supported-compile-options) as
+a compile-time/runtime optimization tradeoff, so it must be recorded separately
+from the default profile. No performance comparison is claimed.
