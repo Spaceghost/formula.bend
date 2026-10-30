@@ -15,8 +15,10 @@ Boolean literals, addition, subtraction, multiplication, division, whitespace, p
 Functions are case-insensitive. Malformed expressions return explicit errors.
 
 Bindings support case-insensitive matching by default, an explicit case-sensitive
-mode, and first-match precedence for transient contexts. The reference model has
-independent row and column anchors and supports forward copying.
+mode, and first-match precedence for transient contexts.
+
+The standalone address layer parses and renders A1 and R1C1, retains independent
+row/column anchors, and supports copying in either direction with bounds checks.
 
 Signed integer and decimal addition, subtraction, and multiplication use exact base-10 digit lists.
 Small integers use a compact Nat representation; larger parsed integers stay in
@@ -24,7 +26,7 @@ digit lists. Coefficients can grow beyond a machine word. Decimal scale uses Nat
 Formatting preserves fractional zeros: `1.25 * .4` displays `0.500`.
 This formatting is not a claim of Ruby BigDecimal display compatibility.
 
-Ten universal laws and seventy-seven concrete regression fixtures cover these
+Eleven universal laws and one hundred concrete regression fixtures cover these
 parts. They do not establish full Ruby or spreadsheet compatibility.
 
 ## Example
@@ -58,14 +60,16 @@ have passed on JavaScript and native CPU. CUDA and Metal remain unverified.
 ## Compatibility limits
 
 Exponent notation, comparisons,
-strings, arrays, most built-ins, spreadsheet reference parsing, dependency
+strings, arrays, most built-ins, spreadsheet formula lookup, dependency
 analysis, and the complete Dentaku Calculator API remain unimplemented.
 `IF` and `NOT` accept Boolean conditions, not the full Ruby truthiness model.
 The numeric representation is not yet a complete BigDecimal implementation.
 The low-level Nat conversion helpers are intended for small values; callers
 constructing large coefficients should use digit lists directly.
 
-The reference model does not yet parse A1/R1C1 or support backward copying.
+The standalone address layer parses A1 and R1C1, supports mixed anchors and signed
+offsets, renders both styles, and checks resolution against caller-provided sheet
+bounds. Formula lookup, ranges, and sheet-qualified addresses are still pending.
 The JavaScript backend executes sequentially. The engine exposes independent
 arithmetic calls to Bend's native scheduler; useful parallel batch execution
 remains to be developed and benchmarked.
@@ -89,3 +93,7 @@ also accepts explicit fractional places and rounding. Division by zero returns
 an explicit error. Other BigDecimal versions and global rounding modes are not
 yet compatibility profiles. See [the reference corpus](compat/README.md).
 The seven division reference cases pass on both JavaScript and native CPU.
+
+Address examples: `$A1` copied from B2 to D5 becomes `$A4`; `R[-1]C[2]` at F6
+resolves to H5. The address layer is tested separately from formula evaluation.
+The eight address runtime cases pass on both JavaScript and native CPU.

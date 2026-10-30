@@ -2,6 +2,7 @@ import Base
 import ./src/core.bend as Core
 import ./src/decimal.bend as Decimal
 import ./src/division.bend as Division
+import ./src/address.bend as Address
 
 import ./src/reference.bend as Ref
 # Initial project contracts. Changes must retain or strengthen their guarantees.
@@ -60,3 +61,10 @@ law division_by_zero:
   for numerator: Decimal.Decimal
   for places: Nat
   {Division.divide(numerator, Decimal.Exact{Nil{}, 0n}, places) == Division.DivisionByZero{} : Division.DivisionResult}
+
+law fixed_axis_origin:
+  for +index: Nat
+  for origin_a: Nat
+  for origin_b: Nat
+  for +limit: Nat
+  {Address.resolve_axis(Address.Fixed{index}, origin_a, limit) == Address.resolve_axis(Address.Fixed{index}, origin_b, limit) : Maybe<&2, Nat>}

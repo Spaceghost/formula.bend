@@ -33,8 +33,9 @@ sheet-qualified and quoted names; ranges; names; and mixed notation in a formula
 under an explicit dialect. Preserve source dialect in the AST. Ambiguous names
 must be resolved by documented dialect rules, never guessed silently.
 
-Forward copying is the only implemented reference operation. Parsing, backward
-copying, bounds errors, resolution, and rendering are pending.
+The address layer parses and renders unqualified A1 and R1C1, with anchors,
+signed offsets, and bounded resolution. Formula integration, sheet qualifiers,
+ranges, dialect-specific bounds, and names remain pending.
 
 Excel and Sheets disagree on functions, coercions, errors, dates, locale, and
 rounding. Separate compatibility profiles need separate test fixtures. XLSX
@@ -94,3 +95,19 @@ are in compat/. Core.divide_at offers explicit fractional places and rounding.
 Long division retains the exact remainder before rounding. Zero divisors produce
 an explicit error. Numeric-string coercion, nonfinite values, global BigDecimal
 modes, Ruby version profiles, and exact exception-class parity remain unfinished.
+
+## Address representation
+
+src/address.bend stores each axis as Fixed(zero-based index) or Displaced(signed
+offset). Parsing A1 takes the formula cell's origin; R1C1 directly supplies axes.
+Copying a formula preserves this representation and resolves it at the new origin.
+The original notation is retained. The syntax parser accepts indices/offsets up to
+2^32-1; resolution uses explicit row/column limits and rejects underflow or bounds
+violations. Excel and Sheets limits must be selected by the future dialect API.
+
+The standalone layer handles $A$1, $A1, A$1, A1, R1C1, R[-1]C[2], RC, and mixed
+R1C1 axes. It does not yet change formula tokenization or variable lookup: A1 in
+an ordinary Ruby-style formula remains an identifier. Quoted sheet names, ranges,
+external workbook names, structured references, and mixed notation inside a
+formula remain required work. src/reference.bend is the earlier forward-copy
+prototype; its original laws remain intact while callers migrate to address.bend.

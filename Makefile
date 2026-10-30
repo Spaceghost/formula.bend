@@ -1,6 +1,6 @@
 BEND ?= bend
 
-.PHONY: check native-check rounding-check division-check
+.PHONY: check native-check rounding-check division-check address-check
 check:
 	$(BEND) PROOF.bend
 	$(BEND) tests.bend
@@ -9,6 +9,7 @@ check:
 	diff -u runtime.expected build/runtime-js.actual
 	$(MAKE) rounding-check
 	$(MAKE) division-check
+	$(MAKE) address-check
 
 rounding-check:
 	mkdir -p build
@@ -19,6 +20,11 @@ division-check:
 	mkdir -p build
 	$(BEND) division-runtime.bend > build/division-js.actual
 	diff -u division-runtime.expected build/division-js.actual
+
+address-check:
+	mkdir -p build
+	$(BEND) address-runtime.bend > build/address-js.actual
+	diff -u address-runtime.expected build/address-js.actual
 
 native-check:
 	mkdir -p build
@@ -31,3 +37,6 @@ native-check:
 	$(BEND) division-runtime.bend -o build/division-runtime
 	./build/division-runtime > build/division-native.actual
 	diff -u division-runtime.expected build/division-native.actual
+	$(BEND) address-runtime.bend -o build/address-runtime
+	./build/address-runtime > build/address-native.actual
+	diff -u address-runtime.expected build/address-native.actual

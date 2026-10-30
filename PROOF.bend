@@ -34,3 +34,6 @@ def Laws.division_by_zero(numerator, places):
   match numerator:
     case Decimal.Exact{digits, s}:
       {==}
+
+def Laws.fixed_axis_origin(index, origin_a, origin_b, limit):
+  {==}

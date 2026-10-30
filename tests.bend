@@ -5,6 +5,7 @@ import ./src/reference.bend as Ref
 import ./src/parser.bend as Parser
 import ./src/decimal.bend as Decimal
 import ./src/division.bend as Division
+import ./src/address.bend as Address
 # Concrete regression fixtures complement the universal laws.
 def arithmetic() -> {Core.evaluate(Core.Multiply{Core.Add{Core.Literal{Core.Number{5n}}, Core.Literal{Core.Number{2n}}}, Core.Literal{Core.Number{6n}}}) == Core.Number{42n} : Core.Value}:
   {==}
@@ -235,4 +236,73 @@ def division_zero_formula() -> {Parser.evaluate("1 / 0", Nil{}, False{}) == Core
   {==}
 
 def lazy_zero_division() -> {Core.show(Parser.evaluate("IF(true, 7, 1 / 0)", Nil{}, False{})) == "7" : String}:
+  {==}
+
+def a1_relative() -> {Address.parse_a1("A1", 1n, 1n) == Address.GoodAddress{Address.AddressCell{Address.Displaced{True{}, 1n}, Address.Displaced{True{}, 1n}, Address.A1Style{}}} : Address.ParsedAddress}:
+  {==}
+
+def a1_absolute() -> {Address.parse_a1("$A$1", 10n, 20n) == Address.GoodAddress{Address.AddressCell{Address.Fixed{0n}, Address.Fixed{0n}, Address.A1Style{}}} : Address.ParsedAddress}:
+  {==}
+
+def a1_column_anchor() -> {Address.resolve_parsed(Address.parse_a1("$A1", 1n, 1n), 4n, 3n, 100n, 100n) == Address.At{3n, 0n} : Address.Resolved}:
+  {==}
+
+def a1_row_anchor() -> {Address.resolve_parsed(Address.parse_a1("A$1", 1n, 1n), 4n, 3n, 100n, 100n) == Address.At{0n, 2n} : Address.Resolved}:
+  {==}
+
+def a1_multiple_letters() -> {Address.resolve_parsed(Address.parse_a1("aa10", 0n, 0n), 0n, 0n, 100n, 100n) == Address.At{9n, 26n} : Address.Resolved}:
+  {==}
+
+def a1_zero_row() -> {Address.parse_a1("A0", 0n, 0n) == Address.BadAddress{"Invalid A1 address"} : Address.ParsedAddress}:
+  {==}
+
+def a1_missing_column() -> {Address.parse_a1("1", 0n, 0n) == Address.BadAddress{"Invalid A1 address"} : Address.ParsedAddress}:
+  {==}
+
+def a1_double_anchor() -> {Address.parse_a1("$$A1", 0n, 0n) == Address.BadAddress{"Invalid A1 address"} : Address.ParsedAddress}:
+  {==}
+
+def reference_before_origin() -> {Address.resolve_parsed(Address.parse_a1("A1", 1n, 1n), 0n, 0n, 100n, 100n) == Address.ReferenceError{} : Address.Resolved}:
+  {==}
+
+def reference_beyond_sheet() -> {Address.resolve_parsed(Address.parse_a1("B2", 0n, 0n), 9n, 9n, 10n, 10n) == Address.ReferenceError{} : Address.Resolved}:
+  {==}
+
+def rc_absolute() -> {Address.parse_r1c1("R1C2") == Address.GoodAddress{Address.AddressCell{Address.Fixed{0n}, Address.Fixed{1n}, Address.R1C1Style{}}} : Address.ParsedAddress}:
+  {==}
+
+def rc_relative() -> {Address.resolve_parsed(Address.parse_r1c1("R[-1]C[2]"), 5n, 5n, 100n, 100n) == Address.At{4n, 7n} : Address.Resolved}:
+  {==}
+
+def rc_current_cell() -> {Address.resolve_parsed(Address.parse_r1c1("RC"), 5n, 5n, 100n, 100n) == Address.At{5n, 5n} : Address.Resolved}:
+  {==}
+
+def rc_mixed() -> {Address.resolve_parsed(Address.parse_r1c1("R1C[-2]"), 5n, 5n, 100n, 100n) == Address.At{0n, 3n} : Address.Resolved}:
+  {==}
+
+def rc_explicit_plus() -> {Address.resolve_parsed(Address.parse_r1c1("r[+2]c1"), 5n, 5n, 100n, 100n) == Address.At{7n, 0n} : Address.Resolved}:
+  {==}
+
+def rc_zero_absolute() -> {Address.parse_r1c1("R0C1") == Address.BadAddress{"Invalid R1C1 axis"} : Address.ParsedAddress}:
+  {==}
+
+def rc_missing_bracket() -> {Address.parse_r1c1("R[1C1") == Address.BadAddress{"Invalid R1C1 axis"} : Address.ParsedAddress}:
+  {==}
+
+def rc_missing_offset() -> {Address.parse_r1c1("R[]C1") == Address.BadAddress{"Invalid R1C1 axis"} : Address.ParsedAddress}:
+  {==}
+
+def rc_repeated_column() -> {Address.parse_r1c1("R1C1C1") == Address.BadAddress{"Invalid R1C1 address"} : Address.ParsedAddress}:
+  {==}
+
+def a1_copy_render() -> {Address.render_parsed_a1(Address.parse_a1("$A1", 1n, 1n), 4n, 3n, 100n, 100n) == "$A4" : String}:
+  {==}
+
+def a1_to_rc() -> {Address.render_parsed_r1c1(Address.parse_a1("$A1", 1n, 1n)) == "R[-1]C1" : String}:
+  {==}
+
+def rc_to_a1() -> {Address.render_parsed_a1(Address.parse_r1c1("R[-1]C[2]"), 5n, 5n, 100n, 100n) == "H5" : String}:
+  {==}
+
+def column_carry_render() -> {Address.render_parsed_a1(Address.parse_a1("Z1", 0n, 0n), 0n, 1n, 100n, 100n) == "AA1" : String}:
   {==}
