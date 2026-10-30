@@ -46,7 +46,7 @@ The unchanged upstream suite passes 713 examples with zero failures and 96.82%
 line coverage in the Ruby reference environment. `reference-summary.json` and
 `upstream-spec-catalog.json` record that run. These results describe Ruby only.
 
-The Lua-driven value and dependency corpus has 733 cases matched against Ruby values or parse
+The Lua-driven value and dependency corpus has 882 cases matched against Ruby values or parse
 error classification. It covers truthiness, strings/null, comparisons, selected
 numeric-string coercions, and static operand rejection. It is a small subset of
 the upstream catalog. Native error classes/messages, all calculator methods,
@@ -87,8 +87,8 @@ lua tools/run-oracle.lua PROJECT UPSTREAM GEMS STORAGE RUNROOT OUTPUT
 The probe catches Dentaku errors and records their class; unexpected Ruby failures
 abort without replacing the output. Compare the result before updating committed
 goldens. Parser snapshots currently preserve parse-error classification, while
-full runtime error-class/message parity remains unfinished. The 733-case value and dependency
-corpus passes on JavaScript; the 654-case checkpoint passed native CPU with one
+full runtime error-class/message parity remains unfinished. The 882-case value and dependency
+corpus passes on JavaScript; the 733-case checkpoint passed native CPU with one
 and eight threads. This is correctness verification,
 not the requested performance shootout.
 
@@ -283,7 +283,46 @@ FILTER and REDUCE propagate them to the outer recovery boundary. Caller-provided
 symbol evaluation-mode overrides are preserved. Dependency-only probes do not
 inject an evaluation mode. Raw signed-long RangeError remains observable.
 
-The 79 new differential cases exercise these rules against Ruby. Typed fixture
-hashes accept ordered string/symbol keys; arbitrary Ruby object keys, complete
-symbol inspection, member-access syntax, and PLUCK remain unfinished. Native
-verification of this batch is pending. The upstream families remain partial.
+The 79 new differential cases exercise these rules against Ruby. The 733-case
+checkpoint and seven scale checks pass native CPU with one and eight threads.
+Its 35 laws pass Lean-backed kernel verification. Typed fixture hashes accept
+ordered string/symbol keys; arbitrary Ruby object keys, encodings, and complete
+symbol inspection remain unfinished. The upstream families remain partial.
+
+## Member access, PLUCK, and Unicode
+
+The 149 additional cases cover indexed/function/grouped member access, chains,
+operator binding, nil safety, missing-key messages, dotted-key hints, strict
+case matching, and exact string/symbol key precedence. All 22 upstream member
+scenarios are mapped. Ruby's MemberAccess subclass is represented by Access
+with a typed MemberIndex; a concrete AST fixture checks that adaptation.
+
+PLUCK validates the whole collection before evaluating defaults. It stringifies
+hash keys with the last matching key winning, preserves null values, and eagerly
+evaluates the default for every item even when the selected key exists. Empty
+collections skip default evaluation while retaining dependency preflight. All
+six upstream PLUCK scenarios are mapped. These mappings bring the total to 113.
+
+Unicode tables record Ruby 3.3.13's Unicode 15.0 alpha/word properties, lowercase
+mappings, and full case folding. Root binding normalization uses lowercase;
+member fallback matching uses full folding. Combining marks, non-Latin names,
+Turkish dotted I, Greek sigma, ligatures, and sharp S have differential checks.
+Generated lookups use balanced branches and an ASCII fast path. The checked-in
+tables come from reference runtime queries, not hand-maintained approximations.
+Run tools/run-unicode-reference.lua STORAGE RUNROOT OUTPUT to regenerate the
+reference table, then tools/generate-unicode.lua INPUT OUTPUT. make unicode-check
+verifies generated source reproducibility.
+The Unicode data notice is retained in LICENSE.unicode; unicode-profile.json
+records table counts and source hashes.
+
+Symbol rendering covers method names, operators, ordinary globals, instance and
+class variables, and quoting for dotted or invalid identifiers. Non-printable
+Unicode inspection, alternate encodings, and arbitrary Ruby values remain open.
+Behavioral references include Ruby's
+[symbol-name rules](https://github.com/ruby/ruby/blob/v3_3_13/symbol.c) and
+[symbol inspection](https://github.com/ruby/ruby/blob/v3_3_13/string.c).
+Native verification of the 882-case corpus is pending.
+The full 882-case corpus has also been replayed against Ruby after the typed
+context encoding change, with no differences. The current proof gate contains
+37 laws and the concrete suite 166 fixtures. Both Bend 2.0.16 and 2.0.39 pass
+the full checks; Bend 2.0.39 also passes the 37 laws with --verdict.

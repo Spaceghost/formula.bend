@@ -11,6 +11,17 @@ law empty_hash_read:
   for key: Core.Value
   {Core.hash_get(Core.HashNil{}, key) == Core.NullValue{} : Core.Value}
 
+law member_null:
+  for name: String
+  for sensitive: Bool
+  {Core.member_value(Core.NullValue{}, name, sensitive) == Core.NullValue{} : Core.Value}
+
+law member_error:
+  for +message: String
+  for name: String
+  for sensitive: Bool
+  {Core.member_value(Core.Failure{message}, name, sensitive) == Core.Failure{message} : Core.Value}
+
 law strict_item_error:
   for +message: String
   {Core.mapped_result(Core.SymbolValue{"strict"}, Core.Failure{message}) == Core.Failure{message} : Core.Value}

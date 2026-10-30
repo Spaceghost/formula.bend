@@ -3,6 +3,7 @@ import ./decimal.bend as Decimal
 import ./division.bend as Division
 import ./lexer.bend as Lex
 import ./string.bend as StringOps
+import ./unicode.bend as Unicode
 
 # Small integers use Nat; larger integers and decimals use exact digit lists.
 type Value is Data:
@@ -15,6 +16,7 @@ type Value is Data:
   NullValue{}
   TextValue{value: String}
   SymbolValue{value: String}
+  MemberIndex{name: String}
   HashNil{}
   HashEntry{key: Value, value: Value, tail: Value}
   ArrayNil{}
@@ -59,6 +61,7 @@ type ArgumentValidation is Data:
 
 type EnumerationKind is Data:
   MapItems{}
+  PluckItems{}
   FilterItems{}
   AllItems{}
   AnyItems{}
@@ -259,7 +262,7 @@ def ruby_render(value: Value, inspect: Bool, tail_mode: Bool) -> String:
     case TextValue{+s}:
       Bool.pick(String, inspect, StringOps.quote(s), s)
     case SymbolValue{+s}:
-      Bool.pick(String, inspect, ":" ++ s, s)
+      Bool.pick(String, inspect, StringOps.symbol_inspect(s), s)
     case HashNil{}:
       Bool.pick(String, tail_mode, "}", "{}")
     case HashEntry{key, value, tail}:
@@ -715,7 +718,7 @@ def normalize(sensitive: Bool, name: String) -> String:
     case True{}:
       name
     case False{}:
-      String.to_lower(name)
+      Unicode.lower(name)
 
 def found(same: Bool, value: Value, rest: Unit -> Value) -> Value:
   match same:
@@ -1241,6 +1244,88 @@ def access_index(value: Value, index: Value) -> Value:
     case index:
       Failure{"Invalid index type"}
 
+def ruby_type_name(value: Value) -> String:
+  match value:
+    case Number{n}:
+      "Integer"
+    case IntegerNumber{n}:
+      "Integer"
+    case NegativeInteger{n}:
+      "Integer"
+    case DecimalNumber{n}:
+      "BigDecimal"
+    case NegativeNumber{n}:
+      "BigDecimal"
+    case TextValue{s}:
+      "String"
+    case SymbolValue{s}:
+      "Symbol"
+    case Logical{True{}}:
+      "TrueClass"
+    case Logical{False{}}:
+      "FalseClass"
+    case NullValue{}:
+      "NilClass"
+    case ArrayNil{}:
+      "Array"
+    case ArrayCons{head, tail}:
+      "Array"
+    case HashNil{}:
+      "Hash"
+    case HashEntry{key, value, tail}:
+      "Hash"
+    case value:
+      "Object"
+
+def hash_keys(hash: Value) -> Value:
+  match hash:
+    case HashEntry{key, value, tail}:
+      ArrayCons{key, hash_keys(tail)}
+    case hash:
+      ArrayNil{}
+
+def member_dotted(hash: Value, +member: String) -> String:
+  match hash:
+    case HashEntry{key, value, tail}:
+      +name = ruby_render(key, False{}, False{})
+      Bool.pick(String, String.starts_with(name, member ++ "."), name, member_dotted(tail, member))
+    case hash:
+      ""
+
+def member_missing(+hash: Value, +member: String) -> Value:
+  +dotted = member_dotted(hash, member)
+  Failure{"no key '" ++ member ++ "' in " ++ ruby_render(hash_keys(hash), True{}, False{}) ++ Bool.pick(String, String.eq(dotted, ""), "", "; member access only reads keys that look like identifiers, use brackets for '" ++ dotted ++ "'")}
+
+def member_folded(hash: Value, +member: String, missing: Unit -> Value) -> Value:
+  match hash:
+    case HashEntry{key, value, tail}:
+      found(String.eq(Unicode.fold(ruby_render(key, False{}, False{})), Unicode.fold(member)), value, u => member_folded(tail, member, missing))
+    case hash:
+      missing(Unit{})
+
+def member_found(result: Maybe<&2, Value>, missing: Unit -> Value) -> Value:
+  match result:
+    case Some{value}:
+      value
+    case None{}:
+      missing(Unit{})
+
+def member_hash(+hash: Value, +member: String, sensitive: Bool) -> Value:
+  member_found(hash_find(hash, TextValue{member}), u => member_found(hash_find(hash, SymbolValue{member}), u => Bool.pick(Value, sensitive, member_missing(hash, member), member_folded(hash, member, u => member_missing(hash, member)))))
+
+def member_value(value: Value, member: String, sensitive: Bool) -> Value:
+  match value:
+    case HashNil{}:
+      member_hash(HashNil{}, member, sensitive)
+    case HashEntry{key, item, tail}:
+      member_hash(HashEntry{key, item, tail}, member, sensitive)
+    case NullValue{}:
+      NullValue{}
+    case Failure{message}:
+      Failure{message}
+    case value:
+      Failure{"Dentaku::AST::MemberAccess requires a hash, but got " ++ ruby_type_name(value)}
+
 def access_value(value: Value, index: Unit -> Value) -> Value:
   match value:
     case NullValue{}:
@@ -1259,6 +1344,24 @@ def access_value(value: Value, index: Unit -> Value) -> Value:
       with_value(index(Unit{}), at => hash_get(HashEntry{key, item, tail}, at))
     case value:
       Failure{"Expected indexable structure"}
+
+def access_read(value: Value, index: Value, sensitive: Bool) -> Value:
+  match index:
+    case MemberIndex{member}:
+      member_value(value, member, sensitive)
+    case Failure{message}:
+      Failure{message}
+    case index:
+      access_value(value, u => index)
+
+def access_scoped(value: Value, index: Unit -> Value, sensitive: Bool) -> Value:
+  match value:
+    case NullValue{}:
+      NullValue{}
+    case Failure{message}:
+      Failure{message}
+    case value:
+      access_read(value, index(Unit{}), sensitive)
 
 def string_count_clamp(within: Bool, digits: List<&2, U32>, limit: Nat) -> Value:
   match within:
@@ -1508,6 +1611,45 @@ def balanced_nodes(+nodes: List<&2, Value>) -> Value:
 
 def collection_batch(value: Value) -> Value:
   balanced_nodes(collection_nodes(value))
+
+def hash_collection(nodes: List<&2, Value>) -> Bool:
+  match nodes:
+    case Nil{}:
+      True{}
+    case ArgumentValue{HashNil{}} <> rest:
+      hash_collection(rest)
+    case ArgumentValue{HashEntry{key, item, tail}} <> rest:
+      hash_collection(rest)
+    case nodes:
+      False{}
+
+def enumeration_collection(kind: EnumerationKind, +value: Value) -> Value:
+  match kind:
+    case PluckItems{}:
+      Bool.pick(Value, hash_collection(collection_nodes(value)), value, Failure{"PLUCK() requires first argument to be an array of hashes"})
+    case kind:
+      value
+
+def pluck_last(last: Maybe<&2, Value>, name: String, path: String, value: Value) -> Maybe<&2, Value>:
+  match last:
+    case Some{item}:
+      Some{item}
+    case None{}:
+      Bool.pick(Maybe<&2, Value>, String.eq(name, path), Some{value}, None{})
+
+def pluck_find(hash: Value, +path: String) -> Maybe<&2, Value>:
+  match hash:
+    case HashEntry{key, item, tail}:
+      pluck_last(pluck_find(tail, path), ruby_render(key, False{}, False{}), path, item)
+    case hash:
+      None{}
+
+def pluck_default(result: Maybe<&2, Value>, fallback: Value) -> Value:
+  match result:
+    case Some{item}:
+      item
+    case None{}:
+      fallback
 
 def numeric_nodes(tree: Value) -> List<&2, Value>:
   match tree:
@@ -1797,6 +1939,8 @@ def prepare_expression(e: Expr) -> Expr:
 
 def enumeration_leaf(kind: EnumerationKind, item: Value, mapped: Value) -> Value:
   match kind mapped:
+    case PluckItems{} mapped:
+      ArgumentValue{mapped}
     case MapItems{} mapped:
       ArgumentValue{mapped}
     case kind Failure{message}:
@@ -1835,6 +1979,8 @@ def enumeration_decide(left: Value, decisive_value: Bool, next: Unit -> Value) -
 
 def enumeration_finish(kind: EnumerationKind, result: Value) -> Value:
   match kind:
+    case PluckItems{}:
+      array_value(result)
     case MapItems{}:
       array_value(result)
     case FilterItems{}:
@@ -1854,6 +2000,8 @@ def evaluate_machine(e: Expr, +batch: Value, +context: List<&2, Binding>, +sensi
     case +e ArgumentPair{a, b} EvaluateItems{+kind, +binder}:
       x y = evaluate_machine(e, a, context, sensitive, subjects, EvaluateItems{kind, binder}) evaluate_machine(e, b, context, sensitive, subjects, EvaluateItems{kind, binder})
       ArgumentPair{x, y}
+    case +e ArgumentValue{item} EvaluateItems{PluckItems{}, binder}:
+      ArgumentValue{with_value(evaluate_machine(e, item, context, sensitive, subjects, EvaluateOne{}), fallback => pluck_default(pluck_find(item, normalize(sensitive, binder)), fallback))}
     case +e ArgumentValue{+item} EvaluateItems{FilterItems{}, binder}:
       filter_leaf(item, evaluate_machine(e, item, item_context(binder, item, context, sensitive), sensitive, subjects, EvaluateOne{}))
     case +e ArgumentValue{+item} EvaluateItems{kind, binder}:
@@ -1867,7 +2015,7 @@ def evaluate_machine(e: Expr, +batch: Value, +context: List<&2, Binding>, +sensi
     case e EmptyArgumentValues{} EvaluateReduction{memo_binder, item_binder, memo}:
       memo
     case EnumerationExpression{+kind, collection, binder, body} batch EvaluateOne{}:
-      with_value(evaluate_machine(collection, batch, context, sensitive, subjects, EvaluateOne{}), value => enumeration_finish(kind, evaluate_machine(body, collection_batch(value), context, sensitive, subjects, EvaluateItems{kind, binder})))
+      with_value(evaluate_machine(collection, batch, context, sensitive, subjects, EvaluateOne{}), value => with_value(enumeration_collection(kind, value), values => enumeration_finish(kind, evaluate_machine(body, collection_batch(values), context, sensitive, subjects, EvaluateItems{kind, binder}))))
     case ReductionExpression{collection, memo_binder, item_binder, body, initial} batch EvaluateOne{}:
       with_value(evaluate_machine(collection, batch, context, sensitive, subjects, EvaluateOne{}), values => with_value(evaluate_machine(initial, batch, context, sensitive, subjects, EvaluateOne{}), memo => evaluate_machine(body, collection_batch(values), context, sensitive, subjects, EvaluateReduction{memo_binder, item_binder, memo})))
     case CaseExpression{subject, clauses} batch EvaluateOne{}:
@@ -1885,7 +2033,7 @@ def evaluate_machine(e: Expr, +batch: Value, +context: List<&2, Binding>, +sensi
     case ArrayLiteral{elements} batch EvaluateOne{}:
       array_value(evaluate_machine(elements, batch, context, sensitive, subjects, EvaluateOne{}))
     case Access{structure, index} batch EvaluateOne{}:
-      access_value(evaluate_machine(structure, batch, context, sensitive, subjects, EvaluateOne{}), u => evaluate_machine(index, batch, context, sensitive, subjects, EvaluateOne{}))
+      access_scoped(evaluate_machine(structure, batch, context, sensitive, subjects, EvaluateOne{}), u => evaluate_machine(index, batch, context, sensitive, subjects, EvaluateOne{}), sensitive)
     case CountOneExpression{a} batch EvaluateOne{}:
       count_single(evaluate_machine(a, batch, context, sensitive, subjects, EvaluateOne{}))
     case CountManyExpression{arguments, count} batch EvaluateOne{}:
@@ -1952,6 +2100,8 @@ def evaluate(e: Expr) -> Value:
 
 def show(value: Value) -> String:
   match value:
+    case MemberIndex{name}:
+      "Internal member index"
     case SymbolValue{s}:
       s
     case HashNil{}:
@@ -1993,6 +2143,8 @@ def failure_snapshot(+message: String) -> String:
 
 def snapshot_render(value: Value, +tail_mode: Bool) -> String:
   match value:
+    case MemberIndex{name}:
+      "internal:member-index"
     case IntegerNumber{n}:
       "number:" ++ Decimal.show(Decimal.canonical(n))
     case NegativeInteger{n}:

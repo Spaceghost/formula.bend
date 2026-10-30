@@ -6,6 +6,12 @@ import ./LAWS.bend as Laws
 def Laws.empty_hash_read(key):
   {==}
 
+def Laws.member_null(name, sensitive):
+  {==}
+
+def Laws.member_error(message, name, sensitive):
+  {==}
+
 def Laws.strict_item_error(message):
   {==}
 

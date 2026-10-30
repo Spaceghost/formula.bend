@@ -24,6 +24,19 @@
     }
   ],
   "latest_verified_native": {
+    "source_commit": "25dafea1e9268f5a4adb5b493758531f8a90e39d",
+    "bend_version": "2.0.39",
+    "differential_cases": 733,
+    "target": "native CPU",
+    "thread_counts": [1, 8],
+    "status": "passed",
+    "optimization": "-O3",
+    "artifact_sha256": "8984795d664f775f56ff5affeb85b2ffd613fa1bf66366a20c3e8bb7fdd1248a",
+    "scale_cases": 7,
+    "scale_artifact_sha256": "e66eab5d95719831145deebfa2f1b9f3af81119ed3b6c38eb4816fb289ae3291",
+    "scope": "correctness verification; no performance measurements"
+  },
+  "enumeration_checkpoint_native": {
     "source_commit": "b871e0eb8c3d80b13c5098e7e40cdd3be7290488",
     "bend_version": "2.0.39",
     "differential_cases": 654,
@@ -48,6 +61,16 @@
     "scope": "correctness verification; no performance measurements"
   },
   "kernel_verification": {
+    "source_commit": "25dafea1e9268f5a4adb5b493758531f8a90e39d",
+    "bend_version": "2.0.39",
+    "command": "bend PROOF.bend --verdict",
+    "status": "passed",
+    "laws": 35,
+    "lean_version": "4.34.0",
+    "kernel_source_sha256": "d7268ff461de974bd4cd875d9766c71c62ee6b2e6411b9bab84839870db68a80",
+    "kernel_artifact_sha256": "e5e82c061a37c48f2162f294df52c8bbb32b227af2e22a331b6b3e2d066190c9"
+  },
+  "enumeration_kernel_checkpoint": {
     "source_commit": "b871e0eb8c3d80b13c5098e7e40cdd3be7290488",
     "bend_version": "2.0.39",
     "command": "bend PROOF.bend --verdict",

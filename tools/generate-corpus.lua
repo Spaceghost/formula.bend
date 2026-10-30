@@ -68,7 +68,7 @@ local function context_values(context, symbol_context)
   for i, name in ipairs(keys) do
     local expression, json = context_value(context[name])
     expressions[i] = 'Core.Bound{' .. bend_string(name) .. ', ' .. expression .. '}'
-    encoded[i] = json_string(name) .. ':' .. json
+    encoded[i] = '[{"text":' .. json_string(name) .. '},' .. json .. ']'
   end
   local symbol_keys = {}
   for name in pairs(symbol_context or {}) do symbol_keys[#symbol_keys+1] = name end
@@ -76,13 +76,13 @@ local function context_values(context, symbol_context)
   for _, name in ipairs(symbol_keys) do
     local expression, json = context_value(symbol_context[name])
     expressions[#expressions+1] = 'Core.SymbolBound{' .. bend_string(name) .. ', ' .. expression .. '}'
-    encoded[#encoded+1] = json_string('@symbol:' .. name) .. ':' .. json
+    encoded[#encoded+1] = '[{"symbol":' .. json_string(name) .. '},' .. json .. ']'
   end
   -- Ruby stores pairs in insertion order with the last normalized key winning;
   -- Bend's public binding lists put the highest-priority binding first.
   local bindings = {}
   for i = #expressions, 1, -1 do bindings[#bindings+1] = expressions[i] end
-  return #bindings == 0 and 'Nil{}' or '[' .. table.concat(bindings, ', ') .. ']', '{' .. table.concat(encoded, ',') .. '}'
+  return #bindings == 0 and 'Nil{}' or '[' .. table.concat(bindings, ', ') .. ']', '{"bindings":[' .. table.concat(encoded, ',') .. ']}'
 end
 local program = not metadata_only and assert(io.open(prefix .. '.bend', 'w'))
 local expected = assert(io.open(prefix .. '.expected', 'w'))

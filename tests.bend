@@ -7,6 +7,9 @@ import ./src/decimal.bend as Decimal
 import ./src/division.bend as Division
 import ./src/address.bend as Address
 # Concrete regression fixtures complement the universal laws.
+def member_access_node() -> {Parser.parse("users[0].age") == Parser.Accepted{Core.Access{Core.Access{Core.Variable{"users"}, Core.Literal{Core.Number{0n}}}, Core.Literal{Core.MemberIndex{"age"}}}} : Parser.Parsed}:
+  {==}
+
 def arithmetic() -> {Core.evaluate(Core.Multiply{Core.Add{Core.Literal{Core.Number{5n}}, Core.Literal{Core.Number{2n}}}, Core.Literal{Core.Number{6n}}}) == Core.Number{42n} : Core.Value}:
   {==}
 

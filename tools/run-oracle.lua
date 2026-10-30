@@ -47,7 +47,12 @@ end
 File.foreach(ENV.fetch('FORMULA_ORACLE_CORPUS')) do |line|
   id, source, operation, encoded_context, sensitive = line.chomp.split("\t", 5)
   begin
-    context = JSON.parse(encoded_context || '{}').map { |key, item| [key.start_with?('@symbol:') ? key.delete_prefix('@symbol:').to_sym : key, context_value(item)] }.to_h
+    raw_context = JSON.parse(encoded_context || '{}')
+    context = if raw_context.key?('bindings')
+      raw_context.fetch('bindings').map { |key, item| [context_value(key), context_value(item)] }.to_h
+    else
+      raw_context.transform_values { |item| context_value(item) }
+    end
     calculator = Dentaku::Calculator.new(case_sensitive: sensitive == 'true')
     value = case operation
     when 'identifiers' then calculator.identifiers(source)

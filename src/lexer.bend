@@ -1,11 +1,14 @@
 import Base
 import ./decimal.bend as Decimal
+import ./unicode.bend as Unicode
 
 type Token is Data:
   Integer{value: Nat}
   BigIntegerLiteral{value: Decimal.Decimal}
   DecimalLiteral{value: Decimal.Decimal}
   Identifier{name: String}
+  MemberName{name: String}
+  InvalidMemberSpacing{}
   StringLiteral{value: String}
   Plus{}
   Minus{}
@@ -39,6 +42,10 @@ type Token is Data:
 
 type Mode is Data:
   Idle{}
+  AfterClose{}
+  AfterCloseSpace{}
+  MemberStart{}
+  MemberWord{reversed: String}
   Digits{reversed: List<&2, U32>}
   Fraction{reversed: List<&2, U32>, scale: Nat}
   Word{reversed: String}
@@ -55,7 +62,7 @@ type CharacterClass is Data:
   Symbol{character: Char}
 
 def classify(+c: Char) -> CharacterClass:
-  Bool.pick(CharacterClass, Char.is_digit(c), Digit{U32.to_nat(U32.sub(Char.to_u32(c), 48)), c}, Bool.pick(CharacterClass, Bool.or(Char.is_alpha(c), Char.is_eq(c, '_')), Letter{c}, Bool.pick(CharacterClass, Char.is_space(c), Space{}, Symbol{c})))
+  Bool.pick(CharacterClass, Char.is_digit(c), Digit{U32.to_nat(U32.sub(Char.to_u32(c), 48)), c}, Bool.pick(CharacterClass, Unicode.is_word(c), Letter{c}, Bool.pick(CharacterClass, Char.is_space(c), Space{}, Symbol{c})))
 
 def integer_token(+digits: List<&2, U32>, small: Bool) -> Token:
   match small:
@@ -175,6 +182,14 @@ def reserved_word(+text: String) -> Token:
 
 def flush(mode: Mode, tokens: List<&2, Token>) -> List<&2, Token>:
   match mode:
+    case AfterClose{}:
+      tokens
+    case AfterCloseSpace{}:
+      tokens
+    case MemberStart{}:
+      InvalidMemberSpacing{} <> tokens
+    case MemberWord{s}:
+      MemberName{String.reverse(s)} <> tokens
     case Scientific{digits, scale, negative, exponent, sign_allowed, explicit_sign, prefix}:
       flush_scientific(digits, scale, negative, exponent, explicit_sign, prefix, tokens)
     case Hexadecimal{+digits, True{}, raw}:
@@ -266,6 +281,10 @@ def quote_step(same: Bool, c: Char, quote: Char, reversed: String, tokens: List<
 
 def normal_step(mode: Mode, c: Char, tokens: List<&2, Token>) -> Mode & List<&2, Token>:
   match c:
+    case Chr{41}:
+      (AfterClose{}, RParen{} <> flush(mode, tokens))
+    case Chr{93}:
+      (AfterClose{}, RBracket{} <> flush(mode, tokens))
     case Chr{38}:
       (Pending{Chr{38}}, flush(mode, tokens))
     case Chr{124}:
@@ -349,8 +368,22 @@ def hexadecimal_step(digit: Maybe<&2, U32>, digits: List<&2, U32>, seen: Bool, +
     case None{}:
       hexadecimal_done(classify(c), digits, seen, raw, tokens)
 
-def scan_step(mode: Mode, c: Char, tokens: List<&2, Token>) -> Mode & List<&2, Token>:
+def scan_step(mode: Mode, c: Char, +tokens: List<&2, Token>) -> Mode & List<&2, Token>:
   match mode c:
+    case AfterClose{} Chr{46}:
+      (MemberStart{}, tokens)
+    case AfterCloseSpace{} Chr{46}:
+      (Idle{}, InvalidMemberSpacing{} <> tokens)
+    case AfterClose{} +c:
+      Bool.pick(Mode & List<&2, Token>, Char.is_space(c), (AfterCloseSpace{}, tokens), normal_step(Idle{}, c, tokens))
+    case AfterCloseSpace{} +c:
+      Bool.pick(Mode & List<&2, Token>, Char.is_space(c), (AfterCloseSpace{}, tokens), normal_step(Idle{}, c, tokens))
+    case MemberStart{} +c:
+      Bool.pick(Mode & List<&2, Token>, Bool.or(Unicode.is_alpha(c), Char.is_eq(c, '_')), (MemberWord{SCon{c, SNil{}}}, tokens), normal_step(Idle{}, c, Bool.pick(Token, Char.is_digit(c), Invalid{Chr{46}}, InvalidMemberSpacing{}) <> tokens))
+    case MemberWord{s} Chr{46}:
+      (MemberStart{}, MemberName{String.reverse(s)} <> tokens)
+    case MemberWord{+s} +c:
+      Bool.pick(Mode & List<&2, Token>, Unicode.is_word(c), (MemberWord{SCon{c, s}}, tokens), Bool.pick(Mode & List<&2, Token>, Char.is_space(c), (AfterCloseSpace{}, MemberName{String.reverse(s)} <> tokens), normal_step(Idle{}, c, MemberName{String.reverse(s)} <> tokens)))
     case Scientific{digits, scale, negative, exponent, sign_allowed, explicit_sign, prefix} c:
       scientific_step(digits, scale, negative, exponent, sign_allowed, explicit_sign, prefix, classify(c), tokens)
     case Hexadecimal{digits, seen, raw} +c:

@@ -180,6 +180,22 @@ def build_enumeration(args: List<&2, Core.Expr>, kind: Core.EnumerationKind, nam
     case args:
       ParseError{"Enumeration expects three arguments"}
 
+def pluck_identifier(collection: Core.Expr, key: Core.Expr, fallback: Core.Expr) -> Parsed:
+  match key:
+    case Core.Variable{name}:
+      Accepted{Core.EnumerationExpression{Core.PluckItems{}, collection, name, fallback}}
+    case key:
+      ParseError{"PLUCK() requires second argument to be an identifier"}
+
+def build_pluck(args: List<&2, Core.Expr>) -> Parsed:
+  match args:
+    case collection <> key <> Nil{}:
+      pluck_identifier(collection, key, Core.Literal{Core.NullValue{}})
+    case collection <> key <> fallback <> Nil{}:
+      pluck_identifier(collection, key, fallback)
+    case args:
+      ParseError{"PLUCK expects two or three arguments"}
+
 def reduction_identifiers(collection: Core.Expr, memo: Core.Expr, item: Core.Expr, body: Core.Expr, initial: Core.Expr) -> Parsed:
   match memo item:
     case Core.Variable{memo_name} Core.Variable{item_name}:
@@ -199,7 +215,7 @@ def build_reduction(args: List<&2, Core.Expr>) -> Parsed:
       ParseError{"REDUCE expects four or five arguments"}
 
 def text_call(+name: String, +args: List<&2, Core.Expr>) -> Parsed:
-  choose_call(String.eq(String.to_upper(name), "MAP"), u => build_enumeration(args, Core.MapItems{}, "MAP"), u => choose_call(String.eq(String.to_upper(name), "FILTER"), u => build_enumeration(args, Core.FilterItems{}, "FILTER"), u => choose_call(String.eq(String.to_upper(name), "ALL"), u => build_enumeration(args, Core.AllItems{}, "ALL"), u => choose_call(String.eq(String.to_upper(name), "ANY"), u => build_enumeration(args, Core.AnyItems{}, "ANY"), u => choose_call(String.eq(String.to_upper(name), "REDUCE"), u => build_reduction(args), u => scalar_text_call(name, args))))))
+  choose_call(String.eq(String.to_upper(name), "PLUCK"), u => build_pluck(args), u => choose_call(String.eq(String.to_upper(name), "MAP"), u => build_enumeration(args, Core.MapItems{}, "MAP"), u => choose_call(String.eq(String.to_upper(name), "FILTER"), u => build_enumeration(args, Core.FilterItems{}, "FILTER"), u => choose_call(String.eq(String.to_upper(name), "ALL"), u => build_enumeration(args, Core.AllItems{}, "ALL"), u => choose_call(String.eq(String.to_upper(name), "ANY"), u => build_enumeration(args, Core.AnyItems{}, "ANY"), u => choose_call(String.eq(String.to_upper(name), "REDUCE"), u => build_reduction(args), u => scalar_text_call(name, args)))))))
 
 def build_call(+name: String, +args: List<&2, Core.Expr>) -> Parsed:
   Bool.pick(Parsed, String.eq(String.to_upper(name), "ROUND"), build_round(args, Decimal.HalfAway{}), Bool.pick(Parsed, String.eq(String.to_upper(name), "ROUNDUP"), build_round(args, Decimal.TowardPositive{}), Bool.pick(Parsed, String.eq(String.to_upper(name), "ROUNDDOWN"), build_round(args, Decimal.TowardNegative{}), text_call(name, args))))
@@ -518,6 +534,8 @@ def operand(token: Lex.Token, stack: Stack) -> Stack:
 
 def operator(token: Lex.Token, stack: Stack) -> Stack:
   match token stack:
+    case Lex.MemberName{name} ParseReady{ops, structure <> outer}:
+      ParseReady{ops, Core.Access{structure, Core.Literal{Core.MemberIndex{name}}} <> outer}
     case Lex.WhenWord{} ParseReady{ops, values}:
       case_when(reduce_all(ops, values))
     case Lex.ThenWord{} ParseReady{ops, values}:
@@ -569,6 +587,8 @@ def operator(token: Lex.Token, stack: Stack) -> Stack:
 
 def ordinary_expectation(token: Lex.Token) -> Bool:
   match token:
+    case Lex.MemberName{name}:
+      False{}
     case Lex.EndWord{}:
       False{}
     case Lex.RBrace{}:
@@ -676,6 +696,8 @@ def valid_numeric_tokens(tokens: List<&2, Lex.Token>) -> Bool:
     case Nil{}:
       True{}
     case Lex.InvalidNumeric{} <> rest:
+      False{}
+    case Lex.InvalidMemberSpacing{} <> rest:
       False{}
     case head <> rest:
       valid_numeric_tokens(rest)

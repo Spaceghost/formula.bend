@@ -1,4 +1,5 @@
 import Base
+import ./unicode.bend as Unicode
 
 def take(count: Nat, text: String) -> String:
   match count text:
@@ -70,6 +71,77 @@ def escaped(text: String) -> String:
 
 def quote(text: String) -> String:
   "\"" ++ escaped(text) ++ "\""
+
+def symbol_tail(text: String) -> Bool:
+  match text:
+    case SNil{}:
+      True{}
+    case SCon{Chr{33}, SNil{}}:
+      True{}
+    case SCon{Chr{63}, SNil{}}:
+      True{}
+    case SCon{Chr{61}, SNil{}}:
+      True{}
+    case SCon{+c, rest}:
+      Bool.and(Bool.or(Unicode.is_word(c), U32.is_ge(Char.to_u32(c), 128)), symbol_tail(rest))
+
+def symbol_identifier(text: String) -> Bool:
+  match text:
+    case SNil{}:
+      False{}
+    case SCon{+c, rest}:
+      Bool.and(Bool.or(U32.is_ge(Char.to_u32(c), 128), Bool.or(Char.is_alpha(c), Char.is_eq(c, '_'))), symbol_tail(rest))
+
+def symbol_one_of(names: List<&2, String>, +text: String) -> Bool:
+  match names:
+    case Nil{}:
+      False{}
+    case name <> rest:
+      Bool.or(String.eq(name, text), symbol_one_of(rest, text))
+
+def symbol_variable_tail(text: String) -> Bool:
+  match text:
+    case SNil{}:
+      True{}
+    case SCon{+c, rest}:
+      Bool.and(Bool.or(U32.is_ge(Char.to_u32(c), 128), Bool.or(Char.is_alpha(c), Bool.or(Char.is_digit(c), Char.is_eq(c, '_')))), symbol_variable_tail(rest))
+
+def symbol_variable(text: String) -> Bool:
+  match text:
+    case SNil{}:
+      False{}
+    case SCon{+c, rest}:
+      Bool.and(Bool.or(U32.is_ge(Char.to_u32(c), 128), Bool.or(Char.is_alpha(c), Char.is_eq(c, '_'))), symbol_variable_tail(rest))
+
+def symbol_digits(text: String) -> Bool:
+  match text:
+    case SNil{}:
+      True{}
+    case SCon{c, rest}:
+      Bool.and(Char.is_digit(c), symbol_digits(rest))
+
+def symbol_global(+text: String) -> Bool:
+  match text:
+    case SNil{}:
+      False{}
+    case SCon{Chr{45}, SCon{+c, SNil{}}}:
+      Bool.or(U32.is_ge(Char.to_u32(c), 128), Bool.or(Char.is_alpha(c), Bool.or(Char.is_digit(c), Char.is_eq(c, '_'))))
+    case SCon{+c, rest}:
+      Bool.or(Bool.and(Char.is_digit(c), symbol_digits(rest)), Bool.or(symbol_variable(text), symbol_one_of(["~", "*", "$", "?", "!", "@", "/", "\\", ";", ",", ".", "=", ":", "<", ">", "\"", "&", "`", "'", "+"], text)))
+
+def symbol_named(text: String) -> Bool:
+  match text:
+    case SCon{Chr{64}, SCon{Chr{64}, rest}}:
+      symbol_variable(rest)
+    case SCon{Chr{64}, rest}:
+      symbol_variable(rest)
+    case SCon{Chr{36}, rest}:
+      symbol_global(rest)
+    case text:
+      symbol_identifier(text)
+
+def symbol_inspect(+text: String) -> String:
+  ":" ++ Bool.pick(String, Bool.or(symbol_named(text), symbol_one_of(["+", "-", "*", "/", "%", "**", "<<", ">>", "[]", "[]=", "==", "===", "!=", "<=", ">=", "<=>", "<", ">", "=~", "!~", "!", "~", "+@", "-@", "&", "|", "^", "`"], text)), text, quote(text))
 
 def replacement_capture(digit: Bool, c: Char, rest: Unit -> String) -> String:
   match digit:

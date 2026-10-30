@@ -16,14 +16,14 @@ spec/ast/function_spec.rb	7	unassessed
 spec/ast/intercept_spec.rb	4	unassessed
 spec/ast/map_spec.rb	6	partial
 spec/ast/max_spec.rb	5	partial
-spec/ast/member_access_spec.rb	22	unassessed
+spec/ast/member_access_spec.rb	22	partial
 spec/ast/min_spec.rb	5	partial
 spec/ast/mul_spec.rb	7	partial
 spec/ast/negation_spec.rb	6	partial
 spec/ast/node_spec.rb	2	unassessed
 spec/ast/numeric_spec.rb	2	partial
 spec/ast/or_spec.rb	6	partial
-spec/ast/pluck_spec.rb	6	unassessed
+spec/ast/pluck_spec.rb	6	partial
 spec/ast/reduce_spec.rb	3	partial
 spec/ast/round_spec.rb	6	partial
 spec/ast/rounddown_spec.rb	6	partial
