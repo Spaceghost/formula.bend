@@ -8,8 +8,8 @@ Early development. This is not yet a replacement for Dentaku, Excel, or Sheets.
 
 ## Current implementation
 
-Formula strings support unsigned integer and decimal literals, ASCII identifiers,
-Boolean literals, addition, multiplication, whitespace, parentheses, and nested
+Formula strings support signed integer and decimal literals, ASCII identifiers,
+Boolean literals, addition, subtraction, multiplication, whitespace, parentheses, and nested
 `SUM`, `IF`, and `NOT` calls. Multiplication has higher precedence than addition.
 `SUM` builds a balanced addition tree; `IF` evaluates only the selected branch.
 Functions are case-insensitive. Malformed expressions return explicit errors.
@@ -18,13 +18,13 @@ Bindings support case-insensitive matching by default, an explicit case-sensitiv
 mode, and first-match precedence for transient contexts. The reference model has
 independent row and column anchors and supports forward copying.
 
-Integer and decimal addition and multiplication use exact base-10 digit lists.
+Signed integer and decimal addition, subtraction, and multiplication use exact base-10 digit lists.
 Small integers use a compact Nat representation; larger parsed integers stay in
 digit lists. Coefficients can grow beyond a machine word. Decimal scale uses Nat.
 Formatting preserves fractional zeros: `1.25 * .4` displays `0.500`.
 This formatting is not a claim of Ruby BigDecimal display compatibility.
 
-Seven universal laws and forty-four concrete regression fixtures cover these
+Eight universal laws and fifty-five concrete regression fixtures cover these
 parts. They do not establish full Ruby or spreadsheet compatibility.
 
 ## Example
@@ -52,13 +52,14 @@ make native-check
 `make check` checks all laws and regression fixtures, then compares JavaScript
 execution with expected output. `make native-check` needs a compatible clang and
 compares the native program with the same output. Build outputs stay in `build/`.
-All fourteen runtime cases, including large integer products and decimal carry,
-have passed on JS and native CPU. CUDA and Metal remain unverified.
+The fourteen unsigned runtime cases, including large integer products and decimal carry,
+have passed on JS and native CPU. The five new signed cases pass on JS; native
+verification is in progress. CUDA and Metal remain unverified.
 No GPU speedup has been measured.
 
 ## Compatibility limits
 
-Negative numbers, subtraction, division, exponent notation, rounding, comparisons,
+Division, exponent notation, rounding, comparisons,
 strings, arrays, most built-ins, spreadsheet reference parsing, dependency
 analysis, and the complete Dentaku Calculator API remain unimplemented.
 `IF` and `NOT` accept Boolean conditions, not the full Ruby truthiness model.

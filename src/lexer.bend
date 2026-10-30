@@ -6,6 +6,7 @@ type Token is Data:
   DecimalLiteral{value: Decimal.Decimal}
   Identifier{name: String}
   Plus{}
+  Minus{}
   Times{}
   LParen{}
   RParen{}
@@ -49,6 +50,8 @@ def flush(mode: Mode, tokens: List<&2, Token>) -> List<&2, Token>:
 
 def symbol(c: Char) -> Token:
   match c:
+    case Chr{45}:
+      Minus{}
     case Chr{43}:
       Plus{}
     case Chr{42}:

@@ -113,3 +113,68 @@ def scale(value: Decimal) -> Nat:
   match value:
     case Exact{digits, s}:
       s
+
+# Comparison ignores redundant high zeros in little-endian coefficients.
+def trim_high_reversed(digits: List<&2, U32>) -> List<&2, U32>:
+  match digits:
+    case 0 <> rest:
+      trim_high_reversed(rest)
+    case digits:
+      digits
+
+def compare_next(order: Cmp, next: Unit -> Cmp) -> Cmp:
+  match order:
+    case EQ{}:
+      next(Unit{})
+    case order:
+      order
+
+def compare_lex(a: List<&2, U32>, b: List<&2, U32>) -> Cmp:
+  match a b:
+    case Nil{} Nil{}:
+      EQ{}
+    case Nil{} b:
+      LT{}
+    case a Nil{}:
+      GT{}
+    case x <> xs y <> ys:
+      compare_next(U32.cmp(x, y), u => compare_lex(xs, ys))
+
+def compare_normalized(+a: List<&2, U32>, +b: List<&2, U32>) -> Cmp:
+  compare_next(Nat.cmp(List.length(&2, U32, a), List.length(&2, U32, b)), u => compare_lex(a, b))
+
+def compare_digits(a: List<&2, U32>, b: List<&2, U32>) -> Cmp:
+  compare_normalized(trim_high_reversed(List.reverse(&2, U32, a)), trim_high_reversed(List.reverse(&2, U32, b)))
+
+def compare(a: Decimal, b: Decimal) -> Cmp:
+  match a b:
+    case Exact{x, +sx} Exact{y, +sy}:
+      compare_digits(pad(Nat.sub(sy, sx), x), pad(Nat.sub(sx, sy), y))
+
+# Requires a >= b. Every intermediate stays below 20.
+def subtract_digits(a: List<&2, U32>, b: List<&2, U32>, +borrow: U32) -> List<&2, U32>:
+  match a b:
+    case Nil{} b:
+      Nil{}
+    case +x <> xs Nil{}:
+      U32.mod(U32.sub(U32.add(x, 10), borrow), 10) <> subtract_digits(xs, Nil{}, Bool.to_u32(U32.is_lt(x, borrow)))
+    case +x <> xs y <> ys:
+      +subtrahend = U32.add(y, borrow)
+      U32.mod(U32.sub(U32.add(x, 10), subtrahend), 10) <> subtract_digits(xs, ys, Bool.to_u32(U32.is_lt(x, subtrahend)))
+
+def subtract(a: Decimal, b: Decimal) -> Decimal:
+  match a b:
+    case Exact{x, +sx} Exact{y, +sy}:
+      Exact{subtract_digits(pad(Nat.sub(sy, sx), x), pad(Nat.sub(sx, sy), y), 0), Nat.add(sx, Nat.sub(sy, sx))}
+
+def is_zero_digits(digits: List<&2, U32>) -> Bool:
+  match digits:
+    case Nil{}:
+      True{}
+    case x <> xs:
+      Bool.and(U32.is_eq(x, 0), is_zero_digits(xs))
+
+def is_zero(value: Decimal) -> Bool:
+  match value:
+    case Exact{digits, s}:
+      is_zero_digits(digits)

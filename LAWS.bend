@@ -43,3 +43,8 @@ law product_scale:
   for +sx: Nat
   for +sy: Nat
   {Decimal.scale(Decimal.multiply(Decimal.Exact{x, sx}, Decimal.Exact{y, sy})) == Nat.add(sx, sy) : Nat}
+
+law subtraction_left_error:
+  for +message: String
+  for right: Core.Value
+  {Core.subtract(Core.Failure{message}, right) == Core.Failure{message} : Core.Value}

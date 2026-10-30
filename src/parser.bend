@@ -8,6 +8,8 @@ type Parsed is Data:
 
 type Operator is Data:
   AddOp{}
+  SubtractOp{}
+  NegateOp{}
   MultiplyOp{}
   GroupFrame{outer: List<&2, Core.Expr>}
   CallFrame{name: String, arguments: List<&2, Core.Expr>, outer: List<&2, Core.Expr>}
@@ -54,6 +56,10 @@ def build_call(+name: String, +args: List<&2, Core.Expr>) -> Parsed:
 
 def reduce_times(ops: List<&2, Operator>, values: List<&2, Core.Expr>) -> Stack:
   match ops values:
+    case NegateOp{} <> tail a <> rest:
+      reduce_times(tail, Core.Negate{a} <> rest)
+    case NegateOp{} <> tail values:
+      Rejected{"Missing operand"}
     case MultiplyOp{} <> tail right <> left <> rest:
       reduce_times(tail, Core.Multiply{left, right} <> rest)
     case MultiplyOp{} <> tail values:
@@ -63,6 +69,14 @@ def reduce_times(ops: List<&2, Operator>, values: List<&2, Core.Expr>) -> Stack:
 
 def reduce_all(ops: List<&2, Operator>, values: List<&2, Core.Expr>) -> Stack:
   match ops values:
+    case NegateOp{} <> tail a <> rest:
+      reduce_all(tail, Core.Negate{a} <> rest)
+    case SubtractOp{} <> tail right <> left <> rest:
+      reduce_all(tail, Core.Subtract{left, right} <> rest)
+    case NegateOp{} <> tail values:
+      Rejected{"Missing operand"}
+    case SubtractOp{} <> tail values:
+      Rejected{"Missing operand"}
     case MultiplyOp{} <> tail right <> left <> rest:
       reduce_all(tail, Core.Multiply{left, right} <> rest)
     case AddOp{} <> tail right <> left <> rest:
@@ -129,6 +143,8 @@ def identifier(+name: String) -> Core.Expr:
 
 def operand(token: Lex.Token, stack: Stack) -> Stack:
   match token stack:
+    case Lex.Minus{} stack:
+      push_operator(stack, NegateOp{})
     case Lex.DecimalLiteral{n} Ready{ops, values}:
       Ready{ops, Core.Literal{Core.DecimalNumber{n}} <> values}
     case Lex.Integer{n} Ready{ops, values}:
@@ -146,6 +162,8 @@ def operand(token: Lex.Token, stack: Stack) -> Stack:
 
 def operator(token: Lex.Token, stack: Stack) -> Stack:
   match token stack:
+    case Lex.Minus{} Ready{ops, values}:
+      push_operator(reduce_all(ops, values), SubtractOp{})
     case Lex.Plus{} Ready{ops, values}:
       push_operator(reduce_all(ops, values), AddOp{})
     case Lex.Times{} Ready{ops, values}:

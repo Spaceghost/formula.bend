@@ -136,3 +136,36 @@ def large_integer_literal() -> {Core.show(Parser.evaluate("999999999999999999999
 
 def integer_product_over_word() -> {Core.show(Parser.evaluate("999999999 * 999999999", Nil{}, False{})) == "999999998000000001" : String}:
   {==}
+
+def signed_integer() -> {Core.show(Parser.evaluate("1 - 2", Nil{}, False{})) == "-1" : String}:
+  {==}
+
+def signed_decimal() -> {Core.show(Parser.evaluate("-.1 + .2", Nil{}, False{})) == "0.1" : String}:
+  {==}
+
+def signed_product() -> {Core.show(Parser.evaluate("-2 * -3", Nil{}, False{})) == "6" : String}:
+  {==}
+
+def signed_group() -> {Core.show(Parser.evaluate("-(2 + 3) * 4", Nil{}, False{})) == "-20" : String}:
+  {==}
+
+def subtract_associative() -> {Core.show(Parser.evaluate("10 - 3 - 2", Nil{}, False{})) == "5" : String}:
+  {==}
+
+def decimal_borrow() -> {Core.show(Parser.evaluate("1000.00 - .01", Nil{}, False{})) == "999.99" : String}:
+  {==}
+
+def subtract_negative() -> {Core.show(Parser.evaluate("1 - -2", Nil{}, False{})) == "3" : String}:
+  {==}
+
+def zero_sign() -> {Core.show(Parser.evaluate("-.0", Nil{}, False{})) == "0.0" : String}:
+  {==}
+
+def repeated_negation() -> {Core.show(Parser.evaluate("--2", Nil{}, False{})) == "2" : String}:
+  {==}
+
+def signed_sum() -> {Core.show(Parser.evaluate("SUM(-2.5, 1, .5)", Nil{}, False{})) == "-1.0" : String}:
+  {==}
+
+def large_subtraction() -> {Core.show(Parser.evaluate("1000000000000000000000000 - 1", Nil{}, False{})) == "999999999999999999999999" : String}:
+  {==}

@@ -53,14 +53,20 @@ Imba interface, and clean project sites under spacegho.st on Cloudflare.
 
 ## Numeric implementation status
 
-Unsigned integer and fixed-point decimal addition and multiplication use exact
+Signed integer and fixed-point decimal addition, subtraction, and multiplication use exact
 base-10 coefficients. Parsed integers with more than three digits remain in this
 representation; arithmetic avoids machine-word coefficient overflow. This also
 avoids large unary Nat reductions in proof checking. The regression suite covers
 24-digit carry and products above the native Nat limit, but is not a complete
-numeric compatibility corpus. Signed values, division, exponent parsing,
+numeric compatibility corpus. Division, exponent parsing,
 rounding policies, and coercions remain required work.
 
 Current functions: SUM (one or more numeric scalar arguments), IF (three arguments,
 Boolean guard, lazy branches), and NOT (one Boolean argument). Arrays, numeric
 string coercion, Ruby truthiness, and remaining built-ins are still pending.
+
+Unary minus binds more tightly than multiplication; binary subtraction shares
+addition precedence and is left-associative. Positive and negative operands use
+aligned exact magnitudes with decimal borrowing. Negative zero is normalized to
+ordinary zero, which differs from some BigDecimal representations and still
+needs an explicit compatibility policy.
