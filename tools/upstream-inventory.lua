@@ -22,6 +22,9 @@ local partial = {
   ['sum_spec.rb']=true, ['negation_spec.rb']=true,
   ['parser_spec.rb']=true, ['tokenizer_spec.rb']=true,
   ['case_sensitivity_spec.rb']=true, ['calculator_spec.rb']=true,
+  ['map_spec.rb']=true, ['filter_spec.rb']=true, ['all_spec.rb']=true,
+  ['any_spec.rb']=true, ['reduce_spec.rb']=true, ['pluck_spec.rb']=true,
+  ['member_access_spec.rb']=true, ['dependency_resolver_spec.rb']=true,
 }
 print('source\tdeclared_example_lines\tbend_parity_status')
 for _, path in ipairs(paths) do

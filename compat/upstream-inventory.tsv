@@ -37,7 +37,7 @@ spec/bulk_expression_solver_spec.rb	35	unassessed
 spec/calculator_spec.rb	162	partial
 spec/case_sensitivity_spec.rb	3	partial
 spec/dentaku_spec.rb	9	unassessed
-spec/dependency_resolver_spec.rb	4	unassessed
+spec/dependency_resolver_spec.rb	4	partial
 spec/exceptions_spec.rb	15	unassessed
 spec/external_function_spec.rb	19	unassessed
 spec/gemspec_spec.rb	1	unassessed

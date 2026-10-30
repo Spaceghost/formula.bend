@@ -1,12 +1,35 @@
 {
+  "toolchain_checks": [
+    {
+      "target": "CUDA",
+      "scope": "Standalone Bend fork tree; no formula corpus or performance measurement",
+      "status": "passed",
+      "source": "compat/cuda-toolchain-smoke.bend",
+      "source_sha256": "ae6645d8fb107ab05d2558854560ab05dff32ef213def4549a32a9161c57ff7d",
+      "bend_version": "2.0.39",
+      "compiler": "Ubuntu clang 19.1.1",
+      "cuda_compiler_version": "13.0.88",
+      "cuda_bundle": "13.0.2",
+      "redistribution_manifest_url": "https://developer.download.nvidia.com/compute/cuda/redist/redistrib_13.0.2.json",
+      "gpu": "NVIDIA GeForce RTX 3070",
+      "compute_capability": "8.6",
+      "driver_version": "615.78.08",
+      "required_gpu_command": "./build/cuda-toolchain-smoke +RTS --gpu 1GB",
+      "cpu_command": "./build/cuda-toolchain-smoke +RTS --gpu off",
+      "expected_output": "16384",
+      "artifact_sha256": "4067b4a3937dd159963d682164f48faa4a9977a9a49adc4cce2903b2484e8314",
+      "gpu_artifact_sha256": "6db7a1f57bb5aaea5558c4ffadd62e55908717313d0390ae02e83812bb08ea80",
+      "container_image_id": "4ef5803422b2f015c041146516346c068f069ceb517c770dd218022e98e91422"
+    }
+  ],
   "schema_version": 2,
   "scope": "Correctness verification; the performance shootout remains pending.",
   "latest_checkpoint": {
-    "source_commit": "8a3b55c089c7725db7c234773f32ee6501bc1db9",
-    "differential_cases": 1083,
+    "source_commit": "f8fbaeb935ac854b937e4ba35ac49256e05e226b",
+    "differential_cases": 1462,
     "scale_cases": 7,
-    "laws": 42,
-    "concrete_fixtures": 169,
+    "laws": 45,
+    "concrete_fixtures": 175,
     "checks": [
       {
         "target": "JavaScript",
@@ -26,11 +49,11 @@
           8
         ],
         "status": "passed",
-        "artifact_sha256": "7583c6938d421b46e26d97d276b4d2bbc7232b17b0193184039913c901a89abb",
-        "generated_c_sha256": "7cf6ae82a2a994640a847d312db80a845639f9dee31cdb61772b771bbc643068",
-        "generated_c_bytes": 12689282,
-        "scale_artifact_sha256": "ae25c536e80733dc9eff703eb8f5f7b989b78fe0d88c8c5086fd8c46a7120118",
-        "scale_generated_c_sha256": "22cf388d25e7eaaaa406e50842ad3645a70f143dcb79b643899f50e07795ed41"
+        "artifact_sha256": "b1c2af1a329d4b623297d756b31e80a2a014dbdf7d5367a3281643bc281dc7b7",
+        "generated_c_sha256": "bd842e90f04f671c9fd691f70ca56dfdbcb40977300f2097cfdad9193506479d",
+        "generated_c_bytes": 23269100,
+        "scale_artifact_sha256": "2864651f0aea61ec9c82a0c8401af106dccda90267e96ddb805c3e986048a433",
+        "scale_generated_c_sha256": "522f309aaabfa52623c1e56e70f5cec6f6287d518e211189ed3ac7d0ea9d86fd"
       },
       {
         "target": "Lean-backed kernel",
@@ -51,56 +74,108 @@
       }
     ]
   },
-  "verified_checkpoints": [{
-    "source_commit": "07732870d03ac6c5d0aac3f5c33c8580b4bb1cfa",
-    "differential_cases": 951,
-    "scale_cases": 7,
-    "laws": 40,
-    "concrete_fixtures": 166,
-    "checks": [
-      {
-        "target": "JavaScript",
-        "bend_versions": [
-          "2.0.16",
-          "2.0.39"
-        ],
-        "status": "passed"
-      },
-      {
-        "target": "native CPU",
-        "bend_version": "2.0.39",
-        "compiler": "Ubuntu clang 19.1.1",
-        "optimization": "-O3",
-        "thread_counts": [
-          1,
-          8
-        ],
-        "status": "passed",
-        "artifact_sha256": "0cda239793846eac7e3a7466ae9a5e628f4aa1bfe161677361cecc6c42666798",
-        "generated_c_sha256": "0dfcdda1e6de416bd64119f72d334e5a76e794c53cc8e21e83cd936a2e52e84a",
-        "generated_c_bytes": 11963607,
-        "scale_artifact_sha256": "7578864a94f52172ad1598543eff4808e40b7878fcd79705e6a38a0b09e8b996",
-        "scale_generated_c_sha256": "ad0150ecf2c56487cfbdb1f9f4c09ff311202cf15ead3fdf4144b54f9628b443"
-      },
-      {
-        "target": "Lean-backed kernel",
-        "bend_version": "2.0.39",
-        "lean_version": "4.34.0",
-        "command": "bend PROOF.bend --verdict",
-        "status": "passed",
-        "kernel_source_sha256": "d7268ff461de974bd4cd875d9766c71c62ee6b2e6411b9bab84839870db68a80",
-        "kernel_artifact_sha256": "e5e82c061a37c48f2162f294df52c8bbb32b227af2e22a331b6b3e2d066190c9"
-      },
-      {
-        "target": "CUDA",
-        "status": "not yet verified"
-      },
-      {
-        "target": "Metal",
-        "status": "not yet verified"
-      }
-    ]
-  }],
+  "verified_checkpoints": [
+    {
+      "source_commit": "07732870d03ac6c5d0aac3f5c33c8580b4bb1cfa",
+      "differential_cases": 951,
+      "scale_cases": 7,
+      "laws": 40,
+      "concrete_fixtures": 166,
+      "checks": [
+        {
+          "target": "JavaScript",
+          "bend_versions": [
+            "2.0.16",
+            "2.0.39"
+          ],
+          "status": "passed"
+        },
+        {
+          "target": "native CPU",
+          "bend_version": "2.0.39",
+          "compiler": "Ubuntu clang 19.1.1",
+          "optimization": "-O3",
+          "thread_counts": [
+            1,
+            8
+          ],
+          "status": "passed",
+          "artifact_sha256": "0cda239793846eac7e3a7466ae9a5e628f4aa1bfe161677361cecc6c42666798",
+          "generated_c_sha256": "0dfcdda1e6de416bd64119f72d334e5a76e794c53cc8e21e83cd936a2e52e84a",
+          "generated_c_bytes": 11963607,
+          "scale_artifact_sha256": "7578864a94f52172ad1598543eff4808e40b7878fcd79705e6a38a0b09e8b996",
+          "scale_generated_c_sha256": "ad0150ecf2c56487cfbdb1f9f4c09ff311202cf15ead3fdf4144b54f9628b443"
+        },
+        {
+          "target": "Lean-backed kernel",
+          "bend_version": "2.0.39",
+          "lean_version": "4.34.0",
+          "command": "bend PROOF.bend --verdict",
+          "status": "passed",
+          "kernel_source_sha256": "d7268ff461de974bd4cd875d9766c71c62ee6b2e6411b9bab84839870db68a80",
+          "kernel_artifact_sha256": "e5e82c061a37c48f2162f294df52c8bbb32b227af2e22a331b6b3e2d066190c9"
+        },
+        {
+          "target": "CUDA",
+          "status": "not yet verified"
+        },
+        {
+          "target": "Metal",
+          "status": "not yet verified"
+        }
+      ]
+    },
+    {
+      "source_commit": "8a3b55c089c7725db7c234773f32ee6501bc1db9",
+      "differential_cases": 1083,
+      "scale_cases": 7,
+      "laws": 42,
+      "concrete_fixtures": 169,
+      "checks": [
+        {
+          "target": "JavaScript",
+          "bend_versions": [
+            "2.0.16",
+            "2.0.39"
+          ],
+          "status": "passed"
+        },
+        {
+          "target": "native CPU",
+          "bend_version": "2.0.39",
+          "compiler": "Ubuntu clang 19.1.1",
+          "optimization": "-O3",
+          "thread_counts": [
+            1,
+            8
+          ],
+          "status": "passed",
+          "artifact_sha256": "7583c6938d421b46e26d97d276b4d2bbc7232b17b0193184039913c901a89abb",
+          "generated_c_sha256": "7cf6ae82a2a994640a847d312db80a845639f9dee31cdb61772b771bbc643068",
+          "generated_c_bytes": 12689282,
+          "scale_artifact_sha256": "ae25c536e80733dc9eff703eb8f5f7b989b78fe0d88c8c5086fd8c46a7120118",
+          "scale_generated_c_sha256": "22cf388d25e7eaaaa406e50842ad3645a70f143dcb79b643899f50e07795ed41"
+        },
+        {
+          "target": "Lean-backed kernel",
+          "bend_version": "2.0.39",
+          "lean_version": "4.34.0",
+          "command": "bend PROOF.bend --verdict",
+          "status": "passed",
+          "kernel_source_sha256": "d7268ff461de974bd4cd875d9766c71c62ee6b2e6411b9bab84839870db68a80",
+          "kernel_artifact_sha256": "e5e82c061a37c48f2162f294df52c8bbb32b227af2e22a331b6b3e2d066190c9"
+        },
+        {
+          "target": "CUDA",
+          "status": "not yet verified"
+        },
+        {
+          "target": "Metal",
+          "status": "not yet verified"
+        }
+      ]
+    }
+  ],
   "historical_evidence": {
     "source_commit": "5f62db6a28321354a5c73bcd091de671eee1519f",
     "bend_version": "2.0.16",

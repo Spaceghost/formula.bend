@@ -59,6 +59,8 @@ File.foreach(ENV.fetch('FORMULA_ORACLE_CORPUS')) do |line|
     end
     calculator = Dentaku::Calculator.new(case_sensitive: sensitive == 'true')
     value = case operation
+    when 'resolve_order' then Dentaku::DependencyResolver.find_resolve_order(context.fetch('input'), sensitive == 'true')
+    when 'resolve_cycles' then Dentaku::DependencyResolver.cycles(context.fetch('input'), sensitive == 'true')
     when 'identifiers' then calculator.identifiers(source)
     when 'dependencies' then calculator.dependencies(source, context)
     when 'coerce', 'coerce_class', 'coerce_message' then Dentaku::NumericParser.ensure_numeric!(context.fetch('input'))
@@ -75,6 +77,9 @@ File.foreach(ENV.fetch('FORMULA_ORACLE_CORPUS')) do |line|
     end
   rescue Dentaku::Error => error
     snapshot = ['message', 'coerce_message'].include?(operation) ? "message:#{error.message}" : "error:#{error.class.name}"
+  rescue TSort::Cyclic => error
+    raise unless ['resolve_order', 'resolve_cycles'].include?(operation)
+    snapshot = "error:#{error.class.name}"
   rescue RangeError => error
     # These source operations leak native Ruby range failures in this baseline.
     raise unless error.message.include?('too big to convert') || error.message == 'shift width too big'

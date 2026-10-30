@@ -49,7 +49,7 @@ The unchanged upstream suite passes 713 examples with zero failures and 96.82%
 line coverage in the Ruby reference environment. `reference-summary.json` and
 `upstream-spec-catalog.json` record that run. These results describe Ruby only.
 
-The Lua-driven value and dependency corpus has 1462 cases matched against Ruby values or parse
+The Lua-driven value and dependency corpus has 2516 cases matched against Ruby values or parse
 error classification. It covers truthiness, strings/null, comparisons, selected
 numeric-string coercions, and static operand rejection. It is a small subset of
 the upstream catalog. Native error classes/messages, all calculator methods,
@@ -90,7 +90,7 @@ lua tools/run-oracle.lua PROJECT UPSTREAM GEMS STORAGE RUNROOT OUTPUT
 The probe catches Dentaku errors and records their class; unexpected Ruby failures
 abort without replacing the output. Compare the result before updating committed
 goldens. Parser snapshots currently preserve parse-error classification, while
-full runtime error-class/message parity remains unfinished. The 1462-case value and dependency
+full runtime error-class/message parity remains unfinished. The 2516-case value and dependency
 corpus passes on JavaScript; the 951-case checkpoint passed native CPU with one
 and eight threads. This is correctness verification,
 not the requested performance shootout.
@@ -429,5 +429,50 @@ full supporting checks. The 2.0.16 corpus run completed as one program;
 `make parity-check` now checks all cases in ordered batches of 256, avoiding
 the earlier run's greater-than-8-GB checker peak. The new runner also passes on
 2.0.39. All 45 laws also pass its Lean-backed kernel verification. Native
-verification of this checkpoint remains in progress; no GPU results or
-performance measurements are claimed.
+verification of this checkpoint also passes: all 1,462 cases and seven scale
+checks match at `-O3` with one and eight threads. Source and artifact hashes are
+recorded in `backend-verification.json`. No GPU parity results or performance
+measurements are claimed.
+
+## Dependency ordering and cycle groups
+
+`src/resolver.bend` implements dependency ordering and ordered strongly connected
+components. Its 1,054 differential checks cover all 512 directed three-node
+graphs, with both ordering and cycle queries, plus the four upstream resolver
+scenarios and named edge cases. All four source scenarios are mapped; the
+correspondence map now contains 124 entries.
+
+Normalization preserves first insertion order and the last original key and
+dependency list for duplicate normalized names. Known keys retain their original
+string or symbol type and spelling in resolve order; missing dependency nodes
+use normalized string names. Case-sensitive mode keeps differently cased names
+distinct. Cycle queries return normalized names in the source's component and
+member order. A self-loop is reported by the cycle query but accepted by the
+pinned Ruby topological-sort API. Multi-node cycles return TSort::Cyclic.
+
+A depth-first traversal preserves discovery and finish order. Its structural
+depth comes from the graph's exact vertex count plus one step for a closing
+edge, including dependency names without keys. It has no configurable cutoff.
+Dependency DAGs use this traversal directly. When a back edge exists, finite
+Floyd–Warshall closure recovers component membership without recursive cycles.
+Three additional laws preserve empty orders, empty cycles, and original key
+values, bringing the proof book to 48 laws. The graph adapter currently accepts
+ordered hashes of array dependency lists; malformed graph inputs and arbitrary
+Ruby duck-typed objects do not yet have compatible diagnostics.
+Both Bend 2.0.16 and 2.0.39 pass the full 2,516-case checks, all 48 laws, and
+175 concrete fixtures. All 48 laws also pass its Lean-backed kernel check,
+including the imported resolver implementation. Native verification of this
+checkpoint is still in progress.
+
+## Linux CUDA toolchain check
+
+The standalone `compat/cuda-toolchain-smoke.bend` check builds with Bend 2.0.39,
+clang 19.1.1 and CUDA 13.0.88. Its 16,384-leaf fork computes 16,384 on both the
+CPU pool and an RTX 3070 in required GPU mode, with a 1-GB GPU heap and driver
+615.78.08. An explicit GPU size makes initialization failure an error instead
+of allowing CPU fallback. `tools/run-cuda-smoke.lua` reproduces that check from
+a frozen worktree using the existing development container and an external
+CUDA toolkit. Toolkit archives were checked against NVIDIA's redistribution
+manifest. Source, binary and GPU artifact hashes are recorded separately from
+formula correctness evidence. This is a compiler/runtime check; the formula
+corpus has not yet run on CUDA, and it supplies no performance comparison.

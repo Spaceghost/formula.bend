@@ -112,6 +112,14 @@ local program = not metadata_only and assert(io.open(prefix .. '.bend', 'w'))
 local expected = assert(io.open(prefix .. '.expected', 'w'))
 local formulas = assert(io.open(prefix .. '.formulas.tsv', 'w'))
 if program then program:write('import Base\nimport ../src/core.bend as Core\nimport ../src/parser.bend as Parser\nimport ../src/string.bend as StringOps\n\n') end
+if program then
+  for _, case in ipairs(cases) do
+    if (case.operation or ''):match('resolve_') then
+      program:write('import ../src/resolver.bend as Resolver\n\n')
+      break
+    end
+  end
+end
 local ids = {}
 local lines = {}
 for _, case in ipairs(cases) do
@@ -125,7 +133,10 @@ for _, case in ipairs(cases) do
   local context, encoded_context = context_values(case.context, case.symbol_context)
   local sensitive = case.sensitive and 'True{}' or 'False{}'
   local call
-  if operation == 'permissive' then
+  if operation == 'resolve_order' or operation == 'resolve_cycles' then
+    local name = operation == 'resolve_order' and 'order_snapshot' or 'cycles_snapshot'
+    call = 'Resolver.' .. name .. '(Core.lookup(' .. context .. ', "input", False{}), ' .. sensitive .. ')'
+  elseif operation == 'permissive' then
     call = 'Parser.permissive_snapshot(' .. bend_string(case.formula) .. ', ' .. context .. ', ' .. sensitive .. ')'
   elseif operation == 'identifiers' then
     call = 'Parser.names_snapshot(Parser.identifiers(' .. bend_string(case.formula) .. ', ' .. sensitive .. '))'

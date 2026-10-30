@@ -4,6 +4,15 @@ import ./src/decimal.bend as Decimal
 import ./LAWS.bend as Laws
 import ./src/bits.bend as Bits
 
+def Laws.empty_dependency_order(sensitive):
+  {==}
+
+def Laws.empty_dependency_cycles(sensitive):
+  {==}
+
+def Laws.dependency_order_preserves_original_key(original):
+  {==}
+
 def Laws.bitwise_left_error(kind, message, right):
   match kind:
     case Bits.BitOr{}:

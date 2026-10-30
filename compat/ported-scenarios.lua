@@ -2,6 +2,12 @@
 -- COUNT's Float input is represented as exact decimal 2.3 in Bend; COUNT only
 -- inspects its length capability, so this adaptation does not alter the result.
 return {
+  ['spec/dependency_resolver_spec.rb'] = {
+    {'sorts expressions in dependency order', 'graph_upstream_chain_resolve_order'},
+    {'handles case differences', 'graph_upstream_case_resolve_order'},
+    {'sorts mixed-case expressions in dependency order when case-sensitive', 'graph_upstream_sensitive_chain_resolve_order'},
+    {'treats variables that differ only in case as distinct when case-sensitive', 'graph_upstream_sensitive_names_resolve_order'},
+  },
   ['spec/parser_spec.rb'] = {
     {'calculates bitwise OR', {'bit_upstream_or', 'bit_upstream_parentheses'}},
   },

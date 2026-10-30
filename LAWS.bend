@@ -7,8 +7,21 @@ import ./src/dependencies.bend as Dependencies
 import ./src/comments.bend as Comments
 import ./src/parser.bend as Parser
 import ./src/bits.bend as Bits
+import ./src/resolver.bend as Resolver
 
 import ./src/reference.bend as Ref
+
+law empty_dependency_order:
+  for sensitive: Bool
+  {Resolver.find_resolve_order(Core.HashNil{}, sensitive) == Resolver.Ordered{Core.ArrayNil{}} : Resolver.Resolution}
+
+law empty_dependency_cycles:
+  for sensitive: Bool
+  {Resolver.cycles(Core.HashNil{}, sensitive) == Core.ArrayNil{} : Core.Value}
+
+law dependency_order_preserves_original_key:
+  for +original: Core.Value
+  {Resolver.order_components(Core.ArrayCons{Core.ArrayCons{Core.TextValue{"name"}, Core.ArrayNil{}}, Core.ArrayNil{}}, [Resolver.Entry{"name", original, Nil{}}]) == Resolver.Ordered{Core.ArrayCons{original, Core.ArrayNil{}}} : Resolver.Resolution}
 
 law empty_hash_read:
   for key: Core.Value
