@@ -64,7 +64,8 @@ strings are supported. Modulo,
 percentages, powers, complete rounding profiles, and coercions remain required.
 
 Current scalar functions: SUM, MUL, MIN, MAX, AVG, ABS, IF, NOT, AND, OR, XOR,
-COUNT, ROUND, ROUNDUP, and ROUNDDOWN. IF uses Ruby truthiness and lazy branches;
+COUNT, ROUND, ROUNDUP, ROUNDDOWN, LEFT, RIGHT, MID, LEN, FIND, SUBSTITUTE,
+CONCAT, CONTAINS, and SWITCH. IF uses Ruby truthiness and lazy branches;
 NOT uses Ruby truthiness. Arrays support nesting, numeric aggregate flattening,
 concatenation, subtraction, repetition, equality, and postfix access. String
 indexing and null-safe access are implemented. Complete numeric-string coercion,

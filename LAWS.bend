@@ -120,3 +120,12 @@ law canonical_zero:
 law numeric_string_leading_space:
   for +text: String
   {Core.cast_numeric(Core.TextValue{" " ++ text}) == Core.TextValue{" " ++ text} : Core.Value}
+
+law mid_invalid_offset_skips_length:
+  for length: Core.Expr
+  {Core.evaluate(Core.FunctionCall{Core.MidFunction{}, Core.Arguments{Core.Arguments{Core.Argument{Core.Literal{Core.TextValue{"abc"}}, Core.RawArgument{}}, Core.Argument{Core.Literal{Core.NegativeInteger{Decimal.Exact{[1], 0n}}}, Core.RawArgument{}}}, Core.Argument{length, Core.RawArgument{}}}}) == Core.Failure{"MID() requires offset to be positive"} : Core.Value}
+
+law contains_haystack_error_first:
+  for needle: Core.Expr
+  for +message: String
+  {Core.evaluate(Core.FunctionCall{Core.ContainsFunction{}, Core.Arguments{Core.Argument{needle, Core.RawArgument{}}, Core.Argument{Core.Literal{Core.Failure{message}}, Core.RawArgument{}}}}) == Core.Failure{message} : Core.Value}

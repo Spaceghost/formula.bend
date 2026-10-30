@@ -31,6 +31,7 @@ address-check:
 parity-check:
 	mkdir -p build
 	$(LUA) tools/generate-corpus.lua compat/scalar-cases.lua build/scalar-corpus
+	$(LUA) tools/check-scenario-map.lua
 	diff -u compat/scalar-oracle.tsv build/scalar-corpus.expected
 	$(BEND) build/scalar-corpus.bend > build/scalar-corpus.actual
 	diff -u compat/scalar-oracle.tsv build/scalar-corpus.actual

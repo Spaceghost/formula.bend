@@ -2,6 +2,7 @@ import Base
 import ./decimal.bend as Decimal
 import ./division.bend as Division
 import ./lexer.bend as Lex
+import ./string.bend as StringOps
 
 # Small integers use Nat; larger integers and decimals use exact digit lists.
 type Value is Data:
@@ -39,6 +40,15 @@ type FunctionKind is Data:
   OrFunction{}
   XorFunction{}
   CountFunction{}
+  LeftFunction{}
+  RightFunction{}
+  MidFunction{}
+  LenFunction{}
+  FindFunction{}
+  SubstituteFunction{}
+  ConcatFunction{}
+  ContainsFunction{}
+  SwitchFunction{}
 
 type ArgumentValidation is Data:
   RawArgument{}
@@ -194,6 +204,42 @@ def cast_numeric(value: Value) -> Value:
     case value:
       value
 
+def ruby_render(value: Value, inspect: Bool, tail_mode: Bool) -> String:
+  match value:
+    case Number{n}:
+      Nat.show(n)
+    case IntegerNumber{n}:
+      Decimal.show(n)
+    case NegativeInteger{n}:
+      "-" ++ Decimal.show(n)
+    case DecimalNumber{n}:
+      Decimal.ruby_show(n, False{})
+    case NegativeNumber{n}:
+      Decimal.ruby_show(n, True{})
+    case TextValue{+s}:
+      Bool.pick(String, inspect, StringOps.quote(s), s)
+    case Logical{True{}}:
+      "true"
+    case Logical{False{}}:
+      "false"
+    case NullValue{}:
+      Bool.pick(String, inspect, "nil", "")
+    case ArrayNil{}:
+      Bool.pick(String, tail_mode, "]", "[]")
+    case ArrayCons{head, tail}:
+      Bool.pick(String, tail_mode, ", ", "[") ++ ruby_render(head, True{}, False{}) ++ ruby_render(tail, True{}, True{})
+    case value:
+      "<internal>"
+
+def incompatible_numeric(value: Value) -> Value:
+  match value:
+    case NullValue{}:
+      Failure{"'NilClass' is not coercible to numeric"}
+    case Logical{False{}}:
+      Failure{"'FalseClass' is not coercible to numeric"}
+    case value:
+      Failure{"'" ++ ruby_render(value, False{}, False{}) ++ "' is not coercible to numeric"}
+
 def require_numeric_value(value: Value) -> Value:
   match value:
     case IntegerNumber{n}:
@@ -209,7 +255,7 @@ def require_numeric_value(value: Value) -> Value:
     case Failure{e}:
       Failure{e}
     case value:
-      Failure{"Expected numbers"}
+      incompatible_numeric(value)
 
 def require_numeric(value: Value) -> Value:
   require_numeric_value(cast_numeric(value))
@@ -1021,6 +1067,156 @@ def access_value(value: Value, index: Unit -> Value) -> Value:
     case value:
       Failure{"Expected indexable structure"}
 
+def string_count_clamp(within: Bool, digits: List<&2, U32>, limit: Nat) -> Value:
+  match within:
+    case True{}:
+      Number{Decimal.coefficient(digits)}
+    case False{}:
+      Number{limit}
+
+def string_count_long(fits: Bool, +digits: List<&2, U32>, +limit: Nat) -> Value:
+  match fits:
+    case False{}:
+      Failure{"Index exceeds Ruby signed long range"}
+    case True{}:
+      string_count_clamp(Bool.not(Cmp.is_gt(Decimal.compare(Decimal.Exact{digits, 0n}, Decimal.from_nat(limit)))), digits, limit)
+
+def string_count_digits(negative: Bool, +digits: List<&2, U32>, limit: Nat) -> Value:
+  match negative:
+    case True{}:
+      Bool.pick(Value, List.is_empty(&2, U32, digits), Number{0n}, Failure{"Negative string index"})
+    case False{}:
+      string_count_long(Bool.not(Cmp.is_gt(Decimal.compare(Decimal.Exact{digits, 0n}, Decimal.Exact{[7, 0, 8, 5, 7, 7, 4, 5, 8, 6, 3, 0, 2, 7, 3, 3, 2, 2, 9], 0n}))), digits, limit)
+
+def string_count_operand(operand: NumericOperand, limit: Nat) -> Value:
+  match operand:
+    case Magnitude{negative_index, Decimal.Exact{digits, scale}}:
+      string_count_digits(negative_index, Decimal.normalize_digits(Decimal.integer_digits(scale, digits)), limit)
+    case InvalidNumeric{message}:
+      Failure{message}
+
+def string_count(value: Value, limit: Nat) -> Value:
+  string_count_operand(numeric_operand(require_numeric(value)), limit)
+
+def named_string_count(count: Value, name: String, argument: String) -> Value:
+  match count:
+    case Failure{+message}:
+      Failure{Bool.pick(String, String.eq(message, "Negative string index"), name ++ "() requires " ++ argument ++ " to be positive", message)}
+    case count:
+      count
+
+def slice_count(count: Value, +text: String, right: Bool) -> Value:
+  match count:
+    case Number{+n}:
+      TextValue{Bool.pick(String, right, StringOps.drop(text, Nat.sub(String.length(text), n)), StringOps.take(n, text))}
+    case Failure{message}:
+      Failure{message}
+    case count:
+      Failure{"Invalid string count"}
+
+def slice_string(value: Value, length: Value, +right: Bool) -> Value:
+  +text = ruby_render(value, False{}, False{})
+  slice_count(named_string_count(string_count(length, String.length(text)), Bool.pick(String, right, "RIGHT", "LEFT"), "length"), text, right)
+
+def mid_length(length: Value, +text: String, +offset: Nat) -> Value:
+  match length:
+    case Number{n}:
+      TextValue{StringOps.take(n, StringOps.drop(text, Bool.pick(Nat, Nat.is_eq(offset, 0n), Nat.sub(String.length(text), 1n), Nat.sub(offset, 1n))))}
+    case Failure{message}:
+      Failure{message}
+    case length:
+      Failure{"Invalid string length"}
+
+def mid_offset(offset: Value, +text: String, length: Unit -> Value) -> Value:
+  match offset:
+    case Number{n}:
+      mid_length(named_string_count(string_count(length(Unit{}), String.length(text)), "MID", "length"), text, n)
+    case Failure{message}:
+      Failure{message}
+    case offset:
+      Failure{"Invalid string offset"}
+
+def mid_text(value: Value, offset: Unit -> Value, length: Unit -> Value) -> Value:
+  match value:
+    case Failure{message}:
+      Failure{message}
+    case value:
+      +text = ruby_render(value, False{}, False{})
+      mid_offset(named_string_count(string_count(offset(Unit{}), 1n+String.length(text)), "MID", "offset"), text, length)
+
+def contains_needle(needle: Value, haystack: String) -> Value:
+  match needle:
+    case Failure{message}:
+      Failure{message}
+    case needle:
+      Logical{contains_text(haystack, ruby_render(needle, False{}, False{}))}
+
+def contains_haystack(haystack: Value, needle: Unit -> Value) -> Value:
+  match haystack:
+    case Failure{message}:
+      Failure{message}
+    case haystack:
+      contains_needle(needle(Unit{}), ruby_render(haystack, False{}, False{}))
+
+def find_value(position: Maybe<&2, Nat>) -> Value:
+  match position:
+    case Some{n}:
+      Number{n}
+    case None{}:
+      NullValue{}
+
+def concat_tree(tree: Value) -> String:
+  match tree:
+    case ArgumentValue{value}:
+      ruby_render(value, False{}, False{})
+    case ArgumentPair{a, b}:
+      x y = concat_tree(a) concat_tree(b)
+      x ++ y
+    case tree:
+      ""
+
+def string_arguments(kind: FunctionKind, values: Value) -> Value:
+  match kind values:
+    case LenFunction{} ArrayCons{value, ArrayNil{}}:
+      Number{String.length(ruby_render(value, False{}, False{}))}
+    case LeftFunction{} ArrayCons{value, ArrayCons{count, ArrayNil{}}}:
+      slice_string(value, count, False{})
+    case RightFunction{} ArrayCons{value, ArrayCons{count, ArrayNil{}}}:
+      slice_string(value, count, True{})
+    case FindFunction{} ArrayCons{needle, ArrayCons{haystack, ArrayNil{}}}:
+      find_value(StringOps.find(ruby_render(haystack, False{}, False{}), ruby_render(needle, False{}, False{}), 1n))
+    case SubstituteFunction{} ArrayCons{original, ArrayCons{search, ArrayCons{replacement, ArrayNil{}}}}:
+      TextValue{StringOps.substitute(ruby_render(original, False{}, False{}), ruby_render(search, False{}, False{}), ruby_render(replacement, False{}, False{}), "")}
+    case ContainsFunction{} ArrayCons{needle, ArrayCons{haystack, ArrayNil{}}}:
+      contains_needle(needle, ruby_render(haystack, False{}, False{}))
+    case MidFunction{} ArrayCons{value, ArrayCons{offset, ArrayCons{length, ArrayNil{}}}}:
+      mid_text(value, u => offset, u => length)
+    case kind values:
+      Failure{"Invalid string function arguments"}
+
+def switch_pick(equal: Bool, value: Value, next: Unit -> Value) -> Value:
+  match equal:
+    case True{}:
+      value
+    case False{}:
+      next(Unit{})
+
+def switch_pairs(pairs: Value, +target: Value) -> Value:
+  match pairs:
+    case ArrayCons{key, ArrayCons{value, rest}}:
+      switch_pick(value_equal(target, key, False{}), value, u => switch_pairs(rest, target))
+    case ArrayCons{value, ArrayNil{}}:
+      value
+    case pairs:
+      NullValue{}
+
+def switch_values(values: Value) -> Value:
+  match values:
+    case ArrayCons{target, pairs}:
+      switch_pairs(pairs, target)
+    case values:
+      NullValue{}
+
 def extreme_pick(order: Value, a: Value, b: Value) -> Value:
   match order:
     case Logical{True{}}:
@@ -1143,6 +1339,24 @@ def average_tree(count: Nat, tree: Value) -> Value:
 
 def function_arguments(kind: FunctionKind, tree: Value) -> Value:
   match kind:
+    case LeftFunction{}:
+      string_arguments(LeftFunction{}, array_elements(tree, ArrayNil{}))
+    case RightFunction{}:
+      string_arguments(RightFunction{}, array_elements(tree, ArrayNil{}))
+    case MidFunction{}:
+      string_arguments(MidFunction{}, array_elements(tree, ArrayNil{}))
+    case LenFunction{}:
+      string_arguments(LenFunction{}, array_elements(tree, ArrayNil{}))
+    case FindFunction{}:
+      string_arguments(FindFunction{}, array_elements(tree, ArrayNil{}))
+    case SubstituteFunction{}:
+      string_arguments(SubstituteFunction{}, array_elements(tree, ArrayNil{}))
+    case ContainsFunction{}:
+      string_arguments(ContainsFunction{}, array_elements(tree, ArrayNil{}))
+    case ConcatFunction{}:
+      TextValue{concat_tree(tree)}
+    case SwitchFunction{}:
+      switch_values(array_elements(tree, ArrayNil{}))
     case ProductFunction{}:
       product_tree(tree)
     case MinFunction{}:
@@ -1174,6 +1388,8 @@ def checked_arguments(error: Maybe<&2, Value>, kind: FunctionKind, tree: Value) 
 
 def call(kind: FunctionKind, tree: Value) -> Value:
   match kind tree:
+    case SwitchFunction{} EmptyArgumentValues{}:
+      NullValue{}
     case MinFunction{} EmptyArgumentValues{}:
       NullValue{}
     case MaxFunction{} EmptyArgumentValues{}:
@@ -1185,6 +1401,10 @@ def call(kind: FunctionKind, tree: Value) -> Value:
 
 def evaluate_in(e: Expr, +context: List<&2, Binding>, +sensitive: Bool) -> Value:
   match e:
+    case FunctionCall{MidFunction{}, Arguments{Arguments{Argument{value, vv}, Argument{offset, ov}}, Argument{length, lv}}}:
+      mid_text(evaluate_in(value, context, sensitive), u => evaluate_in(offset, context, sensitive), u => evaluate_in(length, context, sensitive))
+    case FunctionCall{ContainsFunction{}, Arguments{Argument{needle, nv}, Argument{haystack, hv}}}:
+      contains_haystack(evaluate_in(haystack, context, sensitive), u => evaluate_in(needle, context, sensitive))
     case ArrayLiteral{elements}:
       array_value(evaluate_in(elements, context, sensitive))
     case Access{structure, index}:
@@ -1345,3 +1565,10 @@ def class_snapshot(value: Value) -> String:
       failure_snapshot(e)
     case value:
       "internal:class"
+
+def message_snapshot(value: Value) -> String:
+  match value:
+    case Failure{message}:
+      "message:" ++ message
+    case value:
+      "no-error"

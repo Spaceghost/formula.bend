@@ -72,6 +72,20 @@ def logical_unary(a: Info) -> Info:
 
 def function_kind(kind: Core.FunctionKind) -> ResultKind:
   match kind:
+    case Core.LeftFunction{}:
+      TextKind{}
+    case Core.RightFunction{}:
+      TextKind{}
+    case Core.MidFunction{}:
+      TextKind{}
+    case Core.SubstituteFunction{}:
+      TextKind{}
+    case Core.ConcatFunction{}:
+      TextKind{}
+    case Core.ContainsFunction{}:
+      LogicalKind{}
+    case Core.SwitchFunction{}:
+      LogicalKind{}
     case Core.CountFunction{}:
       UnknownKind{}
     case Core.SumFunction{}:

@@ -127,8 +127,21 @@ def build_round(args: List<&2, Core.Expr>, mode: Decimal.Rounding) -> Parsed:
     case args:
       ParseError{"Rounding expects one or two arguments"}
 
+def checked_arity(valid: Bool, args: List<&2, Core.Expr>, kind: Core.FunctionKind) -> Parsed:
+  match valid:
+    case True{}:
+      build_function(args, kind, Core.RawArgument{})
+    case False{}:
+      ParseError{"Wrong number of string function arguments"}
+
+def fixed_function(+args: List<&2, Core.Expr>, kind: Core.FunctionKind, count: Nat) -> Parsed:
+  checked_arity(Nat.is_eq(List.length(&2, Core.Expr, args), count), args, kind)
+
+def text_call(+name: String, +args: List<&2, Core.Expr>) -> Parsed:
+  choose_call(String.eq(String.to_upper(name), "LEFT"), u => fixed_function(args, Core.LeftFunction{}, 2n), u => choose_call(String.eq(String.to_upper(name), "RIGHT"), u => fixed_function(args, Core.RightFunction{}, 2n), u => choose_call(String.eq(String.to_upper(name), "MID"), u => fixed_function(args, Core.MidFunction{}, 3n), u => choose_call(String.eq(String.to_upper(name), "LEN"), u => fixed_function(args, Core.LenFunction{}, 1n), u => choose_call(String.eq(String.to_upper(name), "FIND"), u => fixed_function(args, Core.FindFunction{}, 2n), u => choose_call(String.eq(String.to_upper(name), "SUBSTITUTE"), u => fixed_function(args, Core.SubstituteFunction{}, 3n), u => choose_call(String.eq(String.to_upper(name), "CONTAINS"), u => fixed_function(args, Core.ContainsFunction{}, 2n), u => choose_call(String.eq(String.to_upper(name), "CONCAT"), u => checked_arity(Bool.not(List.is_empty(&2, Core.Expr, args)), args, Core.ConcatFunction{}), u => choose_call(String.eq(String.to_upper(name), "SWITCH"), u => build_function(args, Core.SwitchFunction{}, Core.RawArgument{}), u => basic_call(name, args))))))))))
+
 def build_call(+name: String, +args: List<&2, Core.Expr>) -> Parsed:
-  Bool.pick(Parsed, String.eq(String.to_upper(name), "ROUND"), build_round(args, Decimal.HalfAway{}), Bool.pick(Parsed, String.eq(String.to_upper(name), "ROUNDUP"), build_round(args, Decimal.TowardPositive{}), Bool.pick(Parsed, String.eq(String.to_upper(name), "ROUNDDOWN"), build_round(args, Decimal.TowardNegative{}), basic_call(name, args))))
+  Bool.pick(Parsed, String.eq(String.to_upper(name), "ROUND"), build_round(args, Decimal.HalfAway{}), Bool.pick(Parsed, String.eq(String.to_upper(name), "ROUNDUP"), build_round(args, Decimal.TowardPositive{}), Bool.pick(Parsed, String.eq(String.to_upper(name), "ROUNDDOWN"), build_round(args, Decimal.TowardNegative{}), text_call(name, args))))
 
 def precedence(op: Operator) -> Nat:
   match op:
@@ -589,6 +602,27 @@ def class_snapshot_parsed(parsed: Parsed, context: List<&2, Core.Binding>, sensi
 
 def class_snapshot(source: String, context: List<&2, Core.Binding>, sensitive: Bool) -> String:
   class_snapshot_parsed(parse(source), context, sensitive)
+
+def type_snapshot_info(info: Inspect.Info) -> String:
+  match info:
+    case Inspect.Metadata{Inspect.NumericKind{}, dynamic, valid}:
+      "type:numeric"
+    case Inspect.Metadata{Inspect.TextKind{}, dynamic, valid}:
+      "type:string"
+    case Inspect.Metadata{Inspect.LogicalKind{}, dynamic, valid}:
+      "type:logical"
+    case info:
+      "type:nil"
+
+def type_snapshot_parsed(parsed: Parsed) -> String:
+  match parsed:
+    case Accepted{expr}:
+      type_snapshot_info(Inspect.analyze(expr))
+    case ParseError{e}:
+      Bool.pick(String, String.starts_with(e, "Tokenizer: "), "error:Dentaku::TokenizerError", "error:Dentaku::ParseError")
+
+def type_snapshot(source: String) -> String:
+  type_snapshot_parsed(parse(source))
 
 type NamesResult is Data:
   FoundNames{names: List<&2, String>}

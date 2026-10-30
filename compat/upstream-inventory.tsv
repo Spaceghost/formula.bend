@@ -28,9 +28,9 @@ spec/ast/reduce_spec.rb	3	unassessed
 spec/ast/round_spec.rb	6	partial
 spec/ast/rounddown_spec.rb	6	partial
 spec/ast/roundup_spec.rb	6	partial
-spec/ast/string_functions_spec.rb	40	unassessed
+spec/ast/string_functions_spec.rb	40	partial
 spec/ast/sum_spec.rb	7	partial
-spec/ast/switch_spec.rb	5	unassessed
+spec/ast/switch_spec.rb	5	partial
 spec/ast/xor_spec.rb	8	partial
 spec/builtin_functions_spec.rb	2	unassessed
 spec/bulk_expression_solver_spec.rb	35	unassessed

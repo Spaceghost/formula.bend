@@ -423,3 +423,27 @@ def decimal_integral_division_class() -> {Parser.class_snapshot("4 / 2", Nil{}, 
 
 def integer_positive_precision_class() -> {Parser.class_snapshot("ROUND(1, 2)", Nil{}, False{}) == "class:Integer" : String}:
   {==}
+
+def mid_zero_offset_from_end() -> {Parser.snapshot("MID('abcdefg', 0, 2)", Nil{}, False{}) == "string:g" : String}:
+  {==}
+
+def mid_validates_before_length_value() -> {Parser.snapshot("MID('abc', -1, 1 / 0)", Nil{}, False{}) == "error:Dentaku::ArgumentError" : String}:
+  {==}
+
+def contains_evaluates_haystack_first() -> {Parser.snapshot("CONTAINS(1 / 0, ABS('x'))", Nil{}, False{}) == "error:Dentaku::ArgumentError" : String}:
+  {==}
+
+def concat_bigdecimal_scientific_form() -> {Parser.snapshot("CONCAT(1000.0)", Nil{}, False{}) == "string:0.1e4" : String}:
+  {==}
+
+def concat_integer_fixed_form() -> {Parser.snapshot("CONCAT(1000)", Nil{}, False{}) == "string:1000" : String}:
+  {==}
+
+def substitute_only_first_match() -> {Parser.snapshot("SUBSTITUTE('ababab', 'ab', 'x')", Nil{}, False{}) == "string:xabab" : String}:
+  {==}
+
+def switch_uses_first_match() -> {Parser.snapshot("SWITCH(1, 1, 'one', 1, 'two')", Nil{}, False{}) == "string:one" : String}:
+  {==}
+
+def switch_values_are_eager() -> {Parser.snapshot("SWITCH(1, 1, 7, 2, 1 / 0)", Nil{}, False{}) == "error:Dentaku::ZeroDivisionError" : String}:
+  {==}

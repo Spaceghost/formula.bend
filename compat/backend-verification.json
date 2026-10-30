@@ -24,6 +24,17 @@
     }
   ],
   "latest_verified_native": {
+    "source_commit": "3cf7590944691dc0d03dc586dd71e64d7a49115f",
+    "bend_version": "2.0.39",
+    "differential_cases": 370,
+    "target": "native CPU",
+    "thread_counts": [1, 8],
+    "status": "passed",
+    "optimization": "-O3",
+    "artifact_sha256": "dc1b246d54973763229f6e3cd3b335c06fd6afcb0da388ab81592d3e5b709310",
+    "scope": "correctness verification; no performance measurements"
+  },
+  "numeric_literal_checkpoint_native": {
     "source_commit": "abddc0b2612dde4037a94ddaba672ece9bad2e80",
     "bend_version": "2.0.39",
     "differential_cases": 296,

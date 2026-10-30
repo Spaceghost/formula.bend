@@ -70,3 +70,9 @@ def Laws.canonical_zero(scale):
 
 def Laws.numeric_string_leading_space(text):
   {==}
+
+def Laws.mid_invalid_offset_skips_length(length):
+  {==}
+
+def Laws.contains_haystack_error_first(needle, message):
+  {==}

@@ -69,8 +69,12 @@ for _, case in ipairs(cases) do
     call = 'Parser.names_snapshot(Parser.dependencies(' .. bend_string(case.formula) .. ', ' .. context .. ', ' .. sensitive .. '))'
   elseif operation == 'class' then
     call = 'Parser.class_snapshot(' .. bend_string(case.formula) .. ', ' .. context .. ', ' .. sensitive .. ')'
-  elseif operation == 'coerce' or operation == 'coerce_class' then
-    local show = operation == 'coerce' and 'snapshot' or 'class_snapshot'
+  elseif operation == 'type' then
+    call = 'Parser.type_snapshot(' .. bend_string(case.formula) .. ')'
+  elseif operation == 'message' then
+    call = 'Core.message_snapshot(Parser.evaluate(' .. bend_string(case.formula) .. ', ' .. context .. ', ' .. sensitive .. '))'
+  elseif operation == 'coerce' or operation == 'coerce_class' or operation == 'coerce_message' then
+    local show = operation == 'coerce' and 'snapshot' or operation == 'coerce_class' and 'class_snapshot' or 'message_snapshot'
     call = 'Core.' .. show .. '(Core.require_numeric(Core.lookup(' .. context .. ', "input", ' .. sensitive .. ')))'
   else
     assert(operation == 'evaluate', 'unknown operation: ' .. operation)

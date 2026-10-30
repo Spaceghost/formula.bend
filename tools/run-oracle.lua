@@ -46,16 +46,19 @@ File.foreach(ENV.fetch('FORMULA_ORACLE_CORPUS')) do |line|
     value = case operation
     when 'identifiers' then calculator.identifiers(source)
     when 'dependencies' then calculator.dependencies(source, context)
-    when 'coerce', 'coerce_class' then Dentaku::NumericParser.ensure_numeric!(context.fetch('input'))
+    when 'coerce', 'coerce_class', 'coerce_message' then Dentaku::NumericParser.ensure_numeric!(context.fetch('input'))
+    when 'type' then calculator.ast(source).type
     else calculator.evaluate!(source, context)
     end
     snapshot = case operation
     when 'identifiers', 'dependencies' then "names:#{value.join(',')}"
     when 'class', 'coerce_class' then "class:#{value.class.name}"
+    when 'type' then "type:#{value || 'nil'}"
+    when 'message', 'coerce_message' then 'no-error'
     else snapshot_value(value)
     end
   rescue Dentaku::Error => error
-    snapshot = "error:#{error.class.name}"
+    snapshot = ['message', 'coerce_message'].include?(operation) ? "message:#{error.message}" : "error:#{error.class.name}"
   rescue RangeError => error
     # Access#read leaks Ruby's signed-long conversion failure in this baseline.
     raise unless error.message.include?('too big to convert')

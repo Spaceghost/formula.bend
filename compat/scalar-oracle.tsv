@@ -368,3 +368,134 @@ coerce_bound_decimal_integral	number:1
 coerce_class_bound_decimal_integral	class:BigDecimal
 coerce_bound_integer	number:1000
 coerce_class_bound_integer	class:Integer
+str_left	string:ABCD
+str_left_literals	string:AB
+str_left_empty	string:
+str_left_over	string:abcdefg
+str_left_numeric_length	string:ABCD
+str_left_negative	error:Dentaku::ArgumentError
+str_left_junk	error:Dentaku::ArgumentError
+str_left_fraction	string:ab
+str_left_negative_fraction	string:
+str_right	string:DEFG
+str_right_empty	string:
+str_right_over	string:abcdefg
+str_right_numeric_length	string:DEFG
+str_right_junk	error:Dentaku::ArgumentError
+str_right_zero	string:
+str_right_negative	error:Dentaku::ArgumentError
+str_mid	string:DE
+str_mid_empty	string:
+str_mid_offset_over	string:
+str_mid_length_over	string:defg
+str_mid_numeric_args	string:DE
+str_mid_junk_offset	error:Dentaku::ArgumentError
+str_mid_junk_length	error:Dentaku::ArgumentError
+str_mid_zero_offset	string:g
+str_mid_negative_offset	error:Dentaku::ArgumentError
+str_mid_negative_length	error:Dentaku::ArgumentError
+str_mid_error_order	error:Dentaku::ArgumentError
+str_len	number:7
+str_len_empty	number:0
+str_len_null	number:0
+str_len_integer	number:4
+str_len_decimal	number:5
+str_len_negative_integer	number:5
+str_len_unicode	number:2
+str_find	number:4
+str_find_empty_needle	number:1
+str_find_empty_haystack	null
+str_find_absent	null
+str_find_unicode	number:2
+str_substitute	string:ABCxyFG
+str_substitute_empty_search	string:xyABCDEFG
+str_substitute_empty_replacement	string:ABCFG
+str_substitute_first_only	string:xabab
+str_substitute_absent	string:abc
+str_concat	string:ABCDEF
+str_concat_empty_first	string:ABC
+str_concat_empty_last	string:ABC
+str_concat_empty_both	string:
+str_concat_null_bool	string:truefalse
+str_concat_big_integer	string:1234567890123456789012345
+str_concat_decimal	string:0.1e4
+str_concat_decimal_fraction	string:0.123e-2
+str_concat_decimal_zero	string:0.0
+str_concat_negative_decimal	string:-0.125e1
+str_concat_array	string:[1, "a", nil, true, [2]]
+str_contains_true	boolean:true
+str_contains_false	boolean:false
+str_contains_null	boolean:true
+str_contains_error_order	error:Dentaku::ArgumentError
+str_left_wrong_arity	error:Dentaku::ParseError
+str_mid_wrong_arity	error:Dentaku::ParseError
+str_concat_wrong_arity	error:Dentaku::ParseError
+str_len_wrong_arity	error:Dentaku::ParseError
+str_find_wrong_arity	error:Dentaku::ParseError
+str_left_huge_length	error:RangeError
+str_mid_huge_offset	error:RangeError
+str_switch_match	string:one
+str_switch_missing	null
+str_switch_default	string:no match
+str_switch_first	string:one
+str_switch_only_keys	number:3
+str_switch_empty	null
+str_switch_single	null
+str_switch_two	string:default
+str_switch_eager	error:Dentaku::ZeroDivisionError
+str_switch_string_no_coercion	number:9
+str_replacement_match	string:abc
+str_replacement_zero	string:abc
+str_replacement_capture	string:ac
+str_replacement_prefix	string:aac
+str_replacement_suffix	string:acc
+str_replacement_slash	string:a\c
+str_left_static_type	error:Dentaku::ParseError
+str_len_numeric_type	number:4
+str_switch_static_type	error:Dentaku::ParseError
+str_mid_validation_before_value	error:Dentaku::ArgumentError
+str_left_boolean_length	error:Dentaku::ArgumentError
+str_right_null_length	error:Dentaku::ArgumentError
+str_mid_negative_fraction_offset	string:c
+str_left_long_max	string:abc
+str_left_long_overflow	error:RangeError
+str_mid_long_max	string:
+str_dependencies_duplicates	names:a,a,a
+str_contains_dependencies	names:a,a
+str_switch_dependencies	names:a,a,a
+str_array_quote_nul	number:12
+str_array_actual_nul	number:12
+str_array_control_nul	number:12
+str_array_control_del	number:12
+str_array_control_bell	number:8
+str_array_control_bs	number:8
+str_array_control_esc	number:8
+str_array_control_ff	number:8
+str_array_control_vt	number:8
+str_array_control_soh	number:12
+str_array_interpolation	string:["\#{x}"]
+str_type_left	type:string
+str_type_right	type:string
+str_type_mid	type:string
+str_type_len	type:numeric
+str_type_find	type:numeric
+str_type_substitute	type:string
+str_type_concat	type:string
+str_type_contains	type:logical
+str_message_left_negative	message:LEFT() requires length to be positive
+str_message_left_junk	message:'junk' is not coercible to numeric
+str_message_right_junk	message:'junk' is not coercible to numeric
+str_message_mid_junk_offset	message:'junk offset' is not coercible to numeric
+str_message_mid_junk_length	message:'junk' is not coercible to numeric
+str_message_mid_negative_offset	message:MID() requires offset to be positive
+str_message_mid_negative_length	message:MID() requires length to be positive
+coerce_message_word	message:'flarble' is not coercible to numeric
+coerce_message_minus	message:'-' is not coercible to numeric
+coerce_message_empty	message:'' is not coercible to numeric
+coerce_message_null	message:'NilClass' is not coercible to numeric
+coerce_message_dot	message:'7.' is not coercible to numeric
+coerce_message_boolean	message:'true' is not coercible to numeric
+coerce_message_false	message:'FalseClass' is not coercible to numeric
+coerce_message_expression	message:'1 - 2' is not coercible to numeric
+coerce_message_array	message:'[1]' is not coercible to numeric
+coerce_message_suffix	message:'1f' is not coercible to numeric

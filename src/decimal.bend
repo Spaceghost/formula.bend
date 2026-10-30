@@ -242,3 +242,26 @@ def canonical(value: Decimal) -> Decimal:
   match value:
     case Exact{digits, s}:
       trim_fraction(normalize_digits(digits), s)
+
+def trim_low_zeros(digits: List<&2, U32>) -> List<&2, U32>:
+  match digits:
+    case 0 <> rest:
+      trim_low_zeros(rest)
+    case digits:
+      digits
+
+def ruby_exponent(+length: Nat, +scale: Nat) -> String:
+  Bool.pick(String, Nat.is_ge(length, scale), Nat.show(Nat.sub(length, scale)), "-" ++ Nat.show(Nat.sub(scale, length)))
+
+def ruby_digits(digits: List<&2, U32>, scale: Nat, negative: Bool) -> String:
+  match digits:
+    case Nil{}:
+      "0.0"
+    case +head <> +tail:
+      Bool.pick(String, negative, "-", "") ++ "0." ++ String.reverse(digit_text(trim_low_zeros(head <> tail))) ++ "e" ++ ruby_exponent(List.length(&2, U32, head <> tail), scale)
+
+# BigDecimal#to_s uses scientific form, separately from fixed-point display.
+def ruby_show(value: Decimal, negative: Bool) -> String:
+  match value:
+    case Exact{digits, fractional_places}:
+      ruby_digits(normalize_digits(digits), fractional_places, negative)
