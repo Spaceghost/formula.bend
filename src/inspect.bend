@@ -12,6 +12,10 @@ type Info is Data:
 
 def literal(value: Core.Value) -> Info:
   match value:
+    case Core.IntegerNumber{n}:
+      Metadata{NumericKind{}, False{}, True{}}
+    case Core.NegativeInteger{n}:
+      Metadata{NumericKind{}, False{}, True{}}
     case Core.Number{n}:
       Metadata{NumericKind{}, False{}, True{}}
     case Core.DecimalNumber{n}:

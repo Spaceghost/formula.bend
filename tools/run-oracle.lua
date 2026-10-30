@@ -46,10 +46,12 @@ File.foreach(ENV.fetch('FORMULA_ORACLE_CORPUS')) do |line|
     value = case operation
     when 'identifiers' then calculator.identifiers(source)
     when 'dependencies' then calculator.dependencies(source, context)
+    when 'coerce', 'coerce_class' then Dentaku::NumericParser.ensure_numeric!(context.fetch('input'))
     else calculator.evaluate!(source, context)
     end
     snapshot = case operation
     when 'identifiers', 'dependencies' then "names:#{value.join(',')}"
+    when 'class', 'coerce_class' then "class:#{value.class.name}"
     else snapshot_value(value)
     end
   rescue Dentaku::Error => error

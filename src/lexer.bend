@@ -3,6 +3,7 @@ import ./decimal.bend as Decimal
 
 type Token is Data:
   Integer{value: Nat}
+  BigIntegerLiteral{value: Decimal.Decimal}
   DecimalLiteral{value: Decimal.Decimal}
   Identifier{name: String}
   StringLiteral{value: String}
@@ -56,7 +57,7 @@ def integer_token(+digits: List<&2, U32>, small: Bool) -> Token:
     case True{}:
       Integer{Decimal.coefficient(digits)}
     case False{}:
-      DecimalLiteral{Decimal.Exact{digits, 0n}}
+      BigIntegerLiteral{Decimal.Exact{digits, 0n}}
 
 def symbol(c: Char) -> Token:
   match c:

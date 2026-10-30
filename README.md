@@ -32,7 +32,7 @@ digit lists. Coefficients can grow beyond a machine word. Decimal scale uses Nat
 Formatting preserves fractional zeros: `1.25 * .4` displays `0.500`.
 This formatting is not a claim of Ruby BigDecimal display compatibility.
 
-Twenty-two universal laws and one hundred thirty-five concrete regression fixtures cover these
+Twenty-two universal laws and one hundred thirty-nine concrete regression fixtures cover these
 parts. They do not establish full Ruby or spreadsheet compatibility.
 
 ## Example
@@ -105,7 +105,7 @@ The eight address runtime cases pass on both JavaScript and native CPU.
 
 Parity is measured against the pinned Ruby source and its complete 713-example
 suite. The Ruby reference passes all examples; that is not a claim that Bend does.
-A separate 296-case value and dependency corpus currently matches Ruby on JavaScript for selected values and
+A separate 370-case value and dependency corpus currently matches Ruby on JavaScript for selected values and
 parse-error classification. `make parity-check` generates the fixtures using Lua.
 Use `LUA=/path/to/lua` if Lua is not on PATH.
 
@@ -117,14 +117,19 @@ See [the parity checklist](compat/PARITY.md) for remaining rules and the shootou
 gate. No performance comparison is claimed yet.
 
 The corpus supports exact decimal, integer, string, Boolean, null, and nested
-array bindings plus case-sensitive contexts. The 234-case arrays/COUNT checkpoint
+array bindings plus case-sensitive contexts. The 296-case numeric literal checkpoint
 passes native CPU with one and eight threads; native verification of the latest
-numeric literal cases is pending. Source commits and checksums are recorded in
+74 numeric-class/coercion cases is pending. Source commits and checksums are recorded in
 `compat/backend-verification.json`.
 
 Scientific exponents support at most 14 significant exponent digits; scales and
 indexes remain bounded by the runtime Nat representation. Hex coefficients use
 exact decimal digit lists. This is not complete Ruby numeric-class compatibility.
+
+Integer and BigDecimal results now remain distinct across parsing, arithmetic,
+division, aggregates, and rounding. The corpus checks result classes and direct
+NumericParser coercions as well as canonical values. Ruby Float inputs, signed
+decimal zero, special numeric values, and global BigDecimal modes remain pending.
 
 Infix AND, OR, XOR, prefix NOT, and `!` follow the pinned Dentaku precedence and
 static logical-operand rules. AND/OR short-circuit and allow a decisive right

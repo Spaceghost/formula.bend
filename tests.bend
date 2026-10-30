@@ -411,3 +411,15 @@ def numeric_string_rejects_internal_space() -> {Parser.snapshot("SUM('- 2')", Ni
 
 def scientific_zero_snapshot() -> {Parser.snapshot("0e-3", Nil{}, False{}) == "number:0" : String}:
   {==}
+
+def big_integer_class_retained() -> {Parser.class_snapshot("100000000000000000000 + 1", Nil{}, False{}) == "class:Integer" : String}:
+  {==}
+
+def negative_integer_class_retained() -> {Parser.class_snapshot("-2 * 3", Nil{}, False{}) == "class:Integer" : String}:
+  {==}
+
+def decimal_integral_division_class() -> {Parser.class_snapshot("4 / 2", Nil{}, False{}) == "class:BigDecimal" : String}:
+  {==}
+
+def integer_positive_precision_class() -> {Parser.class_snapshot("ROUND(1, 2)", Nil{}, False{}) == "class:Integer" : String}:
+  {==}

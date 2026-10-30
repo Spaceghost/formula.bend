@@ -6,6 +6,8 @@ import ./lexer.bend as Lex
 # Small integers use Nat; larger integers and decimals use exact digit lists.
 type Value is Data:
   Number{value: Nat}
+  IntegerNumber{value: Decimal.Decimal}
+  NegativeInteger{value: Decimal.Decimal}
   DecimalNumber{value: Decimal.Decimal}
   NegativeNumber{value: Decimal.Decimal}
   Logical{value: Bool}
@@ -70,6 +72,8 @@ def compact_pick(value: Decimal.Decimal, small: Bool) -> Value:
   match value small:
     case Decimal.Exact{digits, 0n} True{}:
       Number{Decimal.coefficient(digits)}
+    case Decimal.Exact{digits, 0n} small:
+      IntegerNumber{Decimal.Exact{digits, 0n}}
     case value small:
       DecimalNumber{value}
 
@@ -88,6 +92,60 @@ def negative_pick(value: Decimal.Decimal, zero: Bool) -> Value:
 def negative(+value: Decimal.Decimal) -> Value:
   negative_pick(value, Decimal.is_zero(value))
 
+def integer_negative_pick(zero: Bool, value: Decimal.Decimal) -> Value:
+  match zero:
+    case True{}:
+      Number{0n}
+    case False{}:
+      NegativeInteger{value}
+
+def integer_result(value: Value) -> Value:
+  match value:
+    case DecimalNumber{n}:
+      compact(Decimal.canonical(n))
+    case NegativeNumber{+n}:
+      integer_negative_pick(Decimal.is_zero(n), n)
+    case value:
+      value
+
+def decimal_result(value: Value) -> Value:
+  match value:
+    case Number{n}:
+      DecimalNumber{Decimal.from_nat(n)}
+    case IntegerNumber{n}:
+      DecimalNumber{n}
+    case NegativeInteger{n}:
+      NegativeNumber{n}
+    case value:
+      value
+
+def numeric_result(integer: Bool, value: Value) -> Value:
+  match integer:
+    case True{}:
+      integer_result(value)
+    case False{}:
+      decimal_result(value)
+
+def is_integer(value: Value) -> Bool:
+  match value:
+    case Number{n}:
+      True{}
+    case IntegerNumber{n}:
+      True{}
+    case NegativeInteger{n}:
+      True{}
+    case value:
+      False{}
+
+def strip_integer(value: Value) -> Value:
+  match value:
+    case IntegerNumber{n}:
+      DecimalNumber{n}
+    case NegativeInteger{n}:
+      NegativeNumber{n}
+    case value:
+      value
+
 def difference_pick(order: Cmp, +a: Decimal.Decimal, +b: Decimal.Decimal) -> Value:
   match order:
     case LT{}:
@@ -102,12 +160,16 @@ def numeric_text(tokens: List<&2, Lex.Token>, original: String) -> Value:
   match tokens:
     case Lex.Integer{n} <> Nil{}:
       Number{n}
+    case Lex.BigIntegerLiteral{n} <> Nil{}:
+      IntegerNumber{n}
     case Lex.DecimalLiteral{n} <> Nil{}:
       DecimalNumber{n}
     case Lex.Minus{} <> Lex.Integer{n} <> Nil{}:
-      negative(Decimal.from_nat(n))
+      integer_result(negative(Decimal.from_nat(n)))
+    case Lex.Minus{} <> Lex.BigIntegerLiteral{n} <> Nil{}:
+      integer_result(negative(n))
     case Lex.Minus{} <> Lex.DecimalLiteral{n} <> Nil{}:
-      negative(n)
+      decimal_result(negative(n))
     case tokens:
       TextValue{original}
 
@@ -134,6 +196,10 @@ def cast_numeric(value: Value) -> Value:
 
 def require_numeric_value(value: Value) -> Value:
   match value:
+    case IntegerNumber{n}:
+      IntegerNumber{n}
+    case NegativeInteger{n}:
+      NegativeInteger{n}
     case Number{n}:
       Number{n}
     case DecimalNumber{n}:
@@ -170,6 +236,22 @@ def array_join(left: Value, right: Value) -> Value:
 # BigDecimal implementation compares equal to integral values in subtraction.
 def value_equal(a: Value, b: Value, +strict: Bool) -> Bool:
   match a b:
+    case IntegerNumber{x} IntegerNumber{y}:
+      Cmp.is_eq(Decimal.compare(x, y))
+    case IntegerNumber{x} Number{y}:
+      Cmp.is_eq(Decimal.compare(x, Decimal.from_nat(y)))
+    case Number{x} IntegerNumber{y}:
+      Cmp.is_eq(Decimal.compare(Decimal.from_nat(x), y))
+    case IntegerNumber{x} DecimalNumber{y}:
+      Cmp.is_eq(Decimal.compare(x, y))
+    case DecimalNumber{x} IntegerNumber{y}:
+      Cmp.is_eq(Decimal.compare(x, y))
+    case NegativeInteger{x} NegativeInteger{y}:
+      Cmp.is_eq(Decimal.compare(x, y))
+    case NegativeInteger{x} NegativeNumber{y}:
+      Cmp.is_eq(Decimal.compare(x, y))
+    case NegativeNumber{x} NegativeInteger{y}:
+      Cmp.is_eq(Decimal.compare(x, y))
     case ArrayNil{} ArrayNil{}:
       True{}
     case ArrayCons{ah, at} ArrayCons{bh, bt}:
@@ -254,6 +336,10 @@ def array_repeat_decimal(value: Decimal.Decimal, negative_count: Bool, array: Va
 
 def array_multiply(array: Value, count: Value) -> Value:
   match count:
+    case IntegerNumber{n}:
+      array_repeat_decimal(n, False{}, array)
+    case NegativeInteger{n}:
+      array_repeat_decimal(n, True{}, array)
     case Number{n}:
       array_repeat(n, array)
     case DecimalNumber{n}:
@@ -297,12 +383,15 @@ def add_values(a: Value, b: Value) -> Value:
     case a b:
       Failure{"Expected numbers"}
 
+def add_cast(+a: Value, +b: Value) -> Value:
+  numeric_result(Bool.and(is_integer(a), is_integer(b)), add_values(strip_integer(a), strip_integer(b)))
+
 def add(a: Value, b: Value) -> Value:
   match a:
     case Failure{e}:
       Failure{e}
     case a:
-      add_values(cast_numeric(a), cast_numeric(b))
+      add_cast(cast_numeric(a), cast_numeric(b))
 
 def multiply_values(a: Value, b: Value) -> Value:
   match a b:
@@ -335,17 +424,24 @@ def multiply_values(a: Value, b: Value) -> Value:
     case a b:
       Failure{"Expected numbers"}
 
+def multiply_cast(+a: Value, +b: Value) -> Value:
+  numeric_result(Bool.and(is_integer(a), is_integer(b)), multiply_values(strip_integer(a), strip_integer(b)))
+
 def multiply(a: Value, b: Value) -> Value:
-  multiply_values(cast_numeric(a), cast_numeric(b))
+  multiply_cast(cast_numeric(a), cast_numeric(b))
 
 def negate_value(value: Value) -> Value:
   match value:
     case Number{n}:
-      negative(Decimal.from_nat(n))
-    case DecimalNumber{n}:
-      negative(n)
-    case NegativeNumber{n}:
+      integer_result(negative(Decimal.from_nat(n)))
+    case IntegerNumber{n}:
+      integer_result(negative(n))
+    case NegativeInteger{n}:
       compact(n)
+    case DecimalNumber{n}:
+      decimal_result(negative(n))
+    case NegativeNumber{n}:
+      DecimalNumber{n}
     case Failure{e}:
       Failure{e}
     case value:
@@ -477,14 +573,18 @@ def lookup(context: List<&2, Binding>, +name: String, +sensitive: Bool) -> Value
     case Bound{key, value} <> tail:
       found(String.eq(normalize(sensitive, key), normalize(sensitive, name)), value, u => lookup(tail, name, sensitive))
 
-def round_numeric(value: Value, target: Nat, before: Nat, mode: Decimal.Rounding) -> Value:
+def round_numeric(value: Value, +target: Nat, before: Nat, mode: Decimal.Rounding) -> Value:
   match value:
     case Number{n}:
-      compact(Decimal.round(Decimal.from_nat(n), target, before, mode, False{}))
+      integer_result(compact(Decimal.round(Decimal.from_nat(n), target, before, mode, False{})))
+    case IntegerNumber{n}:
+      integer_result(compact(Decimal.round(n, target, before, mode, False{})))
+    case NegativeInteger{n}:
+      integer_result(negative(Decimal.round(n, target, before, mode, True{})))
     case DecimalNumber{n}:
-      compact(Decimal.round(n, target, before, mode, False{}))
+      numeric_result(Nat.is_eq(target, 0n), compact(Decimal.round(n, target, before, mode, False{})))
     case NegativeNumber{n}:
-      negative(Decimal.round(n, target, before, mode, True{}))
+      numeric_result(Nat.is_eq(target, 0n), negative(Decimal.round(n, target, before, mode, True{})))
     case Failure{e}:
       Failure{e}
     case value:
@@ -518,6 +618,10 @@ def round_values(value: Value, places: Value, mode: Decimal.Rounding) -> Value:
       Failure{e}
     case value Number{n}:
       round_numeric(value, n, 0n, mode)
+    case value IntegerNumber{n}:
+      round_precision(n, False{}, value, mode)
+    case value NegativeInteger{n}:
+      round_precision(n, True{}, value, mode)
     case value DecimalNumber{n}:
       round_precision(n, False{}, value, mode)
     case value NegativeNumber{n}:
@@ -537,6 +641,10 @@ type NumericOperand is Data:
 
 def numeric_operand_value(value: Value) -> NumericOperand:
   match value:
+    case IntegerNumber{n}:
+      Magnitude{False{}, n}
+    case NegativeInteger{n}:
+      Magnitude{True{}, n}
     case Number{n}:
       Magnitude{False{}, Decimal.from_nat(n)}
     case DecimalNumber{n}:
@@ -554,9 +662,9 @@ def numeric_operand(value: Value) -> NumericOperand:
 def signed_result(neg: Bool, value: Decimal.Decimal) -> Value:
   match neg:
     case True{}:
-      negative(value)
+      decimal_result(negative(value))
     case False{}:
-      compact(value)
+      DecimalNumber{value}
 
 def division_result(result: Division.DivisionResult, +neg: Bool, mode: Decimal.Rounding) -> Value:
   match result:
@@ -881,6 +989,10 @@ def access_substring(value: Value, +s: String) -> Value:
 
 def access_index(value: Value, index: Value) -> Value:
   match index:
+    case IntegerNumber{n}:
+      access_numeric(n, False{}, value)
+    case NegativeInteger{n}:
+      access_numeric(n, True{}, value)
     case Failure{e}:
       Failure{e}
     case Number{n}:
@@ -942,8 +1054,10 @@ def extreme_value(accumulator: Value, candidate: Value, is_min: Bool) -> Value:
 
 def abs_value(value: Value) -> Value:
   match value:
-    case NegativeNumber{n}:
+    case NegativeInteger{n}:
       compact(n)
+    case NegativeNumber{n}:
+      DecimalNumber{n}
     case value:
       require_numeric(value)
 
@@ -1133,6 +1247,10 @@ def evaluate(e: Expr) -> Value:
 
 def show(value: Value) -> String:
   match value:
+    case IntegerNumber{n}:
+      Decimal.show(n)
+    case NegativeInteger{n}:
+      "-" ++ Decimal.show(n)
     case ArrayNil{}:
       "{}"
     case ArrayCons{head, tail}:
@@ -1164,6 +1282,10 @@ def failure_snapshot(+message: String) -> String:
 
 def snapshot_render(value: Value, +tail_mode: Bool) -> String:
   match value:
+    case IntegerNumber{n}:
+      "number:" ++ Decimal.show(Decimal.canonical(n))
+    case NegativeInteger{n}:
+      "number:-" ++ Decimal.show(Decimal.canonical(n))
     case ArrayNil{}:
       Bool.pick(String, tail_mode, "]", "array:[]")
     case ArrayCons{head, tail}:
@@ -1194,3 +1316,32 @@ def snapshot_render(value: Value, +tail_mode: Bool) -> String:
 
 def snapshot(value: Value) -> String:
   snapshot_render(value, False{})
+
+def class_snapshot(value: Value) -> String:
+  match value:
+    case Number{n}:
+      "class:Integer"
+    case IntegerNumber{n}:
+      "class:Integer"
+    case NegativeInteger{n}:
+      "class:Integer"
+    case DecimalNumber{n}:
+      "class:BigDecimal"
+    case NegativeNumber{n}:
+      "class:BigDecimal"
+    case TextValue{s}:
+      "class:String"
+    case Logical{True{}}:
+      "class:TrueClass"
+    case Logical{False{}}:
+      "class:FalseClass"
+    case NullValue{}:
+      "class:NilClass"
+    case ArrayNil{}:
+      "class:Array"
+    case ArrayCons{head, tail}:
+      "class:Array"
+    case Failure{e}:
+      failure_snapshot(e)
+    case value:
+      "internal:class"

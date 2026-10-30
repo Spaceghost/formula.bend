@@ -364,6 +364,8 @@ def operand(token: Lex.Token, stack: Stack) -> Stack:
       ParseReady{ops, Core.Literal{Core.DecimalNumber{n}} <> values}
     case Lex.Integer{n} ParseReady{ops, values}:
       ParseReady{ops, Core.Literal{Core.Number{n}} <> values}
+    case Lex.BigIntegerLiteral{n} ParseReady{ops, values}:
+      ParseReady{ops, Core.Literal{Core.IntegerNumber{n}} <> values}
     case Lex.Identifier{name} ParseReady{ops, values}:
       ParseReady{ops, identifier(name) <> values}
     case Lex.LParen{} ParseReady{ops, values}:
@@ -429,6 +431,8 @@ def ordinary_expectation(token: Lex.Token) -> Bool:
     case Lex.DecimalLiteral{n}:
       False{}
     case Lex.Integer{n}:
+      False{}
+    case Lex.BigIntegerLiteral{n}:
       False{}
     case Lex.Identifier{name}:
       False{}
@@ -575,6 +579,16 @@ def snapshot_parsed(parsed: Parsed, context: List<&2, Core.Binding>, sensitive: 
 
 def snapshot(source: String, context: List<&2, Core.Binding>, sensitive: Bool) -> String:
   snapshot_parsed(parse(source), context, sensitive)
+
+def class_snapshot_parsed(parsed: Parsed, context: List<&2, Core.Binding>, sensitive: Bool) -> String:
+  match parsed:
+    case Accepted{expr}:
+      Core.class_snapshot(evaluate_checked(expr, context, sensitive))
+    case ParseError{e}:
+      Bool.pick(String, String.starts_with(e, "Tokenizer: "), "error:Dentaku::TokenizerError", "error:Dentaku::ParseError")
+
+def class_snapshot(source: String, context: List<&2, Core.Binding>, sensitive: Bool) -> String:
+  class_snapshot_parsed(parse(source), context, sensitive)
 
 type NamesResult is Data:
   FoundNames{names: List<&2, String>}

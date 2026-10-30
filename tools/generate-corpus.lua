@@ -29,7 +29,9 @@ local function context_value(value)
   if value.decimal or value.integer then
     local key = value.decimal and 'decimal' or 'integer'
     local text = value[key]
-    return 'Parser.evaluate(' .. bend_string(text) .. ', Nil{}, False{})', '{' .. json_string(key) .. ':' .. json_string(text) .. '}'
+    local expression = 'Parser.evaluate(' .. bend_string(text) .. ', Nil{}, False{})'
+    if key == 'decimal' then expression = 'Core.decimal_result(' .. expression .. ')' end
+    return expression, '{' .. json_string(key) .. ':' .. json_string(text) .. '}'
   end
   local expressions, encoded = {}, {}
   for i, item in ipairs(value) do expressions[i], encoded[i] = context_value(item) end
@@ -65,6 +67,11 @@ for _, case in ipairs(cases) do
     call = 'Parser.names_snapshot(Parser.identifiers(' .. bend_string(case.formula) .. ', ' .. sensitive .. '))'
   elseif operation == 'dependencies' then
     call = 'Parser.names_snapshot(Parser.dependencies(' .. bend_string(case.formula) .. ', ' .. context .. ', ' .. sensitive .. '))'
+  elseif operation == 'class' then
+    call = 'Parser.class_snapshot(' .. bend_string(case.formula) .. ', ' .. context .. ', ' .. sensitive .. ')'
+  elseif operation == 'coerce' or operation == 'coerce_class' then
+    local show = operation == 'coerce' and 'snapshot' or 'class_snapshot'
+    call = 'Core.' .. show .. '(Core.require_numeric(Core.lookup(' .. context .. ', "input", ' .. sensitive .. ')))'
   else
     assert(operation == 'evaluate', 'unknown operation: ' .. operation)
     call = 'Parser.snapshot(' .. bend_string(case.formula) .. ', ' .. context .. ', ' .. sensitive .. ')'

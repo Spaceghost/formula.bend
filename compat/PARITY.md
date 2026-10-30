@@ -46,7 +46,7 @@ The unchanged upstream suite passes 713 examples with zero failures and 96.82%
 line coverage in the Ruby reference environment. `reference-summary.json` and
 `upstream-spec-catalog.json` record that run. These results describe Ruby only.
 
-The Lua-driven value and dependency corpus has 296 cases matched against Ruby values or parse
+The Lua-driven value and dependency corpus has 370 cases matched against Ruby values or parse
 error classification. It covers truthiness, strings/null, comparisons, selected
 numeric-string coercions, and static operand rejection. It is a small subset of
 the upstream catalog. Native error classes/messages, all calculator methods,
@@ -87,8 +87,8 @@ lua tools/run-oracle.lua PROJECT UPSTREAM GEMS STORAGE RUNROOT OUTPUT
 The probe catches Dentaku errors and records their class; unexpected Ruby failures
 abort without replacing the output. Compare the result before updating committed
 goldens. Parser snapshots currently preserve parse-error classification, while
-full runtime error-class/message parity remains unfinished. The 296-case value and dependency
-corpus passes on JavaScript; the 234-case checkpoint passed native CPU with one
+full runtime error-class/message parity remains unfinished. The 370-case value and dependency
+corpus passes on JavaScript; the 296-case checkpoint passed native CPU with one
 and eight threads. This is correctness verification,
 not the requested performance shootout.
 
@@ -176,4 +176,20 @@ fallback, including spelling; they are not uniformly tokenizer errors.
 Scientific exponents currently narrow at most 14 significant exponent digits to
 Nat. Extremely large scales and coefficients still depend on available memory;
 infinities, signed zero, complete Ruby numeric classes, and global BigDecimal
-modes remain incomplete. Native verification of the latest 62 cases is pending.
+modes remain incomplete. The 296-case numeric literal checkpoint passes native
+CPU with one and eight threads; the latest 74 class/coercion cases await native
+verification.
+
+## Numeric result classes
+
+The 370-case corpus includes 74 class and direct-coercion checks. Parsed integer
+and hexadecimal coefficients retain Integer identity beyond the compact Nat
+range; negative integers are distinct from negative decimals. Mixed arithmetic
+retains BigDecimal identity even when its result is integral or zero. Division
+and AVG return BigDecimal results, and rounding follows the input class and
+precision. Explicit context tags preserve integral BigDecimal inputs.
+
+These checks cover the pinned NumericParser string scenarios and its rejection
+cases through the direct Core.require_numeric adapter. They do not establish
+Ruby Float, Rational, signed decimal zero, non-finite values, subclass behavior,
+or complete error metadata compatibility. Full parity remains incomplete.
