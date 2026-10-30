@@ -111,3 +111,17 @@ an ordinary Ruby-style formula remains an identifier. Quoted sheet names, ranges
 external workbook names, structured references, and mixed notation inside a
 formula remain required work. src/reference.bend is the earlier forward-copy
 prototype; its original laws remain intact while callers migrate to address.bend.
+
+## Logical operators and dependency queries
+
+Infix AND/OR/XOR share the upstream precedence of zero and associate leftward.
+Prefix NOT and ! bind below comparisons and above infix logic. Function NOT
+retains its broader Ruby truthiness rules; prefix NOT has static logical-operand
+validation. AND/OR preserve lazy value evaluation and right-decisive unbound
+recovery. The alias-spacing rules are covered by differential fixtures.
+
+Syntactic identifier queries deduplicate and do not prune or evaluate guards.
+Resolved dependency queries handle bindings and IF/AND/OR guard pruning. Formula
+evaluation now performs the Calculator-style missing-dependency preflight before
+Core AST evaluation. Current bindings hold values, not stored formula nodes;
+custom/volatile functions, cycles, and bulk solving remain required work.

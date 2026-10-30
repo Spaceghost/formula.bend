@@ -26,7 +26,7 @@ digit lists. Coefficients can grow beyond a machine word. Decimal scale uses Nat
 Formatting preserves fractional zeros: `1.25 * .4` displays `0.500`.
 This formatting is not a claim of Ruby BigDecimal display compatibility.
 
-Thirteen universal laws and one hundred twelve concrete regression fixtures cover these
+Fifteen universal laws and one hundred eighteen concrete regression fixtures cover these
 parts. They do not establish full Ruby or spreadsheet compatibility.
 
 ## Example
@@ -59,8 +59,8 @@ have passed on JavaScript and native CPU. CUDA and Metal remain unverified.
 
 ## Compatibility limits
 
-Exponent notation, logical operators,
-arrays, most built-ins, spreadsheet formula lookup, dependency
+Exponent notation, logical function calls,
+arrays, most built-ins, spreadsheet formula lookup, stored-formula dependency
 analysis, and the complete Dentaku Calculator API remain unimplemented.
 `IF` and `NOT` follow Ruby truthiness: only false and null are falsey.
 The numeric representation is not yet a complete BigDecimal implementation.
@@ -100,7 +100,7 @@ The eight address runtime cases pass on both JavaScript and native CPU.
 
 Parity is measured against the pinned Ruby source and its complete 713-example
 suite. The Ruby reference passes all examples; that is not a claim that Bend does.
-A separate 31-case scalar corpus currently matches Ruby on selected values and
+A separate 68-case scalar and dependency corpus currently matches Ruby on selected values and
 parse-error classification. `make parity-check` generates the fixtures using Lua.
 Use `LUA=/path/to/lua` if Lua is not on PATH.
 
@@ -110,3 +110,11 @@ selected decimal numeric-string coercions are implemented. A static pass rejects
 invalid arithmetic operand types before evaluation, including unused branches.
 See [the parity checklist](compat/PARITY.md) for remaining rules and the shootout
 gate. No performance comparison is claimed yet.
+
+Infix AND, OR, XOR, prefix NOT, and `!` follow the pinned Dentaku precedence and
+static logical-operand rules. AND/OR short-circuit and allow a decisive right
+operand to resolve an unbound left operand. Logical function calls remain pending.
+Parser.identifiers reports unique syntactic inputs; Parser.dependencies prunes
+resolvable IF/AND/OR branches. Public formula evaluation checks dependencies
+before evaluating, while Core.evaluate_in remains direct AST evaluation. Stored
+formula values, cycles, and volatile custom-function analysis are not implemented.

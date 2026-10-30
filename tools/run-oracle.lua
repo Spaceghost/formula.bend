@@ -13,15 +13,21 @@ local function command(args)
 end
 local probe = [[
 File.foreach('/formula/build/scalar-corpus.formulas.tsv') do |line|
-  id, source = line.chomp.split("\t", 2)
+  id, source, operation = line.chomp.split("\t", 3)
   begin
-    value = Dentaku::Calculator.new.evaluate!(source)
+    calculator = Dentaku::Calculator.new
+    value = case operation
+    when 'identifiers' then calculator.identifiers(source)
+    when 'dependencies' then calculator.dependencies(source)
+    else calculator.evaluate!(source)
+    end
     snapshot = case value
     when nil then 'null'
     when true, false then "boolean:#{value}"
     when BigDecimal then "number:#{value.to_s('F').sub(/\.0+\z/, '')}"
     when Integer then "number:#{value}"
     when String then "string:#{value}"
+    when Array then "names:#{value.join(',')}"
     else raise "unhandled oracle type #{value.class}"
     end
   rescue Dentaku::Error => error

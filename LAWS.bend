@@ -79,3 +79,11 @@ law numeric_guard_truthy:
   for +yes: Core.Expr
   for no: Core.Expr
   {Core.evaluate(Core.If{Core.Literal{Core.Number{n}}, yes, no}) == Core.evaluate(yes) : Core.Value}
+
+law and_false_short_circuit:
+  for right: Core.Expr
+  {Core.evaluate(Core.And{Core.Literal{Core.Logical{False{}}}, right}) == Core.Logical{False{}} : Core.Value}
+
+law or_true_short_circuit:
+  for right: Core.Expr
+  {Core.evaluate(Core.Or{Core.Literal{Core.Logical{True{}}}, right}) == Core.Logical{True{}} : Core.Value}

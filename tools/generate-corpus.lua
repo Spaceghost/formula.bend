@@ -13,8 +13,18 @@ for _, case in ipairs(cases) do
   assert(not ids[case.id], 'duplicate id: ' .. case.id)
   ids[case.id] = true
   assert(not case.id:find('[\t\r\n]') and not case.formula:find('[\t\r\n]'), 'TSV control characters unsupported')
-  program:write('    IO.print(', bend_string(case.id .. '\t'), ' ++ Parser.snapshot(', bend_string(case.formula), ', Nil{}, False{}))\n')
+  local operation = case.operation or 'evaluate'
+  local call
+  if operation == 'identifiers' then
+    call = 'Parser.names_snapshot(Parser.identifiers(' .. bend_string(case.formula) .. ', False{}))'
+  elseif operation == 'dependencies' then
+    call = 'Parser.names_snapshot(Parser.dependencies(' .. bend_string(case.formula) .. ', Nil{}, False{}))'
+  else
+    assert(operation == 'evaluate', 'unknown operation: ' .. operation)
+    call = 'Parser.snapshot(' .. bend_string(case.formula) .. ', Nil{}, False{})'
+  end
+  program:write('    IO.print(', bend_string(case.id .. '\t'), ' ++ ', call, ')\n')
   expected:write(case.id, '\t', case.expected, '\n')
-  formulas:write(case.id, '\t', case.formula, '\n')
+  formulas:write(case.id, '\t', case.formula, '\t', operation, '\n')
 end
 program:close(); expected:close(); formulas:close()

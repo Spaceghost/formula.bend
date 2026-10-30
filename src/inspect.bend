@@ -49,6 +49,23 @@ def conditional(c: Info, a: Info, b: Info) -> Info:
     case Metadata{ck, cd, cv} Metadata{ak, ad, av} Metadata{bk, bd, bv}:
       Metadata{ak, Bool.or(cd, Bool.or(ad, bd)), Bool.and(cv, Bool.and(av, bv))}
 
+def logical_kind(kind: ResultKind, dynamic: Bool) -> Bool:
+  match kind:
+    case LogicalKind{}:
+      True{}
+    case kind:
+      dynamic
+
+def logical_binary(a: Info, b: Info) -> Info:
+  match a b:
+    case Metadata{ak, +ad, av} Metadata{bk, +bd, bv}:
+      Metadata{LogicalKind{}, Bool.or(ad, bd), Bool.and(Bool.and(av, bv), Bool.and(logical_kind(ak, ad), logical_kind(bk, bd)))}
+
+def logical_unary(a: Info) -> Info:
+  match a:
+    case Metadata{kind, +dynamic, valid}:
+      Metadata{LogicalKind{}, dynamic, Bool.and(valid, logical_kind(kind, dynamic))}
+
 # This pass inspects syntax only; it never evaluates a guard or user function.
 def analyze(expr: Core.Expr) -> Info:
   match expr:
@@ -78,6 +95,17 @@ def analyze(expr: Core.Expr) -> Info:
       unary(analyze(a), NumericKind{}, True{})
     case Core.Not{a}:
       unary(analyze(a), LogicalKind{}, False{})
+    case Core.And{a, b}:
+      x y = analyze(a) analyze(b)
+      logical_binary(x, y)
+    case Core.Or{a, b}:
+      x y = analyze(a) analyze(b)
+      logical_binary(x, y)
+    case Core.Xor{a, b}:
+      x y = analyze(a) analyze(b)
+      logical_binary(x, y)
+    case Core.PrefixNot{a}:
+      logical_unary(analyze(a))
     case Core.CoerceNumber{a}:
       unary(analyze(a), NumericKind{}, False{})
     case Core.If{c, a, b}:

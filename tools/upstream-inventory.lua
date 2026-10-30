@@ -12,6 +12,7 @@ local partial = {
   ['addition_spec.rb']=true, ['arithmetic_spec.rb']=true,
   ['division_spec.rb']=true, ['numeric_spec.rb']=true,
   ['comparator_spec.rb']=true,
+  ['and_spec.rb']=true, ['identifiers_spec.rb']=true,
   ['round_spec.rb']=true, ['roundup_spec.rb']=true, ['rounddown_spec.rb']=true,
   ['sum_spec.rb']=true, ['negation_spec.rb']=true,
   ['parser_spec.rb']=true, ['tokenizer_spec.rb']=true,

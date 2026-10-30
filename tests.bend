@@ -342,3 +342,21 @@ def trailing_comparison_operator() -> {Parser.parse("1 >") == Parser.ParseError{
 
 def comparison_grouping() -> {Parser.evaluate("(1 < 2) = true", Nil{}, False{}) == Core.Logical{True{}} : Core.Value}:
   {==}
+
+def resolved_guard_dependencies() -> {Parser.dependencies("IF(x > 5, y, z)", [Core.Bound{"x", Core.Number{7n}}], False{}) == Parser.FoundNames{["y"]} : Parser.NamesResult}:
+  {==}
+
+def syntactic_identifiers_do_not_prune() -> {Parser.identifiers("false AND missing", False{}) == Parser.FoundNames{["missing"]} : Parser.NamesResult}:
+  {==}
+
+def logical_dependency_pruning() -> {Parser.dependencies("missing OR true", Nil{}, False{}) == Parser.FoundNames{Nil{}} : Parser.NamesResult}:
+  {==}
+
+def logical_left_associative() -> {Parser.evaluate("true OR false AND false", Nil{}, False{}) == Core.Logical{False{}} : Core.Value}:
+  {==}
+
+def prefix_not_comparison_binding() -> {Parser.evaluate("NOT 1 < 2", Nil{}, False{}) == Core.Logical{False{}} : Core.Value}:
+  {==}
+
+def operator_not_rejects_numeric_literal() -> {Parser.parse("NOT 0") == Parser.ParseError{"Invalid static operand type"} : Parser.Parsed}:
+  {==}

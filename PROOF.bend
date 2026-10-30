@@ -43,3 +43,9 @@ def Laws.null_branch(yes, no):
 
 def Laws.numeric_guard_truthy(n, yes, no):
   {==}
+
+def Laws.and_false_short_circuit(right):
+  {==}
+
+def Laws.or_true_short_circuit(right):
+  {==}

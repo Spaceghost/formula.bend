@@ -3,6 +3,7 @@ import ./core.bend as Core
 import ./lexer.bend as Lex
 import ./decimal.bend as Decimal
 import ./inspect.bend as Inspect
+import ./dependencies.bend as Dependencies
 
 type Parsed is Data:
   Accepted{expression: Core.Expr}
@@ -15,6 +16,10 @@ type Operator is Data:
   MultiplyOp{}
   DivideOp{}
   CompareOp{operation: Core.Comparison}
+  AndOp{}
+  OrOp{}
+  XorOp{}
+  PrefixNotOp{}
   GroupFrame{outer: List<&2, Core.Expr>}
   CallFrame{name: String, arguments: List<&2, Core.Expr>, outer: List<&2, Core.Expr>}
 
@@ -70,76 +75,91 @@ def build_round(args: List<&2, Core.Expr>, mode: Decimal.Rounding) -> Parsed:
 def build_call(+name: String, +args: List<&2, Core.Expr>) -> Parsed:
   Bool.pick(Parsed, String.eq(String.to_upper(name), "ROUND"), build_round(args, Decimal.HalfAway{}), Bool.pick(Parsed, String.eq(String.to_upper(name), "ROUNDUP"), build_round(args, Decimal.TowardPositive{}), Bool.pick(Parsed, String.eq(String.to_upper(name), "ROUNDDOWN"), build_round(args, Decimal.TowardNegative{}), basic_call(name, args))))
 
+def precedence(op: Operator) -> Nat:
+  match op:
+    case NegateOp{}:
+      40n
+    case MultiplyOp{}:
+      20n
+    case DivideOp{}:
+      20n
+    case AddOp{}:
+      10n
+    case SubtractOp{}:
+      10n
+    case CompareOp{kind}:
+      5n
+    case PrefixNotOp{}:
+      3n
+    case op:
+      0n
+
+def reducible(op: Operator) -> Bool:
+  match op:
+    case GroupFrame{outer}:
+      False{}
+    case CallFrame{name, args, outer}:
+      False{}
+    case op:
+      True{}
+
+def reduce_one(op: Operator, tail: List<&2, Operator>, values: List<&2, Core.Expr>) -> Stack:
+  match op values:
+    case NegateOp{} a <> rest:
+      Ready{tail, Core.Negate{a} <> rest}
+    case PrefixNotOp{} a <> rest:
+      Ready{tail, Core.PrefixNot{a} <> rest}
+    case MultiplyOp{} right <> left <> rest:
+      Ready{tail, Core.Multiply{left, right} <> rest}
+    case DivideOp{} right <> left <> rest:
+      Ready{tail, Core.Divide{left, right} <> rest}
+    case AddOp{} right <> left <> rest:
+      Ready{tail, Core.Add{left, right} <> rest}
+    case SubtractOp{} right <> left <> rest:
+      Ready{tail, Core.Subtract{left, right} <> rest}
+    case CompareOp{kind} right <> left <> rest:
+      Ready{tail, Core.Compare{kind, left, right} <> rest}
+    case AndOp{} right <> left <> rest:
+      Ready{tail, Core.And{left, right} <> rest}
+    case OrOp{} right <> left <> rest:
+      Ready{tail, Core.Or{left, right} <> rest}
+    case XorOp{} right <> left <> rest:
+      Ready{tail, Core.Xor{left, right} <> rest}
+    case op values:
+      Rejected{"Missing operand"}
+
+def reduced_values(result: Stack, next: List<&2, Core.Expr> -> Stack) -> Stack:
+  match result:
+    case Ready{ops, values}:
+      next(values)
+    case Rejected{e}:
+      Rejected{e}
+
+def reduce_decision(proceed: Bool, done: Unit -> Stack, next: Unit -> Stack) -> Stack:
+  match proceed:
+    case False{}:
+      done(Unit{})
+    case True{}:
+      next(Unit{})
+
+def reduce_to(ops: List<&2, Operator>, +values: List<&2, Core.Expr>, +minimum: Nat) -> Stack:
+  match ops:
+    case Nil{}:
+      Ready{Nil{}, values}
+    case +head <> +tail:
+      reduce_decision(Bool.and(reducible(head), Nat.is_ge(precedence(head), minimum)), u => Ready{head <> tail, values}, u => reduced_values(reduce_one(head, tail, values), v => reduce_to(tail, v, minimum)))
+
 def reduce_times(ops: List<&2, Operator>, values: List<&2, Core.Expr>) -> Stack:
-  match ops values:
-    case DivideOp{} <> tail right <> left <> rest:
-      reduce_times(tail, Core.Divide{left, right} <> rest)
-    case DivideOp{} <> tail values:
-      Rejected{"Missing operand"}
-    case NegateOp{} <> tail a <> rest:
-      reduce_times(tail, Core.Negate{a} <> rest)
-    case NegateOp{} <> tail values:
-      Rejected{"Missing operand"}
-    case MultiplyOp{} <> tail right <> left <> rest:
-      reduce_times(tail, Core.Multiply{left, right} <> rest)
-    case MultiplyOp{} <> tail values:
-      Rejected{"Missing operand"}
-    case ops values:
-      Ready{ops, values}
+  reduce_to(ops, values, 20n)
 
 def reduce_arithmetic(ops: List<&2, Operator>, values: List<&2, Core.Expr>) -> Stack:
-  match ops values:
-    case DivideOp{} <> tail right <> left <> rest:
-      reduce_arithmetic(tail, Core.Divide{left, right} <> rest)
-    case DivideOp{} <> tail values:
-      Rejected{"Missing operand"}
-    case NegateOp{} <> tail a <> rest:
-      reduce_arithmetic(tail, Core.Negate{a} <> rest)
-    case SubtractOp{} <> tail right <> left <> rest:
-      reduce_arithmetic(tail, Core.Subtract{left, right} <> rest)
-    case NegateOp{} <> tail values:
-      Rejected{"Missing operand"}
-    case SubtractOp{} <> tail values:
-      Rejected{"Missing operand"}
-    case MultiplyOp{} <> tail right <> left <> rest:
-      reduce_arithmetic(tail, Core.Multiply{left, right} <> rest)
-    case AddOp{} <> tail right <> left <> rest:
-      reduce_arithmetic(tail, Core.Add{left, right} <> rest)
-    case MultiplyOp{} <> tail values:
-      Rejected{"Missing operand"}
-    case AddOp{} <> tail values:
-      Rejected{"Missing operand"}
-    case ops values:
-      Ready{ops, values}
+  reduce_to(ops, values, 10n)
+
+def reduce_comparisons(ops: List<&2, Operator>, values: List<&2, Core.Expr>) -> Stack:
+  reduce_to(ops, values, 5n)
 
 def reduce_all(ops: List<&2, Operator>, values: List<&2, Core.Expr>) -> Stack:
-  match ops values:
-    case CompareOp{op} <> tail right <> left <> rest:
-      reduce_all(tail, Core.Compare{op, left, right} <> rest)
-    case CompareOp{op} <> tail values:
-      Rejected{"Missing comparison operand"}
-    case DivideOp{} <> tail right <> left <> rest:
-      reduce_all(tail, Core.Divide{left, right} <> rest)
-    case DivideOp{} <> tail values:
-      Rejected{"Missing operand"}
-    case NegateOp{} <> tail a <> rest:
-      reduce_all(tail, Core.Negate{a} <> rest)
-    case SubtractOp{} <> tail right <> left <> rest:
-      reduce_all(tail, Core.Subtract{left, right} <> rest)
-    case NegateOp{} <> tail values:
-      Rejected{"Missing operand"}
-    case SubtractOp{} <> tail values:
-      Rejected{"Missing operand"}
-    case MultiplyOp{} <> tail right <> left <> rest:
-      reduce_all(tail, Core.Multiply{left, right} <> rest)
-    case AddOp{} <> tail right <> left <> rest:
-      reduce_all(tail, Core.Add{left, right} <> rest)
-    case MultiplyOp{} <> tail values:
-      Rejected{"Missing operand"}
-    case AddOp{} <> tail values:
-      Rejected{"Missing operand"}
-    case ops values:
-      Ready{ops, values}
+  reduce_to(ops, values, 0n)
 
 def push_operator(stack: Stack, op: Operator) -> Stack:
   match stack:
@@ -194,8 +214,25 @@ def start_call(name: String, stack: Stack) -> Stack:
 def identifier(+name: String) -> Core.Expr:
   Bool.pick(Core.Expr, String.eq(String.to_lower(name), "true"), Core.Literal{Core.Logical{True{}}}, Bool.pick(Core.Expr, String.eq(String.to_lower(name), "false"), Core.Literal{Core.Logical{False{}}}, Bool.pick(Core.Expr, String.eq(String.to_lower(name), "null"), Core.Literal{Core.NullValue{}}, Core.Variable{name})))
 
+def keyword_operand(+name: String, stack: Stack) -> Stack:
+  match stack:
+    case Ready{ops, values}:
+      Bool.pick(Stack, Bool.or(String.eq(name, "&&"), String.eq(name, "||")), Rejected{"Expected an operand"}, Ready{ops, Core.Variable{name} <> values})
+    case Rejected{e}:
+      Rejected{e}
+
 def operand(token: Lex.Token, stack: Stack) -> Stack:
   match token stack:
+    case Lex.NotWord{name} stack:
+      push_operator(stack, PrefixNotOp{})
+    case Lex.BangWord{} stack:
+      push_operator(stack, PrefixNotOp{})
+    case Lex.AndWord{name} stack:
+      keyword_operand(name, stack)
+    case Lex.OrWord{name} stack:
+      keyword_operand(name, stack)
+    case Lex.XorWord{name} stack:
+      keyword_operand(name, stack)
     case Lex.StringLiteral{s} Ready{ops, values}:
       Ready{ops, Core.Literal{Core.TextValue{s}} <> values}
     case Lex.Minus{} stack:
@@ -217,18 +254,24 @@ def operand(token: Lex.Token, stack: Stack) -> Stack:
 
 def operator(token: Lex.Token, stack: Stack) -> Stack:
   match token stack:
+    case Lex.AndWord{name} Ready{ops, values}:
+      push_operator(reduce_all(ops, values), AndOp{})
+    case Lex.OrWord{name} Ready{ops, values}:
+      push_operator(reduce_all(ops, values), OrOp{})
+    case Lex.XorWord{name} Ready{ops, values}:
+      push_operator(reduce_all(ops, values), XorOp{})
     case Lex.EqualToken{} Ready{ops, values}:
-      push_operator(reduce_all(ops, values), CompareOp{Core.EqualTo{}})
+      push_operator(reduce_comparisons(ops, values), CompareOp{Core.EqualTo{}})
     case Lex.NotEqualToken{} Ready{ops, values}:
-      push_operator(reduce_all(ops, values), CompareOp{Core.NotEqualTo{}})
+      push_operator(reduce_comparisons(ops, values), CompareOp{Core.NotEqualTo{}})
     case Lex.LessToken{} Ready{ops, values}:
-      push_operator(reduce_all(ops, values), CompareOp{Core.LessThan{}})
+      push_operator(reduce_comparisons(ops, values), CompareOp{Core.LessThan{}})
     case Lex.LessEqualToken{} Ready{ops, values}:
-      push_operator(reduce_all(ops, values), CompareOp{Core.LessOrEqual{}})
+      push_operator(reduce_comparisons(ops, values), CompareOp{Core.LessOrEqual{}})
     case Lex.GreaterToken{} Ready{ops, values}:
-      push_operator(reduce_all(ops, values), CompareOp{Core.GreaterThan{}})
+      push_operator(reduce_comparisons(ops, values), CompareOp{Core.GreaterThan{}})
     case Lex.GreaterEqualToken{} Ready{ops, values}:
-      push_operator(reduce_all(ops, values), CompareOp{Core.GreaterOrEqual{}})
+      push_operator(reduce_comparisons(ops, values), CompareOp{Core.GreaterOrEqual{}})
     case Lex.Slash{} Ready{ops, values}:
       push_operator(reduce_times(ops, values), DivideOp{})
     case Lex.Minus{} Ready{ops, values}:
@@ -246,7 +289,7 @@ def operator(token: Lex.Token, stack: Stack) -> Stack:
     case token stack:
       Rejected{"Expected an operator"}
 
-def next_expectation(token: Lex.Token) -> Bool:
+def ordinary_expectation(token: Lex.Token) -> Bool:
   match token:
     case Lex.StringLiteral{s}:
       False{}
@@ -260,6 +303,17 @@ def next_expectation(token: Lex.Token) -> Bool:
       False{}
     case token:
       True{}
+
+def next_expectation(token: Lex.Token, was_operand: Bool) -> Bool:
+  match token:
+    case Lex.AndWord{name}:
+      Bool.not(was_operand)
+    case Lex.OrWord{name}:
+      Bool.not(was_operand)
+    case Lex.XorWord{name}:
+      Bool.not(was_operand)
+    case token:
+      ordinary_expectation(token)
 
 def step(expected: Bool, token: Lex.Token, stack: Stack) -> Stack:
   match expected:
@@ -277,12 +331,20 @@ def finish(expected: Bool, stack: Stack) -> Stack:
 
 def scan(tokens: List<&2, Lex.Token>, stack: Stack, expected: Bool) -> Stack:
   match tokens expected:
+    case Lex.NotWord{name} <> Lex.LParen{} <> tail True{}:
+      scan(tail, start_call(name, stack), True{})
+    case Lex.AndWord{name} <> Lex.LParen{} <> tail True{}:
+      scan(tail, start_call(name, stack), True{})
+    case Lex.OrWord{name} <> Lex.LParen{} <> tail True{}:
+      scan(tail, start_call(name, stack), True{})
+    case Lex.XorWord{name} <> Lex.LParen{} <> tail True{}:
+      scan(tail, start_call(name, stack), True{})
     case Lex.Identifier{name} <> Lex.LParen{} <> tail True{}:
       scan(tail, start_call(name, stack), True{})
     case Nil{} expected:
       finish(expected, stack)
-    case +head <> tail expected:
-      scan(tail, step(expected, head, stack), next_expectation(head))
+    case +head <> tail +expected:
+      scan(tail, step(expected, head, stack), next_expectation(head, expected))
 
 def validated(info: Inspect.Info, expr: Core.Expr) -> Parsed:
   match info:
@@ -310,10 +372,20 @@ def drain(stack: Stack) -> Parsed:
 def parse(source: String) -> Parsed:
   drain(scan(Lex.tokenize(source), Ready{Nil{}, Nil{}}, True{}))
 
+def preflight(missing: List<&2, String>, expr: Core.Expr, context: List<&2, Core.Binding>, sensitive: Bool) -> Core.Value:
+  match missing:
+    case Nil{}:
+      Core.evaluate_in(expr, context, sensitive)
+    case names:
+      Core.Failure{"Unbound variable: " ++ String.join(names, ", ")}
+
+def evaluate_checked(+expr: Core.Expr, +context: List<&2, Core.Binding>, +sensitive: Bool) -> Core.Value:
+  preflight(Dependencies.analyze(expr, context, sensitive, False{}), expr, context, sensitive)
+
 def evaluate_parsed(parsed: Parsed, context: List<&2, Core.Binding>, sensitive: Bool) -> Core.Value:
   match parsed:
     case Accepted{expr}:
-      Core.evaluate_in(expr, context, sensitive)
+      evaluate_checked(expr, context, sensitive)
     case ParseError{e}:
       Core.Failure{"Parse error: " ++ e}
 
@@ -324,9 +396,33 @@ def evaluate(source: String, context: List<&2, Core.Binding>, sensitive: Bool) -
 def snapshot_parsed(parsed: Parsed, context: List<&2, Core.Binding>, sensitive: Bool) -> String:
   match parsed:
     case Accepted{expr}:
-      Core.snapshot(Core.evaluate_in(expr, context, sensitive))
+      Core.snapshot(evaluate_checked(expr, context, sensitive))
     case ParseError{e}:
       "error:Dentaku::ParseError"
 
 def snapshot(source: String, context: List<&2, Core.Binding>, sensitive: Bool) -> String:
   snapshot_parsed(parse(source), context, sensitive)
+
+type NamesResult is Data:
+  FoundNames{names: List<&2, String>}
+  NamesError{message: String}
+
+def names_result(parsed: Parsed, context: List<&2, Core.Binding>, sensitive: Bool, static: Bool) -> NamesResult:
+  match parsed:
+    case Accepted{expr}:
+      FoundNames{Dependencies.analyze(expr, context, sensitive, static)}
+    case ParseError{e}:
+      NamesError{e}
+
+def identifiers(source: String, sensitive: Bool) -> NamesResult:
+  names_result(parse(source), Nil{}, sensitive, True{})
+
+def dependencies(source: String, context: List<&2, Core.Binding>, sensitive: Bool) -> NamesResult:
+  names_result(parse(source), context, sensitive, False{})
+
+def names_snapshot(result: NamesResult) -> String:
+  match result:
+    case FoundNames{names}:
+      "names:" ++ String.join(names, ",")
+    case NamesError{e}:
+      "error:Dentaku::ParseError"

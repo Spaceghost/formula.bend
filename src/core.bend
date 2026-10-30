@@ -34,6 +34,10 @@ type Expr is Data:
   Round{operand: Expr, places: Expr, mode: Decimal.Rounding}
   Compare{operation: Comparison, left: Expr, right: Expr}
   CoerceNumber{operand: Expr}
+  And{left: Expr, right: Expr}
+  Or{left: Expr, right: Expr}
+  Xor{left: Expr, right: Expr}
+  PrefixNot{operand: Expr}
 
 def compact_pick(value: Decimal.Decimal, small: Bool) -> Value:
   match value small:
@@ -218,6 +222,71 @@ def logical_not(v: Value) -> Value:
     case v:
       Logical{False{}}
 
+def truthy(value: Value) -> Bool:
+  match value:
+    case NullValue{}:
+      False{}
+    case Logical{b}:
+      b
+    case value:
+      True{}
+
+def decisive(+is_and: Bool, value: Value) -> Bool:
+  Bool.xor(is_and, truthy(value))
+
+def logical_recovered(right: Value, left_error: Value, is_and: Bool) -> Value:
+  match right:
+    case Failure{e}:
+      Failure{e}
+    case +right:
+      Bool.pick(Value, decisive(is_and, right), right, left_error)
+
+def logical_unbound(unbound: Bool, left_error: Value, is_and: Bool, next: Unit -> Value) -> Value:
+  match unbound:
+    case True{}:
+      logical_recovered(next(Unit{}), left_error, is_and)
+    case False{}:
+      left_error
+
+def logical_chosen(done: Bool, value: Value, next: Unit -> Value) -> Value:
+  match done:
+    case True{}:
+      value
+    case False{}:
+      next(Unit{})
+
+def logical_left(value: Value, +is_and: Bool, next: Unit -> Value) -> Value:
+  match value:
+    case Failure{+e}:
+      logical_unbound(String.starts_with(e, "Unbound variable: "), Failure{e}, is_and, next)
+    case +value:
+      logical_chosen(decisive(is_and, value), value, next)
+
+def strict_logical(value: Value) -> Value:
+  match value:
+    case Logical{b}:
+      Logical{b}
+    case NullValue{}:
+      Logical{False{}}
+    case Failure{e}:
+      Failure{e}
+    case value:
+      Failure{"Incompatible logical operand"}
+
+def xor_values(a: Value, b: Value) -> Value:
+  match a b:
+    case Logical{x} Logical{y}:
+      Logical{Bool.xor(x, y)}
+    case Failure{e} b:
+      Failure{e}
+    case a Failure{e}:
+      Failure{e}
+    case a b:
+      Failure{"Incompatible logical operand"}
+
+def logical_xor(a: Value, b: Value) -> Value:
+  xor_values(strict_logical(a), strict_logical(b))
+
 type Binding is Data:
   Bound{name: String, value: Value}
 
@@ -344,13 +413,20 @@ def divide_operands(a: NumericOperand, b: NumericOperand, places: Nat, mode: Dec
 def divide_at(a: Value, b: Value, places: Nat, mode: Decimal.Rounding) -> Value:
   divide_operands(numeric_operand(a), numeric_operand(b), places, mode)
 
-def divide_default_operands(a: NumericOperand, b: NumericOperand) -> Value:
-  match a b:
-    case Magnitude{sx, +x} Magnitude{sy, +y}:
+def divide_nonzero(zero: Bool, a: NumericOperand, sy: Bool, +y: Decimal.Decimal) -> Value:
+  match zero a:
+    case True{} a:
+      Failure{"Division by zero"}
+    case False{} Magnitude{sx, +x}:
       division_result(Division.divide(x, y, Division.ruby_places(x, y)), Bool.xor(sx, sy), Decimal.HalfAway{})
-    case InvalidNumeric{e} b:
+    case False{} InvalidNumeric{e}:
       Failure{e}
-    case a InvalidNumeric{e}:
+
+def divide_default_operands(a: NumericOperand, b: NumericOperand) -> Value:
+  match b:
+    case Magnitude{sy, +y}:
+      divide_nonzero(Decimal.is_zero(y), a, sy, y)
+    case InvalidNumeric{e}:
       Failure{e}
 
 def divide(a: Value, b: Value) -> Value:
@@ -449,6 +525,15 @@ def evaluate_in(e: Expr, +context: List<&2, Binding>, +sensitive: Bool) -> Value
     case Multiply{a, b}:
       x y = evaluate_in(a, context, sensitive) evaluate_in(b, context, sensitive)
       multiply(x, y)
+    case And{a, b}:
+      logical_left(evaluate_in(a, context, sensitive), True{}, u => evaluate_in(b, context, sensitive))
+    case Or{a, b}:
+      logical_left(evaluate_in(a, context, sensitive), False{}, u => evaluate_in(b, context, sensitive))
+    case Xor{a, b}:
+      x y = evaluate_in(a, context, sensitive) evaluate_in(b, context, sensitive)
+      logical_xor(x, y)
+    case PrefixNot{a}:
+      logical_not(evaluate_in(a, context, sensitive))
     case CoerceNumber{a}:
       require_numeric(evaluate_in(a, context, sensitive))
     case Compare{op, a, b}:
@@ -488,6 +573,9 @@ def show(value: Value) -> String:
       e
 
 # Typed, canonical snapshots for cross-runtime differential fixtures.
+def failure_snapshot(+message: String) -> String:
+  Bool.pick(String, String.starts_with(message, "Unbound variable: "), "error:Dentaku::UnboundVariableError", Bool.pick(String, String.eq(message, "Division by zero"), "error:Dentaku::ZeroDivisionError", "error:Dentaku::ArgumentError"))
+
 def snapshot(value: Value) -> String:
   match value:
     case Number{n}:
@@ -505,4 +593,4 @@ def snapshot(value: Value) -> String:
     case TextValue{s}:
       "string:" ++ s
     case Failure{e}:
-      "error:" ++ e
+      failure_snapshot(e)

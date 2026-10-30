@@ -46,11 +46,11 @@ The unchanged upstream suite passes 713 examples with zero failures and 96.82%
 line coverage in the Ruby reference environment. `reference-summary.json` and
 `upstream-spec-catalog.json` record that run. These results describe Ruby only.
 
-The Lua-driven scalar corpus has 31 cases matched against Ruby values or parse
+The Lua-driven scalar and dependency corpus has 68 cases matched against Ruby values or parse
 error classification. It covers truthiness, strings/null, comparisons, selected
 numeric-string coercions, and static operand rejection. It is a small subset of
 the upstream catalog. Native error classes/messages, all calculator methods,
-arrays, other built-ins, logical operators, custom functions, dependencies, and
+arrays, other built-ins, remaining logical function calls, custom functions, dependencies, and
 visitors still require parity work. Hex/exponent numeric-string coercion remains
 unfinished. No spec family is marked complete merely because this subset passes.
 
@@ -86,7 +86,7 @@ lua tools/run-oracle.lua PROJECT UPSTREAM GEMS STORAGE RUNROOT OUTPUT
 The probe catches Dentaku errors and records their class; unexpected Ruby failures
 abort without replacing the output. Compare the result before updating committed
 goldens. Parser snapshots currently preserve parse-error classification, while
-full runtime error-class/message parity remains unfinished. The 31-case scalar
+full runtime error-class/message parity remains unfinished. The 68-case scalar and dependency
 corpus passes on JavaScript and native CPU. This is correctness verification,
 not the requested performance shootout.
 
@@ -94,3 +94,25 @@ The upstream catalog and scenario inventory derive from MIT-licensed Dentaku;
 its license is retained as LICENSE.dentaku. The current pinned source has 54 spec
 files and 713 executed examples. The inventory status remains partial or
 unassessed until the corresponding rules have been ported and verified.
+
+## Logical operators and dependency preflight
+
+The corpus includes equal-precedence, left-associative infix AND/OR/XOR, prefix
+NOT below comparisons, `!`, spacing-sensitive aliases, and static type rejection.
+AND/OR can accept a decisive right operand when the left is unbound. A non-unbound
+error is not suppressed. Calculator-style dependency preflight runs before value
+evaluation; direct AST evaluation remains separate. Division validates its right
+operand first, including zero, as in the pinned implementation.
+
+Identifiers enumerate and deduplicate every syntactic input without executing
+values. Dependencies prune resolvable IF branches and decisive AND/OR operands,
+and conservatively retain inputs when probing a guard fails. Stored formula
+nodes, volatile functions, custom function side effects, cycles, and bulk graph
+solving remain incomplete. Logical function calls have eager argument collection
+in Ruby and must not be implemented as aliases for the lazy infix operators.
+
+The current SUM implementation still lowers calls to a numeric reduction tree.
+That preserves covered values but does not preserve every function-node visitor
+or dependency detail: upstream function dependencies can retain repeated names.
+Function argument nodes and those duplicate-dependency cases remain a known
+parity gap; passing the current corpus does not mark that rule complete.

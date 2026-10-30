@@ -19,6 +19,11 @@ type Token is Data:
   LessEqualToken{}
   GreaterToken{}
   GreaterEqualToken{}
+  AndWord{spelling: String}
+  OrWord{spelling: String}
+  XorWord{spelling: String}
+  NotWord{spelling: String}
+  BangWord{}
   Invalid{character: Char}
 
 type Mode is Data:
@@ -28,6 +33,7 @@ type Mode is Data:
   Word{reversed: String}
   Quoted{quote: Char, reversed: String}
   Pending{symbol: Char}
+  AliasPending{is_and: Bool}
 
 type CharacterClass is Data:
   Digit{value: Nat, character: Char}
@@ -47,6 +53,8 @@ def integer_token(+digits: List<&2, U32>, small: Bool) -> Token:
 
 def symbol(c: Char) -> Token:
   match c:
+    case Chr{33}:
+      BangWord{}
     case Chr{61}:
       EqualToken{}
     case Chr{60}:
@@ -72,6 +80,8 @@ def symbol(c: Char) -> Token:
 
 def flush(mode: Mode, tokens: List<&2, Token>) -> List<&2, Token>:
   match mode:
+    case AliasPending{is_and}:
+      Invalid{Chr{38}} <> tokens
     case Pending{c}:
       symbol(c) <> tokens
     case Quoted{quote, text}:
@@ -87,8 +97,20 @@ def flush(mode: Mode, tokens: List<&2, Token>) -> List<&2, Token>:
     case Word{s}:
       Identifier{String.reverse(s)} <> tokens
 
+def spaced_word(+text: String) -> Token:
+  Bool.pick(Token, String.eq(String.to_lower(text), "and"), AndWord{text}, Bool.pick(Token, String.eq(String.to_lower(text), "or"), OrWord{text}, Bool.pick(Token, String.eq(String.to_lower(text), "xor"), XorWord{text}, Bool.pick(Token, String.eq(String.to_lower(text), "not"), NotWord{text}, Identifier{text}))))
+
+def space_flush(mode: Mode, tokens: List<&2, Token>) -> List<&2, Token>:
+  match mode:
+    case Word{reversed}:
+      spaced_word(String.reverse(reversed)) <> tokens
+    case mode:
+      flush(mode, tokens)
+
 def step(kind: CharacterClass, mode: Mode, tokens: List<&2, Token>) -> Mode & List<&2, Token>:
   match kind mode:
+    case Digit{n, c} AliasPending{is_and}:
+      (Idle{}, Invalid{c} <> tokens)
     case Digit{n, c} Pending{first}:
       (Digits{[U32.from_nat(n)]}, symbol(first) <> tokens)
     case Digit{n, c} Quoted{quote, text}:
@@ -106,7 +128,7 @@ def step(kind: CharacterClass, mode: Mode, tokens: List<&2, Token>) -> Mode & Li
     case Letter{c} mode:
       (Word{SCon{c, SNil{}}}, flush(mode, tokens))
     case Space{} mode:
-      (Idle{}, flush(mode, tokens))
+      (Idle{}, space_flush(mode, tokens))
     case Symbol{Chr{46}} Digits{digits}:
       (Fraction{digits, 0n}, tokens)
     case Symbol{Chr{46}} Idle{}:
@@ -123,6 +145,10 @@ def quote_step(same: Bool, c: Char, quote: Char, reversed: String, tokens: List<
 
 def normal_step(mode: Mode, c: Char, tokens: List<&2, Token>) -> Mode & List<&2, Token>:
   match c:
+    case Chr{38}:
+      (Pending{Chr{38}}, flush(mode, tokens))
+    case Chr{124}:
+      (Pending{Chr{124}}, flush(mode, tokens))
     case Chr{34}:
       (Quoted{Chr{34}, SNil{}}, flush(mode, tokens))
     case Chr{39}:
@@ -140,6 +166,10 @@ def normal_step(mode: Mode, c: Char, tokens: List<&2, Token>) -> Mode & List<&2,
 
 def pending_step(first: Char, c: Char, tokens: List<&2, Token>) -> Mode & List<&2, Token>:
   match first c:
+    case Chr{38} Chr{38}:
+      (AliasPending{True{}}, tokens)
+    case Chr{124} Chr{124}:
+      (AliasPending{False{}}, tokens)
     case Chr{60} Chr{61}:
       (Idle{}, LessEqualToken{} <> tokens)
     case Chr{62} Chr{61}:
@@ -153,8 +183,17 @@ def pending_step(first: Char, c: Char, tokens: List<&2, Token>) -> Mode & List<&
     case first c:
       normal_step(Idle{}, c, symbol(first) <> tokens)
 
+def alias_step(space: Bool, is_and: Bool, c: Char, tokens: List<&2, Token>) -> Mode & List<&2, Token>:
+  match space:
+    case True{}:
+      (Idle{}, Bool.pick(Token, is_and, AndWord{"&&"}, OrWord{"||"}) <> tokens)
+    case False{}:
+      (Idle{}, Invalid{c} <> tokens)
+
 def scan_step(mode: Mode, c: Char, tokens: List<&2, Token>) -> Mode & List<&2, Token>:
   match mode c:
+    case AliasPending{is_and} +c:
+      alias_step(Char.is_space(c), is_and, c, tokens)
     case Quoted{+quote, text} +c:
       quote_step(Char.is_eq(c, quote), c, quote, text, tokens)
     case Pending{first} c:
