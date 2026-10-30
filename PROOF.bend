@@ -15,3 +15,6 @@ def Laws.absolute_axis(coordinate, delta):
 
 def Laws.mixed_row_anchor(row, column, rows, columns):
   {==}
+
+def Laws.bound_literal(value, context, sensitive):
+  {==}

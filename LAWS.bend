@@ -29,3 +29,9 @@ law mixed_row_anchor:
   for rows: Nat
   for columns: Nat
   {Ref.copy_forward(Ref.Cell{Ref.Absolute{row}, Ref.Relative{column}}, rows, columns) == Ref.Cell{Ref.Absolute{row}, Ref.Relative{Nat.add(column, columns)}} : Ref.Reference}
+
+law bound_literal:
+  for +value: Core.Value
+  for context: List<&2, Core.Binding>
+  for sensitive: Bool
+  {Core.evaluate_in(Core.Literal{value}, context, sensitive) == value : Core.Value}

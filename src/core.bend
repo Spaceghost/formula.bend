@@ -8,6 +8,7 @@ type Value is Data:
 
 type Expr is Data:
   Literal{value: Value}
+  Variable{name: String}
   Add{left: Expr, right: Expr}
   Multiply{left: Expr, right: Expr}
   If{condition: Expr, yes: Expr, no: Expr}
@@ -47,15 +48,45 @@ def choose(c: Value, yes: Unit -> Value, no: Unit -> Value) -> Value:
     case Number{n}:
       Failure{"Expected logical condition"}
 
-def evaluate(e: Expr) -> Value:
+type Binding is Data:
+  Bound{name: String, value: Value}
+
+def normalize(sensitive: Bool, name: String) -> String:
+  match sensitive:
+    case True{}:
+      name
+    case False{}:
+      String.to_lower(name)
+
+def found(same: Bool, value: Value, rest: Unit -> Value) -> Value:
+  match same:
+    case True{}:
+      value
+    case False{}:
+      rest(Unit{})
+
+# First matching binding wins; callers can prepend a transient context.
+def lookup(context: List<&2, Binding>, +name: String, +sensitive: Bool) -> Value:
+  match context:
+    case Nil{}:
+      Failure{"Unbound variable: " ++ name}
+    case Bound{key, value} <> tail:
+      found(String.eq(normalize(sensitive, key), normalize(sensitive, name)), value, u => lookup(tail, name, sensitive))
+
+def evaluate_in(e: Expr, +context: List<&2, Binding>, +sensitive: Bool) -> Value:
   match e:
     case Literal{v}:
       v
+    case Variable{name}:
+      lookup(context, name, sensitive)
     case Add{a, b}:
-      x y = evaluate(a) evaluate(b)
+      x y = evaluate_in(a, context, sensitive) evaluate_in(b, context, sensitive)
       add(x, y)
     case Multiply{a, b}:
-      x y = evaluate(a) evaluate(b)
+      x y = evaluate_in(a, context, sensitive) evaluate_in(b, context, sensitive)
       multiply(x, y)
     case If{c, a, b}:
-      choose(evaluate(c), u => evaluate(a), u => evaluate(b))
+      choose(evaluate_in(c, context, sensitive), u => evaluate_in(a, context, sensitive), u => evaluate_in(b, context, sensitive))
+
+def evaluate(e: Expr) -> Value:
+  evaluate_in(e, Nil{}, False{})
