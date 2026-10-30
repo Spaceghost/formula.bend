@@ -1,0 +1,26 @@
+{
+  "source_commit": "5f62db6a28321354a5c73bcd091de671eee1519f",
+  "bend_version": "2.0.16",
+  "differential_cases": 114,
+  "scope": "correctness verification; not a performance shootout",
+  "checks": [
+    {
+      "target": "JavaScript",
+      "status": "passed"
+    },
+    {
+      "target": "native CPU",
+      "status": "passed",
+      "optimization": "-O3",
+      "artifact_sha256": "c9d62c58000cd66373670eec3bc5f6883a928f32daa3e5edc524fa26a9630e99"
+    },
+    {
+      "target": "CUDA",
+      "status": "not yet verified"
+    },
+    {
+      "target": "Metal",
+      "status": "not yet verified"
+    }
+  ]
+}

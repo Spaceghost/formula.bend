@@ -87,7 +87,7 @@ The probe catches Dentaku errors and records their class; unexpected Ruby failur
 abort without replacing the output. Compare the result before updating committed
 goldens. Parser snapshots currently preserve parse-error classification, while
 full runtime error-class/message parity remains unfinished. The 114-case scalar and dependency
-corpus passes on JavaScript; native verification is pending. This is correctness verification,
+corpus passes on JavaScript and native CPU. This is correctness verification,
 not the requested performance shootout.
 
 The upstream catalog and scenario inventory derive from MIT-licensed Dentaku;
