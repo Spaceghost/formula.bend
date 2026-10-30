@@ -1,0 +1,5003 @@
+{
+  "version": "3.13.6",
+  "summary": {
+    "duration": 1.032709909,
+    "example_count": 713,
+    "failure_count": 0,
+    "pending_count": 0,
+    "errors_outside_of_examples_count": 0
+  },
+  "examples": [
+    {
+      "id": "./spec/ast/abs_spec.rb[1:1]",
+      "description": "Dentaku::AST::Function::Abs returns the absolute value of number",
+      "file": "./spec/ast/abs_spec.rb",
+      "line": 6,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/abs_spec.rb[1:2]",
+      "description": "Dentaku::AST::Function::Abs returns the correct value for positive number",
+      "file": "./spec/ast/abs_spec.rb",
+      "line": 11,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/abs_spec.rb[1:3]",
+      "description": "Dentaku::AST::Function::Abs returns the correct value for zero",
+      "file": "./spec/ast/abs_spec.rb",
+      "line": 16,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/abs_spec.rb[1:4:1]",
+      "description": "Dentaku::AST::Function::Abs checking errors raises an error if argument is not numeric",
+      "file": "./spec/ast/abs_spec.rb",
+      "line": 22,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/addition_spec.rb[1:1]",
+      "description": "Dentaku::AST::Addition allows access to its sub-trees",
+      "file": "./spec/ast/addition_spec.rb",
+      "line": 12,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/addition_spec.rb[1:2]",
+      "description": "Dentaku::AST::Addition performs addition",
+      "file": "./spec/ast/addition_spec.rb",
+      "line": 18,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/addition_spec.rb[1:3]",
+      "description": "Dentaku::AST::Addition requires operands that respond to +",
+      "file": "./spec/ast/addition_spec.rb",
+      "line": 23,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/addition_spec.rb[1:4]",
+      "description": "Dentaku::AST::Addition allows operands that respond to addition",
+      "file": "./spec/ast/addition_spec.rb",
+      "line": 36,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/addition_spec.rb[1:5]",
+      "description": "Dentaku::AST::Addition does not try to parse nested string as date",
+      "file": "./spec/ast/addition_spec.rb",
+      "line": 61,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/all_spec.rb[1:1]",
+      "description": "Dentaku::AST::All performs ALL operation",
+      "file": "./spec/ast/all_spec.rb",
+      "line": 8,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/all_spec.rb[1:2]",
+      "description": "Dentaku::AST::All works with a single value if needed for some reason",
+      "file": "./spec/ast/all_spec.rb",
+      "line": 13,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/all_spec.rb[1:3]",
+      "description": "Dentaku::AST::All raises argument error if a string is passed as identifier",
+      "file": "./spec/ast/all_spec.rb",
+      "line": 21,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/all_spec.rb[1:4]",
+      "description": "Dentaku::AST::All treats missing keys in hashes as NULL in permissive mode",
+      "file": "./spec/ast/all_spec.rb",
+      "line": 27,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/all_spec.rb[1:5]",
+      "description": "Dentaku::AST::All raises an error if accessing a missing key in a hash in strict mode",
+      "file": "./spec/ast/all_spec.rb",
+      "line": 33,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/and_function_spec.rb[1:1]",
+      "description": "Dentaku::AST::And returns false if any of the arguments is false",
+      "file": "./spec/ast/and_function_spec.rb",
+      "line": 8,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/and_function_spec.rb[1:2]",
+      "description": "Dentaku::AST::And supports nested expressions",
+      "file": "./spec/ast/and_function_spec.rb",
+      "line": 13,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/and_function_spec.rb[1:3]",
+      "description": "Dentaku::AST::And returns true if all of the arguments are true",
+      "file": "./spec/ast/and_function_spec.rb",
+      "line": 18,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/and_function_spec.rb[1:4]",
+      "description": "Dentaku::AST::And returns true if all nested AND functions return true",
+      "file": "./spec/ast/and_function_spec.rb",
+      "line": 23,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/and_function_spec.rb[1:5]",
+      "description": "Dentaku::AST::And raises an error if no arguments are passed",
+      "file": "./spec/ast/and_function_spec.rb",
+      "line": 28,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/and_function_spec.rb[1:6]",
+      "description": "Dentaku::AST::And raises an error if a non logical argument is passed",
+      "file": "./spec/ast/and_function_spec.rb",
+      "line": 32,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/and_spec.rb[1:1]",
+      "description": "Dentaku::AST::And performs logical AND",
+      "file": "./spec/ast/and_spec.rb",
+      "line": 12,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/and_spec.rb[1:2]",
+      "description": "Dentaku::AST::And requires logical operands",
+      "file": "./spec/ast/and_spec.rb",
+      "line": 17,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/any_spec.rb[1:1]",
+      "description": "Dentaku::AST::Any performs ANY operation",
+      "file": "./spec/ast/any_spec.rb",
+      "line": 8,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/any_spec.rb[1:2]",
+      "description": "Dentaku::AST::Any works with a single value if needed for some reason",
+      "file": "./spec/ast/any_spec.rb",
+      "line": 13,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/any_spec.rb[1:3]",
+      "description": "Dentaku::AST::Any raises argument error if a string is passed as identifier",
+      "file": "./spec/ast/any_spec.rb",
+      "line": 21,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/any_spec.rb[1:4]",
+      "description": "Dentaku::AST::Any treats missing keys in hashes as NULL in permissive mode",
+      "file": "./spec/ast/any_spec.rb",
+      "line": 25,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/any_spec.rb[1:5]",
+      "description": "Dentaku::AST::Any raises an error if accessing a missing key in a hash in strict mode",
+      "file": "./spec/ast/any_spec.rb",
+      "line": 31,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/arithmetic_spec.rb[1:1]",
+      "description": "Dentaku::AST::Arithmetic performs an arithmetic operation with numeric operands",
+      "file": "./spec/ast/arithmetic_spec.rb",
+      "line": 13,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/arithmetic_spec.rb[1:2]",
+      "description": "Dentaku::AST::Arithmetic performs an arithmetic operation with one numeric operand and one string operand",
+      "file": "./spec/ast/arithmetic_spec.rb",
+      "line": 21,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/arithmetic_spec.rb[1:3]",
+      "description": "Dentaku::AST::Arithmetic performs an arithmetic operation with string operands",
+      "file": "./spec/ast/arithmetic_spec.rb",
+      "line": 33,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/arithmetic_spec.rb[1:4]",
+      "description": "Dentaku::AST::Arithmetic correctly parses string operands to numeric values",
+      "file": "./spec/ast/arithmetic_spec.rb",
+      "line": 41,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/arithmetic_spec.rb[1:5]",
+      "description": "Dentaku::AST::Arithmetic performs arithmetic on arrays",
+      "file": "./spec/ast/arithmetic_spec.rb",
+      "line": 64,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/arithmetic_spec.rb[1:6]",
+      "description": "Dentaku::AST::Arithmetic performs date arithmetic",
+      "file": "./spec/ast/arithmetic_spec.rb",
+      "line": 69,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/arithmetic_spec.rb[1:7]",
+      "description": "Dentaku::AST::Arithmetic performs arithmetic on object which implements arithmetic",
+      "file": "./spec/ast/arithmetic_spec.rb",
+      "line": 74,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/arithmetic_spec.rb[1:8]",
+      "description": "Dentaku::AST::Arithmetic does not try to parse nested string as date",
+      "file": "./spec/ast/arithmetic_spec.rb",
+      "line": 114,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/arithmetic_spec.rb[1:9]",
+      "description": "Dentaku::AST::Arithmetic raises ArgumentError if given individually valid but incompatible arguments",
+      "file": "./spec/ast/arithmetic_spec.rb",
+      "line": 121,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/arithmetic_spec.rb[1:10:1]",
+      "description": "Dentaku::AST::Arithmetic parse-time operand validation (#197) does not execute functions when an IF is an arithmetic operand",
+      "file": "./spec/ast/arithmetic_spec.rb",
+      "line": 134,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/arithmetic_spec.rb[1:10:2]",
+      "description": "Dentaku::AST::Arithmetic parse-time operand validation (#197) does not execute functions when an IF is negated",
+      "file": "./spec/ast/arithmetic_spec.rb",
+      "line": 140,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/arithmetic_spec.rb[1:10:3]",
+      "description": "Dentaku::AST::Arithmetic parse-time operand validation (#197) does not execute functions when an IF is a combinator operand",
+      "file": "./spec/ast/arithmetic_spec.rb",
+      "line": 146,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/arithmetic_spec.rb[1:10:4]",
+      "description": "Dentaku::AST::Arithmetic parse-time operand validation (#197) does not execute functions when a CASE is an arithmetic operand",
+      "file": "./spec/ast/arithmetic_spec.rb",
+      "line": 152,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/arithmetic_spec.rb[1:10:5]",
+      "description": "Dentaku::AST::Arithmetic parse-time operand validation (#197) reports identifiers across both branches without evaluating",
+      "file": "./spec/ast/arithmetic_spec.rb",
+      "line": 158,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/arithmetic_spec.rb[1:10:6]",
+      "description": "Dentaku::AST::Arithmetic parse-time operand validation (#197) still validates operand types",
+      "file": "./spec/ast/arithmetic_spec.rb",
+      "line": 162,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/arithmetic_spec.rb[1:10:7]",
+      "description": "Dentaku::AST::Arithmetic parse-time operand validation (#197) leaves evaluation and short-circuiting unchanged",
+      "file": "./spec/ast/arithmetic_spec.rb",
+      "line": 166,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/arithmetic_spec.rb[1:11:1]",
+      "description": "Dentaku::AST::Arithmetic operations that reject well-typed operands (#332) wraps the raw Ruby error so it is a Dentaku::Error",
+      "file": "./spec/ast/arithmetic_spec.rb",
+      "line": 179,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/arithmetic_spec.rb[1:11:2]",
+      "description": "Dentaku::AST::Arithmetic operations that reject well-typed operands (#332) is rescuable as Dentaku::Error",
+      "file": "./spec/ast/arithmetic_spec.rb",
+      "line": 188,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/arithmetic_spec.rb[1:11:3]",
+      "description": "Dentaku::AST::Arithmetic operations that reject well-typed operands (#332) returns nil from the non-bang evaluate rather than raising",
+      "file": "./spec/ast/arithmetic_spec.rb",
+      "line": 199,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/arithmetic_spec.rb[1:11:4]",
+      "description": "Dentaku::AST::Arithmetic operations that reject well-typed operands (#332) yields to the block form",
+      "file": "./spec/ast/arithmetic_spec.rb",
+      "line": 204,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/arithmetic_spec.rb[1:11:5]",
+      "description": "Dentaku::AST::Arithmetic operations that reject well-typed operands (#332) still evaluates exponentiation that fits",
+      "file": "./spec/ast/arithmetic_spec.rb",
+      "line": 211,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/arithmetic_spec.rb[1:11:6]",
+      "description": "Dentaku::AST::Arithmetic operations that reject well-typed operands (#332) still evaluates large results that BigDecimal can represent",
+      "file": "./spec/ast/arithmetic_spec.rb",
+      "line": 215,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/arithmetic_spec.rb[1:11:7]",
+      "description": "Dentaku::AST::Arithmetic operations that reject well-typed operands (#332) leaves arithmetic alone when an operand is already infinite",
+      "file": "./spec/ast/arithmetic_spec.rb",
+      "line": 219,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/arithmetic_spec.rb[1:11:8]",
+      "description": "Dentaku::AST::Arithmetic operations that reject well-typed operands (#332) does not swallow Dentaku errors raised by the operation itself",
+      "file": "./spec/ast/arithmetic_spec.rb",
+      "line": 226,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/avg_spec.rb[1:1]",
+      "description": "Dentaku::AST::Function::Avg returns the average of an array of Numeric values as BigDecimal",
+      "file": "./spec/ast/avg_spec.rb",
+      "line": 6,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/avg_spec.rb[1:2]",
+      "description": "Dentaku::AST::Function::Avg returns the average of an array of Numeric values",
+      "file": "./spec/ast/avg_spec.rb",
+      "line": 11,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/avg_spec.rb[1:3]",
+      "description": "Dentaku::AST::Function::Avg returns the average of a single entry array of a Numeric value",
+      "file": "./spec/ast/avg_spec.rb",
+      "line": 16,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/avg_spec.rb[1:4]",
+      "description": "Dentaku::AST::Function::Avg returns the average even if a String is passed",
+      "file": "./spec/ast/avg_spec.rb",
+      "line": 21,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/avg_spec.rb[1:5]",
+      "description": "Dentaku::AST::Function::Avg returns the average even if an array is passed",
+      "file": "./spec/ast/avg_spec.rb",
+      "line": 26,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/avg_spec.rb[1:6:1]",
+      "description": "Dentaku::AST::Function::Avg checking errors raises an error if no arguments are passed",
+      "file": "./spec/ast/avg_spec.rb",
+      "line": 34,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/avg_spec.rb[1:6:2]",
+      "description": "Dentaku::AST::Function::Avg checking errors raises an error if an empty array is passed",
+      "file": "./spec/ast/avg_spec.rb",
+      "line": 38,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/case_spec.rb[1:1:1]",
+      "description": "Dentaku::AST::Case#value raises an exception if there is no switch variable",
+      "file": "./spec/ast/case_spec.rb",
+      "line": 33,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/case_spec.rb[1:1:2]",
+      "description": "Dentaku::AST::Case#value raises an exception if a non-conditional is passed",
+      "file": "./spec/ast/case_spec.rb",
+      "line": 38,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/case_spec.rb[1:1:3]",
+      "description": "Dentaku::AST::Case#value tests each conditional against the switch variable",
+      "file": "./spec/ast/case_spec.rb",
+      "line": 43,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/case_spec.rb[1:1:4]",
+      "description": "Dentaku::AST::Case#value raises an exception if the conditional is not matched",
+      "file": "./spec/ast/case_spec.rb",
+      "line": 48,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/case_spec.rb[1:1:5]",
+      "description": "Dentaku::AST::Case#value uses the else value if provided and conditional is not matched",
+      "file": "./spec/ast/case_spec.rb",
+      "line": 54,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/case_spec.rb[1:2:1]",
+      "description": "Dentaku::AST::Case#dependencies gathers dependencies from switch and conditionals",
+      "file": "./spec/ast/case_spec.rb",
+      "line": 79,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/case_spec.rb[1:2:2]",
+      "description": "Dentaku::AST::Case#dependencies short-circuits to the matched branch when the switch is resolvable",
+      "file": "./spec/ast/case_spec.rb",
+      "line": 84,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/comparator_spec.rb[1:1]",
+      "description": "Dentaku::AST::Comparator performs comparison with numeric operands",
+      "file": "./spec/ast/comparator_spec.rb",
+      "line": 18,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/comparator_spec.rb[1:2]",
+      "description": "Dentaku::AST::Comparator performs conversion from string to numeric operands",
+      "file": "./spec/ast/comparator_spec.rb",
+      "line": 26,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/comparator_spec.rb[1:3]",
+      "description": "Dentaku::AST::Comparator raises a dentaku argument error when incorrect arguments are passed in",
+      "file": "./spec/ast/comparator_spec.rb",
+      "line": 32,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/comparator_spec.rb[1:4]",
+      "description": "Dentaku::AST::Comparator raises a dentaku argument error when nil is passed in as first argument",
+      "file": "./spec/ast/comparator_spec.rb",
+      "line": 42,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/comparator_spec.rb[1:5]",
+      "description": "Dentaku::AST::Comparator returns correct operator symbols",
+      "file": "./spec/ast/comparator_spec.rb",
+      "line": 51,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/count_spec.rb[1:1]",
+      "description": "Dentaku::AST::Count returns the length of an array",
+      "file": "./spec/ast/count_spec.rb",
+      "line": 6,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/count_spec.rb[1:2]",
+      "description": "Dentaku::AST::Count returns the length of a single number object",
+      "file": "./spec/ast/count_spec.rb",
+      "line": 11,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/count_spec.rb[1:3]",
+      "description": "Dentaku::AST::Count returns the length if a single String is passed",
+      "file": "./spec/ast/count_spec.rb",
+      "line": 16,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/count_spec.rb[1:4]",
+      "description": "Dentaku::AST::Count returns the length if an array is passed",
+      "file": "./spec/ast/count_spec.rb",
+      "line": 21,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/count_spec.rb[1:5]",
+      "description": "Dentaku::AST::Count returns the length if an array with one element is passed",
+      "file": "./spec/ast/count_spec.rb",
+      "line": 26,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/count_spec.rb[1:6]",
+      "description": "Dentaku::AST::Count returns the length if an array even if it has nested array",
+      "file": "./spec/ast/count_spec.rb",
+      "line": 31,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/count_spec.rb[1:7]",
+      "description": "Dentaku::AST::Count returns the length if an array is passed",
+      "file": "./spec/ast/count_spec.rb",
+      "line": 36,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/division_spec.rb[1:1]",
+      "description": "Dentaku::AST::Division allows access to its sub-trees",
+      "file": "./spec/ast/division_spec.rb",
+      "line": 12,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/division_spec.rb[1:2]",
+      "description": "Dentaku::AST::Division performs division",
+      "file": "./spec/ast/division_spec.rb",
+      "line": 18,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/division_spec.rb[1:3]",
+      "description": "Dentaku::AST::Division requires operands that respond to /",
+      "file": "./spec/ast/division_spec.rb",
+      "line": 23,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/division_spec.rb[1:4]",
+      "description": "Dentaku::AST::Division allows operands that respond to division",
+      "file": "./spec/ast/division_spec.rb",
+      "line": 36,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/filter_spec.rb[1:1]",
+      "description": "Dentaku::AST::Filter excludes unmatched values",
+      "file": "./spec/ast/filter_spec.rb",
+      "line": 7,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/filter_spec.rb[1:2]",
+      "description": "Dentaku::AST::Filter works with a single value if needed for some reason",
+      "file": "./spec/ast/filter_spec.rb",
+      "line": 12,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/filter_spec.rb[1:3]",
+      "description": "Dentaku::AST::Filter raises argument error if a string is passed as identifier",
+      "file": "./spec/ast/filter_spec.rb",
+      "line": 20,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/function_spec.rb[1:1]",
+      "description": "Dentaku::AST::Function maintains a function registry",
+      "file": "./spec/ast/function_spec.rb",
+      "line": 9,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/function_spec.rb[1:2]",
+      "description": "Dentaku::AST::Function registers a custom function",
+      "file": "./spec/ast/function_spec.rb",
+      "line": 13,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/function_spec.rb[1:3]",
+      "description": "Dentaku::AST::Function does not throw an error when registering a function with a name that matches a currently defined constant",
+      "file": "./spec/ast/function_spec.rb",
+      "line": 20,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/function_spec.rb[1:5]",
+      "description": "Dentaku::AST::Function allows read access to arguments",
+      "file": "./spec/ast/function_spec.rb",
+      "line": 40,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/function_spec.rb[1:4:1]",
+      "description": "Dentaku::AST::Function#arity returns the correct arity for custom functions",
+      "file": "./spec/ast/function_spec.rb",
+      "line": 25,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/function_spec.rb[1:6:1]",
+      "description": "Dentaku::AST::Function#name is a String for functions registered with a Symbol",
+      "file": "./spec/ast/function_spec.rb",
+      "line": 46,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/function_spec.rb[1:6:2]",
+      "description": "Dentaku::AST::Function#name is a String for functions imported from Ruby's Math module",
+      "file": "./spec/ast/function_spec.rb",
+      "line": 51,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/intercept_spec.rb[1:1]",
+      "description": "Dentaku::AST::Function::Intercept returns the correct intercept for given x and y arrays",
+      "file": "./spec/ast/intercept_spec.rb",
+      "line": 6,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/intercept_spec.rb[1:2:1]",
+      "description": "Dentaku::AST::Function::Intercept checking errors raises an error if arguments are not arrays",
+      "file": "./spec/ast/intercept_spec.rb",
+      "line": 14,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/intercept_spec.rb[1:2:2]",
+      "description": "Dentaku::AST::Function::Intercept checking errors raises an error if the arrays are not of equal length",
+      "file": "./spec/ast/intercept_spec.rb",
+      "line": 18,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/intercept_spec.rb[1:2:3]",
+      "description": "Dentaku::AST::Function::Intercept checking errors raises an error if any of the arrays is empty",
+      "file": "./spec/ast/intercept_spec.rb",
+      "line": 24,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/map_spec.rb[1:1]",
+      "description": "Dentaku::AST::Map operates on each value in an array",
+      "file": "./spec/ast/map_spec.rb",
+      "line": 8,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/map_spec.rb[1:2]",
+      "description": "Dentaku::AST::Map works with an empty array",
+      "file": "./spec/ast/map_spec.rb",
+      "line": 13,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/map_spec.rb[1:3]",
+      "description": "Dentaku::AST::Map works with a single value if needed for some reason",
+      "file": "./spec/ast/map_spec.rb",
+      "line": 18,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/map_spec.rb[1:4]",
+      "description": "Dentaku::AST::Map raises argument error if a string is passed as identifier",
+      "file": "./spec/ast/map_spec.rb",
+      "line": 23,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/map_spec.rb[1:5]",
+      "description": "Dentaku::AST::Map treats missing keys in hashes as NULL in permissive mode",
+      "file": "./spec/ast/map_spec.rb",
+      "line": 29,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/map_spec.rb[1:6]",
+      "description": "Dentaku::AST::Map raises an error if accessing a missing key in a hash in strict mode",
+      "file": "./spec/ast/map_spec.rb",
+      "line": 35,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/max_spec.rb[1:1]",
+      "description": "Dentaku::AST::Function::Max returns the largest numeric value in an array of Numeric values",
+      "file": "./spec/ast/max_spec.rb",
+      "line": 6,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/max_spec.rb[1:2]",
+      "description": "Dentaku::AST::Function::Max returns the largest value even if a String is passed",
+      "file": "./spec/ast/max_spec.rb",
+      "line": 11,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/max_spec.rb[1:3]",
+      "description": "Dentaku::AST::Function::Max returns the largest value even if an Array is passed",
+      "file": "./spec/ast/max_spec.rb",
+      "line": 16,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/max_spec.rb[1:4]",
+      "description": "Dentaku::AST::Function::Max returns the largest value if only an Array is passed",
+      "file": "./spec/ast/max_spec.rb",
+      "line": 21,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/max_spec.rb[1:5:1]",
+      "description": "Dentaku::AST::Function::Max checking errors does not raise an error if an empty array is passed",
+      "file": "./spec/ast/max_spec.rb",
+      "line": 29,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/member_access_spec.rb[1:1]",
+      "description": "Dentaku::AST::MemberAccess reads an attribute of an indexed value",
+      "file": "./spec/ast/member_access_spec.rb",
+      "line": 17,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/member_access_spec.rb[1:2]",
+      "description": "Dentaku::AST::MemberAccess reads an attribute of a function result",
+      "file": "./spec/ast/member_access_spec.rb",
+      "line": 21,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/member_access_spec.rb[1:3]",
+      "description": "Dentaku::AST::MemberAccess reads an attribute of a parenthesized expression",
+      "file": "./spec/ast/member_access_spec.rb",
+      "line": 25,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/member_access_spec.rb[1:4]",
+      "description": "Dentaku::AST::MemberAccess chains attributes",
+      "file": "./spec/ast/member_access_spec.rb",
+      "line": 29,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/member_access_spec.rb[1:5]",
+      "description": "Dentaku::AST::MemberAccess binds tighter than operators",
+      "file": "./spec/ast/member_access_spec.rb",
+      "line": 33,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/member_access_spec.rb[1:6]",
+      "description": "Dentaku::AST::MemberAccess can be used inside an index",
+      "file": "./spec/ast/member_access_spec.rb",
+      "line": 38,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/member_access_spec.rb[1:7]",
+      "description": "Dentaku::AST::MemberAccess can be used as a function argument",
+      "file": "./spec/ast/member_access_spec.rb",
+      "line": 42,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/member_access_spec.rb[1:8]",
+      "description": "Dentaku::AST::MemberAccess leaves dotted identifiers alone",
+      "file": "./spec/ast/member_access_spec.rb",
+      "line": 46,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/member_access_spec.rb[1:11]",
+      "description": "Dentaku::AST::MemberAccess reports dependencies of the structure",
+      "file": "./spec/ast/member_access_spec.rb",
+      "line": 110,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/member_access_spec.rb[1:12]",
+      "description": "Dentaku::AST::MemberAccess is an Access",
+      "file": "./spec/ast/member_access_spec.rb",
+      "line": 115,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/member_access_spec.rb[1:13]",
+      "description": "Dentaku::AST::MemberAccess has no static type",
+      "file": "./spec/ast/member_access_spec.rb",
+      "line": 121,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/member_access_spec.rb[1:9:1]",
+      "description": "Dentaku::AST::MemberAccess key matching accepts string and symbol keys",
+      "file": "./spec/ast/member_access_spec.rb",
+      "line": 53,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/member_access_spec.rb[1:9:2]",
+      "description": "Dentaku::AST::MemberAccess key matching prefers an exact match and otherwise ignores case",
+      "file": "./spec/ast/member_access_spec.rb",
+      "line": 58,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/member_access_spec.rb[1:9:3]",
+      "description": "Dentaku::AST::MemberAccess key matching matches case exactly in case-sensitive mode",
+      "file": "./spec/ast/member_access_spec.rb",
+      "line": 63,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/member_access_spec.rb[1:10:1]",
+      "description": "Dentaku::AST::MemberAccess errors raises for a missing key",
+      "file": "./spec/ast/member_access_spec.rb",
+      "line": 71,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/member_access_spec.rb[1:10:2]",
+      "description": "Dentaku::AST::MemberAccess errors points to brackets for keys that do not look like identifiers",
+      "file": "./spec/ast/member_access_spec.rb",
+      "line": 75,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/member_access_spec.rb[1:10:3]",
+      "description": "Dentaku::AST::MemberAccess errors raises when the operand is not a hash",
+      "file": "./spec/ast/member_access_spec.rb",
+      "line": 81,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/member_access_spec.rb[1:10:4]",
+      "description": "Dentaku::AST::MemberAccess errors is nil-safe",
+      "file": "./spec/ast/member_access_spec.rb",
+      "line": 85,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/member_access_spec.rb[1:10:5]",
+      "description": "Dentaku::AST::MemberAccess errors raises for literal operands",
+      "file": "./spec/ast/member_access_spec.rb",
+      "line": 91,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/member_access_spec.rb[1:10:6]",
+      "description": "Dentaku::AST::MemberAccess errors does not allow whitespace before the dot",
+      "file": "./spec/ast/member_access_spec.rb",
+      "line": 96,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/member_access_spec.rb[1:10:7]",
+      "description": "Dentaku::AST::MemberAccess errors does not apply after CASE ... END",
+      "file": "./spec/ast/member_access_spec.rb",
+      "line": 101,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/member_access_spec.rb[1:10:8]",
+      "description": "Dentaku::AST::MemberAccess errors does not apply to array literals",
+      "file": "./spec/ast/member_access_spec.rb",
+      "line": 105,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/min_spec.rb[1:1]",
+      "description": "Dentaku::AST::Function::Min returns the smallest numeric value in an array of Numeric values",
+      "file": "./spec/ast/min_spec.rb",
+      "line": 6,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/min_spec.rb[1:2]",
+      "description": "Dentaku::AST::Function::Min returns the smallest value even if a String is passed",
+      "file": "./spec/ast/min_spec.rb",
+      "line": 11,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/min_spec.rb[1:3]",
+      "description": "Dentaku::AST::Function::Min returns the smallest value even if an Array is passed",
+      "file": "./spec/ast/min_spec.rb",
+      "line": 16,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/min_spec.rb[1:4]",
+      "description": "Dentaku::AST::Function::Min returns the smallest value if only an Array is passed",
+      "file": "./spec/ast/min_spec.rb",
+      "line": 21,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/min_spec.rb[1:5:1]",
+      "description": "Dentaku::AST::Function::Min checking errors does not raise an error if an empty array is passed",
+      "file": "./spec/ast/min_spec.rb",
+      "line": 29,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/mul_spec.rb[1:1]",
+      "description": "Dentaku::AST::Function::Mul returns the product of an array of Numeric values",
+      "file": "./spec/ast/mul_spec.rb",
+      "line": 6,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/mul_spec.rb[1:2]",
+      "description": "Dentaku::AST::Function::Mul returns the product of a single entry array of a Numeric value",
+      "file": "./spec/ast/mul_spec.rb",
+      "line": 11,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/mul_spec.rb[1:3]",
+      "description": "Dentaku::AST::Function::Mul coerces string inputs to numeric",
+      "file": "./spec/ast/mul_spec.rb",
+      "line": 16,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/mul_spec.rb[1:4]",
+      "description": "Dentaku::AST::Function::Mul returns the product even if an array is passed",
+      "file": "./spec/ast/mul_spec.rb",
+      "line": 21,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/mul_spec.rb[1:5]",
+      "description": "Dentaku::AST::Function::Mul handles nested calls",
+      "file": "./spec/ast/mul_spec.rb",
+      "line": 26,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/mul_spec.rb[1:6:1]",
+      "description": "Dentaku::AST::Function::Mul checking errors raises an error if no arguments are passed",
+      "file": "./spec/ast/mul_spec.rb",
+      "line": 34,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/mul_spec.rb[1:6:2]",
+      "description": "Dentaku::AST::Function::Mul checking errors does not raise an error if an empty array is passed",
+      "file": "./spec/ast/mul_spec.rb",
+      "line": 38,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/negation_spec.rb[1:1]",
+      "description": "Dentaku::AST::Negation allows access to its sub-node",
+      "file": "./spec/ast/negation_spec.rb",
+      "line": 11,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/negation_spec.rb[1:2]",
+      "description": "Dentaku::AST::Negation performs negation",
+      "file": "./spec/ast/negation_spec.rb",
+      "line": 16,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/negation_spec.rb[1:3]",
+      "description": "Dentaku::AST::Negation requires numeric operands",
+      "file": "./spec/ast/negation_spec.rb",
+      "line": 21,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/negation_spec.rb[1:4]",
+      "description": "Dentaku::AST::Negation correctly parses string operands to numeric values",
+      "file": "./spec/ast/negation_spec.rb",
+      "line": 34,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/negation_spec.rb[1:5]",
+      "description": "Dentaku::AST::Negation raises error if input string is not coercible to numeric",
+      "file": "./spec/ast/negation_spec.rb",
+      "line": 39,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/negation_spec.rb[1:6]",
+      "description": "Dentaku::AST::Negation raises error if given a non-numeric argument",
+      "file": "./spec/ast/negation_spec.rb",
+      "line": 44,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/node_spec.rb[1:1]",
+      "description": "Dentaku::AST::Node returns list of dependencies",
+      "file": "./spec/ast/node_spec.rb",
+      "line": 7,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/node_spec.rb[1:2]",
+      "description": "Dentaku::AST::Node returns unique list of dependencies",
+      "file": "./spec/ast/node_spec.rb",
+      "line": 33,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/numeric_spec.rb[1:1]",
+      "description": "Dentaku::AST::Numeric has numeric type",
+      "file": "./spec/ast/numeric_spec.rb",
+      "line": 9,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/numeric_spec.rb[1:2]",
+      "description": "Dentaku::AST::Numeric has no dependencies",
+      "file": "./spec/ast/numeric_spec.rb",
+      "line": 13,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/or_spec.rb[1:1]",
+      "description": "Dentaku::AST::Or returns false if all of the arguments are false",
+      "file": "./spec/ast/or_spec.rb",
+      "line": 8,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/or_spec.rb[1:2]",
+      "description": "Dentaku::AST::Or supports nested expressions",
+      "file": "./spec/ast/or_spec.rb",
+      "line": 13,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/or_spec.rb[1:3]",
+      "description": "Dentaku::AST::Or returns true if any of the arguments is true",
+      "file": "./spec/ast/or_spec.rb",
+      "line": 18,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/or_spec.rb[1:4]",
+      "description": "Dentaku::AST::Or returns true if any nested OR function returns true",
+      "file": "./spec/ast/or_spec.rb",
+      "line": 23,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/or_spec.rb[1:5]",
+      "description": "Dentaku::AST::Or raises an error if no arguments are passed",
+      "file": "./spec/ast/or_spec.rb",
+      "line": 28,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/or_spec.rb[1:6]",
+      "description": "Dentaku::AST::Or raises an error if a non logical argument is passed",
+      "file": "./spec/ast/or_spec.rb",
+      "line": 32,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/pluck_spec.rb[1:1]",
+      "description": "Dentaku::AST::Pluck operates on each value in an array",
+      "file": "./spec/ast/pluck_spec.rb",
+      "line": 8,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/pluck_spec.rb[1:2]",
+      "description": "Dentaku::AST::Pluck allows specifying a default for missing values",
+      "file": "./spec/ast/pluck_spec.rb",
+      "line": 16,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/pluck_spec.rb[1:3]",
+      "description": "Dentaku::AST::Pluck returns nil if pluck key is missing from a hash",
+      "file": "./spec/ast/pluck_spec.rb",
+      "line": 24,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/pluck_spec.rb[1:4]",
+      "description": "Dentaku::AST::Pluck works with an empty array",
+      "file": "./spec/ast/pluck_spec.rb",
+      "line": 32,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/pluck_spec.rb[1:5]",
+      "description": "Dentaku::AST::Pluck raises argument error if a string is passed as identifier",
+      "file": "./spec/ast/pluck_spec.rb",
+      "line": 37,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/pluck_spec.rb[1:6]",
+      "description": "Dentaku::AST::Pluck raises argument error if a non array of hashes is passed as collection",
+      "file": "./spec/ast/pluck_spec.rb",
+      "line": 44,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/reduce_spec.rb[1:1]",
+      "description": "Dentaku::AST::Reduce performs REDUCE operation with initial value",
+      "file": "./spec/ast/reduce_spec.rb",
+      "line": 8,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/reduce_spec.rb[1:2]",
+      "description": "Dentaku::AST::Reduce performs REDUCE operation without initial value",
+      "file": "./spec/ast/reduce_spec.rb",
+      "line": 13,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/reduce_spec.rb[1:3]",
+      "description": "Dentaku::AST::Reduce raises argument error if a string is passed as identifier",
+      "file": "./spec/ast/reduce_spec.rb",
+      "line": 18,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/round_spec.rb[1:1]",
+      "description": "Dentaku::AST::Function::Round returns the rounded down value",
+      "file": "./spec/ast/round_spec.rb",
+      "line": 6,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/round_spec.rb[1:2]",
+      "description": "Dentaku::AST::Function::Round returns the rounded down value to the given precision",
+      "file": "./spec/ast/round_spec.rb",
+      "line": 11,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/round_spec.rb[1:3]",
+      "description": "Dentaku::AST::Function::Round returns the rounded down value to the given precision, also with strings",
+      "file": "./spec/ast/round_spec.rb",
+      "line": 16,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/round_spec.rb[1:4]",
+      "description": "Dentaku::AST::Function::Round returns the rounded down value to the given precision, also with nil",
+      "file": "./spec/ast/round_spec.rb",
+      "line": 21,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/round_spec.rb[1:5:1]",
+      "description": "Dentaku::AST::Function::Round checking errors raises an error if first argument is not numeric",
+      "file": "./spec/ast/round_spec.rb",
+      "line": 27,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/round_spec.rb[1:5:2]",
+      "description": "Dentaku::AST::Function::Round checking errors raises an error if places is not numeric",
+      "file": "./spec/ast/round_spec.rb",
+      "line": 31,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/rounddown_spec.rb[1:1]",
+      "description": "Dentaku::AST::Function::Round returns the rounded value",
+      "file": "./spec/ast/rounddown_spec.rb",
+      "line": 6,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/rounddown_spec.rb[1:2]",
+      "description": "Dentaku::AST::Function::Round returns the rounded value to the given precision",
+      "file": "./spec/ast/rounddown_spec.rb",
+      "line": 11,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/rounddown_spec.rb[1:3]",
+      "description": "Dentaku::AST::Function::Round returns the rounded value to the given precision, also with strings",
+      "file": "./spec/ast/rounddown_spec.rb",
+      "line": 16,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/rounddown_spec.rb[1:4]",
+      "description": "Dentaku::AST::Function::Round returns the rounded value to the given precision, also with nil",
+      "file": "./spec/ast/rounddown_spec.rb",
+      "line": 21,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/rounddown_spec.rb[1:5:1]",
+      "description": "Dentaku::AST::Function::Round checking errors raises an error if first argument is not numeric",
+      "file": "./spec/ast/rounddown_spec.rb",
+      "line": 27,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/rounddown_spec.rb[1:5:2]",
+      "description": "Dentaku::AST::Function::Round checking errors raises an error if places is not numeric",
+      "file": "./spec/ast/rounddown_spec.rb",
+      "line": 31,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/roundup_spec.rb[1:1]",
+      "description": "Dentaku::AST::Function::Round returns the rounded value",
+      "file": "./spec/ast/roundup_spec.rb",
+      "line": 6,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/roundup_spec.rb[1:2]",
+      "description": "Dentaku::AST::Function::Round returns the rounded value to the given precision",
+      "file": "./spec/ast/roundup_spec.rb",
+      "line": 11,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/roundup_spec.rb[1:3]",
+      "description": "Dentaku::AST::Function::Round returns the rounded value to the given precision, also with strings",
+      "file": "./spec/ast/roundup_spec.rb",
+      "line": 16,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/roundup_spec.rb[1:4]",
+      "description": "Dentaku::AST::Function::Round returns the rounded value to the given precision, also with nil",
+      "file": "./spec/ast/roundup_spec.rb",
+      "line": 21,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/roundup_spec.rb[1:5:1]",
+      "description": "Dentaku::AST::Function::Round checking errors raises an error if first argument is not numeric",
+      "file": "./spec/ast/roundup_spec.rb",
+      "line": 27,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/roundup_spec.rb[1:5:2]",
+      "description": "Dentaku::AST::Function::Round checking errors raises an error if places is not numeric",
+      "file": "./spec/ast/roundup_spec.rb",
+      "line": 31,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/string_functions_spec.rb[1:1]",
+      "description": "Dentaku::AST::StringFunctions::Left returns the left N characters of the string",
+      "file": "./spec/ast/string_functions_spec.rb",
+      "line": 10,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/string_functions_spec.rb[1:2]",
+      "description": "Dentaku::AST::StringFunctions::Left works correctly with literals",
+      "file": "./spec/ast/string_functions_spec.rb",
+      "line": 14,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/string_functions_spec.rb[1:3]",
+      "description": "Dentaku::AST::StringFunctions::Left handles an empty string correctly",
+      "file": "./spec/ast/string_functions_spec.rb",
+      "line": 21,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/string_functions_spec.rb[1:4]",
+      "description": "Dentaku::AST::StringFunctions::Left handles size greater than input string length correctly",
+      "file": "./spec/ast/string_functions_spec.rb",
+      "line": 25,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/string_functions_spec.rb[1:5]",
+      "description": "Dentaku::AST::StringFunctions::Left accepts strings as length if they can be parsed to a number",
+      "file": "./spec/ast/string_functions_spec.rb",
+      "line": 29,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/string_functions_spec.rb[1:6]",
+      "description": "Dentaku::AST::StringFunctions::Left has the proper type",
+      "file": "./spec/ast/string_functions_spec.rb",
+      "line": 33,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/string_functions_spec.rb[1:7]",
+      "description": "Dentaku::AST::StringFunctions::Left raises an error if given invalid length",
+      "file": "./spec/ast/string_functions_spec.rb",
+      "line": 37,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/string_functions_spec.rb[1:8]",
+      "description": "Dentaku::AST::StringFunctions::Left raises an error when given a junk length",
+      "file": "./spec/ast/string_functions_spec.rb",
+      "line": 43,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/string_functions_spec.rb[2:1]",
+      "description": "Dentaku::AST::StringFunctions::Right returns the right N characters of the string",
+      "file": "./spec/ast/string_functions_spec.rb",
+      "line": 51,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/string_functions_spec.rb[2:2]",
+      "description": "Dentaku::AST::StringFunctions::Right handles an empty string correctly",
+      "file": "./spec/ast/string_functions_spec.rb",
+      "line": 56,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/string_functions_spec.rb[2:3]",
+      "description": "Dentaku::AST::StringFunctions::Right handles size greater than input string length correctly",
+      "file": "./spec/ast/string_functions_spec.rb",
+      "line": 61,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/string_functions_spec.rb[2:4]",
+      "description": "Dentaku::AST::StringFunctions::Right accepts strings as length if they can be parsed to a number",
+      "file": "./spec/ast/string_functions_spec.rb",
+      "line": 66,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/string_functions_spec.rb[2:5]",
+      "description": "Dentaku::AST::StringFunctions::Right has the proper type",
+      "file": "./spec/ast/string_functions_spec.rb",
+      "line": 71,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/string_functions_spec.rb[2:6]",
+      "description": "Dentaku::AST::StringFunctions::Right raises an error when given a junk length",
+      "file": "./spec/ast/string_functions_spec.rb",
+      "line": 75,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/string_functions_spec.rb[3:1]",
+      "description": "Dentaku::AST::StringFunctions::Mid returns a substring from the middle of the string",
+      "file": "./spec/ast/string_functions_spec.rb",
+      "line": 82,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/string_functions_spec.rb[3:2]",
+      "description": "Dentaku::AST::StringFunctions::Mid handles an empty string correctly",
+      "file": "./spec/ast/string_functions_spec.rb",
+      "line": 87,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/string_functions_spec.rb[3:3]",
+      "description": "Dentaku::AST::StringFunctions::Mid handles offset greater than input string length correctly",
+      "file": "./spec/ast/string_functions_spec.rb",
+      "line": 92,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/string_functions_spec.rb[3:4]",
+      "description": "Dentaku::AST::StringFunctions::Mid handles size greater than input string length correctly",
+      "file": "./spec/ast/string_functions_spec.rb",
+      "line": 97,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/string_functions_spec.rb[3:5]",
+      "description": "Dentaku::AST::StringFunctions::Mid accepts strings as offset and length if they can be parsed to a number",
+      "file": "./spec/ast/string_functions_spec.rb",
+      "line": 102,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/string_functions_spec.rb[3:6]",
+      "description": "Dentaku::AST::StringFunctions::Mid has the proper type",
+      "file": "./spec/ast/string_functions_spec.rb",
+      "line": 107,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/string_functions_spec.rb[3:7]",
+      "description": "Dentaku::AST::StringFunctions::Mid raises an error when given a junk offset",
+      "file": "./spec/ast/string_functions_spec.rb",
+      "line": 111,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/string_functions_spec.rb[3:8]",
+      "description": "Dentaku::AST::StringFunctions::Mid raises an error when given a junk length",
+      "file": "./spec/ast/string_functions_spec.rb",
+      "line": 116,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/string_functions_spec.rb[4:1]",
+      "description": "Dentaku::AST::StringFunctions::Len returns the length of a string",
+      "file": "./spec/ast/string_functions_spec.rb",
+      "line": 123,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/string_functions_spec.rb[4:2]",
+      "description": "Dentaku::AST::StringFunctions::Len handles an empty string correctly",
+      "file": "./spec/ast/string_functions_spec.rb",
+      "line": 128,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/string_functions_spec.rb[4:3]",
+      "description": "Dentaku::AST::StringFunctions::Len has the proper type",
+      "file": "./spec/ast/string_functions_spec.rb",
+      "line": 133,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/string_functions_spec.rb[5:1]",
+      "description": "Dentaku::AST::StringFunctions::Find returns the position of a substring within a string",
+      "file": "./spec/ast/string_functions_spec.rb",
+      "line": 139,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/string_functions_spec.rb[5:2]",
+      "description": "Dentaku::AST::StringFunctions::Find handles an empty substring correctly",
+      "file": "./spec/ast/string_functions_spec.rb",
+      "line": 144,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/string_functions_spec.rb[5:3]",
+      "description": "Dentaku::AST::StringFunctions::Find handles an empty string correctly",
+      "file": "./spec/ast/string_functions_spec.rb",
+      "line": 149,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/string_functions_spec.rb[5:4]",
+      "description": "Dentaku::AST::StringFunctions::Find has the proper type",
+      "file": "./spec/ast/string_functions_spec.rb",
+      "line": 154,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/string_functions_spec.rb[6:1]",
+      "description": "Dentaku::AST::StringFunctions::Substitute replaces a substring within a string",
+      "file": "./spec/ast/string_functions_spec.rb",
+      "line": 160,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/string_functions_spec.rb[6:2]",
+      "description": "Dentaku::AST::StringFunctions::Substitute handles an empty search string correctly",
+      "file": "./spec/ast/string_functions_spec.rb",
+      "line": 165,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/string_functions_spec.rb[6:3]",
+      "description": "Dentaku::AST::StringFunctions::Substitute handles an empty replacement string correctly",
+      "file": "./spec/ast/string_functions_spec.rb",
+      "line": 170,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/string_functions_spec.rb[6:4]",
+      "description": "Dentaku::AST::StringFunctions::Substitute has the proper type",
+      "file": "./spec/ast/string_functions_spec.rb",
+      "line": 175,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/string_functions_spec.rb[7:1]",
+      "description": "Dentaku::AST::StringFunctions::Concat concatenates two strings",
+      "file": "./spec/ast/string_functions_spec.rb",
+      "line": 181,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/string_functions_spec.rb[7:2]",
+      "description": "Dentaku::AST::StringFunctions::Concat concatenates a string onto an empty string",
+      "file": "./spec/ast/string_functions_spec.rb",
+      "line": 186,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/string_functions_spec.rb[7:3]",
+      "description": "Dentaku::AST::StringFunctions::Concat concatenates an empty string onto a string",
+      "file": "./spec/ast/string_functions_spec.rb",
+      "line": 191,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/string_functions_spec.rb[7:4]",
+      "description": "Dentaku::AST::StringFunctions::Concat concatenates two empty strings",
+      "file": "./spec/ast/string_functions_spec.rb",
+      "line": 196,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/string_functions_spec.rb[7:5]",
+      "description": "Dentaku::AST::StringFunctions::Concat has the proper type",
+      "file": "./spec/ast/string_functions_spec.rb",
+      "line": 201,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/string_functions_spec.rb[8:1]",
+      "description": "Dentaku::AST::StringFunctions::Contains checks for substrings",
+      "file": "./spec/ast/string_functions_spec.rb",
+      "line": 207,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/string_functions_spec.rb[8:2]",
+      "description": "Dentaku::AST::StringFunctions::Contains has the proper type",
+      "file": "./spec/ast/string_functions_spec.rb",
+      "line": 214,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/sum_spec.rb[1:1]",
+      "description": "Dentaku::AST::Function::Sum returns the sum of an array of Numeric values",
+      "file": "./spec/ast/sum_spec.rb",
+      "line": 6,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/sum_spec.rb[1:2]",
+      "description": "Dentaku::AST::Function::Sum returns the sum of a single entry array of a Numeric value",
+      "file": "./spec/ast/sum_spec.rb",
+      "line": 11,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/sum_spec.rb[1:3]",
+      "description": "Dentaku::AST::Function::Sum returns the sum even if a String is passed",
+      "file": "./spec/ast/sum_spec.rb",
+      "line": 16,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/sum_spec.rb[1:4]",
+      "description": "Dentaku::AST::Function::Sum returns the sum even if an array is passed",
+      "file": "./spec/ast/sum_spec.rb",
+      "line": 21,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/sum_spec.rb[1:5]",
+      "description": "Dentaku::AST::Function::Sum returns the sum of nested sums",
+      "file": "./spec/ast/sum_spec.rb",
+      "line": 26,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/sum_spec.rb[1:6:1]",
+      "description": "Dentaku::AST::Function::Sum checking errors raises an error if no arguments are passed",
+      "file": "./spec/ast/sum_spec.rb",
+      "line": 34,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/sum_spec.rb[1:6:2]",
+      "description": "Dentaku::AST::Function::Sum checking errors does not raise an error if an empty array is passed",
+      "file": "./spec/ast/sum_spec.rb",
+      "line": 38,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/switch_spec.rb[1:1]",
+      "description": "Dentaku::AST::Function::Switch returns the match if present in argumtents",
+      "file": "./spec/ast/switch_spec.rb",
+      "line": 6,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/switch_spec.rb[1:2]",
+      "description": "Dentaku::AST::Function::Switch returns nil if no match was found",
+      "file": "./spec/ast/switch_spec.rb",
+      "line": 11,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/switch_spec.rb[1:3]",
+      "description": "Dentaku::AST::Function::Switch returns the default value if present and no match was found",
+      "file": "./spec/ast/switch_spec.rb",
+      "line": 16,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/switch_spec.rb[1:4]",
+      "description": "Dentaku::AST::Function::Switch returns the first match if multiple matches exist",
+      "file": "./spec/ast/switch_spec.rb",
+      "line": 21,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/switch_spec.rb[1:5]",
+      "description": "Dentaku::AST::Function::Switch does not return a match where a value matches the search value",
+      "file": "./spec/ast/switch_spec.rb",
+      "line": 26,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/xor_spec.rb[1:1]",
+      "description": "Dentaku::AST::Xor returns false if all of the arguments are false",
+      "file": "./spec/ast/xor_spec.rb",
+      "line": 8,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/xor_spec.rb[1:2]",
+      "description": "Dentaku::AST::Xor returns true if only one of the arguments is true",
+      "file": "./spec/ast/xor_spec.rb",
+      "line": 13,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/xor_spec.rb[1:3]",
+      "description": "Dentaku::AST::Xor returns false if an even number of the arguments are true",
+      "file": "./spec/ast/xor_spec.rb",
+      "line": 18,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/xor_spec.rb[1:4]",
+      "description": "Dentaku::AST::Xor returns true if an odd number of the arguments are true",
+      "file": "./spec/ast/xor_spec.rb",
+      "line": 23,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/xor_spec.rb[1:5]",
+      "description": "Dentaku::AST::Xor matches XOR applied pairwise",
+      "file": "./spec/ast/xor_spec.rb",
+      "line": 28,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/xor_spec.rb[1:6]",
+      "description": "Dentaku::AST::Xor supports nested expressions",
+      "file": "./spec/ast/xor_spec.rb",
+      "line": 36,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/xor_spec.rb[1:7]",
+      "description": "Dentaku::AST::Xor raises an error if no arguments are passed",
+      "file": "./spec/ast/xor_spec.rb",
+      "line": 41,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/ast/xor_spec.rb[1:8]",
+      "description": "Dentaku::AST::Xor raises an error if a non logical argument is passed",
+      "file": "./spec/ast/xor_spec.rb",
+      "line": 45,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/builtin_functions_spec.rb[1:1]",
+      "description": "built-in functions are all loaded by requiring dentaku",
+      "file": "./spec/builtin_functions_spec.rb",
+      "line": 9,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/builtin_functions_spec.rb[1:2]",
+      "description": "built-in functions include MUL",
+      "file": "./spec/builtin_functions_spec.rb",
+      "line": 23,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/bulk_expression_solver_spec.rb[1:1:1]",
+      "description": "Dentaku::BulkExpressionSolver#solve! does not reuse a cached order after formulas change with the same variable names",
+      "file": "./spec/bulk_expression_solver_spec.rb",
+      "line": 11,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/bulk_expression_solver_spec.rb[1:1:2]",
+      "description": "Dentaku::BulkExpressionSolver#solve! does not share a cached order with a calculator using different dependencies",
+      "file": "./spec/bulk_expression_solver_spec.rb",
+      "line": 18,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/bulk_expression_solver_spec.rb[1:1:3]",
+      "description": "Dentaku::BulkExpressionSolver#solve! includes memory-dependent edges in the cached order",
+      "file": "./spec/bulk_expression_solver_spec.rb",
+      "line": 25,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/bulk_expression_solver_spec.rb[1:1:4]",
+      "description": "Dentaku::BulkExpressionSolver#solve! evaluates properly with variables, even if some in memory",
+      "file": "./spec/bulk_expression_solver_spec.rb",
+      "line": 35,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/bulk_expression_solver_spec.rb[1:1:5]",
+      "description": "Dentaku::BulkExpressionSolver#solve! lets you know if a variable is unbound",
+      "file": "./spec/bulk_expression_solver_spec.rb",
+      "line": 46,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/bulk_expression_solver_spec.rb[1:1:6]",
+      "description": "Dentaku::BulkExpressionSolver#solve! properly handles access on an unbound variable",
+      "file": "./spec/bulk_expression_solver_spec.rb",
+      "line": 53,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/bulk_expression_solver_spec.rb[1:1:7]",
+      "description": "Dentaku::BulkExpressionSolver#solve! lets you know if the result is a div/0 error when dividing",
+      "file": "./spec/bulk_expression_solver_spec.rb",
+      "line": 60,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/bulk_expression_solver_spec.rb[1:1:8]",
+      "description": "Dentaku::BulkExpressionSolver#solve! lets you know if the result is a div/0 error when taking modulo",
+      "file": "./spec/bulk_expression_solver_spec.rb",
+      "line": 67,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/bulk_expression_solver_spec.rb[1:1:9]",
+      "description": "Dentaku::BulkExpressionSolver#solve! does not require keys to be parseable",
+      "file": "./spec/bulk_expression_solver_spec.rb",
+      "line": 74,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/bulk_expression_solver_spec.rb[1:1:10]",
+      "description": "Dentaku::BulkExpressionSolver#solve! allows self-referential formulas",
+      "file": "./spec/bulk_expression_solver_spec.rb",
+      "line": 80,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/bulk_expression_solver_spec.rb[1:1:12]",
+      "description": "Dentaku::BulkExpressionSolver#solve! does not execute functions unnecessarily",
+      "file": "./spec/bulk_expression_solver_spec.rb",
+      "line": 135,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/bulk_expression_solver_spec.rb[1:1:13]",
+      "description": "Dentaku::BulkExpressionSolver#solve! evaluates expressions in hashes and arrays, and expands the results",
+      "file": "./spec/bulk_expression_solver_spec.rb",
+      "line": 145,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/bulk_expression_solver_spec.rb[1:1:14]",
+      "description": "Dentaku::BulkExpressionSolver#solve! solves arrays of hashes",
+      "file": "./spec/bulk_expression_solver_spec.rb",
+      "line": 184,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/bulk_expression_solver_spec.rb[1:1:15]",
+      "description": "Dentaku::BulkExpressionSolver#solve! solves nested arrays",
+      "file": "./spec/bulk_expression_solver_spec.rb",
+      "line": 197,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/bulk_expression_solver_spec.rb[1:1:11:1]",
+      "description": "Dentaku::BulkExpressionSolver#solve! when a key being solved is also stored in memory gives formulas the solved value regardless of key order",
+      "file": "./spec/bulk_expression_solver_spec.rb",
+      "line": 91,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/bulk_expression_solver_spec.rb[1:1:11:2]",
+      "description": "Dentaku::BulkExpressionSolver#solve! when a key being solved is also stored in memory follows the solved value through a chain of formulas",
+      "file": "./spec/bulk_expression_solver_spec.rb",
+      "line": 106,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/bulk_expression_solver_spec.rb[1:1:11:3]",
+      "description": "Dentaku::BulkExpressionSolver#solve! when a key being solved is also stored in memory still uses the stored value to break a cycle elsewhere in the system",
+      "file": "./spec/bulk_expression_solver_spec.rb",
+      "line": 115,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/bulk_expression_solver_spec.rb[1:1:11:4]",
+      "description": "Dentaku::BulkExpressionSolver#solve! when a key being solved is also stored in memory does not change the reported dependencies",
+      "file": "./spec/bulk_expression_solver_spec.rb",
+      "line": 125,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/bulk_expression_solver_spec.rb[1:2:1]",
+      "description": "Dentaku::BulkExpressionSolver#solve resolves capitalized keys when they are declared out of order",
+      "file": "./spec/bulk_expression_solver_spec.rb",
+      "line": 205,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/bulk_expression_solver_spec.rb[1:2:2]",
+      "description": "Dentaku::BulkExpressionSolver#solve resolves mixed-case keys declared out of order when case-sensitive",
+      "file": "./spec/bulk_expression_solver_spec.rb",
+      "line": 221,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/bulk_expression_solver_spec.rb[1:2:3]",
+      "description": "Dentaku::BulkExpressionSolver#solve does not expose a downcased alias of a constant when case-sensitive",
+      "file": "./spec/bulk_expression_solver_spec.rb",
+      "line": 238,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/bulk_expression_solver_spec.rb[1:2:4]",
+      "description": "Dentaku::BulkExpressionSolver#solve falls back to mixed-case memory values when case-sensitive",
+      "file": "./spec/bulk_expression_solver_spec.rb",
+      "line": 247,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/bulk_expression_solver_spec.rb[1:2:5]",
+      "description": "Dentaku::BulkExpressionSolver#solve returns :undefined when variables are unbound",
+      "file": "./spec/bulk_expression_solver_spec.rb",
+      "line": 256,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/bulk_expression_solver_spec.rb[1:2:6]",
+      "description": "Dentaku::BulkExpressionSolver#solve allows passing in a custom value to an error handler when a variable is unbound",
+      "file": "./spec/bulk_expression_solver_spec.rb",
+      "line": 262,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/bulk_expression_solver_spec.rb[1:2:7]",
+      "description": "Dentaku::BulkExpressionSolver#solve allows passing in a custom value to an error handler when there is a div/0 error",
+      "file": "./spec/bulk_expression_solver_spec.rb",
+      "line": 268,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/bulk_expression_solver_spec.rb[1:2:8]",
+      "description": "Dentaku::BulkExpressionSolver#solve allows passing in ast as expression",
+      "file": "./spec/bulk_expression_solver_spec.rb",
+      "line": 274,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/bulk_expression_solver_spec.rb[1:2:9]",
+      "description": "Dentaku::BulkExpressionSolver#solve stores the recipient variable on the exception when there is a div/0 error",
+      "file": "./spec/bulk_expression_solver_spec.rb",
+      "line": 280,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/bulk_expression_solver_spec.rb[1:2:10]",
+      "description": "Dentaku::BulkExpressionSolver#solve stores the recipient variable on the exception when there is an unbound variable",
+      "file": "./spec/bulk_expression_solver_spec.rb",
+      "line": 289,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/bulk_expression_solver_spec.rb[1:2:11]",
+      "description": "Dentaku::BulkExpressionSolver#solve sets the recipient variable before the solve block is invoked",
+      "file": "./spec/bulk_expression_solver_spec.rb",
+      "line": 298,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/bulk_expression_solver_spec.rb[1:2:12]",
+      "description": "Dentaku::BulkExpressionSolver#solve stores the recipient variable on the exception when there is an ArgumentError",
+      "file": "./spec/bulk_expression_solver_spec.rb",
+      "line": 308,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/bulk_expression_solver_spec.rb[1:2:13]",
+      "description": "Dentaku::BulkExpressionSolver#solve safely handles argument errors",
+      "file": "./spec/bulk_expression_solver_spec.rb",
+      "line": 317,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/bulk_expression_solver_spec.rb[1:2:14]",
+      "description": "Dentaku::BulkExpressionSolver#solve supports nested hashes of expressions using dot notation",
+      "file": "./spec/bulk_expression_solver_spec.rb",
+      "line": 327,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/bulk_expression_solver_spec.rb[1:2:15]",
+      "description": "Dentaku::BulkExpressionSolver#solve uses stored values for expressions when they are known",
+      "file": "./spec/bulk_expression_solver_spec.rb",
+      "line": 341,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/bulk_expression_solver_spec.rb[1:2:16]",
+      "description": "Dentaku::BulkExpressionSolver#solve solves all array expressions for which context exists, returning :undefined for the rest",
+      "file": "./spec/bulk_expression_solver_spec.rb",
+      "line": 353,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/bulk_expression_solver_spec.rb[1:2:17]",
+      "description": "Dentaku::BulkExpressionSolver#solve is expected to eq {:a=>:undefined, :b=>:undefined}",
+      "file": "./spec/bulk_expression_solver_spec.rb",
+      "line": 363,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:1]",
+      "description": "Dentaku::Calculator evaluates an expression",
+      "file": "./spec/calculator_spec.rb",
+      "line": 10,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:2]",
+      "description": "Dentaku::Calculator differentiates between percentage and modulo operators",
+      "file": "./spec/calculator_spec.rb",
+      "line": 46,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:6]",
+      "description": "Dentaku::Calculator supports unicode characters in identifiers",
+      "file": "./spec/calculator_spec.rb",
+      "line": 141,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:11]",
+      "description": "Dentaku::Calculator evaluates a statement with no variables",
+      "file": "./spec/calculator_spec.rb",
+      "line": 427,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:12]",
+      "description": "Dentaku::Calculator evaluates negation",
+      "file": "./spec/calculator_spec.rb",
+      "line": 432,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:13]",
+      "description": "Dentaku::Calculator fails to evaluate unbound statements",
+      "file": "./spec/calculator_spec.rb",
+      "line": 440,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:14]",
+      "description": "Dentaku::Calculator accepts a block for custom handling of unbound variables",
+      "file": "./spec/calculator_spec.rb",
+      "line": 452,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:15]",
+      "description": "Dentaku::Calculator fails to evaluate incomplete statements",
+      "file": "./spec/calculator_spec.rb",
+      "line": 458,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:16]",
+      "description": "Dentaku::Calculator evaluates unbound statements given a binding in memory",
+      "file": "./spec/calculator_spec.rb",
+      "line": 466,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:17]",
+      "description": "Dentaku::Calculator rebinds for each evaluation",
+      "file": "./spec/calculator_spec.rb",
+      "line": 472,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:18]",
+      "description": "Dentaku::Calculator accepts strings or symbols for binding keys",
+      "file": "./spec/calculator_spec.rb",
+      "line": 477,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:19]",
+      "description": "Dentaku::Calculator accepts digits in identifiers",
+      "file": "./spec/calculator_spec.rb",
+      "line": 482,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:20]",
+      "description": "Dentaku::Calculator accepts special characters in quoted identifiers",
+      "file": "./spec/calculator_spec.rb",
+      "line": 489,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:21]",
+      "description": "Dentaku::Calculator compares string literals with string variables",
+      "file": "./spec/calculator_spec.rb",
+      "line": 496,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:22]",
+      "description": "Dentaku::Calculator performs case-sensitive comparison",
+      "file": "./spec/calculator_spec.rb",
+      "line": 501,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:23]",
+      "description": "Dentaku::Calculator allows binding logical values",
+      "file": "./spec/calculator_spec.rb",
+      "line": 506,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:24]",
+      "description": "Dentaku::Calculator compares time variables",
+      "file": "./spec/calculator_spec.rb",
+      "line": 516,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:25]",
+      "description": "Dentaku::Calculator compares time literals with time variables",
+      "file": "./spec/calculator_spec.rb",
+      "line": 523,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:3:1]",
+      "description": "Dentaku::Calculator evaluate returns nil when formula has error",
+      "file": "./spec/calculator_spec.rb",
+      "line": 57,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:3:2]",
+      "description": "Dentaku::Calculator evaluate suppresses unbound variable errors",
+      "file": "./spec/calculator_spec.rb",
+      "line": 61,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:3:3]",
+      "description": "Dentaku::Calculator evaluate suppresses numeric coercion errors",
+      "file": "./spec/calculator_spec.rb",
+      "line": 74,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:3:4]",
+      "description": "Dentaku::Calculator evaluate treats explicit nil as logical false",
+      "file": "./spec/calculator_spec.rb",
+      "line": 84,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:3:5]",
+      "description": "Dentaku::Calculator evaluate supports lazy evaluation of variables",
+      "file": "./spec/calculator_spec.rb",
+      "line": 91,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:4:1]",
+      "description": "Dentaku::Calculator ast raises parsing errors",
+      "file": "./spec/calculator_spec.rb",
+      "line": 98,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:5:1]",
+      "description": "Dentaku::Calculator evaluate! raises exception when formula has error",
+      "file": "./spec/calculator_spec.rb",
+      "line": 105,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:5:2]",
+      "description": "Dentaku::Calculator evaluate! raises unbound variable errors",
+      "file": "./spec/calculator_spec.rb",
+      "line": 110,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:5:3]",
+      "description": "Dentaku::Calculator evaluate! raises numeric coersion errors",
+      "file": "./spec/calculator_spec.rb",
+      "line": 123,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:5:4]",
+      "description": "Dentaku::Calculator evaluate! raises argument error if a function is called with incorrect arity",
+      "file": "./spec/calculator_spec.rb",
+      "line": 136,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:7:1]",
+      "description": "Dentaku::Calculator memory is expected to be empty",
+      "file": "./spec/calculator_spec.rb",
+      "line": 146,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:7:2]",
+      "description": "Dentaku::Calculator memory is expected not to be empty",
+      "file": "./spec/calculator_spec.rb",
+      "line": 147,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:7:3]",
+      "description": "Dentaku::Calculator memory is expected to be empty",
+      "file": "./spec/calculator_spec.rb",
+      "line": 148,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:7:4]",
+      "description": "Dentaku::Calculator memory discards local values",
+      "file": "./spec/calculator_spec.rb",
+      "line": 150,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:7:5]",
+      "description": "Dentaku::Calculator memory can store the value `false`",
+      "file": "./spec/calculator_spec.rb",
+      "line": 155,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:7:6]",
+      "description": "Dentaku::Calculator memory can store multiple values",
+      "file": "./spec/calculator_spec.rb",
+      "line": 160,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:7:7]",
+      "description": "Dentaku::Calculator memory collapses differently cased symbol keys unless case sensitive",
+      "file": "./spec/calculator_spec.rb",
+      "line": 166,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:7:8]",
+      "description": "Dentaku::Calculator memory flattens a hash that mixes flat and nested values",
+      "file": "./spec/calculator_spec.rb",
+      "line": 173,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:7:9]",
+      "description": "Dentaku::Calculator memory stores nested values as-is without nested data support",
+      "file": "./spec/calculator_spec.rb",
+      "line": 178,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:7:10]",
+      "description": "Dentaku::Calculator memory stores formulas",
+      "file": "./spec/calculator_spec.rb",
+      "line": 183,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:7:11]",
+      "description": "Dentaku::Calculator memory stores dates",
+      "file": "./spec/calculator_spec.rb",
+      "line": 188,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:7:12]",
+      "description": "Dentaku::Calculator memory stores nested hashes",
+      "file": "./spec/calculator_spec.rb",
+      "line": 194,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:7:13]",
+      "description": "Dentaku::Calculator memory stores nested hashes with quotes",
+      "file": "./spec/calculator_spec.rb",
+      "line": 201,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:7:14]",
+      "description": "Dentaku::Calculator memory stores arrays",
+      "file": "./spec/calculator_spec.rb",
+      "line": 208,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:7:15]",
+      "description": "Dentaku::Calculator memory accesses into strings and nested arrays",
+      "file": "./spec/calculator_spec.rb",
+      "line": 215,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:7:16]",
+      "description": "Dentaku::Calculator memory raises an argument error when accessing into a non-indexable value",
+      "file": "./spec/calculator_spec.rb",
+      "line": 220,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:7:17]",
+      "description": "Dentaku::Calculator memory returns nil when accessing into nil",
+      "file": "./spec/calculator_spec.rb",
+      "line": 225,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:7:18]",
+      "description": "Dentaku::Calculator memory raises an argument error when the index type is incompatible",
+      "file": "./spec/calculator_spec.rb",
+      "line": 231,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:7:19]",
+      "description": "Dentaku::Calculator memory evaluates arrays",
+      "file": "./spec/calculator_spec.rb",
+      "line": 235,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:8:1]",
+      "description": "Dentaku::Calculator dependencies respects quoted identifiers in dependencies",
+      "file": "./spec/calculator_spec.rb",
+      "line": 242,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:8:2]",
+      "description": "Dentaku::Calculator dependencies finds dependencies in a generic statement",
+      "file": "./spec/calculator_spec.rb",
+      "line": 246,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:8:3]",
+      "description": "Dentaku::Calculator dependencies ignores dependencies passed in context",
+      "file": "./spec/calculator_spec.rb",
+      "line": 250,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:8:4]",
+      "description": "Dentaku::Calculator dependencies ignores dependencies passed in context for quoted identifiers",
+      "file": "./spec/calculator_spec.rb",
+      "line": 254,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:8:5]",
+      "description": "Dentaku::Calculator dependencies finds dependencies in formula arguments",
+      "file": "./spec/calculator_spec.rb",
+      "line": 258,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:8:6]",
+      "description": "Dentaku::Calculator dependencies doesn't consider variables in memory as dependencies",
+      "file": "./spec/calculator_spec.rb",
+      "line": 264,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:8:7]",
+      "description": "Dentaku::Calculator dependencies finds no dependencies in array literals",
+      "file": "./spec/calculator_spec.rb",
+      "line": 268,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:8:8]",
+      "description": "Dentaku::Calculator dependencies finds dependencies in item expressions",
+      "file": "./spec/calculator_spec.rb",
+      "line": 272,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:8:9]",
+      "description": "Dentaku::Calculator dependencies raises an error when trying to find dependencies with invalid syntax",
+      "file": "./spec/calculator_spec.rb",
+      "line": 277,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:9:1]",
+      "description": "Dentaku::Calculator solve! evaluates properly with variables, even if some in memory",
+      "file": "./spec/calculator_spec.rb",
+      "line": 285,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:9:2]",
+      "description": "Dentaku::Calculator solve! prefers variables over values in memory if they have no dependencies",
+      "file": "./spec/calculator_spec.rb",
+      "line": 294,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:9:3]",
+      "description": "Dentaku::Calculator solve! preserves hash keys",
+      "file": "./spec/calculator_spec.rb",
+      "line": 303,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:9:4]",
+      "description": "Dentaku::Calculator solve! lets you know about a cycle if one occurs",
+      "file": "./spec/calculator_spec.rb",
+      "line": 311,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:9:5]",
+      "description": "Dentaku::Calculator solve! is case-insensitive",
+      "file": "./spec/calculator_spec.rb",
+      "line": 317,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:9:6]",
+      "description": "Dentaku::Calculator solve! lets you know if a variable is unbound",
+      "file": "./spec/calculator_spec.rb",
+      "line": 322,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:9:7]",
+      "description": "Dentaku::Calculator solve! can reference stored formulas",
+      "file": "./spec/calculator_spec.rb",
+      "line": 328,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:9:8]",
+      "description": "Dentaku::Calculator solve! raises an exception if there are cyclic dependencies",
+      "file": "./spec/calculator_spec.rb",
+      "line": 342,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:10:1]",
+      "description": "Dentaku::Calculator solve returns :undefined when variables are unbound",
+      "file": "./spec/calculator_spec.rb",
+      "line": 353,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:10:2]",
+      "description": "Dentaku::Calculator solve returns :undefined when variables are nil",
+      "file": "./spec/calculator_spec.rb",
+      "line": 358,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:10:3]",
+      "description": "Dentaku::Calculator solve allows passing in a custom value to an error handler",
+      "file": "./spec/calculator_spec.rb",
+      "line": 363,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:10:4]",
+      "description": "Dentaku::Calculator solve solves remainder of expressions with unbound variable",
+      "file": "./spec/calculator_spec.rb",
+      "line": 369,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:10:5]",
+      "description": "Dentaku::Calculator solve solves remainder of expressions when one cannot be evaluated",
+      "file": "./spec/calculator_spec.rb",
+      "line": 380,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:10:6]",
+      "description": "Dentaku::Calculator solve returns undefined if there are cyclic dependencies",
+      "file": "./spec/calculator_spec.rb",
+      "line": 394,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:10:7]",
+      "description": "Dentaku::Calculator solve allows to compare \"-\" or \"-.\"",
+      "file": "./spec/calculator_spec.rb",
+      "line": 407,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:10:8]",
+      "description": "Dentaku::Calculator solve integrates with custom functions",
+      "file": "./spec/calculator_spec.rb",
+      "line": 412,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:26:1]",
+      "description": "Dentaku::Calculator disabling date literals does not parse formulas with minus signs as dates",
+      "file": "./spec/calculator_spec.rb",
+      "line": 531,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:27:1]",
+      "description": "Dentaku::Calculator supports date arithmetic from hardcoded string",
+      "file": "./spec/calculator_spec.rb",
+      "line": 538,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:27:2]",
+      "description": "Dentaku::Calculator supports date arithmetic from string variable",
+      "file": "./spec/calculator_spec.rb",
+      "line": 553,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:27:3]",
+      "description": "Dentaku::Calculator supports date arithmetic from date object",
+      "file": "./spec/calculator_spec.rb",
+      "line": 562,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:27:4]",
+      "description": "Dentaku::Calculator supports date arithmetic from time object",
+      "file": "./spec/calculator_spec.rb",
+      "line": 571,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:27:5]",
+      "description": "Dentaku::Calculator supports date arithmetic does not accept unknown durations",
+      "file": "./spec/calculator_spec.rb",
+      "line": 582,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:28:1]",
+      "description": "Dentaku::Calculator functions include IF",
+      "file": "./spec/calculator_spec.rb",
+      "line": 592,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:28:2]",
+      "description": "Dentaku::Calculator functions include ROUND",
+      "file": "./spec/calculator_spec.rb",
+      "line": 599,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:28:3]",
+      "description": "Dentaku::Calculator functions include ABS",
+      "file": "./spec/calculator_spec.rb",
+      "line": 607,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:28:4]",
+      "description": "Dentaku::Calculator functions include NOT",
+      "file": "./spec/calculator_spec.rb",
+      "line": 614,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:28:5]",
+      "description": "Dentaku::Calculator functions evaluates functions with negative numbers",
+      "file": "./spec/calculator_spec.rb",
+      "line": 622,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:28:6]",
+      "description": "Dentaku::Calculator functions calculates intercept correctly",
+      "file": "./spec/calculator_spec.rb",
+      "line": 629,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:28:11]",
+      "description": "Dentaku::Calculator functions evaluates functions with stored variables",
+      "file": "./spec/calculator_spec.rb",
+      "line": 718,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:28:7:1]",
+      "description": "Dentaku::Calculator functions any enumerates values and returns true if any evaluation is truthy",
+      "file": "./spec/calculator_spec.rb",
+      "line": 637,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:28:8:1]",
+      "description": "Dentaku::Calculator functions all enumerates values and returns true if all evaluations are truthy",
+      "file": "./spec/calculator_spec.rb",
+      "line": 654,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:28:9:1]",
+      "description": "Dentaku::Calculator functions map maps values",
+      "file": "./spec/calculator_spec.rb",
+      "line": 671,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:28:10:1]",
+      "description": "Dentaku::Calculator functions pluck plucks values from array of hashes",
+      "file": "./spec/calculator_spec.rb",
+      "line": 698,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:28:12:1]",
+      "description": "Dentaku::Calculator functions roundup should work with one argument",
+      "file": "./spec/calculator_spec.rb",
+      "line": 725,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:28:12:2]",
+      "description": "Dentaku::Calculator functions roundup should accept second precision argument like in Office formula",
+      "file": "./spec/calculator_spec.rb",
+      "line": 729,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:28:12:3]",
+      "description": "Dentaku::Calculator functions roundup does not round up a float that is already exact",
+      "file": "./spec/calculator_spec.rb",
+      "line": 733,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:28:12:4]",
+      "description": "Dentaku::Calculator functions roundup returns the same type as its input, like round",
+      "file": "./spec/calculator_spec.rb",
+      "line": 738,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:28:13:1]",
+      "description": "Dentaku::Calculator functions rounddown should work with one argument",
+      "file": "./spec/calculator_spec.rb",
+      "line": 746,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:28:13:2]",
+      "description": "Dentaku::Calculator functions rounddown should accept second precision argument like in Office formula",
+      "file": "./spec/calculator_spec.rb",
+      "line": 750,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:28:13:3]",
+      "description": "Dentaku::Calculator functions rounddown does not round down a float that is already exact",
+      "file": "./spec/calculator_spec.rb",
+      "line": 754,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:28:13:4]",
+      "description": "Dentaku::Calculator functions rounddown returns the same type as its input, like round",
+      "file": "./spec/calculator_spec.rb",
+      "line": 759,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:29:1]",
+      "description": "Dentaku::Calculator nil values can be used explicitly",
+      "file": "./spec/calculator_spec.rb",
+      "line": 768,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:29:2]",
+      "description": "Dentaku::Calculator nil values can be assigned to a variable",
+      "file": "./spec/calculator_spec.rb",
+      "line": 772,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:29:3]",
+      "description": "Dentaku::Calculator nil values are carried across middle terms",
+      "file": "./spec/calculator_spec.rb",
+      "line": 776,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:29:4]",
+      "description": "Dentaku::Calculator nil values raise errors when used in arithmetic operations",
+      "file": "./spec/calculator_spec.rb",
+      "line": 788,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:30:1]",
+      "description": "Dentaku::Calculator case statements handles complex then statements",
+      "file": "./spec/calculator_spec.rb",
+      "line": 809,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:30:2]",
+      "description": "Dentaku::Calculator case statements evaluates case statement as part of a larger expression",
+      "file": "./spec/calculator_spec.rb",
+      "line": 814,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:30:3]",
+      "description": "Dentaku::Calculator case statements handles complex when statements",
+      "file": "./spec/calculator_spec.rb",
+      "line": 823,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:30:4]",
+      "description": "Dentaku::Calculator case statements raises an exception when no match and there is no default value",
+      "file": "./spec/calculator_spec.rb",
+      "line": 836,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:30:5]",
+      "description": "Dentaku::Calculator case statements handles a default else statement",
+      "file": "./spec/calculator_spec.rb",
+      "line": 847,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:30:6]",
+      "description": "Dentaku::Calculator case statements handles nested case statements",
+      "file": "./spec/calculator_spec.rb",
+      "line": 852,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:30:7]",
+      "description": "Dentaku::Calculator case statements handles nested case statements with case-sensitivity",
+      "file": "./spec/calculator_spec.rb",
+      "line": 876,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:30:8]",
+      "description": "Dentaku::Calculator case statements handles multiple nested case statements",
+      "file": "./spec/calculator_spec.rb",
+      "line": 901,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:31:1]",
+      "description": "Dentaku::Calculator math support includes `frexp`",
+      "file": "./spec/calculator_spec.rb",
+      "line": 932,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:31:2]",
+      "description": "Dentaku::Calculator math support includes `ldexp`",
+      "file": "./spec/calculator_spec.rb",
+      "line": 932,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:31:3]",
+      "description": "Dentaku::Calculator math support includes `hypot`",
+      "file": "./spec/calculator_spec.rb",
+      "line": 932,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:31:4]",
+      "description": "Dentaku::Calculator math support includes `erf`",
+      "file": "./spec/calculator_spec.rb",
+      "line": 932,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:31:5]",
+      "description": "Dentaku::Calculator math support includes `erfc`",
+      "file": "./spec/calculator_spec.rb",
+      "line": 932,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:31:6]",
+      "description": "Dentaku::Calculator math support includes `gamma`",
+      "file": "./spec/calculator_spec.rb",
+      "line": 932,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:31:7]",
+      "description": "Dentaku::Calculator math support includes `lgamma`",
+      "file": "./spec/calculator_spec.rb",
+      "line": 932,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:31:8]",
+      "description": "Dentaku::Calculator math support includes `sqrt`",
+      "file": "./spec/calculator_spec.rb",
+      "line": 932,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:31:9]",
+      "description": "Dentaku::Calculator math support includes `atan2`",
+      "file": "./spec/calculator_spec.rb",
+      "line": 932,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:31:10]",
+      "description": "Dentaku::Calculator math support includes `cos`",
+      "file": "./spec/calculator_spec.rb",
+      "line": 932,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:31:11]",
+      "description": "Dentaku::Calculator math support includes `sin`",
+      "file": "./spec/calculator_spec.rb",
+      "line": 932,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:31:12]",
+      "description": "Dentaku::Calculator math support includes `tan`",
+      "file": "./spec/calculator_spec.rb",
+      "line": 932,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:31:13]",
+      "description": "Dentaku::Calculator math support includes `acos`",
+      "file": "./spec/calculator_spec.rb",
+      "line": 932,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:31:14]",
+      "description": "Dentaku::Calculator math support includes `asin`",
+      "file": "./spec/calculator_spec.rb",
+      "line": 932,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:31:15]",
+      "description": "Dentaku::Calculator math support includes `atan`",
+      "file": "./spec/calculator_spec.rb",
+      "line": 932,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:31:16]",
+      "description": "Dentaku::Calculator math support includes `cosh`",
+      "file": "./spec/calculator_spec.rb",
+      "line": 932,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:31:17]",
+      "description": "Dentaku::Calculator math support includes `sinh`",
+      "file": "./spec/calculator_spec.rb",
+      "line": 932,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:31:18]",
+      "description": "Dentaku::Calculator math support includes `tanh`",
+      "file": "./spec/calculator_spec.rb",
+      "line": 932,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:31:19]",
+      "description": "Dentaku::Calculator math support includes `acosh`",
+      "file": "./spec/calculator_spec.rb",
+      "line": 932,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:31:20]",
+      "description": "Dentaku::Calculator math support includes `asinh`",
+      "file": "./spec/calculator_spec.rb",
+      "line": 932,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:31:21]",
+      "description": "Dentaku::Calculator math support includes `atanh`",
+      "file": "./spec/calculator_spec.rb",
+      "line": 932,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:31:22]",
+      "description": "Dentaku::Calculator math support includes `exp`",
+      "file": "./spec/calculator_spec.rb",
+      "line": 932,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:31:23]",
+      "description": "Dentaku::Calculator math support includes `log`",
+      "file": "./spec/calculator_spec.rb",
+      "line": 932,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:31:24]",
+      "description": "Dentaku::Calculator math support includes `log2`",
+      "file": "./spec/calculator_spec.rb",
+      "line": 932,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:31:25]",
+      "description": "Dentaku::Calculator math support includes `log10`",
+      "file": "./spec/calculator_spec.rb",
+      "line": 932,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:31:26]",
+      "description": "Dentaku::Calculator math support includes `cbrt`",
+      "file": "./spec/calculator_spec.rb",
+      "line": 932,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:31:27]",
+      "description": "Dentaku::Calculator math support defines a properly named class to support AST marshaling",
+      "file": "./spec/calculator_spec.rb",
+      "line": 946,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:31:28]",
+      "description": "Dentaku::Calculator math support properly handles a Math::DomainError",
+      "file": "./spec/calculator_spec.rb",
+      "line": 952,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:32:1]",
+      "description": "Dentaku::Calculator disable_cache disables the AST cache",
+      "file": "./spec/calculator_spec.rb",
+      "line": 963,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:32:2]",
+      "description": "Dentaku::Calculator disable_cache calculates normally",
+      "file": "./spec/calculator_spec.rb",
+      "line": 967,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:33:1]",
+      "description": "Dentaku::Calculator clear_cache clears all items from cache",
+      "file": "./spec/calculator_spec.rb",
+      "line": 985,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:33:2]",
+      "description": "Dentaku::Calculator clear_cache clears one item from cache",
+      "file": "./spec/calculator_spec.rb",
+      "line": 991,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:33:3]",
+      "description": "Dentaku::Calculator clear_cache clears items matching regex from cache",
+      "file": "./spec/calculator_spec.rb",
+      "line": 999,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:34:1]",
+      "description": "Dentaku::Calculator string functions concatenates strings",
+      "file": "./spec/calculator_spec.rb",
+      "line": 1006,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:34:2]",
+      "description": "Dentaku::Calculator string functions manipulates string arguments",
+      "file": "./spec/calculator_spec.rb",
+      "line": 1012,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:35:1]",
+      "description": "Dentaku::Calculator zero-arity functions can be used in formulas",
+      "file": "./spec/calculator_spec.rb",
+      "line": 1024,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:36:1]",
+      "description": "Dentaku::Calculator functions with whitespace before parentheses accepts regular functions",
+      "file": "./spec/calculator_spec.rb",
+      "line": 1032,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:37:1]",
+      "description": "Dentaku::Calculator logical operators with unbound operands short-circuits OR when the bound operand is true",
+      "file": "./spec/calculator_spec.rb",
+      "line": 1038,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:37:2]",
+      "description": "Dentaku::Calculator logical operators with unbound operands short-circuits AND when the bound operand is false",
+      "file": "./spec/calculator_spec.rb",
+      "line": 1043,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:37:3]",
+      "description": "Dentaku::Calculator logical operators with unbound operands still raises when the unbound operand is needed to decide",
+      "file": "./spec/calculator_spec.rb",
+      "line": 1048,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:38:1]",
+      "description": "Dentaku::Calculator XOR operator is true when exactly one operand is true",
+      "file": "./spec/calculator_spec.rb",
+      "line": 1057,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:38:2]",
+      "description": "Dentaku::Calculator XOR operator treats null as false, like the XOR function",
+      "file": "./spec/calculator_spec.rb",
+      "line": 1064,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:38:3]",
+      "description": "Dentaku::Calculator XOR operator needs both operands",
+      "file": "./spec/calculator_spec.rb",
+      "line": 1068,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:38:4]",
+      "description": "Dentaku::Calculator XOR operator shares precedence with AND and OR, left to right",
+      "file": "./spec/calculator_spec.rb",
+      "line": 1074,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:38:5]",
+      "description": "Dentaku::Calculator XOR operator requires logical operands",
+      "file": "./spec/calculator_spec.rb",
+      "line": 1079,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:38:6]",
+      "description": "Dentaku::Calculator XOR operator is still a function when followed by parentheses",
+      "file": "./spec/calculator_spec.rb",
+      "line": 1083,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:39:1]",
+      "description": "Dentaku::Calculator NOT operator negates its operand",
+      "file": "./spec/calculator_spec.rb",
+      "line": 1090,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:39:2]",
+      "description": "Dentaku::Calculator NOT operator is aliased as !",
+      "file": "./spec/calculator_spec.rb",
+      "line": 1096,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:39:3]",
+      "description": "Dentaku::Calculator NOT operator leaves != alone",
+      "file": "./spec/calculator_spec.rb",
+      "line": 1103,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:39:4]",
+      "description": "Dentaku::Calculator NOT operator binds looser than comparisons and tighter than AND, OR and XOR",
+      "file": "./spec/calculator_spec.rb",
+      "line": 1108,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:39:5]",
+      "description": "Dentaku::Calculator NOT operator works inside function arguments and case statements",
+      "file": "./spec/calculator_spec.rb",
+      "line": 1117,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:39:6]",
+      "description": "Dentaku::Calculator NOT operator requires a logical operand",
+      "file": "./spec/calculator_spec.rb",
+      "line": 1122,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:39:7]",
+      "description": "Dentaku::Calculator NOT operator reports the dependencies of its operand",
+      "file": "./spec/calculator_spec.rb",
+      "line": 1126,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:39:8]",
+      "description": "Dentaku::Calculator NOT operator is still a function when followed by parentheses",
+      "file": "./spec/calculator_spec.rb",
+      "line": 1130,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:40:1]",
+      "description": "Dentaku::Calculator AND and OR followed by parentheses without a left operand are functions",
+      "file": "./spec/calculator_spec.rb",
+      "line": 1137,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:41:1]",
+      "description": "Dentaku::Calculator negation after case keywords negates",
+      "file": "./spec/calculator_spec.rb",
+      "line": 1144,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:42:1]",
+      "description": "Dentaku::Calculator logical operators whose short-circuit probe raises falls back to the dependencies of both operands",
+      "file": "./spec/calculator_spec.rb",
+      "line": 1152,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:42:2]",
+      "description": "Dentaku::Calculator logical operators whose short-circuit probe raises still prunes when the probe is decisive",
+      "file": "./spec/calculator_spec.rb",
+      "line": 1157,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:42:3]",
+      "description": "Dentaku::Calculator logical operators whose short-circuit probe raises still reports the other operand when the probe is not decisive",
+      "file": "./spec/calculator_spec.rb",
+      "line": 1164,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:42:4]",
+      "description": "Dentaku::Calculator logical operators whose short-circuit probe raises probes each operand of a chain once rather than exponentially",
+      "file": "./spec/calculator_spec.rb",
+      "line": 1172,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:43:1]",
+      "description": "Dentaku::Calculator aliases accepts aliases as instance option",
+      "file": "./spec/calculator_spec.rb",
+      "line": 1185,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:43:2]",
+      "description": "Dentaku::Calculator aliases accepts aliases with whitespace before parentheses",
+      "file": "./spec/calculator_spec.rb",
+      "line": 1189,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:43:3]",
+      "description": "Dentaku::Calculator aliases applies module-level aliases set after calculator creation",
+      "file": "./spec/calculator_spec.rb",
+      "line": 1193,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:44:1]",
+      "description": "Dentaku::Calculator constructor options raises on unknown options",
+      "file": "./spec/calculator_spec.rb",
+      "line": 1202,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:44:2]",
+      "description": "Dentaku::Calculator constructor options accepts a pre-warmed AST cache",
+      "file": "./spec/calculator_spec.rb",
+      "line": 1207,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:44:3]",
+      "description": "Dentaku::Calculator constructor options caches ASTs when caching is enabled on the instance",
+      "file": "./spec/calculator_spec.rb",
+      "line": 1213,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:44:4]",
+      "description": "Dentaku::Calculator constructor options does not cache ASTs when disabled on the instance, even if enabled globally",
+      "file": "./spec/calculator_spec.rb",
+      "line": 1219,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:45:1]",
+      "description": "Dentaku::Calculator nested_data default to nested data enabled",
+      "file": "./spec/calculator_spec.rb",
+      "line": 1228,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:45:2]",
+      "description": "Dentaku::Calculator nested_data allow opt out of nested data support",
+      "file": "./spec/calculator_spec.rb",
+      "line": 1232,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:45:3]",
+      "description": "Dentaku::Calculator nested_data should allow optout of nested hash",
+      "file": "./spec/calculator_spec.rb",
+      "line": 1236,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:46:1]",
+      "description": "Dentaku::Calculator identifier cache reduces call count by caching results of resolved identifiers",
+      "file": "./spec/calculator_spec.rb",
+      "line": 1244,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:46:2]",
+      "description": "Dentaku::Calculator identifier cache does not carry cached identifier values across evaluations",
+      "file": "./spec/calculator_spec.rb",
+      "line": 1260,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:47:1]",
+      "description": "Dentaku::Calculator block-scoped store (#336) removes keys the block introduced",
+      "file": "./spec/calculator_spec.rb",
+      "line": 1281,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:47:2]",
+      "description": "Dentaku::Calculator block-scoped store (#336) restores keys the block shadowed",
+      "file": "./spec/calculator_spec.rb",
+      "line": 1289,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:47:3]",
+      "description": "Dentaku::Calculator block-scoped store (#336) restores when the block raises",
+      "file": "./spec/calculator_spec.rb",
+      "line": 1297,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:47:4]",
+      "description": "Dentaku::Calculator block-scoped store (#336) restores correctly when nested",
+      "file": "./spec/calculator_spec.rb",
+      "line": 1308,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:47:5]",
+      "description": "Dentaku::Calculator block-scoped store (#336) does not leak the internal evaluation mode key into memory",
+      "file": "./spec/calculator_spec.rb",
+      "line": 1316,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/calculator_spec.rb[1:47:6]",
+      "description": "Dentaku::Calculator block-scoped store (#336) restores in place rather than copying the whole memory hash",
+      "file": "./spec/calculator_spec.rb",
+      "line": 1323,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/case_sensitivity_spec.rb[1:1]",
+      "description": "Dentaku::Calculator honours its own setting regardless of what other instances do",
+      "file": "./spec/case_sensitivity_spec.rb",
+      "line": 9,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/case_sensitivity_spec.rb[1:2]",
+      "description": "Dentaku::Calculator is unaffected by another instance tokenizing while it scans",
+      "file": "./spec/case_sensitivity_spec.rb",
+      "line": 32,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/case_sensitivity_spec.rb[1:3]",
+      "description": "Dentaku::Calculator leaves identifier casing to the parser",
+      "file": "./spec/case_sensitivity_spec.rb",
+      "line": 50,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/dentaku_spec.rb[1:1]",
+      "description": "Dentaku evaulates an expression",
+      "file": "./spec/dentaku_spec.rb",
+      "line": 4,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/dentaku_spec.rb[1:2]",
+      "description": "Dentaku binds values to variables",
+      "file": "./spec/dentaku_spec.rb",
+      "line": 8,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/dentaku_spec.rb[1:3]",
+      "description": "Dentaku evaulates a nested function",
+      "file": "./spec/dentaku_spec.rb",
+      "line": 12,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/dentaku_spec.rb[1:4]",
+      "description": "Dentaku treats variables as case-insensitive",
+      "file": "./spec/dentaku_spec.rb",
+      "line": 16,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/dentaku_spec.rb[1:5]",
+      "description": "Dentaku raises a parse error for bad logic expressions",
+      "file": "./spec/dentaku_spec.rb",
+      "line": 23,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/dentaku_spec.rb[1:6]",
+      "description": "Dentaku evaluates with class-level shortcut functions",
+      "file": "./spec/dentaku_spec.rb",
+      "line": 29,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/dentaku_spec.rb[1:7]",
+      "description": "Dentaku accepts a block for custom handling of unbound variables",
+      "file": "./spec/dentaku_spec.rb",
+      "line": 35,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/dentaku_spec.rb[1:8]",
+      "description": "Dentaku evaluates with class-level aliases",
+      "file": "./spec/dentaku_spec.rb",
+      "line": 41,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/dentaku_spec.rb[1:9]",
+      "description": "Dentaku sets caching opt-in flags",
+      "file": "./spec/dentaku_spec.rb",
+      "line": 46,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/dependency_resolver_spec.rb[1:1]",
+      "description": "Dentaku::DependencyResolver sorts expressions in dependency order",
+      "file": "./spec/dependency_resolver_spec.rb",
+      "line": 5,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/dependency_resolver_spec.rb[1:2]",
+      "description": "Dentaku::DependencyResolver handles case differences",
+      "file": "./spec/dependency_resolver_spec.rb",
+      "line": 12,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/dependency_resolver_spec.rb[1:3]",
+      "description": "Dentaku::DependencyResolver sorts mixed-case expressions in dependency order when case-sensitive",
+      "file": "./spec/dependency_resolver_spec.rb",
+      "line": 19,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/dependency_resolver_spec.rb[1:4]",
+      "description": "Dentaku::DependencyResolver treats variables that differ only in case as distinct when case-sensitive",
+      "file": "./spec/dependency_resolver_spec.rb",
+      "line": 26,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/exceptions_spec.rb[1:1]",
+      "description": "Dentaku::UnboundVariableError includes variable name(s) in message",
+      "file": "./spec/exceptions_spec.rb",
+      "line": 5,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/exceptions_spec.rb[2:1]",
+      "description": "Dentaku::Error is included in every Dentaku exception, even those subclassing Ruby built-ins",
+      "file": "./spec/exceptions_spec.rb",
+      "line": 12,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/exceptions_spec.rb[2:2]",
+      "description": "Dentaku::Error preserves stdlib ancestry for exceptions subclassing Ruby built-ins",
+      "file": "./spec/exceptions_spec.rb",
+      "line": 26,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/exceptions_spec.rb[3:1]",
+      "description": "Dentaku::ParseError builds a message from reason and metadata",
+      "file": "./spec/exceptions_spec.rb",
+      "line": 33,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/exceptions_spec.rb[3:2]",
+      "description": "Dentaku::ParseError constructs with sparse metadata",
+      "file": "./spec/exceptions_spec.rb",
+      "line": 38,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/exceptions_spec.rb[3:3]",
+      "description": "Dentaku::ParseError describes an :incompatible expectation as requiring compatible operands",
+      "file": "./spec/exceptions_spec.rb",
+      "line": 42,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/exceptions_spec.rb[3:4]",
+      "description": "Dentaku::ParseError allows call sites to override the default message",
+      "file": "./spec/exceptions_spec.rb",
+      "line": 47,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/exceptions_spec.rb[4:1]",
+      "description": "Dentaku::TokenizerError builds a message from reason and metadata",
+      "file": "./spec/exceptions_spec.rb",
+      "line": 55,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/exceptions_spec.rb[5:1]",
+      "description": "Dentaku::ArgumentError builds an incompatible_type message from a function context",
+      "file": "./spec/exceptions_spec.rb",
+      "line": 62,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/exceptions_spec.rb[5:2]",
+      "description": "Dentaku::ArgumentError builds an incompatible_type message from expected and actual",
+      "file": "./spec/exceptions_spec.rb",
+      "line": 67,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/exceptions_spec.rb[5:3]",
+      "description": "Dentaku::ArgumentError builds an invalid_operator message",
+      "file": "./spec/exceptions_spec.rb",
+      "line": 72,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/exceptions_spec.rb[5:4]",
+      "description": "Dentaku::ArgumentError describes an at-least arity as a range",
+      "file": "./spec/exceptions_spec.rb",
+      "line": 77,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/exceptions_spec.rb[5:5]",
+      "description": "Dentaku::ArgumentError describes an exact arity as a count",
+      "file": "./spec/exceptions_spec.rb",
+      "line": 82,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/exceptions_spec.rb[5:6]",
+      "description": "Dentaku::ArgumentError constructs with sparse metadata",
+      "file": "./spec/exceptions_spec.rb",
+      "line": 87,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/exceptions_spec.rb[5:7]",
+      "description": "Dentaku::ArgumentError allows call sites to override the default message",
+      "file": "./spec/exceptions_spec.rb",
+      "line": 91,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/external_function_spec.rb[1:1:3]",
+      "description": "Dentaku::Calculator functions allows registering \"bang\" functions",
+      "file": "./spec/external_function_spec.rb",
+      "line": 125,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/external_function_spec.rb[1:1:4]",
+      "description": "Dentaku::Calculator functions defines for a given function a properly named class that represents it to support AST marshaling",
+      "file": "./spec/external_function_spec.rb",
+      "line": 131,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/external_function_spec.rb[1:1:5]",
+      "description": "Dentaku::Calculator functions does not store functions across all calculators",
+      "file": "./spec/external_function_spec.rb",
+      "line": 144,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/external_function_spec.rb[1:1:1:1]",
+      "description": "Dentaku::Calculator functions external functions includes NOW",
+      "file": "./spec/external_function_spec.rb",
+      "line": 23,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/external_function_spec.rb[1:1:1:2]",
+      "description": "Dentaku::Calculator functions external functions includes POW",
+      "file": "./spec/external_function_spec.rb",
+      "line": 29,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/external_function_spec.rb[1:1:1:3]",
+      "description": "Dentaku::Calculator functions external functions includes BIGGEST",
+      "file": "./spec/external_function_spec.rb",
+      "line": 35,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/external_function_spec.rb[1:1:1:4]",
+      "description": "Dentaku::Calculator functions external functions includes SMALLEST",
+      "file": "./spec/external_function_spec.rb",
+      "line": 39,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/external_function_spec.rb[1:1:1:5]",
+      "description": "Dentaku::Calculator functions external functions includes OPTIONAL",
+      "file": "./spec/external_function_spec.rb",
+      "line": 43,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/external_function_spec.rb[1:1:1:6]",
+      "description": "Dentaku::Calculator functions external functions supports array parameters",
+      "file": "./spec/external_function_spec.rb",
+      "line": 50,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/external_function_spec.rb[1:1:2:1]",
+      "description": "Dentaku::Calculator functions with callbacks includes BIGGEST_CALLBACK",
+      "file": "./spec/external_function_spec.rb",
+      "line": 94,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/external_function_spec.rb[1:1:2:2]",
+      "description": "Dentaku::Calculator functions with callbacks includes REVERSE",
+      "file": "./spec/external_function_spec.rb",
+      "line": 99,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/external_function_spec.rb[1:1:2:3]",
+      "description": "Dentaku::Calculator functions with callbacks includes PYTHAGORAS",
+      "file": "./spec/external_function_spec.rb",
+      "line": 105,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/external_function_spec.rb[1:1:2:4]",
+      "description": "Dentaku::Calculator functions with callbacks exposes the `callback` method of a function",
+      "file": "./spec/external_function_spec.rb",
+      "line": 111,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/external_function_spec.rb[1:1:2:5]",
+      "description": "Dentaku::Calculator functions with callbacks does not add a `callback` method to built-in functions",
+      "file": "./spec/external_function_spec.rb",
+      "line": 116,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/external_function_spec.rb[1:1:2:6]",
+      "description": "Dentaku::Calculator functions with callbacks defaults `callback` method to nil if not specified",
+      "file": "./spec/external_function_spec.rb",
+      "line": 120,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/external_function_spec.rb[1:1:6:1]",
+      "description": "Dentaku::Calculator functions error messages (#264) names the function even when another calculator claimed the constant",
+      "file": "./spec/external_function_spec.rb",
+      "line": 160,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/external_function_spec.rb[1:1:6:2]",
+      "description": "Dentaku::Calculator functions error messages (#264) gives re-registered functions a stable string representation",
+      "file": "./spec/external_function_spec.rb",
+      "line": 177,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/external_function_spec.rb[1:1:7:1]",
+      "description": "Dentaku::Calculator functions Dentaku::Calculator.add_function adds a function to default/global function registry",
+      "file": "./spec/external_function_spec.rb",
+      "line": 192,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/external_function_spec.rb[1:1:8:1]",
+      "description": "Dentaku::Calculator functions Dentaku::Calculator.add_functions adds multiple functions to default/global function registry",
+      "file": "./spec/external_function_spec.rb",
+      "line": 199,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/gemspec_spec.rb[1:1]",
+      "description": "dentaku.gemspec declares tsort as a runtime dependency",
+      "file": "./spec/gemspec_spec.rb",
+      "line": 5,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/humanize_visitor_spec.rb[1:1]",
+      "description": "Dentaku::HumanizeVisitor verbalizes comparison operators",
+      "file": "./spec/humanize_visitor_spec.rb",
+      "line": 12,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/humanize_visitor_spec.rb[1:2]",
+      "description": "Dentaku::HumanizeVisitor verbalizes arithmetic operators",
+      "file": "./spec/humanize_visitor_spec.rb",
+      "line": 21,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/humanize_visitor_spec.rb[1:3]",
+      "description": "Dentaku::HumanizeVisitor verbalizes bitwise operators",
+      "file": "./spec/humanize_visitor_spec.rb",
+      "line": 30,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/humanize_visitor_spec.rb[1:4]",
+      "description": "Dentaku::HumanizeVisitor verbalizes logical combinators",
+      "file": "./spec/humanize_visitor_spec.rb",
+      "line": 37,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/humanize_visitor_spec.rb[1:5]",
+      "description": "Dentaku::HumanizeVisitor verbalizes XOR and NOT operators",
+      "file": "./spec/humanize_visitor_spec.rb",
+      "line": 43,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/humanize_visitor_spec.rb[1:6]",
+      "description": "Dentaku::HumanizeVisitor verbalizes negation",
+      "file": "./spec/humanize_visitor_spec.rb",
+      "line": 49,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/humanize_visitor_spec.rb[1:7]",
+      "description": "Dentaku::HumanizeVisitor verbalizes nil literal",
+      "file": "./spec/humanize_visitor_spec.rb",
+      "line": 53,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/humanize_visitor_spec.rb[1:8]",
+      "description": "Dentaku::HumanizeVisitor substitutes identifiers with provided values",
+      "file": "./spec/humanize_visitor_spec.rb",
+      "line": 57,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/humanize_visitor_spec.rb[1:9]",
+      "description": "Dentaku::HumanizeVisitor quotes string values in substitution",
+      "file": "./spec/humanize_visitor_spec.rb",
+      "line": 62,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/humanize_visitor_spec.rb[1:10]",
+      "description": "Dentaku::HumanizeVisitor preserves identifiers with no substitution value",
+      "file": "./spec/humanize_visitor_spec.rb",
+      "line": 66,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/humanize_visitor_spec.rb[1:11]",
+      "description": "Dentaku::HumanizeVisitor verbalizes IF",
+      "file": "./spec/humanize_visitor_spec.rb",
+      "line": 70,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/humanize_visitor_spec.rb[1:12]",
+      "description": "Dentaku::HumanizeVisitor verbalizes AND function",
+      "file": "./spec/humanize_visitor_spec.rb",
+      "line": 74,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/humanize_visitor_spec.rb[1:13]",
+      "description": "Dentaku::HumanizeVisitor verbalizes OR function",
+      "file": "./spec/humanize_visitor_spec.rb",
+      "line": 78,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/humanize_visitor_spec.rb[1:14]",
+      "description": "Dentaku::HumanizeVisitor verbalizes XOR",
+      "file": "./spec/humanize_visitor_spec.rb",
+      "line": 82,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/humanize_visitor_spec.rb[1:15]",
+      "description": "Dentaku::HumanizeVisitor verbalizes NOT",
+      "file": "./spec/humanize_visitor_spec.rb",
+      "line": 86,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/humanize_visitor_spec.rb[1:16]",
+      "description": "Dentaku::HumanizeVisitor verbalizes SWITCH with default",
+      "file": "./spec/humanize_visitor_spec.rb",
+      "line": 90,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/humanize_visitor_spec.rb[1:17]",
+      "description": "Dentaku::HumanizeVisitor verbalizes SWITCH without default",
+      "file": "./spec/humanize_visitor_spec.rb",
+      "line": 95,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/humanize_visitor_spec.rb[1:18]",
+      "description": "Dentaku::HumanizeVisitor verbalizes MIN / MAX / SUM / AVG / COUNT",
+      "file": "./spec/humanize_visitor_spec.rb",
+      "line": 100,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/humanize_visitor_spec.rb[1:19]",
+      "description": "Dentaku::HumanizeVisitor verbalizes ABS",
+      "file": "./spec/humanize_visitor_spec.rb",
+      "line": 108,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/humanize_visitor_spec.rb[1:20]",
+      "description": "Dentaku::HumanizeVisitor verbalizes ROUND / ROUNDUP / ROUNDDOWN",
+      "file": "./spec/humanize_visitor_spec.rb",
+      "line": 112,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/humanize_visitor_spec.rb[1:21]",
+      "description": "Dentaku::HumanizeVisitor verbalizes INTERCEPT",
+      "file": "./spec/humanize_visitor_spec.rb",
+      "line": 118,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/humanize_visitor_spec.rb[1:22]",
+      "description": "Dentaku::HumanizeVisitor verbalizes LEFT / RIGHT",
+      "file": "./spec/humanize_visitor_spec.rb",
+      "line": 122,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/humanize_visitor_spec.rb[1:23]",
+      "description": "Dentaku::HumanizeVisitor verbalizes MID",
+      "file": "./spec/humanize_visitor_spec.rb",
+      "line": 127,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/humanize_visitor_spec.rb[1:24]",
+      "description": "Dentaku::HumanizeVisitor verbalizes LEN",
+      "file": "./spec/humanize_visitor_spec.rb",
+      "line": 131,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/humanize_visitor_spec.rb[1:25]",
+      "description": "Dentaku::HumanizeVisitor verbalizes FIND",
+      "file": "./spec/humanize_visitor_spec.rb",
+      "line": 135,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/humanize_visitor_spec.rb[1:26]",
+      "description": "Dentaku::HumanizeVisitor verbalizes SUBSTITUTE",
+      "file": "./spec/humanize_visitor_spec.rb",
+      "line": 139,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/humanize_visitor_spec.rb[1:27]",
+      "description": "Dentaku::HumanizeVisitor verbalizes CONCAT",
+      "file": "./spec/humanize_visitor_spec.rb",
+      "line": 143,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/humanize_visitor_spec.rb[1:28]",
+      "description": "Dentaku::HumanizeVisitor verbalizes CONTAINS",
+      "file": "./spec/humanize_visitor_spec.rb",
+      "line": 147,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/humanize_visitor_spec.rb[1:29]",
+      "description": "Dentaku::HumanizeVisitor verbalizes CASE",
+      "file": "./spec/humanize_visitor_spec.rb",
+      "line": 151,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/humanize_visitor_spec.rb[1:30]",
+      "description": "Dentaku::HumanizeVisitor verbalizes MAP",
+      "file": "./spec/humanize_visitor_spec.rb",
+      "line": 156,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/humanize_visitor_spec.rb[1:31]",
+      "description": "Dentaku::HumanizeVisitor verbalizes FILTER",
+      "file": "./spec/humanize_visitor_spec.rb",
+      "line": 160,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/humanize_visitor_spec.rb[1:32]",
+      "description": "Dentaku::HumanizeVisitor verbalizes ALL",
+      "file": "./spec/humanize_visitor_spec.rb",
+      "line": 164,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/humanize_visitor_spec.rb[1:33]",
+      "description": "Dentaku::HumanizeVisitor verbalizes ANY",
+      "file": "./spec/humanize_visitor_spec.rb",
+      "line": 168,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/humanize_visitor_spec.rb[1:34]",
+      "description": "Dentaku::HumanizeVisitor verbalizes PLUCK",
+      "file": "./spec/humanize_visitor_spec.rb",
+      "line": 172,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/humanize_visitor_spec.rb[1:35]",
+      "description": "Dentaku::HumanizeVisitor verbalizes unary Math functions",
+      "file": "./spec/humanize_visitor_spec.rb",
+      "line": 176,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/humanize_visitor_spec.rb[1:36]",
+      "description": "Dentaku::HumanizeVisitor verbalizes LOG with base",
+      "file": "./spec/humanize_visitor_spec.rb",
+      "line": 184,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/humanize_visitor_spec.rb[1:37]",
+      "description": "Dentaku::HumanizeVisitor verbalizes binary Math functions",
+      "file": "./spec/humanize_visitor_spec.rb",
+      "line": 188,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/humanize_visitor_spec.rb[1:38]",
+      "description": "Dentaku::HumanizeVisitor keeps member access in operands",
+      "file": "./spec/humanize_visitor_spec.rb",
+      "line": 193,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/humanize_visitor_spec.rb[1:39]",
+      "description": "Dentaku::HumanizeVisitor groups function calls before member access",
+      "file": "./spec/humanize_visitor_spec.rb",
+      "line": 198,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/humanize_visitor_spec.rb[1:40]",
+      "description": "Dentaku::HumanizeVisitor groups function calls and operations before an index",
+      "file": "./spec/humanize_visitor_spec.rb",
+      "line": 204,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/humanize_visitor_spec.rb[1:41]",
+      "description": "Dentaku::HumanizeVisitor is exposed via Calculator#humanize",
+      "file": "./spec/humanize_visitor_spec.rb",
+      "line": 213,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/identifiers_spec.rb[1:1:1]",
+      "description": "Dentaku::Calculator#identifiers does not prune literal guards",
+      "file": "./spec/identifiers_spec.rb",
+      "line": 9,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/identifiers_spec.rb[1:1:2]",
+      "description": "Dentaku::Calculator#identifiers includes the guard identifiers themselves",
+      "file": "./spec/identifiers_spec.rb",
+      "line": 13,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/identifiers_spec.rb[1:1:3]",
+      "description": "Dentaku::Calculator#identifiers never executes functions, pure or volatile",
+      "file": "./spec/identifiers_spec.rb",
+      "line": 17,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/identifiers_spec.rb[1:1:4]",
+      "description": "Dentaku::Calculator#identifiers includes switch and every branch of CASE",
+      "file": "./spec/identifiers_spec.rb",
+      "line": 26,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/identifiers_spec.rb[1:1:5]",
+      "description": "Dentaku::Calculator#identifiers includes both operands of AND/OR even when one is decisive",
+      "file": "./spec/identifiers_spec.rb",
+      "line": 31,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/identifiers_spec.rb[1:1:6]",
+      "description": "Dentaku::Calculator#identifiers excludes enum-bound variables",
+      "file": "./spec/identifiers_spec.rb",
+      "line": 36,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/identifiers_spec.rb[1:1:7]",
+      "description": "Dentaku::Calculator#identifiers ignores stored memory",
+      "file": "./spec/identifiers_spec.rb",
+      "line": 40,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/identifiers_spec.rb[1:1:8]",
+      "description": "Dentaku::Calculator#identifiers accepts an AST node",
+      "file": "./spec/identifiers_spec.rb",
+      "line": 45,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/identifiers_spec.rb[1:1:9]",
+      "description": "Dentaku::Calculator#identifiers accepts an array of expressions and deduplicates",
+      "file": "./spec/identifiers_spec.rb",
+      "line": 50,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/identifiers_spec.rb[1:1:10]",
+      "description": "Dentaku::Calculator#identifiers deduplicates repeated identifiers",
+      "file": "./spec/identifiers_spec.rb",
+      "line": 54,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/identifiers_spec.rb[1:1:11]",
+      "description": "Dentaku::Calculator#identifiers lists all inputs of a formula using external-state functions",
+      "file": "./spec/identifiers_spec.rb",
+      "line": 58,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/numeric_parser_spec.rb[1:1]",
+      "description": "Dentaku::NumericParser casts a String to an Integer if possible",
+      "file": "./spec/numeric_parser_spec.rb",
+      "line": 4,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/numeric_parser_spec.rb[1:2]",
+      "description": "Dentaku::NumericParser casts a String to a BigDecimal if possible and if Integer would loose information",
+      "file": "./spec/numeric_parser_spec.rb",
+      "line": 10,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/numeric_parser_spec.rb[1:3]",
+      "description": "Dentaku::NumericParser casts a String to a BigDecimal with a negative number",
+      "file": "./spec/numeric_parser_spec.rb",
+      "line": 16,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/numeric_parser_spec.rb[1:4]",
+      "description": "Dentaku::NumericParser casts a String to a BigDecimal without a leading zero",
+      "file": "./spec/numeric_parser_spec.rb",
+      "line": 22,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/numeric_parser_spec.rb[1:5]",
+      "description": "Dentaku::NumericParser casts a String with Sientific notiation to a BigDecimal",
+      "file": "./spec/numeric_parser_spec.rb",
+      "line": 28,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/numeric_parser_spec.rb[1:6]",
+      "description": "Dentaku::NumericParser casts a String with negative Sientific notiation to a BigDecimal",
+      "file": "./spec/numeric_parser_spec.rb",
+      "line": 34,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/numeric_parser_spec.rb[1:7]",
+      "description": "Dentaku::NumericParser casts a String with hexadecimal to an Integer",
+      "file": "./spec/numeric_parser_spec.rb",
+      "line": 40,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/numeric_parser_spec.rb[1:8]",
+      "description": "Dentaku::NumericParser casts a String with a negative hexadecimal to an Integer",
+      "file": "./spec/numeric_parser_spec.rb",
+      "line": 49,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/numeric_parser_spec.rb[1:9]",
+      "description": "Dentaku::NumericParser raises an error if the value could not be cast to a Numeric",
+      "file": "./spec/numeric_parser_spec.rb",
+      "line": 55,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/parser_spec.rb[1:1]",
+      "description": "Dentaku::Parser parses an integer literal",
+      "file": "./spec/parser_spec.rb",
+      "line": 7,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/parser_spec.rb[1:2]",
+      "description": "Dentaku::Parser performs simple addition",
+      "file": "./spec/parser_spec.rb",
+      "line": 12,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/parser_spec.rb[1:3]",
+      "description": "Dentaku::Parser compares two numbers",
+      "file": "./spec/parser_spec.rb",
+      "line": 17,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/parser_spec.rb[1:4]",
+      "description": "Dentaku::Parser calculates unary percentage",
+      "file": "./spec/parser_spec.rb",
+      "line": 22,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/parser_spec.rb[1:5]",
+      "description": "Dentaku::Parser calculates bitwise OR",
+      "file": "./spec/parser_spec.rb",
+      "line": 27,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/parser_spec.rb[1:6]",
+      "description": "Dentaku::Parser performs multiple operations in one stream",
+      "file": "./spec/parser_spec.rb",
+      "line": 35,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/parser_spec.rb[1:7]",
+      "description": "Dentaku::Parser respects order of operations",
+      "file": "./spec/parser_spec.rb",
+      "line": 40,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/parser_spec.rb[1:8]",
+      "description": "Dentaku::Parser respects grouping by parenthesis",
+      "file": "./spec/parser_spec.rb",
+      "line": 45,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/parser_spec.rb[1:9]",
+      "description": "Dentaku::Parser evaluates functions",
+      "file": "./spec/parser_spec.rb",
+      "line": 50,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/parser_spec.rb[1:10]",
+      "description": "Dentaku::Parser parses multiple zero-argument functions in sequence",
+      "file": "./spec/parser_spec.rb",
+      "line": 55,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/parser_spec.rb[1:11]",
+      "description": "Dentaku::Parser represents formulas with variables",
+      "file": "./spec/parser_spec.rb",
+      "line": 60,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/parser_spec.rb[1:12]",
+      "description": "Dentaku::Parser evaluates access into data structures",
+      "file": "./spec/parser_spec.rb",
+      "line": 66,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/parser_spec.rb[1:13]",
+      "description": "Dentaku::Parser evaluates access directly on array literal",
+      "file": "./spec/parser_spec.rb",
+      "line": 72,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/parser_spec.rb[1:14]",
+      "description": "Dentaku::Parser evaluates boolean expressions",
+      "file": "./spec/parser_spec.rb",
+      "line": 77,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/parser_spec.rb[1:15]",
+      "description": "Dentaku::Parser evaluates a case statement",
+      "file": "./spec/parser_spec.rb",
+      "line": 82,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/parser_spec.rb[1:16]",
+      "description": "Dentaku::Parser evaluates a nested case statement with case-sensitivity",
+      "file": "./spec/parser_spec.rb",
+      "line": 87,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/parser_spec.rb[1:17]",
+      "description": "Dentaku::Parser evaluates a case statement with an unparenthesized operation as switch",
+      "file": "./spec/parser_spec.rb",
+      "line": 92,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/parser_spec.rb[1:18]",
+      "description": "Dentaku::Parser evaluates a case statement with a comparator as switch",
+      "file": "./spec/parser_spec.rb",
+      "line": 98,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/parser_spec.rb[1:19]",
+      "description": "Dentaku::Parser evaluates arrays",
+      "file": "./spec/parser_spec.rb",
+      "line": 103,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/parser_spec.rb[1:21]",
+      "description": "Dentaku::Parser evaluates explicit 'NULL' as nil",
+      "file": "./spec/parser_spec.rb",
+      "line": 215,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/parser_spec.rb[1:20:1]",
+      "description": "Dentaku::Parser invalid expression raises a parse error for bad math",
+      "file": "./spec/parser_spec.rb",
+      "line": 121,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/parser_spec.rb[1:20:2]",
+      "description": "Dentaku::Parser invalid expression raises a parse error for bad logic",
+      "file": "./spec/parser_spec.rb",
+      "line": 127,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/parser_spec.rb[1:20:3]",
+      "description": "Dentaku::Parser invalid expression preserves the node-level message for incompatible operands",
+      "file": "./spec/parser_spec.rb",
+      "line": 133,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/parser_spec.rb[1:20:4]",
+      "description": "Dentaku::Parser invalid expression preserves the node-level message for non-logical combinator operands",
+      "file": "./spec/parser_spec.rb",
+      "line": 142,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/parser_spec.rb[1:20:5]",
+      "description": "Dentaku::Parser invalid expression raises a parse error for too many operands",
+      "file": "./spec/parser_spec.rb",
+      "line": 148,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/parser_spec.rb[1:20:6]",
+      "description": "Dentaku::Parser invalid expression raises a parse error for bad grouping structure",
+      "file": "./spec/parser_spec.rb",
+      "line": 158,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/parser_spec.rb[1:20:7]",
+      "description": "Dentaku::Parser invalid expression raises parse errors for malformed case statements",
+      "file": "./spec/parser_spec.rb",
+      "line": 181,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/parser_spec.rb[1:20:8]",
+      "description": "Dentaku::Parser invalid expression raises a parse error when trying to access an undefined function",
+      "file": "./spec/parser_spec.rb",
+      "line": 199,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/parser_spec.rb[1:20:9]",
+      "description": "Dentaku::Parser invalid expression raises a parse error for an unbalanced closing parenthesis",
+      "file": "./spec/parser_spec.rb",
+      "line": 205,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/print_visitor_spec.rb[1:1]",
+      "description": "Dentaku::PrintVisitor prints a representation of an AST",
+      "file": "./spec/print_visitor_spec.rb",
+      "line": 6,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/print_visitor_spec.rb[1:2]",
+      "description": "Dentaku::PrintVisitor handles grouping correctly",
+      "file": "./spec/print_visitor_spec.rb",
+      "line": 11,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/print_visitor_spec.rb[1:3]",
+      "description": "Dentaku::PrintVisitor quotes string literals",
+      "file": "./spec/print_visitor_spec.rb",
+      "line": 17,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/print_visitor_spec.rb[1:4]",
+      "description": "Dentaku::PrintVisitor handles unary operations on literals",
+      "file": "./spec/print_visitor_spec.rb",
+      "line": 22,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/print_visitor_spec.rb[1:5]",
+      "description": "Dentaku::PrintVisitor handles unary operations on trees",
+      "file": "./spec/print_visitor_spec.rb",
+      "line": 27,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/print_visitor_spec.rb[1:6]",
+      "description": "Dentaku::PrintVisitor handles a complex arithmetic expression",
+      "file": "./spec/print_visitor_spec.rb",
+      "line": 32,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/print_visitor_spec.rb[1:7]",
+      "description": "Dentaku::PrintVisitor handles a complex logical expression",
+      "file": "./spec/print_visitor_spec.rb",
+      "line": 37,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/print_visitor_spec.rb[1:8]",
+      "description": "Dentaku::PrintVisitor handles a function call",
+      "file": "./spec/print_visitor_spec.rb",
+      "line": 42,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/print_visitor_spec.rb[1:9]",
+      "description": "Dentaku::PrintVisitor handles member access",
+      "file": "./spec/print_visitor_spec.rb",
+      "line": 47,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/print_visitor_spec.rb[1:10]",
+      "description": "Dentaku::PrintVisitor groups anything but accesses and function calls before member access",
+      "file": "./spec/print_visitor_spec.rb",
+      "line": 52,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/print_visitor_spec.rb[1:11]",
+      "description": "Dentaku::PrintVisitor groups anything but variables, arrays, accesses and function calls before an index",
+      "file": "./spec/print_visitor_spec.rb",
+      "line": 67,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/print_visitor_spec.rb[1:12]",
+      "description": "Dentaku::PrintVisitor keeps the meaning of a grouped index",
+      "file": "./spec/print_visitor_spec.rb",
+      "line": 85,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/print_visitor_spec.rb[1:13]",
+      "description": "Dentaku::PrintVisitor prints array literals as they are written",
+      "file": "./spec/print_visitor_spec.rb",
+      "line": 92,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/print_visitor_spec.rb[1:14]",
+      "description": "Dentaku::PrintVisitor keeps the lookup rules when grouping a variable",
+      "file": "./spec/print_visitor_spec.rb",
+      "line": 98,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/print_visitor_spec.rb[1:15]",
+      "description": "Dentaku::PrintVisitor handles a case statement",
+      "file": "./spec/print_visitor_spec.rb",
+      "line": 105,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/print_visitor_spec.rb[1:16]",
+      "description": "Dentaku::PrintVisitor prints a case statement that can be re-parsed",
+      "file": "./spec/print_visitor_spec.rb",
+      "line": 110,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/print_visitor_spec.rb[1:17]",
+      "description": "Dentaku::PrintVisitor handles a bitwise operators",
+      "file": "./spec/print_visitor_spec.rb",
+      "line": 115,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/print_visitor_spec.rb[1:18]",
+      "description": "Dentaku::PrintVisitor handles a datetime literal",
+      "file": "./spec/print_visitor_spec.rb",
+      "line": 120,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/print_visitor_spec.rb[1:19]",
+      "description": "Dentaku::PrintVisitor handles XOR and NOT operators",
+      "file": "./spec/print_visitor_spec.rb",
+      "line": 125,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/print_visitor_spec.rb[1:20]",
+      "description": "Dentaku::PrintVisitor handles a percentage in a formula",
+      "file": "./spec/print_visitor_spec.rb",
+      "line": 133,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/token_matcher_spec.rb[1:1]",
+      "description": "Dentaku::TokenMatcher with single category matches token category",
+      "file": "./spec/token_matcher_spec.rb",
+      "line": 5,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/token_matcher_spec.rb[1:2]",
+      "description": "Dentaku::TokenMatcher with multiple categories matches any included token category",
+      "file": "./spec/token_matcher_spec.rb",
+      "line": 12,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/token_matcher_spec.rb[1:3]",
+      "description": "Dentaku::TokenMatcher with single category and value matches token category and value",
+      "file": "./spec/token_matcher_spec.rb",
+      "line": 23,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/token_matcher_spec.rb[1:4]",
+      "description": "Dentaku::TokenMatcher with multiple values matches any included token value",
+      "file": "./spec/token_matcher_spec.rb",
+      "line": 32,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/token_matcher_spec.rb[1:5]",
+      "description": "Dentaku::TokenMatcher is invertible",
+      "file": "./spec/token_matcher_spec.rb",
+      "line": 45,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/token_matcher_spec.rb[1:6:1]",
+      "description": "Dentaku::TokenMatcher combining multiple tokens matches either",
+      "file": "./spec/token_matcher_spec.rb",
+      "line": 60,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/token_matcher_spec.rb[1:6:2]",
+      "description": "Dentaku::TokenMatcher combining multiple tokens matches any value",
+      "file": "./spec/token_matcher_spec.rb",
+      "line": 66,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/token_matcher_spec.rb[1:7:1:1]",
+      "description": "Dentaku::TokenMatcher stream matching standard matches zero or more occurrences in a token stream",
+      "file": "./spec/token_matcher_spec.rb",
+      "line": 82,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/token_matcher_spec.rb[1:7:2:1]",
+      "description": "Dentaku::TokenMatcher stream matching star matches zero or more occurrences in a token stream",
+      "file": "./spec/token_matcher_spec.rb",
+      "line": 97,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/token_matcher_spec.rb[1:7:3:1]",
+      "description": "Dentaku::TokenMatcher stream matching plus matches one or more occurrences in a token stream",
+      "file": "./spec/token_matcher_spec.rb",
+      "line": 112,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/token_matcher_spec.rb[1:7:4:1]",
+      "description": "Dentaku::TokenMatcher stream matching arguments matches comma-separated values",
+      "file": "./spec/token_matcher_spec.rb",
+      "line": 125,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/token_scanner_spec.rb[1:1]",
+      "description": "Dentaku::TokenScanner returns a token for a matching string",
+      "file": "./spec/token_scanner_spec.rb",
+      "line": 14,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/token_scanner_spec.rb[1:2]",
+      "description": "Dentaku::TokenScanner returns falsy for a non-matching string",
+      "file": "./spec/token_scanner_spec.rb",
+      "line": 20,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/token_scanner_spec.rb[1:3]",
+      "description": "Dentaku::TokenScanner performs raw value conversion",
+      "file": "./spec/token_scanner_spec.rb",
+      "line": 24,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/token_scanner_spec.rb[1:4]",
+      "description": "Dentaku::TokenScanner allows customizing available scanners",
+      "file": "./spec/token_scanner_spec.rb",
+      "line": 30,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/token_scanner_spec.rb[1:5]",
+      "description": "Dentaku::TokenScanner ignores invalid scanners",
+      "file": "./spec/token_scanner_spec.rb",
+      "line": 35,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/token_scanner_spec.rb[1:6]",
+      "description": "Dentaku::TokenScanner uses a custom scanner",
+      "file": "./spec/token_scanner_spec.rb",
+      "line": 40,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/token_spec.rb[1:1]",
+      "description": "Dentaku::Token has a category and a value",
+      "file": "./spec/token_spec.rb",
+      "line": 4,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/token_spec.rb[1:2]",
+      "description": "Dentaku::Token compares category and value to determine equality",
+      "file": "./spec/token_spec.rb",
+      "line": 11,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/tokenizer_spec.rb[1:1]",
+      "description": "Dentaku::Tokenizer handles an empty expression",
+      "file": "./spec/tokenizer_spec.rb",
+      "line": 7,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/tokenizer_spec.rb[1:2]",
+      "description": "Dentaku::Tokenizer tokenizes numeric literal in decimal",
+      "file": "./spec/tokenizer_spec.rb",
+      "line": 11,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/tokenizer_spec.rb[1:3]",
+      "description": "Dentaku::Tokenizer tokenizes numeric literal in hexadecimal",
+      "file": "./spec/tokenizer_spec.rb",
+      "line": 17,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/tokenizer_spec.rb[1:4]",
+      "description": "Dentaku::Tokenizer tokenizes numeric literal in scientific notation",
+      "file": "./spec/tokenizer_spec.rb",
+      "line": 23,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/tokenizer_spec.rb[1:5]",
+      "description": "Dentaku::Tokenizer tokenizes addition",
+      "file": "./spec/tokenizer_spec.rb",
+      "line": 37,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/tokenizer_spec.rb[1:6]",
+      "description": "Dentaku::Tokenizer tokenizes unary minus",
+      "file": "./spec/tokenizer_spec.rb",
+      "line": 43,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/tokenizer_spec.rb[1:7]",
+      "description": "Dentaku::Tokenizer tokenizes comparison with =",
+      "file": "./spec/tokenizer_spec.rb",
+      "line": 83,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/tokenizer_spec.rb[1:8]",
+      "description": "Dentaku::Tokenizer tokenizes comparison with alternate ==",
+      "file": "./spec/tokenizer_spec.rb",
+      "line": 89,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/tokenizer_spec.rb[1:9]",
+      "description": "Dentaku::Tokenizer tokenizes bitwise OR",
+      "file": "./spec/tokenizer_spec.rb",
+      "line": 95,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/tokenizer_spec.rb[1:10]",
+      "description": "Dentaku::Tokenizer tokenizes bitwise AND",
+      "file": "./spec/tokenizer_spec.rb",
+      "line": 101,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/tokenizer_spec.rb[1:11]",
+      "description": "Dentaku::Tokenizer tokenizes bitwise SHIFT LEFT",
+      "file": "./spec/tokenizer_spec.rb",
+      "line": 107,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/tokenizer_spec.rb[1:12]",
+      "description": "Dentaku::Tokenizer tokenizes bitwise SHIFT RIGHT",
+      "file": "./spec/tokenizer_spec.rb",
+      "line": 113,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/tokenizer_spec.rb[1:13]",
+      "description": "Dentaku::Tokenizer ignores whitespace",
+      "file": "./spec/tokenizer_spec.rb",
+      "line": 119,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/tokenizer_spec.rb[1:14]",
+      "description": "Dentaku::Tokenizer tokenizes power operations in simple expressions",
+      "file": "./spec/tokenizer_spec.rb",
+      "line": 125,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/tokenizer_spec.rb[1:15]",
+      "description": "Dentaku::Tokenizer tokenizes power operations in complex expressions",
+      "file": "./spec/tokenizer_spec.rb",
+      "line": 131,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/tokenizer_spec.rb[1:16]",
+      "description": "Dentaku::Tokenizer handles floating point operands",
+      "file": "./spec/tokenizer_spec.rb",
+      "line": 137,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/tokenizer_spec.rb[1:17]",
+      "description": "Dentaku::Tokenizer does not require leading zero",
+      "file": "./spec/tokenizer_spec.rb",
+      "line": 143,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/tokenizer_spec.rb[1:18]",
+      "description": "Dentaku::Tokenizer accepts arbitrary identifiers",
+      "file": "./spec/tokenizer_spec.rb",
+      "line": 149,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/tokenizer_spec.rb[1:19]",
+      "description": "Dentaku::Tokenizer recognizes double-quoted strings",
+      "file": "./spec/tokenizer_spec.rb",
+      "line": 155,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/tokenizer_spec.rb[1:20]",
+      "description": "Dentaku::Tokenizer recognizes single-quoted strings",
+      "file": "./spec/tokenizer_spec.rb",
+      "line": 161,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/tokenizer_spec.rb[1:21]",
+      "description": "Dentaku::Tokenizer recognizes binary minus operator",
+      "file": "./spec/tokenizer_spec.rb",
+      "line": 167,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/tokenizer_spec.rb[1:22]",
+      "description": "Dentaku::Tokenizer recognizes unary minus operator applied to left operand",
+      "file": "./spec/tokenizer_spec.rb",
+      "line": 173,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/tokenizer_spec.rb[1:23]",
+      "description": "Dentaku::Tokenizer recognizes unary minus operator applied to right operand",
+      "file": "./spec/tokenizer_spec.rb",
+      "line": 179,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/tokenizer_spec.rb[1:24]",
+      "description": "Dentaku::Tokenizer matches \"<=\" before \"<\"",
+      "file": "./spec/tokenizer_spec.rb",
+      "line": 185,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/tokenizer_spec.rb[1:25]",
+      "description": "Dentaku::Tokenizer tokenizes \"and\" for logical expressions",
+      "file": "./spec/tokenizer_spec.rb",
+      "line": 191,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/tokenizer_spec.rb[1:26]",
+      "description": "Dentaku::Tokenizer tokenizes \"or\" for logical expressions",
+      "file": "./spec/tokenizer_spec.rb",
+      "line": 197,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/tokenizer_spec.rb[1:27]",
+      "description": "Dentaku::Tokenizer tokenizes \"&&\" for logical expressions",
+      "file": "./spec/tokenizer_spec.rb",
+      "line": 203,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/tokenizer_spec.rb[1:28]",
+      "description": "Dentaku::Tokenizer tokenizes \"||\" for logical expressions",
+      "file": "./spec/tokenizer_spec.rb",
+      "line": 209,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/tokenizer_spec.rb[1:29]",
+      "description": "Dentaku::Tokenizer tokenizes curly brackets for array literals",
+      "file": "./spec/tokenizer_spec.rb",
+      "line": 215,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/tokenizer_spec.rb[1:30]",
+      "description": "Dentaku::Tokenizer tokenizes square brackets for data structure access",
+      "file": "./spec/tokenizer_spec.rb",
+      "line": 221,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/tokenizer_spec.rb[1:31]",
+      "description": "Dentaku::Tokenizer tokenizes member access after brackets and parentheses",
+      "file": "./spec/tokenizer_spec.rb",
+      "line": 227,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/tokenizer_spec.rb[1:32]",
+      "description": "Dentaku::Tokenizer rejects whitespace before member access",
+      "file": "./spec/tokenizer_spec.rb",
+      "line": 235,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/tokenizer_spec.rb[1:33]",
+      "description": "Dentaku::Tokenizer keeps dots inside identifiers",
+      "file": "./spec/tokenizer_spec.rb",
+      "line": 240,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/tokenizer_spec.rb[1:34]",
+      "description": "Dentaku::Tokenizer detects unbalanced parentheses",
+      "file": "./spec/tokenizer_spec.rb",
+      "line": 246,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/tokenizer_spec.rb[1:35]",
+      "description": "Dentaku::Tokenizer recognizes identifiers that share initial substrings with combinators",
+      "file": "./spec/tokenizer_spec.rb",
+      "line": 251,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/tokenizer_spec.rb[1:36]",
+      "description": "Dentaku::Tokenizer tokenizes TRUE and FALSE literals",
+      "file": "./spec/tokenizer_spec.rb",
+      "line": 258,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/tokenizer_spec.rb[1:37]",
+      "description": "Dentaku::Tokenizer tokenizes Time literals",
+      "file": "./spec/tokenizer_spec.rb",
+      "line": 270,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/tokenizer_spec.rb[1:38:1]",
+      "description": "Dentaku::Tokenizer tokenizing function calls handles IF",
+      "file": "./spec/tokenizer_spec.rb",
+      "line": 288,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/tokenizer_spec.rb[1:38:2]",
+      "description": "Dentaku::Tokenizer tokenizing function calls handles ROUND/UP/DOWN",
+      "file": "./spec/tokenizer_spec.rb",
+      "line": 295,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/tokenizer_spec.rb[1:38:3]",
+      "description": "Dentaku::Tokenizer tokenizing function calls handles NOT",
+      "file": "./spec/tokenizer_spec.rb",
+      "line": 317,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/tokenizer_spec.rb[1:38:4]",
+      "description": "Dentaku::Tokenizer tokenizing function calls handles ANY/ALL",
+      "file": "./spec/tokenizer_spec.rb",
+      "line": 324,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/tokenizer_spec.rb[1:38:5]",
+      "description": "Dentaku::Tokenizer tokenizing function calls handles whitespace after function name",
+      "file": "./spec/tokenizer_spec.rb",
+      "line": 343,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/tokenizer_spec.rb[1:38:6]",
+      "description": "Dentaku::Tokenizer tokenizing function calls handles when function ends with a bang",
+      "file": "./spec/tokenizer_spec.rb",
+      "line": 350,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/tokenizer_spec.rb[1:39:1]",
+      "description": "Dentaku::Tokenizer aliases replaced with function name",
+      "file": "./spec/tokenizer_spec.rb",
+      "line": 370,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/tokenizer_spec.rb[1:39:2]",
+      "description": "Dentaku::Tokenizer aliases case insensitive",
+      "file": "./spec/tokenizer_spec.rb",
+      "line": 376,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/tokenizer_spec.rb[1:39:3]",
+      "description": "Dentaku::Tokenizer aliases replaces aliases with whitespace before parentheses",
+      "file": "./spec/tokenizer_spec.rb",
+      "line": 382,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/tokenizer_spec.rb[1:39:4]",
+      "description": "Dentaku::Tokenizer aliases replace only whole aliases without word parts",
+      "file": "./spec/tokenizer_spec.rb",
+      "line": 388,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/tokenizer_spec.rb[1:39:5]",
+      "description": "Dentaku::Tokenizer aliases work with non-latin symbols",
+      "file": "./spec/tokenizer_spec.rb",
+      "line": 394,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/visitor/infix_spec.rb[1:1]",
+      "description": "Dentaku::Visitor::Infix generates array representation of operation",
+      "file": "./spec/visitor/infix_spec.rb",
+      "line": 34,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/visitor/infix_spec.rb[1:2]",
+      "description": "Dentaku::Visitor::Infix supports array nodes",
+      "file": "./spec/visitor/infix_spec.rb",
+      "line": 40,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/visitor_spec.rb[1:1]",
+      "description": "TestVisitor visits all concrete AST node types",
+      "file": "./spec/visitor_spec.rb",
+      "line": 113,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/volatile_functions_spec.rb[1:1:1:1]",
+      "description": "Dentaku::Calculator volatile functions registration marks generated function classes volatile",
+      "file": "./spec/volatile_functions_spec.rb",
+      "line": 16,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/volatile_functions_spec.rb[1:1:1:2]",
+      "description": "Dentaku::Calculator volatile functions registration defaults to non-volatile",
+      "file": "./spec/volatile_functions_spec.rb",
+      "line": 22,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/volatile_functions_spec.rb[1:1:1:3]",
+      "description": "Dentaku::Calculator volatile functions registration reports built-in function classes as non-volatile",
+      "file": "./spec/volatile_functions_spec.rb",
+      "line": 28,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/volatile_functions_spec.rb[1:1:1:4]",
+      "description": "Dentaku::Calculator volatile functions registration accepts a fifth tuple element in add_functions",
+      "file": "./spec/volatile_functions_spec.rb",
+      "line": 32,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/volatile_functions_spec.rb[1:1:2:1]",
+      "description": "Dentaku::Calculator volatile functions dependency resolution does not evaluate a volatile IF predicate and returns both branches",
+      "file": "./spec/volatile_functions_spec.rb",
+      "line": 43,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/volatile_functions_spec.rb[1:1:2:2]",
+      "description": "Dentaku::Calculator volatile functions dependency resolution still prunes when the predicate uses a pure custom function",
+      "file": "./spec/volatile_functions_spec.rb",
+      "line": 49,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/volatile_functions_spec.rb[1:1:2:3]",
+      "description": "Dentaku::Calculator volatile functions dependency resolution treats volatility as recursive through the guard subtree",
+      "file": "./spec/volatile_functions_spec.rb",
+      "line": 55,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/volatile_functions_spec.rb[1:1:2:4]",
+      "description": "Dentaku::Calculator volatile functions dependency resolution does not prune CASE with a volatile switch",
+      "file": "./spec/volatile_functions_spec.rb",
+      "line": 61,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/volatile_functions_spec.rb[1:1:2:5]",
+      "description": "Dentaku::Calculator volatile functions dependency resolution does not prune CASE with a volatile when-clause",
+      "file": "./spec/volatile_functions_spec.rb",
+      "line": 68,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/volatile_functions_spec.rb[1:1:2:6]",
+      "description": "Dentaku::Calculator volatile functions dependency resolution does not treat a volatile AND operand as decisive",
+      "file": "./spec/volatile_functions_spec.rb",
+      "line": 75,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/volatile_functions_spec.rb[1:1:2:7]",
+      "description": "Dentaku::Calculator volatile functions dependency resolution still prunes AND on a pure decisive operand without running the volatile side",
+      "file": "./spec/volatile_functions_spec.rb",
+      "line": 81,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/volatile_functions_spec.rb[1:1:3:1]",
+      "description": "Dentaku::Calculator volatile functions evaluation evaluates a volatile predicate exactly once per evaluate!",
+      "file": "./spec/volatile_functions_spec.rb",
+      "line": 89,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/volatile_functions_spec.rb[1:1:3:2]",
+      "description": "Dentaku::Calculator volatile functions evaluation requires variables from both branches when the predicate is volatile",
+      "file": "./spec/volatile_functions_spec.rb",
+      "line": 95,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/volatile_functions_spec.rb[1:1:3:3]",
+      "description": "Dentaku::Calculator volatile functions evaluation does not change runtime short-circuit behavior for direct AST evaluation",
+      "file": "./spec/volatile_functions_spec.rb",
+      "line": 104,
+      "reference_status": "passed"
+    },
+    {
+      "id": "./spec/volatile_functions_spec.rb[1:1:4:1]",
+      "description": "Dentaku::Calculator volatile functions solve resolves expressions with volatile guards when all branch inputs are provided",
+      "file": "./spec/volatile_functions_spec.rb",
+      "line": 113,
+      "reference_status": "passed"
+    }
+  ]
+}

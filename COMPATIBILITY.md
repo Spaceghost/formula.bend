@@ -8,8 +8,8 @@ The implemented parser, bindings, functions, and numeric subset are listed in RE
 
 The upstream README, lib/dentaku/calculator.rb, parser.rb, tokenizer.rb,
 numeric_parser.rb, ast/functions/if.rb, and spec suite are authoritative evidence
-for Ruby compatibility. Upstream IF uses Ruby truthiness; our current Boolean-only
-condition prototype does not yet implement the complete value model.
+for Ruby compatibility. Upstream IF uses Ruby truthiness; our earlier Boolean-only
+condition prototype has been replaced with Ruby truthiness for scalar values.
 
 1. Parse formula strings with upstream precedence, literals, names, and errors;
    preserve Integer and BigDecimal behavior without silently substituting F32.
@@ -63,8 +63,8 @@ numeric compatibility corpus. Division, exponent parsing,
 rounding policies, and coercions remain required work.
 
 Current functions: SUM (one or more numeric scalar arguments), IF (three arguments,
-Boolean guard, lazy branches), and NOT (one Boolean argument). Arrays, numeric
-string coercion, Ruby truthiness, and remaining built-ins are still pending.
+Ruby truthiness, lazy branches), and NOT (one Boolean argument). Arrays, complete numeric
+string coercion and remaining built-ins are still pending.
 
 Unary minus binds more tightly than multiplication; binary subtraction shares
 addition precedence and is left-associative. Positive and negative operands use

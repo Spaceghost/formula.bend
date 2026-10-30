@@ -68,3 +68,14 @@ law fixed_axis_origin:
   for origin_b: Nat
   for +limit: Nat
   {Address.resolve_axis(Address.Fixed{index}, origin_a, limit) == Address.resolve_axis(Address.Fixed{index}, origin_b, limit) : Maybe<&2, Nat>}
+
+law null_branch:
+  for yes: Core.Expr
+  for +no: Core.Expr
+  {Core.evaluate(Core.If{Core.Literal{Core.NullValue{}}, yes, no}) == Core.evaluate(no) : Core.Value}
+
+law numeric_guard_truthy:
+  for n: Nat
+  for +yes: Core.Expr
+  for no: Core.Expr
+  {Core.evaluate(Core.If{Core.Literal{Core.Number{n}}, yes, no}) == Core.evaluate(yes) : Core.Value}

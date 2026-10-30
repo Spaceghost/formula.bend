@@ -306,3 +306,39 @@ def rc_to_a1() -> {Address.render_parsed_a1(Address.parse_r1c1("R[-1]C[2]"), 5n,
 
 def column_carry_render() -> {Address.render_parsed_a1(Address.parse_a1("Z1", 0n, 0n), 0n, 1n, 100n, 100n) == "AA1" : String}:
   {==}
+
+def ruby_numeric_guard() -> {Core.show(Parser.evaluate("IF(0, 1, 2)", Nil{}, False{})) == "1" : String}:
+  {==}
+
+def ruby_null_guard() -> {Core.show(Parser.evaluate("IF(null, 1, 2)", Nil{}, False{})) == "2" : String}:
+  {==}
+
+def ruby_empty_string_guard() -> {Core.show(Parser.evaluate("IF('', 1, 2)", Nil{}, False{})) == "1" : String}:
+  {==}
+
+def ruby_numeric_not() -> {Parser.evaluate("NOT(0)", Nil{}, False{}) == Core.Logical{False{}} : Core.Value}:
+  {==}
+
+def ruby_null_not() -> {Parser.evaluate("NOT(NULL)", Nil{}, False{}) == Core.Logical{True{}} : Core.Value}:
+  {==}
+
+def ruby_string_not() -> {Parser.evaluate("NOT('')", Nil{}, False{}) == Core.Logical{False{}} : Core.Value}:
+  {==}
+
+def literal_quoted_text() -> {Parser.evaluate("'a 1 + (b)'", Nil{}, False{}) == Core.TextValue{"a 1 + (b)"} : Core.Value}:
+  {==}
+
+def literal_double_quoted_text() -> {Parser.evaluate("\"a 'b'\"", Nil{}, False{}) == Core.TextValue{"a 'b'"} : Core.Value}:
+  {==}
+
+def missing_closing_quote() -> {Parser.parse("'missing") == Parser.ParseError{"Expected an operand"} : Parser.Parsed}:
+  {==}
+
+def separated_comparator_symbols() -> {Parser.parse("1 < = 2") == Parser.ParseError{"Expected an operand"} : Parser.Parsed}:
+  {==}
+
+def trailing_comparison_operator() -> {Parser.parse("1 >") == Parser.ParseError{"Expected an operand"} : Parser.Parsed}:
+  {==}
+
+def comparison_grouping() -> {Parser.evaluate("(1 < 2) = true", Nil{}, False{}) == Core.Logical{True{}} : Core.Value}:
+  {==}

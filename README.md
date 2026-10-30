@@ -26,7 +26,7 @@ digit lists. Coefficients can grow beyond a machine word. Decimal scale uses Nat
 Formatting preserves fractional zeros: `1.25 * .4` displays `0.500`.
 This formatting is not a claim of Ruby BigDecimal display compatibility.
 
-Eleven universal laws and one hundred concrete regression fixtures cover these
+Thirteen universal laws and one hundred twelve concrete regression fixtures cover these
 parts. They do not establish full Ruby or spreadsheet compatibility.
 
 ## Example
@@ -59,10 +59,10 @@ have passed on JavaScript and native CPU. CUDA and Metal remain unverified.
 
 ## Compatibility limits
 
-Exponent notation, comparisons,
-strings, arrays, most built-ins, spreadsheet formula lookup, dependency
+Exponent notation, logical operators,
+arrays, most built-ins, spreadsheet formula lookup, dependency
 analysis, and the complete Dentaku Calculator API remain unimplemented.
-`IF` and `NOT` accept Boolean conditions, not the full Ruby truthiness model.
+`IF` and `NOT` follow Ruby truthiness: only false and null are falsey.
 The numeric representation is not yet a complete BigDecimal implementation.
 The low-level Nat conversion helpers are intended for small values; callers
 constructing large coefficients should use digit lists directly.
@@ -97,3 +97,18 @@ The seven division reference cases pass on both JavaScript and native CPU.
 Address examples: `$A1` copied from B2 to D5 becomes `$A4`; `R[-1]C[2]` at F6
 resolves to H5. The address layer is tested separately from formula evaluation.
 The eight address runtime cases pass on both JavaScript and native CPU.
+
+## Dentaku parity work
+
+Parity is measured against the pinned Ruby source and its complete 713-example
+suite. The Ruby reference passes all examples; that is not a claim that Bend does.
+A separate 31-case scalar corpus currently matches Ruby on selected values and
+parse-error classification. `make parity-check` generates the fixtures using Lua.
+Use `LUA=/path/to/lua` if Lua is not on PATH.
+
+The parser now supports `=`, `==`, `!=`, `<>`, `<`, `<=`, `>`, and `>=`, with
+arithmetic taking precedence. String and null literals, Ruby truthiness, and
+selected decimal numeric-string coercions are implemented. A static pass rejects
+invalid arithmetic operand types before evaluation, including unused branches.
+See [the parity checklist](compat/PARITY.md) for remaining rules and the shootout
+gate. No performance comparison is claimed yet.

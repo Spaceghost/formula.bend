@@ -1,0 +1,31 @@
+zero_truthy	number:1
+null_falsey	number:2
+empty_string_truthy	number:1
+numeric_not	boolean:false
+null_not	boolean:true
+string_not	boolean:false
+null_literal	null
+quoted_text	string:a 1 + (b)
+double_quoted_text	string:a 'b'
+unused_identifier	number:7
+unused_division	number:9
+comparison_precedence	boolean:true
+comparison_rhs_arithmetic	boolean:true
+numeric_string_comparison	boolean:false
+lexical_comparison	boolean:true
+null_equality	boolean:true
+null_numeric_equality	boolean:false
+boolean_numeric_equality	boolean:false
+alternate_equality	boolean:true
+alternate_inequality	boolean:true
+standard_inequality	boolean:true
+less_equal	boolean:true
+greater_equal	boolean:true
+negative_comparison	boolean:true
+text_arithmetic	error:Dentaku::ParseError
+text_rounding	number:1.3
+text_division	error:Dentaku::ParseError
+single_text_sum	number:2
+comparison_guard	number:8
+multiple_text_sum	number:5
+invalid_unused_branch	error:Dentaku::ParseError

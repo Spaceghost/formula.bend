@@ -37,3 +37,9 @@ def Laws.division_by_zero(numerator, places):
 
 def Laws.fixed_axis_origin(index, origin_a, origin_b, limit):
   {==}
+
+def Laws.null_branch(yes, no):
+  {==}
+
+def Laws.numeric_guard_truthy(n, yes, no):
+  {==}

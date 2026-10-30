@@ -1,0 +1,32 @@
+-- Source inventory, not a claim of runtime parity or test coverage.
+local root = assert(arg[1], 'usage: lua tools/upstream-inventory.lua UPSTREAM_ROOT')
+local function quote(s) return "'" .. s:gsub("'", "'\\''") .. "'" end
+local pipe = assert(io.popen('git -C ' .. quote(root) .. ' ls-files spec'))
+local paths = {}
+for path in pipe:lines() do
+  if path:match('_spec%.rb$') then paths[#paths + 1] = path end
+end
+assert(pipe:close(), 'upstream git listing failed')
+table.sort(paths)
+local partial = {
+  ['addition_spec.rb']=true, ['arithmetic_spec.rb']=true,
+  ['division_spec.rb']=true, ['numeric_spec.rb']=true,
+  ['comparator_spec.rb']=true,
+  ['round_spec.rb']=true, ['roundup_spec.rb']=true, ['rounddown_spec.rb']=true,
+  ['sum_spec.rb']=true, ['negation_spec.rb']=true,
+  ['parser_spec.rb']=true, ['tokenizer_spec.rb']=true,
+  ['case_sensitivity_spec.rb']=true, ['calculator_spec.rb']=true,
+}
+print('source\tdeclared_example_lines\tbend_parity_status')
+for _, path in ipairs(paths) do
+  local file = assert(io.open(root .. '/' .. path, 'r'))
+  local count = 0
+  for line in file:lines() do
+    if line:match('^%s*it[%s%(]') or line:match('^%s*specify[%s%(]') then
+      count = count + 1
+    end
+  end
+  file:close()
+  local name = path:match('([^/]+)$')
+  print(('%s\t%d\t%s'):format(path, count, partial[name] and 'partial' or 'unassessed'))
+end

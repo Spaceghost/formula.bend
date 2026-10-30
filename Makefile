@@ -1,6 +1,7 @@
 BEND ?= bend
+LUA ?= lua
 
-.PHONY: check native-check rounding-check division-check address-check
+.PHONY: parity-check check native-check rounding-check division-check address-check
 check:
 	$(BEND) PROOF.bend
 	$(BEND) tests.bend
@@ -10,6 +11,7 @@ check:
 	$(MAKE) rounding-check
 	$(MAKE) division-check
 	$(MAKE) address-check
+	$(MAKE) parity-check
 
 rounding-check:
 	mkdir -p build
@@ -26,6 +28,13 @@ address-check:
 	$(BEND) address-runtime.bend > build/address-js.actual
 	diff -u address-runtime.expected build/address-js.actual
 
+parity-check:
+	mkdir -p build
+	$(LUA) tools/generate-corpus.lua compat/scalar-cases.lua build/scalar-corpus
+	diff -u compat/scalar-oracle.tsv build/scalar-corpus.expected
+	$(BEND) build/scalar-corpus.bend > build/scalar-corpus.actual
+	diff -u compat/scalar-oracle.tsv build/scalar-corpus.actual
+
 native-check:
 	mkdir -p build
 	$(BEND) runtime.bend -o build/runtime
@@ -40,3 +49,7 @@ native-check:
 	$(BEND) address-runtime.bend -o build/address-runtime
 	./build/address-runtime > build/address-native.actual
 	diff -u address-runtime.expected build/address-native.actual
+	$(LUA) tools/generate-corpus.lua compat/scalar-cases.lua build/scalar-corpus
+	$(BEND) build/scalar-corpus.bend -o build/scalar-corpus
+	./build/scalar-corpus > build/scalar-corpus-native.actual
+	diff -u compat/scalar-oracle.tsv build/scalar-corpus-native.actual

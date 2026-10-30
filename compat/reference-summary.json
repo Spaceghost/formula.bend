@@ -1,0 +1,11 @@
+{
+  "upstream_commit": "1b9950be405ecb0d425f8683447b58cf29796d1f",
+  "ruby": "3.3.13",
+  "bigdecimal": "3.1.5",
+  "examples": 713,
+  "failures": 0,
+  "covered_lines": 2433,
+  "total_lines": 2513,
+  "line_coverage_percent": 96.82,
+  "scope": "Ruby reference implementation only; not Bend feature parity"
+}
