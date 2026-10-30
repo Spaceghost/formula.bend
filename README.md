@@ -52,10 +52,8 @@ make native-check
 `make check` checks all laws and regression fixtures, then compares JavaScript
 execution with expected output. `make native-check` needs a compatible clang and
 compares the native program with the same output. Build outputs stay in `build/`.
-The fourteen unsigned runtime cases, including large integer products and decimal carry,
-have passed on JS and native CPU. The five new signed cases pass on JS; native
-verification is in progress. CUDA and Metal remain unverified.
-No GPU speedup has been measured.
+All nineteen arithmetic/function runtime cases and eight rounding runtime cases
+have passed on JavaScript and native CPU. CUDA and Metal remain unverified.
 
 ## Compatibility limits
 
