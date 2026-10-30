@@ -169,3 +169,36 @@ def signed_sum() -> {Core.show(Parser.evaluate("SUM(-2.5, 1, .5)", Nil{}, False{
 
 def large_subtraction() -> {Core.show(Parser.evaluate("1000000000000000000000000 - 1", Nil{}, False{})) == "999999999999999999999999" : String}:
   {==}
+
+def round_default() -> {Core.show(Parser.evaluate("ROUND(8.2)", Nil{}, False{})) == "8" : String}:
+  {==}
+
+def round_places() -> {Core.show(Parser.evaluate("ROUND(8.2759, 2)", Nil{}, False{})) == "8.28" : String}:
+  {==}
+
+def round_negative_tie() -> {Core.show(Parser.evaluate("ROUND(-1.25, 1)", Nil{}, False{})) == "-1.3" : String}:
+  {==}
+
+def round_tens() -> {Core.show(Parser.evaluate("ROUND(125, -1)", Nil{}, False{})) == "130" : String}:
+  {==}
+
+def ruby_roundup_negative() -> {Core.show(Parser.evaluate("ROUNDUP(-1.21, 1)", Nil{}, False{})) == "-1.2" : String}:
+  {==}
+
+def ruby_rounddown_negative() -> {Core.show(Parser.evaluate("ROUNDDOWN(-1.21, 1)", Nil{}, False{})) == "-1.3" : String}:
+  {==}
+
+def roundup_sticky() -> {Core.show(Parser.evaluate("ROUNDUP(.1001, 1)", Nil{}, False{})) == "0.2" : String}:
+  {==}
+
+def rounddown_sticky() -> {Core.show(Parser.evaluate("ROUNDDOWN(.1001, 1)", Nil{}, False{})) == "0.1" : String}:
+  {==}
+
+def round_precision_truncates() -> {Core.show(Parser.evaluate("ROUND(1.256, 1.9)", Nil{}, False{})) == "1.3" : String}:
+  {==}
+
+def round_arity() -> {Parser.parse("ROUND(1,2,3)") == Parser.ParseError{"Rounding expects one or two arguments"} : Parser.Parsed}:
+  {==}
+
+def round_zero_precision_padding() -> {Core.show(Parser.evaluate("ROUND(1.5, 000000000000000)", Nil{}, False{})) == "2" : String}:
+  {==}

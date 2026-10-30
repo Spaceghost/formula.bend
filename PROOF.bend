@@ -25,3 +25,6 @@ def Laws.product_scale(x, y, sx, sy):
 
 def Laws.subtraction_left_error(message, right):
   {==}
+
+def Laws.rounding_failure(message, places, mode):
+  {==}

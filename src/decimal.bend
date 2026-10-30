@@ -178,3 +178,53 @@ def is_zero(value: Decimal) -> Bool:
   match value:
     case Exact{digits, s}:
       is_zero_digits(digits)
+
+type Rounding is Data:
+  HalfAway{}
+  TowardPositive{}
+  TowardNegative{}
+
+type Removed is Data:
+  Cut{kept: List<&2, U32>, guard: U32, sticky: Bool}
+
+def split_digits(count: Nat, digits: List<&2, U32>, +last: U32, sticky: Bool) -> Removed:
+  match count digits:
+    case 0n digits:
+      Cut{digits, last, sticky}
+    case 1n+p Nil{}:
+      split_digits(p, Nil{}, 0, Bool.or(sticky, U32.is_ne(last, 0)))
+    case 1n+p x <> rest:
+      split_digits(p, rest, x, Bool.or(sticky, U32.is_ne(last, 0)))
+
+def increment(mode: Rounding, negative: Bool, +guard: U32, sticky: Bool) -> Bool:
+  match mode:
+    case HalfAway{}:
+      U32.is_ge(guard, 5)
+    case TowardPositive{}:
+      Bool.and(Bool.not(negative), Bool.or(U32.is_ne(guard, 0), sticky))
+    case TowardNegative{}:
+      Bool.and(negative, Bool.or(U32.is_ne(guard, 0), sticky))
+
+def rounded_parts(parts: Removed, mode: Rounding, negative: Bool, result_scale: Nat, before: Nat) -> Decimal:
+  match parts:
+    case Cut{+digits, guard, sticky}:
+      Exact{pad(before, Bool.pick(List<&2, U32>, increment(mode, negative, guard, sticky), add_digits(digits, [1], 0), digits)), result_scale}
+
+# target is fractional places; before is places to the left of the decimal point.
+# Only one of target/before is nonzero. Sign remains in the caller.
+def round(value: Decimal, +target: Nat, +before: Nat, mode: Rounding, negative: Bool) -> Decimal:
+  match value:
+    case Exact{digits, +s}:
+      rounded_parts(split_digits(Nat.add(Nat.sub(s, target), before), digits, 0, False{}), mode, negative, Nat.sub(s, Nat.sub(s, target)), before)
+
+def integer_digits(scale: Nat, digits: List<&2, U32>) -> List<&2, U32>:
+  match scale digits:
+    case 0n digits:
+      digits
+    case 1n+p Nil{}:
+      Nil{}
+    case 1n+p x <> rest:
+      integer_digits(p, rest)
+
+def normalize_digits(digits: List<&2, U32>) -> List<&2, U32>:
+  List.reverse(&2, U32, trim_high_reversed(List.reverse(&2, U32, digits)))

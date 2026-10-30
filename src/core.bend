@@ -18,6 +18,7 @@ type Expr is Data:
   Not{operand: Expr}
   Negate{operand: Expr}
   Subtract{left: Expr, right: Expr}
+  Round{operand: Expr, places: Expr, mode: Decimal.Rounding}
 
 def compact_pick(value: Decimal.Decimal, small: Bool) -> Value:
   match value small:
@@ -179,6 +180,56 @@ def lookup(context: List<&2, Binding>, +name: String, +sensitive: Bool) -> Value
     case Bound{key, value} <> tail:
       found(String.eq(normalize(sensitive, key), normalize(sensitive, name)), value, u => lookup(tail, name, sensitive))
 
+def round_numeric(value: Value, target: Nat, before: Nat, mode: Decimal.Rounding) -> Value:
+  match value:
+    case Number{n}:
+      compact(Decimal.round(Decimal.from_nat(n), target, before, mode, False{}))
+    case DecimalNumber{n}:
+      compact(Decimal.round(n, target, before, mode, False{}))
+    case NegativeNumber{n}:
+      negative(Decimal.round(n, target, before, mode, True{}))
+    case Failure{e}:
+      Failure{e}
+    case value:
+      Failure{"Expected numbers"}
+
+def round_direction(negative_places: Bool, count: Nat, value: Value, mode: Decimal.Rounding) -> Value:
+  match negative_places:
+    case False{}:
+      round_numeric(value, count, 0n, mode)
+    case True{}:
+      round_numeric(value, 0n, count, mode)
+
+def round_precision_fits(fits: Bool, digits: List<&2, U32>, negative_places: Bool, value: Value, mode: Decimal.Rounding) -> Value:
+  match fits:
+    case True{}:
+      round_direction(negative_places, Decimal.coefficient(digits), value, mode)
+    case False{}:
+      Failure{"Rounding precision exceeds supported index range"}
+
+def round_precision_digits(+digits: List<&2, U32>, negative_places: Bool, value: Value, mode: Decimal.Rounding) -> Value:
+  round_precision_fits(Nat.is_le(List.length(&2, U32, digits), 14n), digits, negative_places, value, mode)
+
+def round_precision(places: Decimal.Decimal, negative_places: Bool, value: Value, mode: Decimal.Rounding) -> Value:
+  match places:
+    case Decimal.Exact{digits, s}:
+      round_precision_digits(Decimal.normalize_digits(Decimal.integer_digits(s, digits)), negative_places, value, mode)
+
+def round(value: Value, places: Value, mode: Decimal.Rounding) -> Value:
+  match value places:
+    case Failure{e} places:
+      Failure{e}
+    case value Number{n}:
+      round_numeric(value, n, 0n, mode)
+    case value DecimalNumber{n}:
+      round_precision(n, False{}, value, mode)
+    case value NegativeNumber{n}:
+      round_precision(n, True{}, value, mode)
+    case value Failure{e}:
+      Failure{e}
+    case value places:
+      Failure{"Expected numeric rounding precision"}
+
 def evaluate_in(e: Expr, +context: List<&2, Binding>, +sensitive: Bool) -> Value:
   match e:
     case Literal{v}:
@@ -191,6 +242,9 @@ def evaluate_in(e: Expr, +context: List<&2, Binding>, +sensitive: Bool) -> Value
     case Multiply{a, b}:
       x y = evaluate_in(a, context, sensitive) evaluate_in(b, context, sensitive)
       multiply(x, y)
+    case Round{a, places, mode}:
+      x p = evaluate_in(a, context, sensitive) evaluate_in(places, context, sensitive)
+      round(x, p, mode)
     case Negate{a}:
       negate(evaluate_in(a, context, sensitive))
     case Subtract{a, b}:

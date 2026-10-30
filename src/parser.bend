@@ -1,6 +1,7 @@
 import Base
 import ./core.bend as Core
 import ./lexer.bend as Lex
+import ./decimal.bend as Decimal
 
 type Parsed is Data:
   Accepted{expression: Core.Expr}
@@ -51,8 +52,20 @@ def build_not(args: List<&2, Core.Expr>) -> Parsed:
     case args:
       ParseError{"NOT expects one argument"}
 
-def build_call(+name: String, +args: List<&2, Core.Expr>) -> Parsed:
+def basic_call(+name: String, +args: List<&2, Core.Expr>) -> Parsed:
   Bool.pick(Parsed, String.eq(String.to_upper(name), "SUM"), balanced_sum(List.length(&2, Core.Expr, args), args), Bool.pick(Parsed, String.eq(String.to_upper(name), "IF"), build_if(args), Bool.pick(Parsed, String.eq(String.to_upper(name), "NOT"), build_not(args), ParseError{"Unknown function: " ++ name})))
+
+def build_round(args: List<&2, Core.Expr>, mode: Decimal.Rounding) -> Parsed:
+  match args:
+    case value <> Nil{}:
+      Accepted{Core.Round{value, Core.Literal{Core.Number{0n}}, mode}}
+    case value <> places <> Nil{}:
+      Accepted{Core.Round{value, places, mode}}
+    case args:
+      ParseError{"Rounding expects one or two arguments"}
+
+def build_call(+name: String, +args: List<&2, Core.Expr>) -> Parsed:
+  Bool.pick(Parsed, String.eq(String.to_upper(name), "ROUND"), build_round(args, Decimal.HalfAway{}), Bool.pick(Parsed, String.eq(String.to_upper(name), "ROUNDUP"), build_round(args, Decimal.TowardPositive{}), Bool.pick(Parsed, String.eq(String.to_upper(name), "ROUNDDOWN"), build_round(args, Decimal.TowardNegative{}), basic_call(name, args))))
 
 def reduce_times(ops: List<&2, Operator>, values: List<&2, Core.Expr>) -> Stack:
   match ops values:

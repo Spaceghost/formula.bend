@@ -70,3 +70,14 @@ addition precedence and is left-associative. Positive and negative operands use
 aligned exact magnitudes with decimal borrowing. Negative zero is normalized to
 ordinary zero, which differs from some BigDecimal representations and still
 needs an explicit compatibility policy.
+
+## Rounding profile
+
+ROUND uses half-away-from-zero and defaults to zero decimal places. ROUNDUP is
+ceiling; ROUNDDOWN is floor, following the pinned Ruby Dentaku source. In
+particular, ROUNDUP(-1.21, 1) is -1.2 here. Excel's ROUNDUP/ROUNDDOWN use different
+negative-number rules and require a separate profile, not a change to this Ruby
+baseline. Fractional precision arguments truncate toward zero, matching to_i.
+Negative precision rounds to tens, hundreds, etc. Precision must fit the current
+index range (at most 14 significant integer digits); larger precision arguments
+produce an explicit error. This is an implementation limit, not full Ruby parity.

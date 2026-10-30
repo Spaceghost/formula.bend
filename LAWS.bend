@@ -48,3 +48,9 @@ law subtraction_left_error:
   for +message: String
   for right: Core.Value
   {Core.subtract(Core.Failure{message}, right) == Core.Failure{message} : Core.Value}
+
+law rounding_failure:
+  for +message: String
+  for places: Nat
+  for mode: Decimal.Rounding
+  {Core.round(Core.Failure{message}, Core.Number{places}, mode) == Core.Failure{message} : Core.Value}
