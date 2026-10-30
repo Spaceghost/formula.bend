@@ -22,18 +22,23 @@ run({'podman', 'run', '--rm', '--cgroups=disabled', '--network=host',
   '-v', compiler .. ':/compiler:ro', '-v', scratch .. ':/tmp:rw',
   '-w', '/work', os.getenv('FORMULA_NATIVE_IMAGE') or 'localhost/bend-jev:dev',
   'bash', '-lc', [[set -e
-/compiler/bin/bend build/scalar-corpus.bend -o build/scalar-corpus-native
+clang --version
+# Finish Bend's process before starting clang so their compiler heaps do not
+# overlap. Retain the generated C alongside the verified native artifact.
+/compiler/bin/bend build/scalar-corpus.bend -o build/scalar-corpus-native.c
+clang -std=c11 -O3 build/scalar-corpus-native.c -lpthread -lm -o build/scalar-corpus-native
 ./build/scalar-corpus-native +RTS --threads 1 > build/scalar-corpus-native-1.actual
 diff -u compat/scalar-oracle.tsv build/scalar-corpus-native-1.actual
 ./build/scalar-corpus-native +RTS --threads 8 > build/scalar-corpus-native-8.actual
 diff -u compat/scalar-oracle.tsv build/scalar-corpus-native-8.actual
-sha256sum build/scalar-corpus-native
+sha256sum build/scalar-corpus-native build/scalar-corpus-native.c
 if test -f enumeration-runtime.bend; then
-  /compiler/bin/bend enumeration-runtime.bend -o build/enumeration-native
+  /compiler/bin/bend enumeration-runtime.bend -o build/enumeration-native.c
+  clang -std=c11 -O3 build/enumeration-native.c -lpthread -lm -o build/enumeration-native
   ./build/enumeration-native +RTS --threads 1 > build/enumeration-native-1.actual
   diff -u enumeration-runtime.expected build/enumeration-native-1.actual
   ./build/enumeration-native +RTS --threads 8 > build/enumeration-native-8.actual
   diff -u enumeration-runtime.expected build/enumeration-native-8.actual
-  sha256sum build/enumeration-native
+  sha256sum build/enumeration-native build/enumeration-native.c
 fi
 ]]})

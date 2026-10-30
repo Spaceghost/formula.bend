@@ -4,6 +4,7 @@ import ./division.bend as Division
 import ./lexer.bend as Lex
 import ./string.bend as StringOps
 import ./unicode.bend as Unicode
+import ./remainder.bend as Remainder
 
 # Small integers use Nat; larger integers and decimals use exact digit lists.
 type Value is Data:
@@ -72,6 +73,7 @@ type Expr is Data:
   Add{left: Expr, right: Expr}
   Multiply{left: Expr, right: Expr}
   Divide{left: Expr, right: Expr}
+  Modulo{left: Expr, right: Expr}
   If{condition: Expr, yes: Expr, no: Expr}
   Not{operand: Expr}
   Negate{operand: Expr}
@@ -922,6 +924,46 @@ def divide_default_operands(a: NumericOperand, b: NumericOperand) -> Value:
 
 def divide(a: Value, b: Value) -> Value:
   divide_default_operands(numeric_operand(a), numeric_operand(b))
+
+def modulo_result(result: Remainder.RemainderResult) -> Value:
+  match result:
+    case Remainder.ZeroDivisor{}:
+      Failure{"Division by zero"}
+    case Remainder.Remainder{sign, value}:
+      signed_result(sign, value)
+
+def modulo_nonzero(zero: Bool, a: NumericOperand, sy: Bool, y: Decimal.Decimal) -> Value:
+  match zero a:
+    case True{} a:
+      Failure{"Division by zero"}
+    case False{} InvalidNumeric{message}:
+      Failure{message}
+    case False{} Magnitude{sx, x}:
+      modulo_result(Remainder.remainder(x, y, sx, sy))
+
+def modulo_operands(a: NumericOperand, b: NumericOperand) -> Value:
+  match b:
+    case InvalidNumeric{message}:
+      Failure{message}
+    case Magnitude{sy, +y}:
+      modulo_nonzero(Decimal.is_zero(y), a, sy, y)
+
+def modulo(a: Value, b: Value) -> Value:
+  modulo_operands(numeric_operand(a), numeric_operand(b))
+
+def modulo_right_nonzero(zero: Bool, sy: Bool, y: Decimal.Decimal, left: Unit -> Value) -> Value:
+  match zero:
+    case True{}:
+      Failure{"Division by zero"}
+    case False{}:
+      modulo_nonzero(False{}, numeric_operand(left(Unit{})), sy, y)
+
+def modulo_right(right: NumericOperand, left: Unit -> Value) -> Value:
+  match right:
+    case InvalidNumeric{message}:
+      Failure{message}
+    case Magnitude{sy, +y}:
+      modulo_right_nonzero(Decimal.is_zero(y), sy, y, left)
 
 def incompatible_comparison(op: Comparison) -> Value:
   match op:
@@ -1884,6 +1926,8 @@ def prepare_expression(e: Expr) -> Expr:
       Multiply{prepare_expression(a), prepare_expression(b)}
     case Divide{a, b}:
       Divide{prepare_expression(a), prepare_expression(b)}
+    case Modulo{a, b}:
+      Modulo{prepare_expression(a), prepare_expression(b)}
     case If{condition, yes, no}:
       If{prepare_expression(condition), prepare_expression(yes), prepare_expression(no)}
     case Not{a}:
@@ -2057,6 +2101,8 @@ def evaluate_machine(e: Expr, +batch: Value, +context: List<&2, Binding>, +sensi
     case Divide{a, b} batch EvaluateOne{}:
       x y = evaluate_machine(a, batch, context, sensitive, subjects, EvaluateOne{}) evaluate_machine(b, batch, context, sensitive, subjects, EvaluateOne{})
       divide(x, y)
+    case Modulo{a, b} batch EvaluateOne{}:
+      modulo_right(numeric_operand(evaluate_machine(b, batch, context, sensitive, subjects, EvaluateOne{})), u => evaluate_machine(a, batch, context, sensitive, subjects, EvaluateOne{}))
     case Multiply{a, b} batch EvaluateOne{}:
       x y = evaluate_machine(a, batch, context, sensitive, subjects, EvaluateOne{}) evaluate_machine(b, batch, context, sensitive, subjects, EvaluateOne{})
       multiply(x, y)

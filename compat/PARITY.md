@@ -46,7 +46,7 @@ The unchanged upstream suite passes 713 examples with zero failures and 96.82%
 line coverage in the Ruby reference environment. `reference-summary.json` and
 `upstream-spec-catalog.json` record that run. These results describe Ruby only.
 
-The Lua-driven value and dependency corpus has 882 cases matched against Ruby values or parse
+The Lua-driven value and dependency corpus has 951 cases matched against Ruby values or parse
 error classification. It covers truthiness, strings/null, comparisons, selected
 numeric-string coercions, and static operand rejection. It is a small subset of
 the upstream catalog. Native error classes/messages, all calculator methods,
@@ -87,7 +87,7 @@ lua tools/run-oracle.lua PROJECT UPSTREAM GEMS STORAGE RUNROOT OUTPUT
 The probe catches Dentaku errors and records their class; unexpected Ruby failures
 abort without replacing the output. Compare the result before updating committed
 goldens. Parser snapshots currently preserve parse-error classification, while
-full runtime error-class/message parity remains unfinished. The 882-case value and dependency
+full runtime error-class/message parity remains unfinished. The 951-case value and dependency
 corpus passes on JavaScript; the 733-case checkpoint passed native CPU with one
 and eight threads. This is correctness verification,
 not the requested performance shootout.
@@ -326,3 +326,29 @@ The full 882-case corpus has also been replayed against Ruby after the typed
 context encoding change, with no differences. The current proof gate contains
 37 laws and the concrete suite 166 fixtures. Both Bend 2.0.16 and 2.0.39 pass
 the full checks; Bend 2.0.39 also passes the 37 laws with --verdict.
+
+## Modulo
+
+The additional 69 cases cover exact BigDecimal remainder, negative operands,
+positive zero, large coefficients, unequal decimal scales, numeric strings,
+precedence, dependencies, static rejection, and collection bodies. Modulo returns
+BigDecimal identity for integer inputs too. The evaluator validates the right
+operand and rejects a zero divisor before entering the left expression. Three
+new laws preserve this order, bringing the proof gate to 40 laws.
+
+The tokenizer distinguishes binary modulo positions from postfix percentage.
+Postfix percentage remains explicitly unsupported until Ruby Float arithmetic is
+implemented. A negative divisor therefore needs parentheses, as in the pinned
+source grammar. The three original FILTER/ALL/ANY binder-rejection formulas now
+have direct differential cases; the scenario map contains 116 entries.
+
+The native -O3 build of the 882-case checkpoint caused heavy paging and was
+stopped with its generated C preserved. A second build with -O1 and inlining
+disabled also exhausted available memory and was stopped; neither is a verified
+native result. The generated Unicode lookups now use direct Boolean dispatch
+instead of thousands of closures. Their reference tables and mappings are
+unchanged. Native verification of the revised implementation remains pending.
+Both Bend 2.0.16 and 2.0.39 pass the 951-case full checks; Bend 2.0.39 also passes
+all 40 laws with --verdict. Native orchestration now completes C generation
+before launching clang, so the compiler heaps do not overlap, and retains the
+generated C for inspection.

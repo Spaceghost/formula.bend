@@ -18,6 +18,7 @@ type Operator is Data:
   NegateOp{}
   MultiplyOp{}
   DivideOp{}
+  ModuloOp{}
   CompareOp{operation: Core.Comparison}
   AndOp{}
   OrOp{}
@@ -228,6 +229,8 @@ def precedence(op: Operator) -> Nat:
       20n
     case DivideOp{}:
       20n
+    case ModuloOp{}:
+      20n
     case AddOp{}:
       10n
     case SubtractOp{}:
@@ -270,6 +273,8 @@ def reduce_one(op: Operator, tail: List<&2, Operator>, values: List<&2, Core.Exp
       ParseReady{tail, Core.Multiply{left, right} <> rest}
     case DivideOp{} right <> left <> rest:
       ParseReady{tail, Core.Divide{left, right} <> rest}
+    case ModuloOp{} right <> left <> rest:
+      ParseReady{tail, Core.Modulo{left, right} <> rest}
     case AddOp{} right <> left <> rest:
       ParseReady{tail, Core.Add{left, right} <> rest}
     case SubtractOp{} right <> left <> rest:
@@ -534,6 +539,8 @@ def operand(token: Lex.Token, stack: Stack) -> Stack:
 
 def operator(token: Lex.Token, stack: Stack) -> Stack:
   match token stack:
+    case Lex.ModuloToken{} ParseReady{ops, values}:
+      push_operator(reduce_times(ops, values), ModuloOp{})
     case Lex.MemberName{name} ParseReady{ops, structure <> outer}:
       ParseReady{ops, Core.Access{structure, Core.Literal{Core.MemberIndex{name}}} <> outer}
     case Lex.WhenWord{} ParseReady{ops, values}:
@@ -635,8 +642,36 @@ def finish(expected: Bool, stack: Stack) -> Stack:
     case False{}:
       stack
 
+def binary_percent(tokens: List<&2, Lex.Token>) -> Bool:
+  match tokens:
+    case Nil{}:
+      False{}
+    case Lex.Plus{} <> rest:
+      False{}
+    case Lex.Minus{} <> rest:
+      False{}
+    case Lex.Times{} <> rest:
+      False{}
+    case Lex.Slash{} <> rest:
+      False{}
+    case Lex.ModuloToken{} <> rest:
+      False{}
+    case Lex.RParen{} <> rest:
+      False{}
+    case tokens:
+      True{}
+
+def percent_position(binary: Bool, stack: Stack) -> Stack:
+  match binary:
+    case True{}:
+      operator(Lex.ModuloToken{}, stack)
+    case False{}:
+      Rejected{"Postfix percentage is not implemented"}
+
 def scan(tokens: List<&2, Lex.Token>, stack: Stack, expected: Bool) -> Stack:
   match tokens expected:
+    case Lex.ModuloToken{} <> +tail False{}:
+      scan(tail, percent_position(binary_percent(tail), stack), True{})
     case Lex.NotWord{name} <> Lex.LParen{} <> tail True{}:
       scan(tail, start_call(name, stack), True{})
     case Lex.AndWord{name} <> Lex.LParen{} <> tail True{}:

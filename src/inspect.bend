@@ -163,6 +163,9 @@ def analyze_in(+expr: Core.Expr, +sensitive: Bool) -> Info:
     case Core.Divide{a, b}:
       x y = analyze_in(a, sensitive) analyze_in(b, sensitive)
       binary(x, y, NumericKind{}, True{})
+    case Core.Modulo{a, b}:
+      x y = analyze_in(a, sensitive) analyze_in(b, sensitive)
+      binary(x, y, NumericKind{}, True{})
     case Core.Compare{op, a, b}:
       x y = analyze_in(a, sensitive) analyze_in(b, sensitive)
       binary(x, y, LogicalKind{}, False{})

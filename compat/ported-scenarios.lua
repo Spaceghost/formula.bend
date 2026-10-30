@@ -89,18 +89,21 @@ return {
   ['spec/ast/filter_spec.rb'] = {
     {'excludes unmatched values', 'enum_filter_sum'},
     {'works with a single value if needed for some reason', {'enum_filter_scalar_false', 'enum_filter_scalar_true'}},
+    {'raises argument error if a string is passed as identifier', {'mod_filter_bad_binder', 'mod_filter_bad_binder_message'}},
   },
   ['spec/ast/all_spec.rb'] = {
     {'performs ALL operation', 'enum_all'},
     {'works with a single value if needed for some reason', {'enum_all_scalar_false', 'enum_all_scalar_true'}},
     {'treats missing keys in hashes as NULL in permissive mode', 'hash_all_permissive'},
     {'raises an error if accessing a missing key in a hash in strict mode', 'hash_all_evaluate'},
+    {'raises argument error if a string is passed as identifier', {'mod_all_bad_binder', 'mod_all_bad_binder_message'}},
   },
   ['spec/ast/any_spec.rb'] = {
     {'performs ANY operation', 'enum_any'},
     {'works with a single value if needed for some reason', {'enum_any_scalar_false', 'enum_any_scalar_true'}},
     {'treats missing keys in hashes as NULL in permissive mode', 'hash_any_permissive'},
     {'raises an error if accessing a missing key in a hash in strict mode', 'hash_any_strict_missing_first'},
+    {'raises argument error if a string is passed as identifier', 'mod_any_bad_binder'},
   },
   ['spec/ast/reduce_spec.rb'] = {
     {'performs REDUCE operation with initial value', 'enum_reduce_initial'},

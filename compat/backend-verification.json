@@ -61,6 +61,16 @@
     "scope": "correctness verification; no performance measurements"
   },
   "kernel_verification": {
+    "source_commit": "5d2b8b8f3d357ef5b19e004dd661caaf50dd55ae",
+    "bend_version": "2.0.39",
+    "command": "bend PROOF.bend --verdict",
+    "status": "passed",
+    "laws": 37,
+    "lean_version": "4.34.0",
+    "kernel_source_sha256": "d7268ff461de974bd4cd875d9766c71c62ee6b2e6411b9bab84839870db68a80",
+    "kernel_artifact_sha256": "e5e82c061a37c48f2162f294df52c8bbb32b227af2e22a331b6b3e2d066190c9"
+  },
+  "hash_kernel_checkpoint": {
     "source_commit": "25dafea1e9268f5a4adb5b493758531f8a90e39d",
     "bend_version": "2.0.39",
     "command": "bend PROOF.bend --verdict",

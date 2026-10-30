@@ -12,6 +12,15 @@ def Laws.member_null(name, sensitive):
 def Laws.member_error(message, name, sensitive):
   {==}
 
+def Laws.modulo_zero_divisor(left):
+  {==}
+
+def Laws.modulo_right_zero_skips_left(left):
+  {==}
+
+def Laws.modulo_right_failure(left, message):
+  {==}
+
 def Laws.strict_item_error(message):
   {==}
 
@@ -123,6 +132,8 @@ def Laws.empty_enumeration_batch(body, kind, binder, context, sensitive, subject
       {==}
     case Core.Divide{x0, x1}:
       {==}
+    case Core.Modulo{x0, x1}:
+      {==}
     case Core.If{x0, x1, x2}:
       {==}
     case Core.Not{x0}:
@@ -189,6 +200,8 @@ def Laws.empty_reduction_batch(body, memo_name, item_name, initial, context, sen
     case Core.Multiply{x0, x1}:
       {==}
     case Core.Divide{x0, x1}:
+      {==}
+    case Core.Modulo{x0, x1}:
       {==}
     case Core.If{x0, x1, x2}:
       {==}

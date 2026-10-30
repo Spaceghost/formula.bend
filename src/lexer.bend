@@ -14,6 +14,7 @@ type Token is Data:
   Minus{}
   Times{}
   Slash{}
+  ModuloToken{}
   LParen{}
   RParen{}
   LBrace{}
@@ -95,6 +96,8 @@ def symbol(c: Char) -> Token:
       Plus{}
     case Chr{47}:
       Slash{}
+    case Chr{37}:
+      ModuloToken{}
     case Chr{42}:
       Times{}
     case Chr{40}:

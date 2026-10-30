@@ -22,6 +22,19 @@ law member_error:
   for sensitive: Bool
   {Core.member_value(Core.Failure{message}, name, sensitive) == Core.Failure{message} : Core.Value}
 
+law modulo_zero_divisor:
+  for left: Core.Value
+  {Core.modulo(left, Core.Number{0n}) == Core.Failure{"Division by zero"} : Core.Value}
+
+law modulo_right_zero_skips_left:
+  for left: Core.Expr
+  {Core.evaluate(Core.Modulo{left, Core.Literal{Core.Number{0n}}}) == Core.Failure{"Division by zero"} : Core.Value}
+
+law modulo_right_failure:
+  for left: Core.Value
+  for +message: String
+  {Core.modulo(left, Core.Failure{message}) == Core.Failure{message} : Core.Value}
+
 law strict_item_error:
   for +message: String
   {Core.mapped_result(Core.SymbolValue{"strict"}, Core.Failure{message}) == Core.Failure{message} : Core.Value}
