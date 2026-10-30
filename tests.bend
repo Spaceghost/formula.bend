@@ -130,7 +130,7 @@ def large_decimal_formula() -> {Core.show(Parser.evaluate("999999999999999999999
 def repeated_decimal_point() -> {Parser.parse("1.2.3") == Parser.ParseError{"Expected an operator"} : Parser.Parsed}:
   {==}
 
-def trailing_decimal_point() -> {Parser.parse("1.") == Parser.ParseError{"Expected an operand"} : Parser.Parsed}:
+def trailing_decimal_point() -> {Parser.parse("1.") == Parser.ParseError{"Tokenizer: invalid numeric literal"} : Parser.Parsed}:
   {==}
 
 def large_integer_literal() -> {Core.show(Parser.evaluate("999999999999999999999999 + 1", Nil{}, False{})) == "1000000000000000000000000" : String}:
@@ -398,4 +398,16 @@ def array_nested_index() -> {Parser.evaluate("{{1, 2}, {3, 4}}[1][0]", Nil{}, Fa
   {==}
 
 def array_nested_sum() -> {Parser.evaluate("SUM({1, {2, 3}}, 4)", Nil{}, False{}) == Core.Number{10n} : Core.Value}:
+  {==}
+
+def scientific_exact_large_addition() -> {Parser.snapshot("1e20 + 1", Nil{}, False{}) == "number:100000000000000000001" : String}:
+  {==}
+
+def hex_exact_large_literal() -> {Parser.snapshot("0xFFFFFFFFFFFFFFFFFFFFFFFF", Nil{}, False{}) == "number:79228162514264337593543950335" : String}:
+  {==}
+
+def numeric_string_rejects_internal_space() -> {Parser.snapshot("SUM('- 2')", Nil{}, False{}) == "error:Dentaku::ArgumentError" : String}:
+  {==}
+
+def scientific_zero_snapshot() -> {Parser.snapshot("0e-3", Nil{}, False{}) == "number:0" : String}:
   {==}

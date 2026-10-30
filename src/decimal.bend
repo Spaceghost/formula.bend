@@ -231,6 +231,8 @@ def normalize_digits(digits: List<&2, U32>) -> List<&2, U32>:
 
 def trim_fraction(digits: List<&2, U32>, s: Nat) -> Decimal:
   match digits s:
+    case Nil{} s:
+      Exact{Nil{}, 0n}
     case 0 <> rest 1n+p:
       trim_fraction(rest, p)
     case digits s:

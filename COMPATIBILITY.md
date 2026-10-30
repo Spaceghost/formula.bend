@@ -59,7 +59,8 @@ base-10 coefficients. Parsed integers with more than three digits remain in this
 representation; arithmetic avoids machine-word coefficient overflow. This also
 avoids large unary Nat reductions in proof checking. The regression suite covers
 24-digit carry and products above the native Nat limit, but is not a complete
-numeric compatibility corpus. Exponent and hexadecimal parsing, modulo,
+numeric compatibility corpus. Scientific and hexadecimal literals and numeric
+strings are supported. Modulo,
 percentages, powers, complete rounding profiles, and coercions remain required.
 
 Current scalar functions: SUM, MUL, MIN, MAX, AVG, ABS, IF, NOT, AND, OR, XOR,
@@ -68,6 +69,8 @@ NOT uses Ruby truthiness. Arrays support nesting, numeric aggregate flattening,
 concatenation, subtraction, repetition, equality, and postfix access. String
 indexing and null-safe access are implemented. Complete numeric-string coercion,
 array-oriented built-ins, hash/member access, and other built-ins remain pending.
+Scientific exponents are limited to 14 significant exponent digits and runtime
+Nat scales; special BigDecimal values and full numeric-class parity are pending.
 
 Unary minus binds more tightly than multiplication; binary subtraction shares
 addition precedence and is left-associative. Positive and negative operands use

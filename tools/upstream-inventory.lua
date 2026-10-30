@@ -10,7 +10,7 @@ assert(pipe:close(), 'upstream git listing failed')
 table.sort(paths)
 local partial = {
   ['addition_spec.rb']=true, ['arithmetic_spec.rb']=true,
-  ['division_spec.rb']=true, ['numeric_spec.rb']=true,
+  ['division_spec.rb']=true, ['numeric_spec.rb']=true, ['numeric_parser_spec.rb']=true,
   ['comparator_spec.rb']=true,
   ['and_spec.rb']=true, ['identifiers_spec.rb']=true,
   ['and_function_spec.rb']=true, ['or_spec.rb']=true, ['xor_spec.rb']=true,

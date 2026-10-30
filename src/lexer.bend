@@ -29,6 +29,7 @@ type Token is Data:
   NotWord{spelling: String}
   BangWord{}
   Invalid{character: Char}
+  InvalidNumeric{}
 
 type Mode is Data:
   Idle{}
@@ -38,6 +39,8 @@ type Mode is Data:
   Quoted{quote: Char, reversed: String}
   Pending{symbol: Char}
   AliasPending{is_and: Bool}
+  Scientific{digits: List<&2, U32>, scale: Nat, negative: Bool, exponent: List<&2, U32>, sign_allowed: Bool, explicit_sign: Bool, prefix: String}
+  Hexadecimal{digits: List<&2, U32>, seen: Bool, reversed: String}
 
 type CharacterClass is Data:
   Digit{value: Nat, character: Char}
@@ -90,8 +93,85 @@ def symbol(c: Char) -> Token:
     case c:
       Invalid{c}
 
+def scientific_scaled(digits: List<&2, U32>, +scale: Nat, negative: Bool, +exponent: Nat) -> Token:
+  match negative:
+    case True{}:
+      DecimalLiteral{Decimal.Exact{digits, Nat.add(scale, exponent)}}
+    case False{}:
+      DecimalLiteral{Decimal.Exact{Decimal.pad(Nat.sub(exponent, scale), digits), Nat.sub(scale, exponent)}}
+
+def scientific_fits(fits: Bool, digits: List<&2, U32>, scale: Nat, negative: Bool, exponent: List<&2, U32>) -> Token:
+  match fits:
+    case True{}:
+      scientific_scaled(digits, scale, negative, Decimal.coefficient(exponent))
+    case False{}:
+      InvalidNumeric{}
+
+def scientific_token(digits: List<&2, U32>, scale: Nat, negative: Bool, exponent: List<&2, U32>) -> Token:
+  match exponent:
+    case Nil{}:
+      InvalidNumeric{}
+    case +head <> +tail:
+      scientific_fits(Nat.is_le(List.length(&2, U32, Decimal.normalize_digits(head <> tail)), 14n), digits, scale, negative, head <> tail)
+
+def fraction_reversed(digits: List<&2, U32>, scale: Nat) -> String:
+  match digits scale:
+    case digits 0n:
+      SCon{Chr{46}, Decimal.digit_text(digits)}
+    case head <> rest 1n+p:
+      SCon{Chr{U32.add(48, head)}, fraction_reversed(rest, p)}
+    case Nil{} 1n+p:
+      SCon{Chr{48}, fraction_reversed(Nil{}, p)}
+
+def numeric_word_choose(digit: Bool, yes: Unit -> (Mode & List<&2, Token>), no: Unit -> (Mode & List<&2, Token>)) -> Mode & List<&2, Token>:
+  match digit:
+    case True{}:
+      yes(Unit{})
+    case False{}:
+      no(Unit{})
+
+def numeric_word_parts(source: String, +prefix_digits: List<&2, U32>, +original: String, +tokens: List<&2, Token>) -> Mode & List<&2, Token>:
+  match source:
+    case SNil{}:
+      (Word{original}, tokens)
+    case SCon{Chr{46}, rest}:
+      (Word{String.reverse(SCon{Chr{46}, rest})}, Bool.pick(List<&2, Token>, List.is_empty(&2, U32, prefix_digits), tokens, integer_token(prefix_digits, Nat.is_le(List.length(&2, U32, prefix_digits), 3n)) <> tokens))
+    case SCon{+c, rest}:
+      numeric_word_choose(Char.is_digit(c), u => numeric_word_parts(rest, U32.sub(Char.to_u32(c), 48) <> prefix_digits, original, tokens), u => (Word{original}, tokens))
+
+def numeric_word(+reversed: String, tokens: List<&2, Token>) -> Mode & List<&2, Token>:
+  numeric_word_parts(String.reverse(reversed), Nil{}, reversed, tokens)
+
+def flush_word_result(result: Mode & List<&2, Token>) -> List<&2, Token>:
+  (mode, tokens) = result
+  match mode:
+    case Word{s}:
+      Identifier{String.reverse(s)} <> tokens
+    case mode:
+      tokens
+
+def scientific_prefix_tokens(explicit_sign: Bool, negative: Bool, prefix: String, tokens: List<&2, Token>) -> List<&2, Token>:
+  match explicit_sign:
+    case True{}:
+      Bool.pick(Token, negative, Minus{}, Plus{}) <> flush_word_result(numeric_word(prefix, tokens))
+    case False{}:
+      flush_word_result(numeric_word(prefix, tokens))
+
+def flush_scientific(digits: List<&2, U32>, scale: Nat, negative: Bool, exponent: List<&2, U32>, explicit_sign: Bool, prefix: String, tokens: List<&2, Token>) -> List<&2, Token>:
+  match exponent:
+    case Nil{}:
+      scientific_prefix_tokens(explicit_sign, negative, prefix, tokens)
+    case head <> tail:
+      scientific_token(digits, scale, negative, head <> tail) <> tokens
+
 def flush(mode: Mode, tokens: List<&2, Token>) -> List<&2, Token>:
   match mode:
+    case Scientific{digits, scale, negative, exponent, sign_allowed, explicit_sign, prefix}:
+      flush_scientific(digits, scale, negative, exponent, explicit_sign, prefix, tokens)
+    case Hexadecimal{+digits, True{}, raw}:
+      integer_token(Decimal.normalize_digits(digits), Nat.is_le(List.length(&2, U32, digits), 3n)) <> tokens
+    case Hexadecimal{digits, False{}, raw}:
+      Identifier{String.reverse(raw)} <> tokens
     case AliasPending{is_and}:
       Invalid{Chr{38}} <> tokens
     case Pending{c}:
@@ -103,7 +183,7 @@ def flush(mode: Mode, tokens: List<&2, Token>) -> List<&2, Token>:
     case Digits{+n}:
       integer_token(n, Nat.is_le(List.length(&2, U32, n), 3n)) <> tokens
     case Fraction{digits, 0n}:
-      Invalid{Chr{46}} <> tokens
+      InvalidNumeric{} <> tokens
     case Fraction{digits, 1n+p}:
       DecimalLiteral{Decimal.Exact{digits, 1n+p}} <> tokens
     case Word{s}:
@@ -121,6 +201,22 @@ def space_flush(mode: Mode, tokens: List<&2, Token>) -> List<&2, Token>:
 
 def step(kind: CharacterClass, mode: Mode, tokens: List<&2, Token>) -> Mode & List<&2, Token>:
   match kind mode:
+    case Letter{Chr{101}} Digits{+digits}:
+      (Scientific{digits, 0n, False{}, Nil{}, True{}, False{}, SCon{Chr{101}, Decimal.digit_text(digits)}}, tokens)
+    case Letter{Chr{69}} Digits{+digits}:
+      (Scientific{digits, 0n, False{}, Nil{}, True{}, False{}, SCon{Chr{69}, Decimal.digit_text(digits)}}, tokens)
+    case Letter{Chr{101}} Fraction{+digits, 1n+ +p}:
+      (Scientific{digits, 1n+p, False{}, Nil{}, True{}, False{}, SCon{Chr{101}, fraction_reversed(digits, 1n+p)}}, tokens)
+    case Letter{Chr{69}} Fraction{+digits, 1n+ +p}:
+      (Scientific{digits, 1n+p, False{}, Nil{}, True{}, False{}, SCon{Chr{69}, fraction_reversed(digits, 1n+p)}}, tokens)
+    case Letter{Chr{120}} Digits{0 <> Nil{}}:
+      (Hexadecimal{Nil{}, False{}, "x0"}, tokens)
+    case Letter{Chr{88}} Digits{0 <> Nil{}}:
+      (Hexadecimal{Nil{}, False{}, "X0"}, tokens)
+    case Letter{c} Digits{digits}:
+      numeric_word(SCon{c, Decimal.digit_text(digits)}, tokens)
+    case Letter{c} Fraction{digits, scale}:
+      numeric_word(SCon{c, fraction_reversed(digits, scale)}, tokens)
     case Digit{n, c} AliasPending{is_and}:
       (Idle{}, Invalid{c} <> tokens)
     case Digit{n, c} Pending{first}:
@@ -145,8 +241,12 @@ def step(kind: CharacterClass, mode: Mode, tokens: List<&2, Token>) -> Mode & Li
       (Fraction{digits, 0n}, tokens)
     case Symbol{Chr{46}} Idle{}:
       (Fraction{Nil{}, 0n}, tokens)
+    case Symbol{Chr{46}} Word{s}:
+      (Word{SCon{Chr{46}, s}}, tokens)
     case Symbol{c} mode:
       (Idle{}, symbol(c) <> flush(mode, tokens))
+    case kind mode:
+      (Idle{}, Invalid{Chr{0}} <> tokens)
 
 def quote_step(same: Bool, c: Char, quote: Char, reversed: String, tokens: List<&2, Token>) -> Mode & List<&2, Token>:
   match same:
@@ -202,8 +302,50 @@ def alias_step(space: Bool, is_and: Bool, c: Char, tokens: List<&2, Token>) -> M
     case False{}:
       (Idle{}, Invalid{c} <> tokens)
 
+def scientific_word(explicit_sign: Bool, negative: Bool, exponent: List<&2, U32>, prefix: String, c: Char, tokens: List<&2, Token>) -> Mode & List<&2, Token>:
+  match explicit_sign:
+    case True{}:
+      (Word{SCon{c, Decimal.digit_text(exponent)}}, scientific_prefix_tokens(True{}, negative, prefix, tokens))
+    case False{}:
+      numeric_word(SCon{c, Decimal.digit_text(exponent) ++ prefix}, tokens)
+
+def scientific_step(digits: List<&2, U32>, scale: Nat, negative: Bool, exponent: List<&2, U32>, sign_allowed: Bool, explicit_sign: Bool, prefix: String, kind: CharacterClass, tokens: List<&2, Token>) -> Mode & List<&2, Token>:
+  match sign_allowed kind:
+    case sign_allowed Digit{n, c}:
+      (Scientific{digits, scale, negative, U32.from_nat(n) <> exponent, False{}, explicit_sign, prefix}, tokens)
+    case True{} Symbol{Chr{43}}:
+      (Scientific{digits, scale, False{}, exponent, False{}, True{}, prefix}, tokens)
+    case True{} Symbol{Chr{45}}:
+      (Scientific{digits, scale, True{}, exponent, False{}, True{}, prefix}, tokens)
+    case sign_allowed Letter{c}:
+      scientific_word(explicit_sign, negative, exponent, prefix, c, tokens)
+    case sign_allowed kind:
+      step(kind, Idle{}, flush_scientific(digits, scale, negative, exponent, explicit_sign, prefix, tokens))
+
+def hexadecimal_digit(+c: Char) -> Maybe<&2, U32>:
+  +code = Char.to_u32(Char.to_lower(c))
+  Bool.pick(Maybe<&2, U32>, Char.is_digit(c), Some{U32.sub(Char.to_u32(c), 48)}, Bool.pick(Maybe<&2, U32>, Bool.and(U32.is_ge(code, 97), U32.is_le(code, 102)), Some{U32.sub(code, 87)}, None{}))
+
+def hexadecimal_done(kind: CharacterClass, digits: List<&2, U32>, seen: Bool, raw: String, tokens: List<&2, Token>) -> Mode & List<&2, Token>:
+  match kind:
+    case Letter{c}:
+      (Word{SCon{c, raw}}, tokens)
+    case kind:
+      step(kind, Idle{}, flush(Hexadecimal{digits, seen, raw}, tokens))
+
+def hexadecimal_step(digit: Maybe<&2, U32>, digits: List<&2, U32>, seen: Bool, +c: Char, raw: String, tokens: List<&2, Token>) -> Mode & List<&2, Token>:
+  match digit:
+    case Some{n}:
+      (Hexadecimal{Decimal.add_digits(Decimal.multiply_digit(digits, 16, 0), [n], 0), True{}, SCon{c, raw}}, tokens)
+    case None{}:
+      hexadecimal_done(classify(c), digits, seen, raw, tokens)
+
 def scan_step(mode: Mode, c: Char, tokens: List<&2, Token>) -> Mode & List<&2, Token>:
   match mode c:
+    case Scientific{digits, scale, negative, exponent, sign_allowed, explicit_sign, prefix} c:
+      scientific_step(digits, scale, negative, exponent, sign_allowed, explicit_sign, prefix, classify(c), tokens)
+    case Hexadecimal{digits, seen, raw} +c:
+      hexadecimal_step(hexadecimal_digit(c), digits, seen, c, raw, tokens)
     case AliasPending{is_and} +c:
       alias_step(Char.is_space(c), is_and, c, tokens)
     case Quoted{+quote, text} +c:

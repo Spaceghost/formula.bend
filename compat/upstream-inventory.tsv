@@ -43,7 +43,7 @@ spec/external_function_spec.rb	19	unassessed
 spec/gemspec_spec.rb	1	unassessed
 spec/humanize_visitor_spec.rb	41	unassessed
 spec/identifiers_spec.rb	11	partial
-spec/numeric_parser_spec.rb	9	unassessed
+spec/numeric_parser_spec.rb	9	partial
 spec/parser_spec.rb	29	partial
 spec/print_visitor_spec.rb	20	unassessed
 spec/token_matcher_spec.rb	11	unassessed

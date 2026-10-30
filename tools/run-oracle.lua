@@ -1,10 +1,12 @@
 -- Reference-only probe: no Ruby code is used by the Bend application.
-local project = assert(arg[1], 'usage: lua tools/run-oracle.lua PROJECT UPSTREAM GEMS STORAGE RUNROOT OUTPUT')
+local project = assert(arg[1], 'usage: lua tools/run-oracle.lua PROJECT UPSTREAM GEMS STORAGE RUNROOT OUTPUT [CORPUS_RELATIVE_PATH]')
 local upstream = assert(arg[2], 'missing upstream directory')
 local gems = assert(arg[3], 'missing gems directory')
 local storage = assert(arg[4], 'missing container storage directory')
 local runroot = assert(arg[5], 'missing container runroot')
 local output = assert(arg[6], 'missing output file')
+local corpus = arg[7] or 'build/scalar-corpus.formulas.tsv'
+assert(not corpus:match('^/') and not corpus:match('%.%.'), 'corpus path must be relative to the project')
 local function quote(s) return "'" .. s:gsub("'", "'\\''") .. "'" end
 local function command(args)
   local escaped = {}
@@ -36,7 +38,7 @@ def snapshot_value(value)
   else raise "unhandled oracle type #{value.class}"
   end
 end
-File.foreach('/formula/build/scalar-corpus.formulas.tsv') do |line|
+File.foreach(ENV.fetch('FORMULA_ORACLE_CORPUS')) do |line|
   id, source, operation, encoded_context, sensitive = line.chomp.split("\t", 5)
   begin
     context = JSON.parse(encoded_context || '{}').transform_values { |item| context_value(item) }
@@ -64,6 +66,7 @@ local args = {
   'podman','--root',storage,'--runroot',runroot,'run','--rm',
   '--cgroups=disabled','--network=host','--security-opt','label=disable',
   '-e','GEM_HOME=/gems','-e','GEM_PATH=/gems',
+  '-e','FORMULA_ORACLE_CORPUS=/formula/' .. corpus,
   '-v',gems .. ':/gems','-v',upstream .. ':/reference:ro',
   '-v',project .. ':/formula:ro','-w','/reference',
   os.getenv('FORMULA_REFERENCE_IMAGE') or 'localhost/formula-dentaku-reference:3.3.13',

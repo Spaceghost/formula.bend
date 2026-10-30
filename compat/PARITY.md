@@ -46,13 +46,14 @@ The unchanged upstream suite passes 713 examples with zero failures and 96.82%
 line coverage in the Ruby reference environment. `reference-summary.json` and
 `upstream-spec-catalog.json` record that run. These results describe Ruby only.
 
-The Lua-driven value and dependency corpus has 234 cases matched against Ruby values or parse
+The Lua-driven value and dependency corpus has 296 cases matched against Ruby values or parse
 error classification. It covers truthiness, strings/null, comparisons, selected
 numeric-string coercions, and static operand rejection. It is a small subset of
 the upstream catalog. Native error classes/messages, all calculator methods,
 complete array semantics, other built-ins, custom functions, complete dependency graphs, and
-visitors still require parity work. Hex/exponent numeric-string coercion remains
-unfinished. No spec family is marked complete merely because this subset passes.
+visitors still require parity work. Hex/exponent numeric-string coercion is
+covered within the documented exponent range. No spec family is marked complete
+merely because this subset passes.
 
 The static analysis pass never evaluates guards or functions. It distinguishes
 literal strings rejected as arithmetic operands from variables that can resolve
@@ -86,8 +87,9 @@ lua tools/run-oracle.lua PROJECT UPSTREAM GEMS STORAGE RUNROOT OUTPUT
 The probe catches Dentaku errors and records their class; unexpected Ruby failures
 abort without replacing the output. Compare the result before updating committed
 goldens. Parser snapshots currently preserve parse-error classification, while
-full runtime error-class/message parity remains unfinished. The 234-case value and dependency
-corpus passes on JavaScript; the previous 114 cases passed native CPU. This is correctness verification,
+full runtime error-class/message parity remains unfinished. The 296-case value and dependency
+corpus passes on JavaScript; the 234-case checkpoint passed native CPU with one
+and eight threads. This is correctness verification,
 not the requested performance shootout.
 
 The upstream catalog and scenario inventory derive from MIT-licensed Dentaku;
@@ -158,4 +160,20 @@ diagnostics. Full TokenizerError classification remains unfinished.
 Array repetition currently narrows decimal counts with at most 14 integer digits;
 larger counts return an argument error. Numeric representation/class parity,
 hash/member access, custom indexable objects, ranges, and all array-oriented
-built-ins remain incomplete. Native verification of this expanded corpus is pending.
+built-ins remain incomplete. The 234-case checkpoint passes native CPU with one
+and eight threads using Bend 2.0.39; its frozen source commit and artifact checksum
+are recorded in backend-verification.json.
+
+## Numeric literal and coercion rules
+
+Scientific and hexadecimal literals use exact decimal coefficients. The corpus
+includes large values, signed exponents, leading exponent zeros, hexadecimal
+prefix casing, arithmetic, comparisons, and numeric strings. Leading, trailing,
+and internal whitespace is rejected by numeric-string coercion. Malformed
+numeric-looking words such as `1e`, `0xG`, and `123abc` retain Dentaku's identifier
+fallback, including spelling; they are not uniformly tokenizer errors.
+
+Scientific exponents currently narrow at most 14 significant exponent digits to
+Nat. Extremely large scales and coefficients still depend on available memory;
+infinities, signed zero, complete Ruby numeric classes, and global BigDecimal
+modes remain incomplete. Native verification of the latest 62 cases is pending.

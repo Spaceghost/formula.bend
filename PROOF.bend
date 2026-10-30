@@ -64,3 +64,9 @@ def Laws.count_pair_skips_values(left, right):
 
 def Laws.array_head_access(head, tail):
   {==}
+
+def Laws.canonical_zero(scale):
+  {==}
+
+def Laws.numeric_string_leading_space(text):
+  {==}

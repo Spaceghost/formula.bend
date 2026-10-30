@@ -112,3 +112,11 @@ law array_head_access:
   for +head: Core.Value
   for tail: Core.Value
   {Core.array_at(Core.ArrayCons{head, tail}, 0n) == head : Core.Value}
+
+law canonical_zero:
+  for scale: Nat
+  {Decimal.canonical(Decimal.Exact{Nil{}, scale}) == Decimal.Exact{Nil{}, 0n} : Decimal.Decimal}
+
+law numeric_string_leading_space:
+  for +text: String
+  {Core.cast_numeric(Core.TextValue{" " ++ text}) == Core.TextValue{" " ++ text} : Core.Value}

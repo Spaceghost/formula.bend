@@ -518,6 +518,15 @@ def balanced_parentheses(tokens: List<&2, Lex.Token>, depth: Nat) -> Bool:
     case head <> rest depth:
       balanced_parentheses(rest, depth)
 
+def valid_numeric_tokens(tokens: List<&2, Lex.Token>) -> Bool:
+  match tokens:
+    case Nil{}:
+      True{}
+    case Lex.InvalidNumeric{} <> rest:
+      False{}
+    case head <> rest:
+      valid_numeric_tokens(rest)
+
 def parse_tokens(balanced: Bool, tokens: List<&2, Lex.Token>) -> Parsed:
   match balanced:
     case True{}:
@@ -525,9 +534,16 @@ def parse_tokens(balanced: Bool, tokens: List<&2, Lex.Token>) -> Parsed:
     case False{}:
       ParseError{"Tokenizer: unbalanced parentheses"}
 
+def parse_numeric_tokens(valid: Bool, +tokens: List<&2, Lex.Token>) -> Parsed:
+  match valid:
+    case True{}:
+      parse_tokens(balanced_parentheses(tokens, 0n), tokens)
+    case False{}:
+      ParseError{"Tokenizer: invalid numeric literal"}
+
 def parse(source: String) -> Parsed:
   +tokens = Lex.tokenize(source)
-  parse_tokens(balanced_parentheses(tokens, 0n), tokens)
+  parse_numeric_tokens(valid_numeric_tokens(tokens), tokens)
 
 def preflight(missing: List<&2, String>, expr: Core.Expr, context: List<&2, Core.Binding>, sensitive: Bool) -> Core.Value:
   match missing:

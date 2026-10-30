@@ -23,6 +23,17 @@
       "status": "not yet verified"
     }
   ],
+  "latest_verified_native": {
+    "source_commit": "b62f95de85f1ad122f2ab14773fe1cb93a5e04f9",
+    "bend_version": "2.0.39",
+    "differential_cases": 234,
+    "target": "native CPU",
+    "thread_counts": [1, 8],
+    "status": "passed",
+    "optimization": "-O3",
+    "artifact_sha256": "8e64b9c3920276c8d6ea18f32c01573ceb9859845869dd428d616a7e031b6d8b",
+    "scope": "correctness verification; no performance measurements"
+  },
   "additional_toolchains": [
     {
       "source_commit": "418c114984dd14e1b6101ffdb2b2e5b4bcd229fa",

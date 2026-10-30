@@ -118,10 +118,17 @@ def numeric_text_allowed(allowed: Bool, +text: String) -> Value:
     case False{}:
       TextValue{text}
 
+def numeric_string_spacing(text: String) -> Bool:
+  match text:
+    case SNil{}:
+      True{}
+    case SCon{c, rest}:
+      Bool.and(Bool.not(Char.is_space(c)), numeric_string_spacing(rest))
+
 def cast_numeric(value: Value) -> Value:
   match value:
     case TextValue{+text}:
-      numeric_text_allowed(String.eq(String.trim(text), text), text)
+      numeric_text_allowed(numeric_string_spacing(text), text)
     case value:
       value
 
