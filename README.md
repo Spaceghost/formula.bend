@@ -31,7 +31,7 @@ parts. They do not establish full Ruby or spreadsheet compatibility.
 
 ## Example
 
-```python
+```bend
 import Base
 import ./src/core.bend as Core
 import ./src/parser.bend as Parser
