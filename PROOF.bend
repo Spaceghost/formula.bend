@@ -49,3 +49,9 @@ def Laws.and_false_short_circuit(right):
 
 def Laws.or_true_short_circuit(right):
   {==}
+
+def Laws.argument_error_left(message, right):
+  {==}
+
+def Laws.sum_dependency_duplicates(name, sensitive):
+  {==}

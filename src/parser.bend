@@ -27,24 +27,47 @@ type Stack is Data:
   Ready{operators: List<&2, Operator>, values: List<&2, Core.Expr>}
   Rejected{message: String}
 
+def wrap_args(args: List<&2, Core.Expr>, +validation: Core.ArgumentValidation) -> List<&2, Core.Expr>:
+  match args:
+    case Nil{}:
+      Nil{}
+    case head <> tail:
+      Core.Argument{head, validation} <> wrap_args(tail, validation)
+
 def pair_args(args: List<&2, Core.Expr>) -> List<&2, Core.Expr>:
   match args:
-    case a <> b <> tail:
-      Core.Add{Core.CoerceNumber{a}, Core.CoerceNumber{b}} <> pair_args(tail)
+    case a <> b <> rest:
+      Core.Arguments{a, b} <> pair_args(rest)
     case args:
       args
 
-# Pair adjacent arguments in rounds to produce a balanced parallel reduction.
-def balanced_sum(fuel: Nat, args: List<&2, Core.Expr>) -> Parsed:
+def balanced_arguments(fuel: Nat, args: List<&2, Core.Expr>) -> Parsed:
   match fuel args:
-    case fuel a <> Nil{}:
-      Accepted{Core.CoerceNumber{a}}
     case fuel Nil{}:
-      ParseError{"SUM expects at least one argument"}
+      Accepted{Core.EmptyArguments{}}
+    case fuel a <> Nil{}:
+      Accepted{a}
     case 0n args:
       ParseError{"Internal argument balancing limit"}
     case 1n+p args:
-      balanced_sum(p, pair_args(args))
+      balanced_arguments(p, pair_args(args))
+
+def function_tree(tree: Parsed, kind: Core.FunctionKind) -> Parsed:
+  match tree:
+    case Accepted{arguments}:
+      Accepted{Core.FunctionCall{kind, arguments}}
+    case ParseError{e}:
+      ParseError{e}
+
+def build_function(+args: List<&2, Core.Expr>, kind: Core.FunctionKind, validation: Core.ArgumentValidation) -> Parsed:
+  function_tree(balanced_arguments(List.length(&2, Core.Expr, args), wrap_args(args, validation)), kind)
+
+def build_xor(args: List<&2, Core.Expr>) -> Parsed:
+  match args:
+    case Nil{}:
+      ParseError{"XOR expects at least one argument"}
+    case args:
+      build_function(args, Core.XorFunction{}, Core.LogicalArgument{})
 
 def build_if(args: List<&2, Core.Expr>) -> Parsed:
   match args:
@@ -60,8 +83,28 @@ def build_not(args: List<&2, Core.Expr>) -> Parsed:
     case args:
       ParseError{"NOT expects one argument"}
 
+def build_abs(args: List<&2, Core.Expr>) -> Parsed:
+  match args:
+    case a <> Nil{}:
+      build_function([a], Core.AbsFunction{}, Core.RawArgument{})
+    case args:
+      ParseError{"ABS expects one argument"}
+
+def legacy_call(+name: String, +args: List<&2, Core.Expr>) -> Parsed:
+  Bool.pick(Parsed, String.eq(String.to_upper(name), "SUM"), build_function(args, Core.SumFunction{}, Core.RawArgument{}), Bool.pick(Parsed, String.eq(String.to_upper(name), "IF"), build_if(args), Bool.pick(Parsed, String.eq(String.to_upper(name), "NOT"), build_not(args), ParseError{"Unknown function: " ++ name})))
+
+def choose_call(matches: Bool, yes: Unit -> Parsed, no: Unit -> Parsed) -> Parsed:
+  match matches:
+    case True{}:
+      yes(Unit{})
+    case False{}:
+      no(Unit{})
+
+def logical_call(+name: String, +args: List<&2, Core.Expr>) -> Parsed:
+  choose_call(String.eq(String.to_upper(name), "AND"), u => build_function(args, Core.AndFunction{}, Core.RawArgument{}), u => choose_call(String.eq(String.to_upper(name), "OR"), u => build_function(args, Core.OrFunction{}, Core.RawArgument{}), u => choose_call(String.eq(String.to_upper(name), "XOR"), u => build_xor(args), u => legacy_call(name, args))))
+
 def basic_call(+name: String, +args: List<&2, Core.Expr>) -> Parsed:
-  Bool.pick(Parsed, String.eq(String.to_upper(name), "SUM"), balanced_sum(List.length(&2, Core.Expr, args), args), Bool.pick(Parsed, String.eq(String.to_upper(name), "IF"), build_if(args), Bool.pick(Parsed, String.eq(String.to_upper(name), "NOT"), build_not(args), ParseError{"Unknown function: " ++ name})))
+  choose_call(String.eq(String.to_upper(name), "MUL"), u => build_function(args, Core.ProductFunction{}, Core.RawArgument{}), u => choose_call(String.eq(String.to_upper(name), "MIN"), u => build_function(args, Core.MinFunction{}, Core.RawArgument{}), u => choose_call(String.eq(String.to_upper(name), "MAX"), u => build_function(args, Core.MaxFunction{}, Core.RawArgument{}), u => choose_call(String.eq(String.to_upper(name), "AVG"), u => build_function(args, Core.AverageFunction{}, Core.RawArgument{}), u => choose_call(String.eq(String.to_upper(name), "ABS"), u => build_abs(args), u => logical_call(name, args))))))
 
 def build_round(args: List<&2, Core.Expr>, mode: Decimal.Rounding) -> Parsed:
   match args:
@@ -377,7 +420,7 @@ def preflight(missing: List<&2, String>, expr: Core.Expr, context: List<&2, Core
     case Nil{}:
       Core.evaluate_in(expr, context, sensitive)
     case names:
-      Core.Failure{"Unbound variable: " ++ String.join(names, ", ")}
+      Core.Failure{"Unbound variable: " ++ String.join(Dependencies.unique(names, Nil{}), ", ")}
 
 def evaluate_checked(+expr: Core.Expr, +context: List<&2, Core.Binding>, +sensitive: Bool) -> Core.Value:
   preflight(Dependencies.analyze(expr, context, sensitive, False{}), expr, context, sensitive)
@@ -407,10 +450,17 @@ type NamesResult is Data:
   FoundNames{names: List<&2, String>}
   NamesError{message: String}
 
-def names_result(parsed: Parsed, context: List<&2, Core.Binding>, sensitive: Bool, static: Bool) -> NamesResult:
+def names_mode(names: List<&2, String>, static: Bool) -> NamesResult:
+  match static:
+    case True{}:
+      FoundNames{Dependencies.unique(names, Nil{})}
+    case False{}:
+      FoundNames{names}
+
+def names_result(parsed: Parsed, context: List<&2, Core.Binding>, sensitive: Bool, +static: Bool) -> NamesResult:
   match parsed:
     case Accepted{expr}:
-      FoundNames{Dependencies.analyze(expr, context, sensitive, static)}
+      names_mode(Dependencies.analyze(expr, context, sensitive, static), static)
     case ParseError{e}:
       NamesError{e}
 

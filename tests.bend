@@ -82,7 +82,7 @@ def alternate_function() -> {Parser.evaluate("if(false, missing, 9)", Nil{}, Fal
 def not_function() -> {Parser.evaluate("NOT(false)", Nil{}, False{}) == Core.Logical{True{}} : Core.Value}:
   {==}
 
-def empty_sum() -> {Parser.parse("SUM()") == Parser.ParseError{"SUM expects at least one argument"} : Parser.Parsed}:
+def empty_sum() -> {Parser.snapshot("SUM()", Nil{}, False{}) == "error:Dentaku::ArgumentError" : String}:
   {==}
 
 def trailing_comma() -> {Parser.parse("SUM(1,)") == Parser.ParseError{"Expected an operand"} : Parser.Parsed}:
@@ -359,4 +359,22 @@ def prefix_not_comparison_binding() -> {Parser.evaluate("NOT 1 < 2", Nil{}, Fals
   {==}
 
 def operator_not_rejects_numeric_literal() -> {Parser.parse("NOT 0") == Parser.ParseError{"Invalid static operand type"} : Parser.Parsed}:
+  {==}
+
+def function_dependency_duplicates_retained() -> {Parser.dependencies("SUM(a, a)", Nil{}, False{}) == Parser.FoundNames{["a", "a"]} : Parser.NamesResult}:
+  {==}
+
+def function_identifiers_deduplicated() -> {Parser.identifiers("SUM(a, a)", False{}) == Parser.FoundNames{["a"]} : Parser.NamesResult}:
+  {==}
+
+def logical_function_eager_value_error() -> {Parser.snapshot("AND(false, 1 / 0 = 0)", Nil{}, False{}) == "error:Dentaku::ZeroDivisionError" : String}:
+  {==}
+
+def logical_function_type_validation_order() -> {Parser.evaluate("AND(false, 7)", Nil{}, False{}) == Core.Logical{False{}} : Core.Value}:
+  {==}
+
+def logical_xor_parity() -> {Parser.evaluate("XOR(true, true, true)", Nil{}, False{}) == Core.Logical{True{}} : Core.Value}:
+  {==}
+
+def sum_empty_branch_is_lazy() -> {Parser.evaluate("IF(true, 7, SUM())", Nil{}, False{}) == Core.Number{7n} : Core.Value}:
   {==}

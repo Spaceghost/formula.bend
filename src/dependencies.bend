@@ -36,16 +36,8 @@ def unique(names: List<&2, String>, +seen: List<&2, String>) -> List<&2, String>
     case +head <> rest:
       unique_pick(contains(seen, head), head, u => unique(rest, head <> seen))
 
-# analyze returns unique lists, so merging need not deduplicate the left side again.
-def append_new(names: List<&2, String>, +existing: List<&2, String>) -> List<&2, String>:
-  match names:
-    case Nil{}:
-      Nil{}
-    case +head <> rest:
-      unique_pick(contains(existing, head), head, u => append_new(rest, existing))
-
-def union(+a: List<&2, String>, b: List<&2, String>) -> List<&2, String>:
-  List.append(&2, String, a, append_new(b, a))
+def union(a: List<&2, String>, b: List<&2, String>) -> List<&2, String>:
+  unique(List.append(&2, String, a, b), Nil{})
 
 def variable(+name: String, context: List<&2, Core.Binding>, +sensitive: Bool, static: Bool) -> List<&2, String>:
   Bool.pick(List<&2, String>, Bool.or(static, Bool.not(present(context, name, sensitive))), [Core.normalize(sensitive, name)], Nil{})
@@ -76,9 +68,9 @@ def logical(a: List<&2, String>, b: List<&2, String>, left: Core.Expr, right: Co
     case Nil{} Nil{}:
       Nil{}
     case Nil{} +b:
-      Bool.pick(List<&2, String>, probe(Core.evaluate_in(left, context, sensitive), is_and), Nil{}, b)
+      Bool.pick(List<&2, String>, probe(Core.evaluate_in(left, context, sensitive), is_and), Nil{}, unique(b, Nil{}))
     case +a Nil{}:
-      Bool.pick(List<&2, String>, probe(Core.evaluate_in(right, context, sensitive), is_and), Nil{}, a)
+      Bool.pick(List<&2, String>, probe(Core.evaluate_in(right, context, sensitive), is_and), Nil{}, unique(a, Nil{}))
     case a b:
       union(a, b)
 
@@ -91,6 +83,15 @@ def logical_mode(static: Bool, +a: List<&2, String>, +b: List<&2, String>, left:
 
 def analyze(expr: Core.Expr, +context: List<&2, Core.Binding>, +sensitive: Bool, +static: Bool) -> List<&2, String>:
   match expr:
+    case Core.EmptyArguments{}:
+      Nil{}
+    case Core.Argument{a, validation}:
+      analyze(a, context, sensitive, static)
+    case Core.Arguments{a, b}:
+      x y = analyze(a, context, sensitive, static) analyze(b, context, sensitive, static)
+      List.append(&2, String, x, y)
+    case Core.FunctionCall{kind, arguments}:
+      analyze(arguments, context, sensitive, static)
     case Core.Literal{v}:
       Nil{}
     case Core.Variable{name}:
@@ -115,7 +116,7 @@ def analyze(expr: Core.Expr, +context: List<&2, Core.Binding>, +sensitive: Bool,
       union(x, y)
     case Core.Round{a, places, mode}:
       x y = analyze(a, context, sensitive, static) analyze(places, context, sensitive, static)
-      union(x, y)
+      List.append(&2, String, x, y)
     case Core.Negate{a}:
       analyze(a, context, sensitive, static)
     case Core.Not{a}:

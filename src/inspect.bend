@@ -66,9 +66,36 @@ def logical_unary(a: Info) -> Info:
     case Metadata{kind, +dynamic, valid}:
       Metadata{LogicalKind{}, dynamic, Bool.and(valid, logical_kind(kind, dynamic))}
 
+def function_kind(kind: Core.FunctionKind) -> ResultKind:
+  match kind:
+    case Core.SumFunction{}:
+      NumericKind{}
+    case Core.XorFunction{}:
+      UnknownKind{}
+    case Core.AndFunction{}:
+      LogicalKind{}
+    case Core.OrFunction{}:
+      LogicalKind{}
+    case kind:
+      NumericKind{}
+
+def function_info(kind: Core.FunctionKind, info: Info) -> Info:
+  match info:
+    case Metadata{old, dynamic, valid}:
+      Metadata{function_kind(kind), dynamic, valid}
+
 # This pass inspects syntax only; it never evaluates a guard or user function.
 def analyze(expr: Core.Expr) -> Info:
   match expr:
+    case Core.EmptyArguments{}:
+      Metadata{UnknownKind{}, False{}, True{}}
+    case Core.Argument{a, validation}:
+      unary(analyze(a), UnknownKind{}, False{})
+    case Core.Arguments{a, b}:
+      x y = analyze(a) analyze(b)
+      binary(x, y, UnknownKind{}, False{})
+    case Core.FunctionCall{kind, arguments}:
+      function_info(kind, analyze(arguments))
     case Core.Literal{v}:
       literal(v)
     case Core.Variable{name}:

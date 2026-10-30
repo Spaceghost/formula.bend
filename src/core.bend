@@ -11,6 +11,9 @@ type Value is Data:
   Logical{value: Bool}
   NullValue{}
   TextValue{value: String}
+  ArgumentValue{value: Value}
+  ArgumentPair{left: Value, right: Value}
+  EmptyArgumentValues{}
   Failure{message: String}
 
 type Comparison is Data:
@@ -20,6 +23,21 @@ type Comparison is Data:
   LessOrEqual{}
   GreaterThan{}
   GreaterOrEqual{}
+
+type FunctionKind is Data:
+  SumFunction{}
+  ProductFunction{}
+  MinFunction{}
+  MaxFunction{}
+  AverageFunction{}
+  AbsFunction{}
+  AndFunction{}
+  OrFunction{}
+  XorFunction{}
+
+type ArgumentValidation is Data:
+  RawArgument{}
+  LogicalArgument{}
 
 type Expr is Data:
   Literal{value: Value}
@@ -38,6 +56,10 @@ type Expr is Data:
   Or{left: Expr, right: Expr}
   Xor{left: Expr, right: Expr}
   PrefixNot{operand: Expr}
+  Argument{value: Expr, validation: ArgumentValidation}
+  Arguments{left: Expr, right: Expr}
+  EmptyArguments{}
+  FunctionCall{kind: FunctionKind, arguments: Expr}
 
 def compact_pick(value: Decimal.Decimal, small: Bool) -> Value:
   match value small:
@@ -510,8 +532,211 @@ def compare_values(a: Value, b: Value, op: Comparison) -> Value:
 def compare(a: Value, b: Value, op: Comparison) -> Value:
   compare_values(cast_numeric(a), cast_numeric(b), op)
 
+# Arguments are evaluated before the function implementation sees their values.
+# XOR validates each argument during collection, as in Dentaku's custom node.
+def validate_argument(validation: ArgumentValidation, value: Value) -> Value:
+  match validation:
+    case RawArgument{}:
+      value
+    case LogicalArgument{}:
+      strict_logical(value)
+
+def next_argument_error(error: Maybe<&2, Value>, next: Unit -> Maybe<&2, Value>) -> Maybe<&2, Value>:
+  match error:
+    case Some{value}:
+      Some{value}
+    case None{}:
+      next(Unit{})
+
+def first_argument_error(tree: Value) -> Maybe<&2, Value>:
+  match tree:
+    case ArgumentValue{Failure{e}}:
+      Some{Failure{e}}
+    case ArgumentValue{value}:
+      None{}
+    case ArgumentPair{a, b}:
+      next_argument_error(first_argument_error(a), u => first_argument_error(b))
+    case EmptyArgumentValues{}:
+      None{}
+    case tree:
+      Some{Failure{"Invalid argument tree"}}
+
+def logical_combine(left: Bool, right: Value, kind: FunctionKind) -> Value:
+  match right kind:
+    case Logical{b} AndFunction{}:
+      Logical{Bool.and(left, b)}
+    case Logical{b} OrFunction{}:
+      Logical{Bool.or(left, b)}
+    case Logical{b} XorFunction{}:
+      Logical{Bool.xor(left, b)}
+    case Failure{e} kind:
+      Failure{e}
+    case right kind:
+      Failure{"Incompatible logical operand"}
+
+def logical_fold_guard(accumulator: Value, kind: FunctionKind, next: Bool -> Value) -> Value:
+  match accumulator kind:
+    case Failure{e} kind:
+      Failure{e}
+    case Logical{False{}} AndFunction{}:
+      Logical{False{}}
+    case Logical{True{}} OrFunction{}:
+      Logical{True{}}
+    case Logical{b} kind:
+      next(b)
+    case accumulator kind:
+      Failure{"Invalid logical accumulator"}
+
+def logical_arguments(tree: Value, accumulator: Value, +kind: FunctionKind) -> Value:
+  match tree:
+    case ArgumentValue{value}:
+      logical_fold_guard(accumulator, kind, b => logical_combine(b, strict_logical(value), kind))
+    case ArgumentPair{a, b}:
+      logical_fold_guard(accumulator, kind, value => logical_arguments(b, logical_arguments(a, Logical{value}, kind), kind))
+    case EmptyArgumentValues{}:
+      accumulator
+    case tree:
+      Failure{"Invalid argument tree"}
+
+def argument_count(tree: Value) -> Nat:
+  match tree:
+    case ArgumentValue{value}:
+      1n
+    case ArgumentPair{a, b}:
+      Nat.add(argument_count(a), argument_count(b))
+    case tree:
+      0n
+
+def extreme_pick(order: Value, a: Value, b: Value) -> Value:
+  match order:
+    case Logical{True{}}:
+      a
+    case Logical{False{}}:
+      b
+    case Failure{e}:
+      Failure{e}
+    case order:
+      Failure{"Invalid numeric comparison"}
+
+def extreme_compare(is_min: Bool, +a: Value, +b: Value) -> Value:
+  match is_min:
+    case True{}:
+      extreme_pick(compare(a, b, LessOrEqual{}), a, b)
+    case False{}:
+      extreme_pick(compare(a, b, GreaterOrEqual{}), a, b)
+
+def extreme_value(accumulator: Value, candidate: Value, is_min: Bool) -> Value:
+  match accumulator candidate:
+    case Failure{e} candidate:
+      Failure{e}
+    case accumulator Failure{e}:
+      Failure{e}
+    case NullValue{} candidate:
+      candidate
+    case accumulator candidate:
+      extreme_compare(is_min, accumulator, candidate)
+
+def abs_value(value: Value) -> Value:
+  match value:
+    case NegativeNumber{n}:
+      compact(n)
+    case value:
+      require_numeric(value)
+
+def abs_argument(tree: Value) -> Value:
+  match tree:
+    case ArgumentValue{value}:
+      abs_value(cast_numeric(value))
+    case tree:
+      Failure{"ABS expects one argument"}
+
+def sum_tree(tree: Value) -> Value:
+  match tree:
+    case ArgumentValue{value}:
+      require_numeric(value)
+    case ArgumentPair{a, b}:
+      x y = sum_tree(a) sum_tree(b)
+      add(x, y)
+    case EmptyArgumentValues{}:
+      Number{0n}
+    case tree:
+      Failure{"Invalid argument tree"}
+
+def product_tree(tree: Value) -> Value:
+  match tree:
+    case ArgumentValue{value}:
+      require_numeric(value)
+    case ArgumentPair{a, b}:
+      x y = product_tree(a) product_tree(b)
+      multiply(x, y)
+    case EmptyArgumentValues{}:
+      Number{1n}
+    case tree:
+      Failure{"Invalid argument tree"}
+
+def extreme_tree(tree: Value, +is_min: Bool) -> Value:
+  match tree:
+    case ArgumentValue{value}:
+      require_numeric(value)
+    case ArgumentPair{a, b}:
+      x y = extreme_tree(a, is_min) extreme_tree(b, is_min)
+      extreme_value(x, y, is_min)
+    case EmptyArgumentValues{}:
+      NullValue{}
+    case tree:
+      Failure{"Invalid argument tree"}
+
+def function_arguments(kind: FunctionKind, tree: Value) -> Value:
+  match kind:
+    case ProductFunction{}:
+      product_tree(tree)
+    case MinFunction{}:
+      extreme_tree(tree, True{})
+    case MaxFunction{}:
+      extreme_tree(tree, False{})
+    case AverageFunction{}:
+      +arguments = tree
+      divide(sum_tree(arguments), Number{argument_count(arguments)})
+    case AbsFunction{}:
+      abs_argument(tree)
+    case SumFunction{}:
+      sum_tree(tree)
+    case AndFunction{}:
+      logical_arguments(tree, Logical{True{}}, AndFunction{})
+    case OrFunction{}:
+      logical_arguments(tree, Logical{False{}}, OrFunction{})
+    case XorFunction{}:
+      logical_arguments(tree, Logical{False{}}, XorFunction{})
+
+def checked_arguments(error: Maybe<&2, Value>, kind: FunctionKind, tree: Value) -> Value:
+  match error:
+    case Some{value}:
+      value
+    case None{}:
+      function_arguments(kind, tree)
+
+def call(kind: FunctionKind, tree: Value) -> Value:
+  match kind tree:
+    case MinFunction{} EmptyArgumentValues{}:
+      NullValue{}
+    case MaxFunction{} EmptyArgumentValues{}:
+      NullValue{}
+    case kind EmptyArgumentValues{}:
+      Failure{"Function expects at least one argument"}
+    case kind +tree:
+      checked_arguments(first_argument_error(tree), kind, tree)
+
 def evaluate_in(e: Expr, +context: List<&2, Binding>, +sensitive: Bool) -> Value:
   match e:
+    case EmptyArguments{}:
+      EmptyArgumentValues{}
+    case Argument{a, validation}:
+      ArgumentValue{validate_argument(validation, evaluate_in(a, context, sensitive))}
+    case Arguments{a, b}:
+      x y = evaluate_in(a, context, sensitive) evaluate_in(b, context, sensitive)
+      ArgumentPair{x, y}
+    case FunctionCall{kind, arguments}:
+      call(kind, evaluate_in(arguments, context, sensitive))
     case Literal{v}:
       v
     case Variable{name}:
@@ -557,6 +782,12 @@ def evaluate(e: Expr) -> Value:
 
 def show(value: Value) -> String:
   match value:
+    case ArgumentValue{value}:
+      "Internal argument value"
+    case ArgumentPair{a, b}:
+      "Internal argument pair"
+    case EmptyArgumentValues{}:
+      "Internal empty arguments"
     case NullValue{}:
       "null"
     case TextValue{s}:
@@ -578,6 +809,12 @@ def failure_snapshot(+message: String) -> String:
 
 def snapshot(value: Value) -> String:
   match value:
+    case ArgumentValue{value}:
+      "internal:argument"
+    case ArgumentPair{a, b}:
+      "internal:arguments"
+    case EmptyArgumentValues{}:
+      "internal:empty-arguments"
     case Number{n}:
       "number:" ++ Nat.show(n)
     case DecimalNumber{n}:

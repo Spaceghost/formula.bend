@@ -3,6 +3,7 @@ import ./src/core.bend as Core
 import ./src/decimal.bend as Decimal
 import ./src/division.bend as Division
 import ./src/address.bend as Address
+import ./src/dependencies.bend as Dependencies
 
 import ./src/reference.bend as Ref
 # Initial project contracts. Changes must retain or strengthen their guarantees.
@@ -87,3 +88,13 @@ law and_false_short_circuit:
 law or_true_short_circuit:
   for right: Core.Expr
   {Core.evaluate(Core.Or{Core.Literal{Core.Logical{True{}}}, right}) == Core.Logical{True{}} : Core.Value}
+
+law argument_error_left:
+  for +message: String
+  for right: Core.Value
+  {Core.first_argument_error(Core.ArgumentPair{Core.ArgumentValue{Core.Failure{message}}, right}) == Some{Core.Failure{message}} : Maybe<&2, Core.Value>}
+
+law sum_dependency_duplicates:
+  for +name: String
+  for +sensitive: Bool
+  {Dependencies.analyze(Core.FunctionCall{Core.SumFunction{}, Core.Arguments{Core.Argument{Core.Variable{name}, Core.RawArgument{}}, Core.Argument{Core.Variable{name}, Core.RawArgument{}}}}, Nil{}, sensitive, False{}) == [Core.normalize(sensitive, name), Core.normalize(sensitive, name)] : List<&2, String>}

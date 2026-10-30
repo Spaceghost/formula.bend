@@ -9,9 +9,12 @@ Early development. This is not yet a replacement for Dentaku, Excel, or Sheets.
 ## Current implementation
 
 Formula strings support signed integer and decimal literals, ASCII identifiers,
-Boolean literals, addition, subtraction, multiplication, division, whitespace, parentheses, and nested
-`SUM`, `IF`, `NOT`, `ROUND`, `ROUNDUP`, and `ROUNDDOWN` calls. Multiplication has higher precedence than addition.
-`SUM` builds a balanced addition tree; `IF` evaluates only the selected branch.
+Boolean literals, addition, subtraction, multiplication, division, whitespace,
+parentheses, and nested calls. Numeric functions include `SUM`, `MUL`, `MIN`,
+`MAX`, `AVG`, and `ABS`; logical functions include `IF`, `NOT`, `AND`, `OR`, and
+`XOR`; rounding functions are `ROUND`, `ROUNDUP`, and `ROUNDDOWN`.
+Function arguments and numeric reductions use balanced trees. `IF` evaluates
+only the selected branch; logical function calls retain eager argument rules.
 Functions are case-insensitive. Malformed expressions return explicit errors.
 
 Bindings support case-insensitive matching by default, an explicit case-sensitive
@@ -26,7 +29,7 @@ digit lists. Coefficients can grow beyond a machine word. Decimal scale uses Nat
 Formatting preserves fractional zeros: `1.25 * .4` displays `0.500`.
 This formatting is not a claim of Ruby BigDecimal display compatibility.
 
-Fifteen universal laws and one hundred eighteen concrete regression fixtures cover these
+Seventeen universal laws and one hundred twenty-four concrete regression fixtures cover these
 parts. They do not establish full Ruby or spreadsheet compatibility.
 
 ## Example
@@ -59,7 +62,7 @@ have passed on JavaScript and native CPU. CUDA and Metal remain unverified.
 
 ## Compatibility limits
 
-Exponent notation, logical function calls,
+Exponent notation, COUNT,
 arrays, most built-ins, spreadsheet formula lookup, stored-formula dependency
 analysis, and the complete Dentaku Calculator API remain unimplemented.
 `IF` and `NOT` follow Ruby truthiness: only false and null are falsey.
@@ -100,7 +103,7 @@ The eight address runtime cases pass on both JavaScript and native CPU.
 
 Parity is measured against the pinned Ruby source and its complete 713-example
 suite. The Ruby reference passes all examples; that is not a claim that Bend does.
-A separate 68-case scalar and dependency corpus currently matches Ruby on selected values and
+A separate 114-case scalar and dependency corpus currently matches Ruby on selected values and
 parse-error classification. `make parity-check` generates the fixtures using Lua.
 Use `LUA=/path/to/lua` if Lua is not on PATH.
 
@@ -113,7 +116,8 @@ gate. No performance comparison is claimed yet.
 
 Infix AND, OR, XOR, prefix NOT, and `!` follow the pinned Dentaku precedence and
 static logical-operand rules. AND/OR short-circuit and allow a decisive right
-operand to resolve an unbound left operand. Logical function calls remain pending.
+operand to resolve an unbound left operand. Function AND/OR/XOR have their own
+argument collection and type-validation rules.
 Parser.identifiers reports unique syntactic inputs; Parser.dependencies prunes
 resolvable IF/AND/OR branches. Public formula evaluation checks dependencies
 before evaluating, while Core.evaluate_in remains direct AST evaluation. Stored

@@ -46,11 +46,11 @@ The unchanged upstream suite passes 713 examples with zero failures and 96.82%
 line coverage in the Ruby reference environment. `reference-summary.json` and
 `upstream-spec-catalog.json` record that run. These results describe Ruby only.
 
-The Lua-driven scalar and dependency corpus has 68 cases matched against Ruby values or parse
+The Lua-driven scalar and dependency corpus has 114 cases matched against Ruby values or parse
 error classification. It covers truthiness, strings/null, comparisons, selected
 numeric-string coercions, and static operand rejection. It is a small subset of
 the upstream catalog. Native error classes/messages, all calculator methods,
-arrays, other built-ins, remaining logical function calls, custom functions, dependencies, and
+arrays, other built-ins, custom functions, complete dependency graphs, and
 visitors still require parity work. Hex/exponent numeric-string coercion remains
 unfinished. No spec family is marked complete merely because this subset passes.
 
@@ -86,8 +86,8 @@ lua tools/run-oracle.lua PROJECT UPSTREAM GEMS STORAGE RUNROOT OUTPUT
 The probe catches Dentaku errors and records their class; unexpected Ruby failures
 abort without replacing the output. Compare the result before updating committed
 goldens. Parser snapshots currently preserve parse-error classification, while
-full runtime error-class/message parity remains unfinished. The 68-case scalar and dependency
-corpus passes on JavaScript and native CPU. This is correctness verification,
+full runtime error-class/message parity remains unfinished. The 114-case scalar and dependency
+corpus passes on JavaScript; native verification is pending. This is correctness verification,
 not the requested performance shootout.
 
 The upstream catalog and scenario inventory derive from MIT-licensed Dentaku;
@@ -111,8 +111,22 @@ nodes, volatile functions, custom function side effects, cycles, and bulk graph
 solving remain incomplete. Logical function calls have eager argument collection
 in Ruby and must not be implemented as aliases for the lazy infix operators.
 
-The current SUM implementation still lowers calls to a numeric reduction tree.
-That preserves covered values but does not preserve every function-node visitor
-or dependency detail: upstream function dependencies can retain repeated names.
-Function argument nodes and those duplicate-dependency cases remain a known
-parity gap; passing the current corpus does not mark that rule complete.
+Function calls now retain explicit argument nodes. Function dependencies can
+retain repeated names, identifiers deduplicate them, and enclosing binary
+operators deduplicate their combined dependencies. These cases are in the
+differential corpus. Full visitor APIs and array arguments remain unfinished.
+
+## Function argument collection
+
+SUM, MUL, MIN, MAX, AVG, ABS, AND, OR, and XOR retain call nodes. Their arguments
+are collected in balanced trees, with original ordering retained for errors and
+dependencies. Numeric reductions also use balanced trees. The standard functions
+collect argument values before validation; XOR validates logical arguments during
+collection, matching the custom upstream node. AND/OR can skip a later value's
+type check after a decisive value, but cannot skip an error from evaluating an
+argument. Function dependencies do not prune such arguments.
+
+The corpus includes empty-call behavior: MIN/MAX return null, SUM/MUL/AVG/AND/OR
+raise runtime argument errors, and empty XOR is a parse error. XOR's static result
+type follows the pinned custom-node implementation rather than being inferred
+from its returned Boolean value. Arrays and flattening remain unimplemented.

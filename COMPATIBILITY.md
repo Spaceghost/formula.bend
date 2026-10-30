@@ -59,12 +59,13 @@ base-10 coefficients. Parsed integers with more than three digits remain in this
 representation; arithmetic avoids machine-word coefficient overflow. This also
 avoids large unary Nat reductions in proof checking. The regression suite covers
 24-digit carry and products above the native Nat limit, but is not a complete
-numeric compatibility corpus. Division, exponent parsing,
-rounding policies, and coercions remain required work.
+numeric compatibility corpus. Exponent and hexadecimal parsing, modulo,
+percentages, powers, complete rounding profiles, and coercions remain required.
 
-Current functions: SUM (one or more numeric scalar arguments), IF (three arguments,
-Ruby truthiness, lazy branches), and NOT (one Boolean argument). Arrays, complete numeric
-string coercion and remaining built-ins are still pending.
+Current scalar functions: SUM, MUL, MIN, MAX, AVG, ABS, IF, NOT, AND, OR, XOR,
+ROUND, ROUNDUP, and ROUNDDOWN. IF uses Ruby truthiness and lazy branches; NOT
+uses Ruby truthiness. Arrays, complete numeric-string coercion, COUNT, and the
+remaining built-ins are still pending.
 
 Unary minus binds more tightly than multiplication; binary subtraction shares
 addition precedence and is left-associative. Positive and negative operands use
@@ -125,3 +126,12 @@ Resolved dependency queries handle bindings and IF/AND/OR guard pruning. Formula
 evaluation now performs the Calculator-style missing-dependency preflight before
 Core AST evaluation. Current bindings hold values, not stored formula nodes;
 custom/volatile functions, cycles, and bulk solving remain required work.
+
+## Function argument nodes
+
+Function calls retain explicit argument nodes. SUM, MUL, MIN, MAX, AVG, ABS, AND,
+OR, and XOR support covered scalar cases, including numeric-string coercion,
+empty calls, and eager errors. Arrays and flattening remain pending. Function
+argument dependencies retain repeated names; identifiers deduplicate at their
+public boundary. Enclosing operations deduplicate dependencies as upstream does.
+ROUND preserves repeated dependencies in its two arguments as well.
