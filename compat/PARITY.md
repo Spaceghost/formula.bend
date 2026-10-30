@@ -130,3 +130,9 @@ The corpus includes empty-call behavior: MIN/MAX return null, SUM/MUL/AVG/AND/OR
 raise runtime argument errors, and empty XOR is a parse error. XOR's static result
 type follows the pinned custom-node implementation rather than being inferred
 from its returned Boolean value. Arrays and flattening remain unimplemented.
+
+The 114-case corpus passes on JavaScript and native CPU with Bend 2.0.16 and
+2.0.39. Native checks run from frozen Git worktrees, with source commit and
+artifact checksums recorded in backend-verification.json. The parser uses the
+internal constructor ParseReady to avoid a collision with the newer Base library.
+CUDA and Metal are still unverified; this is not a performance shootout.

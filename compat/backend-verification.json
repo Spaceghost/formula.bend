@@ -22,5 +22,24 @@
       "target": "Metal",
       "status": "not yet verified"
     }
+  ],
+  "additional_toolchains": [
+    {
+      "source_commit": "418c114984dd14e1b6101ffdb2b2e5b4bcd229fa",
+      "bend_version": "2.0.39",
+      "differential_cases": 114,
+      "checks": [
+        {
+          "target": "JavaScript",
+          "status": "passed"
+        },
+        {
+          "target": "native CPU",
+          "status": "passed",
+          "optimization": "-O3",
+          "artifact_sha256": "152c06084d60bad76942be7d2ac59b6c9b4927ca7e262bc4fd0ac3c37f4a52a4"
+        }
+      ]
+    }
   ]
 }

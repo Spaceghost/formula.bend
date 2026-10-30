@@ -46,7 +46,7 @@ def main() -> String:
 
 ## Verify
 
-With Bend 2.0.16 (the version currently tested):
+Tested with Bend 2.0.16 and 2.0.39:
 
 ```sh
 bend guide
