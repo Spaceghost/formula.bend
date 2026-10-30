@@ -8,6 +8,7 @@ type Token is Data:
   Plus{}
   Minus{}
   Times{}
+  Slash{}
   LParen{}
   RParen{}
   Comma{}
@@ -54,6 +55,8 @@ def symbol(c: Char) -> Token:
       Minus{}
     case Chr{43}:
       Plus{}
+    case Chr{47}:
+      Slash{}
     case Chr{42}:
       Times{}
     case Chr{40}:

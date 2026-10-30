@@ -1,5 +1,6 @@
 import Base
 import ./src/core.bend as Core
+import ./src/decimal.bend as Decimal
 import ./LAWS.bend as Laws
 
 def Laws.true_branch(yes, no):
@@ -28,3 +29,8 @@ def Laws.subtraction_left_error(message, right):
 
 def Laws.rounding_failure(message, places, mode):
   {==}
+
+def Laws.division_by_zero(numerator, places):
+  match numerator:
+    case Decimal.Exact{digits, s}:
+      {==}

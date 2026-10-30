@@ -228,3 +228,15 @@ def integer_digits(scale: Nat, digits: List<&2, U32>) -> List<&2, U32>:
 
 def normalize_digits(digits: List<&2, U32>) -> List<&2, U32>:
   List.reverse(&2, U32, trim_high_reversed(List.reverse(&2, U32, digits)))
+
+def trim_fraction(digits: List<&2, U32>, s: Nat) -> Decimal:
+  match digits s:
+    case 0 <> rest 1n+p:
+      trim_fraction(rest, p)
+    case digits s:
+      Exact{digits, s}
+
+def canonical(value: Decimal) -> Decimal:
+  match value:
+    case Exact{digits, s}:
+      trim_fraction(normalize_digits(digits), s)

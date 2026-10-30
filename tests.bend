@@ -4,6 +4,7 @@ import ./src/reference.bend as Ref
 
 import ./src/parser.bend as Parser
 import ./src/decimal.bend as Decimal
+import ./src/division.bend as Division
 # Concrete regression fixtures complement the universal laws.
 def arithmetic() -> {Core.evaluate(Core.Multiply{Core.Add{Core.Literal{Core.Number{5n}}, Core.Literal{Core.Number{2n}}}, Core.Literal{Core.Number{6n}}}) == Core.Number{42n} : Core.Value}:
   {==}
@@ -47,7 +48,7 @@ def trailing_operator() -> {Parser.parse("1 +") == Parser.ParseError{"Expected a
 def empty_group() -> {Parser.parse("()") == Parser.ParseError{"Expected an operand"} : Parser.Parsed}:
   {==}
 
-def unsupported_character() -> {Parser.parse("1 / 2") == Parser.ParseError{"Expected an operator"} : Parser.Parsed}:
+def unsupported_character() -> {Parser.parse("1 @ 2") == Parser.ParseError{"Expected an operator"} : Parser.Parsed}:
   {==}
 
 def unmatched_group() -> {Parser.parse("(1 + 2") == Parser.ParseError{"Unmatched parenthesis or missing operand"} : Parser.Parsed}:
@@ -201,4 +202,37 @@ def round_arity() -> {Parser.parse("ROUND(1,2,3)") == Parser.ParseError{"Roundin
   {==}
 
 def round_zero_precision_padding() -> {Core.show(Parser.evaluate("ROUND(1.5, 000000000000000)", Nil{}, False{})) == "2" : String}:
+  {==}
+
+def exact_division() -> {Division.show(Division.divide(Decimal.Exact{[1], 0n}, Decimal.Exact{[8], 0n}, 3n)) == "0.125" : String}:
+  {==}
+
+def repeating_division() -> {Division.show(Division.divide(Decimal.Exact{[1], 0n}, Decimal.Exact{[3], 0n}, 4n)) == "0.3333" : String}:
+  {==}
+
+def division_remainder() -> {Division.divide(Decimal.Exact{[5], 0n}, Decimal.Exact{[6], 0n}, 4n) == Division.Quotient{Decimal.Exact{[3,3,3,8], 4n}, [2], [6]} : Division.DivisionResult}:
+  {==}
+
+def scaled_division() -> {Division.show(Division.divide(Decimal.Exact{[5,2,1], 2n}, Decimal.Exact{[5], 1n}, 1n)) == "2.5" : String}:
+  {==}
+
+def division_zero() -> {Division.divide(Decimal.Exact{[1], 0n}, Decimal.Exact{[0,0], 1n}, 4n) == Division.DivisionByZero{} : Division.DivisionResult}:
+  {==}
+
+def default_repeating_division() -> {Core.show(Parser.evaluate("1 / 3", Nil{}, False{})) == "0.333333333333333333333333333333333333" : String}:
+  {==}
+
+def rounded_repeating_division() -> {Core.show(Parser.evaluate("2 / 3", Nil{}, False{})) == "0.666666666666666666666666666666666667" : String}:
+  {==}
+
+def division_precedence() -> {Core.show(Parser.evaluate("12 / 2 * 3", Nil{}, False{})) == "18" : String}:
+  {==}
+
+def signed_division() -> {Core.show(Parser.evaluate("-1 / 8", Nil{}, False{})) == "-0.125" : String}:
+  {==}
+
+def division_zero_formula() -> {Parser.evaluate("1 / 0", Nil{}, False{}) == Core.Failure{"Division by zero"} : Core.Value}:
+  {==}
+
+def lazy_zero_division() -> {Core.show(Parser.evaluate("IF(true, 7, 1 / 0)", Nil{}, False{})) == "7" : String}:
   {==}

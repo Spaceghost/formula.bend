@@ -1,5 +1,6 @@
 import Base
 import ./decimal.bend as Decimal
+import ./division.bend as Division
 
 # Small integers use Nat; larger integers and decimals use exact digit lists.
 type Value is Data:
@@ -14,6 +15,7 @@ type Expr is Data:
   Variable{name: String}
   Add{left: Expr, right: Expr}
   Multiply{left: Expr, right: Expr}
+  Divide{left: Expr, right: Expr}
   If{condition: Expr, yes: Expr, no: Expr}
   Not{operand: Expr}
   Negate{operand: Expr}
@@ -230,6 +232,63 @@ def round(value: Value, places: Value, mode: Decimal.Rounding) -> Value:
     case value places:
       Failure{"Expected numeric rounding precision"}
 
+
+type NumericOperand is Data:
+  Magnitude{negative: Bool, value: Decimal.Decimal}
+  InvalidNumeric{message: String}
+
+def numeric_operand(value: Value) -> NumericOperand:
+  match value:
+    case Number{n}:
+      Magnitude{False{}, Decimal.from_nat(n)}
+    case DecimalNumber{n}:
+      Magnitude{False{}, n}
+    case NegativeNumber{n}:
+      Magnitude{True{}, n}
+    case Failure{e}:
+      InvalidNumeric{e}
+    case value:
+      InvalidNumeric{"Expected numbers"}
+
+def signed_result(neg: Bool, value: Decimal.Decimal) -> Value:
+  match neg:
+    case True{}:
+      negative(value)
+    case False{}:
+      compact(value)
+
+def division_result(result: Division.DivisionResult, +neg: Bool, mode: Decimal.Rounding) -> Value:
+  match result:
+    case Division.DivisionByZero{}:
+      Failure{"Division by zero"}
+    case Division.Quotient{value, remainder, divisor}:
+      signed_result(neg, Decimal.canonical(Division.round_coefficient(value, Division.needs_increment(mode, neg, remainder, divisor))))
+
+def divide_operands(a: NumericOperand, b: NumericOperand, places: Nat, mode: Decimal.Rounding) -> Value:
+  match a b:
+    case Magnitude{sx, x} Magnitude{sy, y}:
+      division_result(Division.divide(x, y, places), Bool.xor(sx, sy), mode)
+    case InvalidNumeric{e} b:
+      Failure{e}
+    case a InvalidNumeric{e}:
+      Failure{e}
+
+# Explicit decimal places and rounding; callers select their compatibility policy.
+def divide_at(a: Value, b: Value, places: Nat, mode: Decimal.Rounding) -> Value:
+  divide_operands(numeric_operand(a), numeric_operand(b), places, mode)
+
+def divide_default_operands(a: NumericOperand, b: NumericOperand) -> Value:
+  match a b:
+    case Magnitude{sx, +x} Magnitude{sy, +y}:
+      division_result(Division.divide(x, y, Division.ruby_places(x, y)), Bool.xor(sx, sy), Decimal.HalfAway{})
+    case InvalidNumeric{e} b:
+      Failure{e}
+    case a InvalidNumeric{e}:
+      Failure{e}
+
+def divide(a: Value, b: Value) -> Value:
+  divide_default_operands(numeric_operand(a), numeric_operand(b))
+
 def evaluate_in(e: Expr, +context: List<&2, Binding>, +sensitive: Bool) -> Value:
   match e:
     case Literal{v}:
@@ -239,6 +298,9 @@ def evaluate_in(e: Expr, +context: List<&2, Binding>, +sensitive: Bool) -> Value
     case Add{a, b}:
       x y = evaluate_in(a, context, sensitive) evaluate_in(b, context, sensitive)
       add(x, y)
+    case Divide{a, b}:
+      x y = evaluate_in(a, context, sensitive) evaluate_in(b, context, sensitive)
+      divide(x, y)
     case Multiply{a, b}:
       x y = evaluate_in(a, context, sensitive) evaluate_in(b, context, sensitive)
       multiply(x, y)

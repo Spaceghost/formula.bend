@@ -9,7 +9,7 @@ Early development. This is not yet a replacement for Dentaku, Excel, or Sheets.
 ## Current implementation
 
 Formula strings support signed integer and decimal literals, ASCII identifiers,
-Boolean literals, addition, subtraction, multiplication, whitespace, parentheses, and nested
+Boolean literals, addition, subtraction, multiplication, division, whitespace, parentheses, and nested
 `SUM`, `IF`, `NOT`, `ROUND`, `ROUNDUP`, and `ROUNDDOWN` calls. Multiplication has higher precedence than addition.
 `SUM` builds a balanced addition tree; `IF` evaluates only the selected branch.
 Functions are case-insensitive. Malformed expressions return explicit errors.
@@ -24,7 +24,7 @@ digit lists. Coefficients can grow beyond a machine word. Decimal scale uses Nat
 Formatting preserves fractional zeros: `1.25 * .4` displays `0.500`.
 This formatting is not a claim of Ruby BigDecimal display compatibility.
 
-Nine universal laws and sixty-six concrete regression fixtures cover these
+Ten universal laws and seventy-seven concrete regression fixtures cover these
 parts. They do not establish full Ruby or spreadsheet compatibility.
 
 ## Example
@@ -57,7 +57,7 @@ have passed on JavaScript and native CPU. CUDA and Metal remain unverified.
 
 ## Compatibility limits
 
-Division, exponent notation, comparisons,
+Exponent notation, comparisons,
 strings, arrays, most built-ins, spreadsheet reference parsing, dependency
 analysis, and the complete Dentaku Calculator API remain unimplemented.
 `IF` and `NOT` accept Boolean conditions, not the full Ruby truthiness model.
@@ -81,3 +81,11 @@ supported. These last two functions differ from Excel for negative inputs;
 Excel and Sheets profiles are still pending. See the rounding profile in
 COMPATIBILITY.md for precision limits. The eight rounding runtime cases pass on
 JavaScript and native CPU.
+
+Division uses an operand-dependent precision profile matching the recorded Ruby
+3.3.13 / BigDecimal 3.1.5 reference. Seven differential cases cover terminating
+and repeating quotients, large integers, and tiny decimals. `Core.divide_at`
+also accepts explicit fractional places and rounding. Division by zero returns
+an explicit error. Other BigDecimal versions and global rounding modes are not
+yet compatibility profiles. See [the reference corpus](compat/README.md).
+The seven division reference cases pass on both JavaScript and native CPU.

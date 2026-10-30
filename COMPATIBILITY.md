@@ -81,3 +81,16 @@ baseline. Fractional precision arguments truncate toward zero, matching to_i.
 Negative precision rounds to tens, hundreds, etc. Precision must fit the current
 index range (at most 14 significant integer digits); larger precision arguments
 produce an explicit error. This is an implementation limit, not full Ruby parity.
+
+## Division profile
+
+The `/` operator has multiplication precedence and left associativity. Its current
+default precision follows Ruby 3.3.13 / BigDecimal 3.1.5's operand-dependent
+allocation and base-10^9 alignment, with half-away-from-zero rounding. Seven
+reference cases match all digits after integral `.0` display normalization;
+this does not establish full BigDecimal parity. The recorded source and results
+are in compat/. Core.divide_at offers explicit fractional places and rounding.
+
+Long division retains the exact remainder before rounding. Zero divisors produce
+an explicit error. Numeric-string coercion, nonfinite values, global BigDecimal
+modes, Ruby version profiles, and exact exception-class parity remain unfinished.
