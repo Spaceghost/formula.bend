@@ -49,8 +49,8 @@ short-circuit branches lazy and deterministic errors stable. Test JS, native CPU
 CUDA, and Metal separately. Record benchmark inputs, sizes, backend, hardware,
 thread count, and timings before making performance claims.
 
-The formula.bend repository is public. Remaining delivery: the public nelua-bend repository, Nelua backend,
-Imba interface, and clean project sites under spacegho.st on Cloudflare.
+Remaining delivery for formula.bend includes full Dentaku parity, the target
+shootout, an Imba interface, and a project site under spacegho.st on Cloudflare.
 
 ## Numeric implementation status
 

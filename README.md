@@ -75,9 +75,7 @@ arithmetic calls to Bend's native scheduler; useful parallel batch execution
 remains to be developed and benchmarked.
 
 See [COMPATIBILITY.md](COMPATIBILITY.md) for the complete baseline and remaining
-work. The compiler project will live separately as `nelua-bend`. Bend is the
-initial engine; the planned authoring languages are Nelua/Lua, with Imba for web
-interfaces.
+work. The engine uses Bend 2 and development tooling uses Lua.
 
 Rounding currently follows Ruby Dentaku: `ROUND` uses half-away-from-zero,
 `ROUNDUP` is ceiling, and `ROUNDDOWN` is floor. Negative decimal places are

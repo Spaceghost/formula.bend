@@ -8,5 +8,10 @@ to pass a gate. Run `bend PROOF.bend` before every commit. Parallelize independe
 balanced computation; preserve lazy branches. State compatibility limits plainly.
 
 The project is formula.bend, a reimplementation of Ruby Dentaku with additional
-Excel/Google Sheets dialects. Preserve that identity and full scope. Bend is the
-initial engine; compiler/tooling work uses Lua/Nelua and web source uses Imba only.
+Excel/Google Sheets dialects. Preserve that identity and full scope. The engine
+uses Bend 2; development tooling uses Lua and web source uses Imba only. Keep
+separate compiler projects out of the product documentation.
+
+Do not introduce Python tooling. When replacing Python, prefer Nelua unless
+another option expresses the task better. Lua is appropriate for the existing
+fixture generation and reference-process orchestration.
