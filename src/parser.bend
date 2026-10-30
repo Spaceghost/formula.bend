@@ -24,7 +24,7 @@ type Operator is Data:
   CallFrame{name: String, arguments: List<&2, Core.Expr>, outer: List<&2, Core.Expr>}
 
 type Stack is Data:
-  Ready{operators: List<&2, Operator>, values: List<&2, Core.Expr>}
+  ParseReady{operators: List<&2, Operator>, values: List<&2, Core.Expr>}
   Rejected{message: String}
 
 def wrap_args(args: List<&2, Core.Expr>, +validation: Core.ArgumentValidation) -> List<&2, Core.Expr>:
@@ -149,31 +149,31 @@ def reducible(op: Operator) -> Bool:
 def reduce_one(op: Operator, tail: List<&2, Operator>, values: List<&2, Core.Expr>) -> Stack:
   match op values:
     case NegateOp{} a <> rest:
-      Ready{tail, Core.Negate{a} <> rest}
+      ParseReady{tail, Core.Negate{a} <> rest}
     case PrefixNotOp{} a <> rest:
-      Ready{tail, Core.PrefixNot{a} <> rest}
+      ParseReady{tail, Core.PrefixNot{a} <> rest}
     case MultiplyOp{} right <> left <> rest:
-      Ready{tail, Core.Multiply{left, right} <> rest}
+      ParseReady{tail, Core.Multiply{left, right} <> rest}
     case DivideOp{} right <> left <> rest:
-      Ready{tail, Core.Divide{left, right} <> rest}
+      ParseReady{tail, Core.Divide{left, right} <> rest}
     case AddOp{} right <> left <> rest:
-      Ready{tail, Core.Add{left, right} <> rest}
+      ParseReady{tail, Core.Add{left, right} <> rest}
     case SubtractOp{} right <> left <> rest:
-      Ready{tail, Core.Subtract{left, right} <> rest}
+      ParseReady{tail, Core.Subtract{left, right} <> rest}
     case CompareOp{kind} right <> left <> rest:
-      Ready{tail, Core.Compare{kind, left, right} <> rest}
+      ParseReady{tail, Core.Compare{kind, left, right} <> rest}
     case AndOp{} right <> left <> rest:
-      Ready{tail, Core.And{left, right} <> rest}
+      ParseReady{tail, Core.And{left, right} <> rest}
     case OrOp{} right <> left <> rest:
-      Ready{tail, Core.Or{left, right} <> rest}
+      ParseReady{tail, Core.Or{left, right} <> rest}
     case XorOp{} right <> left <> rest:
-      Ready{tail, Core.Xor{left, right} <> rest}
+      ParseReady{tail, Core.Xor{left, right} <> rest}
     case op values:
       Rejected{"Missing operand"}
 
 def reduced_values(result: Stack, next: List<&2, Core.Expr> -> Stack) -> Stack:
   match result:
-    case Ready{ops, values}:
+    case ParseReady{ops, values}:
       next(values)
     case Rejected{e}:
       Rejected{e}
@@ -188,9 +188,9 @@ def reduce_decision(proceed: Bool, done: Unit -> Stack, next: Unit -> Stack) -> 
 def reduce_to(ops: List<&2, Operator>, +values: List<&2, Core.Expr>, +minimum: Nat) -> Stack:
   match ops:
     case Nil{}:
-      Ready{Nil{}, values}
+      ParseReady{Nil{}, values}
     case +head <> +tail:
-      reduce_decision(Bool.and(reducible(head), Nat.is_ge(precedence(head), minimum)), u => Ready{head <> tail, values}, u => reduced_values(reduce_one(head, tail, values), v => reduce_to(tail, v, minimum)))
+      reduce_decision(Bool.and(reducible(head), Nat.is_ge(precedence(head), minimum)), u => ParseReady{head <> tail, values}, u => reduced_values(reduce_one(head, tail, values), v => reduce_to(tail, v, minimum)))
 
 def reduce_times(ops: List<&2, Operator>, values: List<&2, Core.Expr>) -> Stack:
   reduce_to(ops, values, 20n)
@@ -206,33 +206,33 @@ def reduce_all(ops: List<&2, Operator>, values: List<&2, Core.Expr>) -> Stack:
 
 def push_operator(stack: Stack, op: Operator) -> Stack:
   match stack:
-    case Ready{ops, values}:
-      Ready{op <> ops, values}
+    case ParseReady{ops, values}:
+      ParseReady{op <> ops, values}
     case Rejected{e}:
       Rejected{e}
 
 def call_result(result: Parsed, ops: List<&2, Operator>, outer: List<&2, Core.Expr>) -> Stack:
   match result:
     case Accepted{expr}:
-      Ready{ops, expr <> outer}
+      ParseReady{ops, expr <> outer}
     case ParseError{e}:
       Rejected{e}
 
 def close_group(stack: Stack) -> Stack:
   match stack:
-    case Ready{GroupFrame{outer} <> rest, expr <> Nil{}}:
-      Ready{rest, expr <> outer}
-    case Ready{CallFrame{name, args, outer} <> rest, expr <> Nil{}}:
+    case ParseReady{GroupFrame{outer} <> rest, expr <> Nil{}}:
+      ParseReady{rest, expr <> outer}
+    case ParseReady{CallFrame{name, args, outer} <> rest, expr <> Nil{}}:
       call_result(build_call(name, List.reverse(&2, Core.Expr, expr <> args)), rest, outer)
-    case Ready{ops, values}:
+    case ParseReady{ops, values}:
       Rejected{"Unmatched closing parenthesis"}
     case Rejected{e}:
       Rejected{e}
 
 def comma(stack: Stack) -> Stack:
   match stack:
-    case Ready{CallFrame{name, args, outer} <> rest, expr <> Nil{}}:
-      Ready{CallFrame{name, expr <> args, outer} <> rest, Nil{}}
+    case ParseReady{CallFrame{name, args, outer} <> rest, expr <> Nil{}}:
+      ParseReady{CallFrame{name, expr <> args, outer} <> rest, Nil{}}
     case Rejected{e}:
       Rejected{e}
     case stack:
@@ -240,7 +240,7 @@ def comma(stack: Stack) -> Stack:
 
 def empty_call(stack: Stack) -> Stack:
   match stack:
-    case Ready{CallFrame{name, Nil{}, outer} <> rest, Nil{}}:
+    case ParseReady{CallFrame{name, Nil{}, outer} <> rest, Nil{}}:
       call_result(build_call(name, Nil{}), rest, outer)
     case Rejected{e}:
       Rejected{e}
@@ -249,8 +249,8 @@ def empty_call(stack: Stack) -> Stack:
 
 def start_call(name: String, stack: Stack) -> Stack:
   match stack:
-    case Ready{ops, outer}:
-      Ready{CallFrame{name, Nil{}, outer} <> ops, Nil{}}
+    case ParseReady{ops, outer}:
+      ParseReady{CallFrame{name, Nil{}, outer} <> ops, Nil{}}
     case Rejected{e}:
       Rejected{e}
 
@@ -259,8 +259,8 @@ def identifier(+name: String) -> Core.Expr:
 
 def keyword_operand(+name: String, stack: Stack) -> Stack:
   match stack:
-    case Ready{ops, values}:
-      Bool.pick(Stack, Bool.or(String.eq(name, "&&"), String.eq(name, "||")), Rejected{"Expected an operand"}, Ready{ops, Core.Variable{name} <> values})
+    case ParseReady{ops, values}:
+      Bool.pick(Stack, Bool.or(String.eq(name, "&&"), String.eq(name, "||")), Rejected{"Expected an operand"}, ParseReady{ops, Core.Variable{name} <> values})
     case Rejected{e}:
       Rejected{e}
 
@@ -276,18 +276,18 @@ def operand(token: Lex.Token, stack: Stack) -> Stack:
       keyword_operand(name, stack)
     case Lex.XorWord{name} stack:
       keyword_operand(name, stack)
-    case Lex.StringLiteral{s} Ready{ops, values}:
-      Ready{ops, Core.Literal{Core.TextValue{s}} <> values}
+    case Lex.StringLiteral{s} ParseReady{ops, values}:
+      ParseReady{ops, Core.Literal{Core.TextValue{s}} <> values}
     case Lex.Minus{} stack:
       push_operator(stack, NegateOp{})
-    case Lex.DecimalLiteral{n} Ready{ops, values}:
-      Ready{ops, Core.Literal{Core.DecimalNumber{n}} <> values}
-    case Lex.Integer{n} Ready{ops, values}:
-      Ready{ops, Core.Literal{Core.Number{n}} <> values}
-    case Lex.Identifier{name} Ready{ops, values}:
-      Ready{ops, identifier(name) <> values}
-    case Lex.LParen{} Ready{ops, values}:
-      Ready{GroupFrame{values} <> ops, Nil{}}
+    case Lex.DecimalLiteral{n} ParseReady{ops, values}:
+      ParseReady{ops, Core.Literal{Core.DecimalNumber{n}} <> values}
+    case Lex.Integer{n} ParseReady{ops, values}:
+      ParseReady{ops, Core.Literal{Core.Number{n}} <> values}
+    case Lex.Identifier{name} ParseReady{ops, values}:
+      ParseReady{ops, identifier(name) <> values}
+    case Lex.LParen{} ParseReady{ops, values}:
+      ParseReady{GroupFrame{values} <> ops, Nil{}}
     case Lex.RParen{} stack:
       empty_call(stack)
     case token Rejected{e}:
@@ -297,35 +297,35 @@ def operand(token: Lex.Token, stack: Stack) -> Stack:
 
 def operator(token: Lex.Token, stack: Stack) -> Stack:
   match token stack:
-    case Lex.AndWord{name} Ready{ops, values}:
+    case Lex.AndWord{name} ParseReady{ops, values}:
       push_operator(reduce_all(ops, values), AndOp{})
-    case Lex.OrWord{name} Ready{ops, values}:
+    case Lex.OrWord{name} ParseReady{ops, values}:
       push_operator(reduce_all(ops, values), OrOp{})
-    case Lex.XorWord{name} Ready{ops, values}:
+    case Lex.XorWord{name} ParseReady{ops, values}:
       push_operator(reduce_all(ops, values), XorOp{})
-    case Lex.EqualToken{} Ready{ops, values}:
+    case Lex.EqualToken{} ParseReady{ops, values}:
       push_operator(reduce_comparisons(ops, values), CompareOp{Core.EqualTo{}})
-    case Lex.NotEqualToken{} Ready{ops, values}:
+    case Lex.NotEqualToken{} ParseReady{ops, values}:
       push_operator(reduce_comparisons(ops, values), CompareOp{Core.NotEqualTo{}})
-    case Lex.LessToken{} Ready{ops, values}:
+    case Lex.LessToken{} ParseReady{ops, values}:
       push_operator(reduce_comparisons(ops, values), CompareOp{Core.LessThan{}})
-    case Lex.LessEqualToken{} Ready{ops, values}:
+    case Lex.LessEqualToken{} ParseReady{ops, values}:
       push_operator(reduce_comparisons(ops, values), CompareOp{Core.LessOrEqual{}})
-    case Lex.GreaterToken{} Ready{ops, values}:
+    case Lex.GreaterToken{} ParseReady{ops, values}:
       push_operator(reduce_comparisons(ops, values), CompareOp{Core.GreaterThan{}})
-    case Lex.GreaterEqualToken{} Ready{ops, values}:
+    case Lex.GreaterEqualToken{} ParseReady{ops, values}:
       push_operator(reduce_comparisons(ops, values), CompareOp{Core.GreaterOrEqual{}})
-    case Lex.Slash{} Ready{ops, values}:
+    case Lex.Slash{} ParseReady{ops, values}:
       push_operator(reduce_times(ops, values), DivideOp{})
-    case Lex.Minus{} Ready{ops, values}:
+    case Lex.Minus{} ParseReady{ops, values}:
       push_operator(reduce_arithmetic(ops, values), SubtractOp{})
-    case Lex.Plus{} Ready{ops, values}:
+    case Lex.Plus{} ParseReady{ops, values}:
       push_operator(reduce_arithmetic(ops, values), AddOp{})
-    case Lex.Times{} Ready{ops, values}:
+    case Lex.Times{} ParseReady{ops, values}:
       push_operator(reduce_times(ops, values), MultiplyOp{})
-    case Lex.RParen{} Ready{ops, values}:
+    case Lex.RParen{} ParseReady{ops, values}:
       close_group(reduce_all(ops, values))
-    case Lex.Comma{} Ready{ops, values}:
+    case Lex.Comma{} ParseReady{ops, values}:
       comma(reduce_all(ops, values))
     case token Rejected{e}:
       Rejected{e}
@@ -398,22 +398,22 @@ def validated(info: Inspect.Info, expr: Core.Expr) -> Parsed:
 
 def completed(stack: Stack) -> Parsed:
   match stack:
-    case Ready{Nil{}, +expr <> Nil{}}:
+    case ParseReady{Nil{}, +expr <> Nil{}}:
       validated(Inspect.analyze(expr), expr)
-    case Ready{ops, values}:
+    case ParseReady{ops, values}:
       ParseError{"Unmatched parenthesis or missing operand"}
     case Rejected{e}:
       ParseError{e}
 
 def drain(stack: Stack) -> Parsed:
   match stack:
-    case Ready{ops, values}:
+    case ParseReady{ops, values}:
       completed(reduce_all(ops, values))
     case Rejected{e}:
       ParseError{e}
 
 def parse(source: String) -> Parsed:
-  drain(scan(Lex.tokenize(source), Ready{Nil{}, Nil{}}, True{}))
+  drain(scan(Lex.tokenize(source), ParseReady{Nil{}, Nil{}}, True{}))
 
 def preflight(missing: List<&2, String>, expr: Core.Expr, context: List<&2, Core.Binding>, sensitive: Bool) -> Core.Value:
   match missing:
