@@ -7,6 +7,8 @@ type Token is Data:
   BigIntegerLiteral{value: Decimal.Decimal}
   DecimalLiteral{value: Decimal.Decimal}
   Identifier{name: String}
+  QuotedIdentifier{name: String}
+  InvalidQuotedIdentifier{}
   MemberName{name: String}
   InvalidMemberSpacing{}
   StringLiteral{value: String}
@@ -51,6 +53,7 @@ type Mode is Data:
   Fraction{reversed: List<&2, U32>, scale: Nat}
   Word{reversed: String}
   Quoted{quote: Char, reversed: String}
+  QuotedName{reversed: String}
   Pending{symbol: Char}
   AliasPending{is_and: Bool}
   Scientific{digits: List<&2, U32>, scale: Nat, negative: Bool, exponent: List<&2, U32>, sign_allowed: Bool, explicit_sign: Bool, prefix: String}
@@ -205,6 +208,8 @@ def flush(mode: Mode, tokens: List<&2, Token>) -> List<&2, Token>:
       symbol(c) <> tokens
     case Quoted{quote, text}:
       Invalid{quote} <> tokens
+    case QuotedName{text}:
+      InvalidQuotedIdentifier{} <> tokens
     case Idle{}:
       tokens
     case Digits{+n}:
@@ -284,6 +289,8 @@ def quote_step(same: Bool, c: Char, quote: Char, reversed: String, tokens: List<
 
 def normal_step(mode: Mode, c: Char, tokens: List<&2, Token>) -> Mode & List<&2, Token>:
   match c:
+    case Chr{96}:
+      (QuotedName{SNil{}}, flush(mode, tokens))
     case Chr{41}:
       (AfterClose{}, RParen{} <> flush(mode, tokens))
     case Chr{93}:
@@ -373,6 +380,10 @@ def hexadecimal_step(digit: Maybe<&2, U32>, digits: List<&2, U32>, seen: Bool, +
 
 def scan_step(mode: Mode, c: Char, +tokens: List<&2, Token>) -> Mode & List<&2, Token>:
   match mode c:
+    case QuotedName{text} Chr{96}:
+      (Idle{}, QuotedIdentifier{String.reverse(text)} <> tokens)
+    case QuotedName{text} c:
+      (QuotedName{SCon{c, text}}, tokens)
     case AfterClose{} Chr{46}:
       (MemberStart{}, tokens)
     case AfterCloseSpace{} Chr{46}:

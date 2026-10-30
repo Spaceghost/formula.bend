@@ -142,4 +142,9 @@ return {
     {'raises argument error if a string is passed as identifier', {'pluck_bad_identifier','pluck_bad_identifier_message'}},
     {'raises argument error if a non array of hashes is passed as collection', {'pluck_non_hashes','pluck_non_hashes_message'}},
   },
+  ['spec/calculator_spec.rb'] = {
+    {'respects quoted identifiers in dependencies', 'quoted_upstream_dependencies'},
+    {'ignores dependencies passed in context for quoted identifiers', 'quoted_upstream_bound_dependency'},
+    {'accepts special characters in quoted identifiers', {'quoted_upstream_special_one','quoted_upstream_special_two','quoted_upstream_special_three','quoted_upstream_special_four'}},
+  },
 }

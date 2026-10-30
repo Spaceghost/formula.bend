@@ -6,7 +6,17 @@ import ./src/parser.bend as Parser
 import ./src/decimal.bend as Decimal
 import ./src/division.bend as Division
 import ./src/address.bend as Address
+import ./src/comments.bend as Comments
 # Concrete regression fixtures complement the universal laws.
+def quoted_keyword_node() -> {Parser.parse("`true`") == Parser.Accepted{Core.Variable{"true"}} : Parser.Parsed}:
+  {==}
+
+def comments_joined_number() -> {Parser.evaluate("1/**/2", Nil{}, False{}) == Core.Number{12n} : Core.Value}:
+  {==}
+
+def comments_unfinished() -> {Comments.strip_comments("1/*unfinished") == "1/*unfinished" : String}:
+  {==}
+
 def member_access_node() -> {Parser.parse("users[0].age") == Parser.Accepted{Core.Access{Core.Access{Core.Variable{"users"}, Core.Literal{Core.Number{0n}}}, Core.Literal{Core.MemberIndex{"age"}}}} : Parser.Parsed}:
   {==}
 
@@ -43,7 +53,7 @@ def sensitive_formula() -> {Parser.evaluate("Kiwi + 5", [Core.Bound{"Kiwi", Core
 def first_binding_wins() -> {Parser.evaluate("kiwi", [Core.Bound{"kiwi", Core.Number{9n}}, Core.Bound{"kiwi", Core.Number{2n}}], False{}) == Core.Number{9n} : Core.Value}:
   {==}
 
-def missing_binding() -> {Parser.evaluate("missing", Nil{}, False{}) == Core.Failure{"Unbound variable: missing"} : Core.Value}:
+def missing_binding() -> {Parser.evaluate("missing", Nil{}, False{}) == Core.Failure{"no value provided for variables: missing"} : Core.Value}:
   {==}
 
 def trailing_operator() -> {Parser.parse("1 +") == Parser.ParseError{"Expected an operand"} : Parser.Parsed}:

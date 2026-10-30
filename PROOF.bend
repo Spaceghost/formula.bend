@@ -21,6 +21,12 @@ def Laws.modulo_right_zero_skips_left(left):
 def Laws.modulo_right_failure(left, message):
   {==}
 
+def Laws.empty_comment_prefix(source):
+  {==}
+
+def Laws.empty_formula(context, sensitive):
+  {==}
+
 def Laws.strict_item_error(message):
   {==}
 

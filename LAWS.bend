@@ -4,6 +4,8 @@ import ./src/decimal.bend as Decimal
 import ./src/division.bend as Division
 import ./src/address.bend as Address
 import ./src/dependencies.bend as Dependencies
+import ./src/comments.bend as Comments
+import ./src/parser.bend as Parser
 
 import ./src/reference.bend as Ref
 
@@ -34,6 +36,15 @@ law modulo_right_failure:
   for left: Core.Value
   for +message: String
   {Core.modulo(left, Core.Failure{message}) == Core.Failure{message} : Core.Value}
+
+law empty_comment_prefix:
+  for +source: String
+  {Comments.strip_comments("/**/" ++ source) == Comments.strip_comments(source) : String}
+
+law empty_formula:
+  for context: List<&2, Core.Binding>
+  for sensitive: Bool
+  {Parser.evaluate("", context, sensitive) == Core.NullValue{} : Core.Value}
 
 law strict_item_error:
   for +message: String

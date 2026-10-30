@@ -46,7 +46,7 @@ The unchanged upstream suite passes 713 examples with zero failures and 96.82%
 line coverage in the Ruby reference environment. `reference-summary.json` and
 `upstream-spec-catalog.json` record that run. These results describe Ruby only.
 
-The Lua-driven value and dependency corpus has 951 cases matched against Ruby values or parse
+The Lua-driven value and dependency corpus has 1083 cases matched against Ruby values or parse
 error classification. It covers truthiness, strings/null, comparisons, selected
 numeric-string coercions, and static operand rejection. It is a small subset of
 the upstream catalog. Native error classes/messages, all calculator methods,
@@ -87,8 +87,8 @@ lua tools/run-oracle.lua PROJECT UPSTREAM GEMS STORAGE RUNROOT OUTPUT
 The probe catches Dentaku errors and records their class; unexpected Ruby failures
 abort without replacing the output. Compare the result before updating committed
 goldens. Parser snapshots currently preserve parse-error classification, while
-full runtime error-class/message parity remains unfinished. The 951-case value and dependency
-corpus passes on JavaScript; the 733-case checkpoint passed native CPU with one
+full runtime error-class/message parity remains unfinished. The 1083-case value and dependency
+corpus passes on JavaScript; the 951-case checkpoint passed native CPU with one
 and eight threads. This is correctness verification,
 not the requested performance shootout.
 
@@ -321,7 +321,8 @@ Unicode inspection, alternate encodings, and arbitrary Ruby values remain open.
 Behavioral references include Ruby's
 [symbol-name rules](https://github.com/ruby/ruby/blob/v3_3_13/symbol.c) and
 [symbol inspection](https://github.com/ruby/ruby/blob/v3_3_13/string.c).
-Native verification of the 882-case corpus is pending.
+The later 951-case checkpoint includes these cases and passes native CPU with
+one and eight threads at -O3.
 The full 882-case corpus has also been replayed against Ruby after the typed
 context encoding change, with no differences. The current proof gate contains
 37 laws and the concrete suite 166 fixtures. Both Bend 2.0.16 and 2.0.39 pass
@@ -347,8 +348,40 @@ stopped with its generated C preserved. A second build with -O1 and inlining
 disabled also exhausted available memory and was stopped; neither is a verified
 native result. The generated Unicode lookups now use direct Boolean dispatch
 instead of thousands of closures. Their reference tables and mappings are
-unchanged. Native verification of the revised implementation remains pending.
+unchanged. The revised 951-case corpus and seven scale checks pass native CPU
+with one and eight threads at -O3.
 Both Bend 2.0.16 and 2.0.39 pass the 951-case full checks; Bend 2.0.39 also passes
 all 40 laws with --verdict. Native orchestration now completes C generation
 before launching clang, so the compiler heaps do not overlap, and retains the
 generated C for inspection.
+
+## Quoted identifiers, comments, and fixture transport
+
+The 132 additional cases cover quoted identifiers with spaces, punctuation,
+reserved words, Unicode, empty names, and control characters. Quoted names stay
+variables, including quoted true/false/null; quoted function calls retain the
+source parse error. All three corresponding calculator scenarios are mapped,
+bringing the map to 119 entries.
+
+Comment stripping follows the pinned raw-text rule: complete /*...*/ spans are
+removed before tokenization, including inside strings and quoted identifiers.
+Adjacent text joins with no inserted whitespace. Incomplete comments remain
+verbatim. Empty and comment-only formulas produce null. The two additional laws
+preserve empty-comment prefixes and empty-formula evaluation for any context.
+The proof book now imports the parser as well as the evaluator.
+
+Formula text in the oracle transport is JSON encoded, with an explicit format
+tag and support for the older five-column input. Optional json_ operation
+prefixes frame canonical snapshots as JSON strings. This permits exact fixtures
+for NUL, newlines, tabs, all ASCII controls, nested array text, and diagnostics
+without corrupting TSV rows. The full 951-case reference corpus was replayed
+after the formula encoding change with no differences.
+
+Missing-variable messages now match Ruby's wording, normalized identifier case,
+and ordered deduplication. Scoped missing fields and names containing control
+characters have exact message checks. Legacy unbound failures still retain their
+class and logical recovery behavior. Structured diagnostics and complete error
+metadata remain unfinished. The proof gate contains 42 laws and the concrete
+suite 169 fixtures. Native verification of the 1,083-case corpus is pending.
+Both Bend 2.0.16 and 2.0.39 pass the full checks. Bend 2.0.39 also passes the
+42-law proof book with --verdict, including the imported parser implementation.

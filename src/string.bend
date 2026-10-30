@@ -72,6 +72,37 @@ def escaped(text: String) -> String:
 def quote(text: String) -> String:
   "\"" ++ escaped(text) ++ "\""
 
+def json_control(control: Bool, +c: Char, rest: String) -> String:
+  match control:
+    case True{}:
+      "\\u00" ++ SCon{Char.to_lower(hex_char(U32.div(Char.to_u32(c), 16))), SCon{Char.to_lower(hex_char(U32.mod(Char.to_u32(c), 16))), rest}}
+    case False{}:
+      SCon{c, rest}
+
+def json_escaped(text: String) -> String:
+  match text:
+    case SNil{}:
+      SNil{}
+    case SCon{Chr{34}, rest}:
+      "\\\"" ++ json_escaped(rest)
+    case SCon{Chr{92}, rest}:
+      "\\\\" ++ json_escaped(rest)
+    case SCon{Chr{8}, rest}:
+      "\\b" ++ json_escaped(rest)
+    case SCon{Chr{12}, rest}:
+      "\\f" ++ json_escaped(rest)
+    case SCon{Chr{10}, rest}:
+      "\\n" ++ json_escaped(rest)
+    case SCon{Chr{13}, rest}:
+      "\\r" ++ json_escaped(rest)
+    case SCon{Chr{9}, rest}:
+      "\\t" ++ json_escaped(rest)
+    case SCon{+c, rest}:
+      json_control(U32.is_lt(Char.to_u32(c), 32), c, json_escaped(rest))
+
+def json_quote(text: String) -> String:
+  "\"" ++ json_escaped(text) ++ "\""
+
 def symbol_tail(text: String) -> Bool:
   match text:
     case SNil{}:

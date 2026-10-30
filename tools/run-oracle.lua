@@ -45,7 +45,11 @@ def snapshot_value(value)
   end
 end
 File.foreach(ENV.fetch('FORMULA_ORACLE_CORPUS')) do |line|
-  id, source, operation, encoded_context, sensitive = line.chomp.split("\t", 5)
+  id, source, operation, encoded_context, sensitive, source_format = line.chomp.split("\t", 6)
+  source = JSON.parse(source) if source_format == 'json'
+  operation ||= 'evaluate'
+  json_output = operation.start_with?('json_')
+  operation = operation.delete_prefix('json_') if json_output
   begin
     raw_context = JSON.parse(encoded_context || '{}')
     context = if raw_context.key?('bindings')
@@ -76,6 +80,7 @@ File.foreach(ENV.fetch('FORMULA_ORACLE_CORPUS')) do |line|
     raise unless error.message.include?('too big to convert')
     snapshot = "error:#{error.class.name}"
   end
+  snapshot = "json:#{JSON.generate(snapshot)}" if json_output
   puts "#{id}\t#{snapshot}"
 end
 ]]

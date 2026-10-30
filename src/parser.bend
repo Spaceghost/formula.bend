@@ -4,6 +4,7 @@ import ./lexer.bend as Lex
 import ./decimal.bend as Decimal
 import ./inspect.bend as Inspect
 import ./dependencies.bend as Dependencies
+import ./comments.bend as Comments
 
 type Parsed is Data:
   Accepted{expression: Core.Expr}
@@ -528,6 +529,8 @@ def operand(token: Lex.Token, stack: Stack) -> Stack:
       ParseReady{ops, Core.Literal{Core.IntegerNumber{n}} <> values}
     case Lex.Identifier{name} ParseReady{ops, values}:
       ParseReady{ops, identifier(name) <> values}
+    case Lex.QuotedIdentifier{name} ParseReady{ops, values}:
+      ParseReady{ops, Core.Variable{name} <> values}
     case Lex.LParen{} ParseReady{ops, values}:
       ParseReady{GroupFrame{values} <> ops, Nil{}}
     case Lex.RParen{} stack:
@@ -611,6 +614,8 @@ def ordinary_expectation(token: Lex.Token) -> Bool:
     case Lex.BigIntegerLiteral{n}:
       False{}
     case Lex.Identifier{name}:
+      False{}
+    case Lex.QuotedIdentifier{name}:
       False{}
     case Lex.RParen{}:
       False{}
@@ -734,14 +739,18 @@ def valid_numeric_tokens(tokens: List<&2, Lex.Token>) -> Bool:
       False{}
     case Lex.InvalidMemberSpacing{} <> rest:
       False{}
+    case Lex.InvalidQuotedIdentifier{} <> rest:
+      False{}
     case head <> rest:
       valid_numeric_tokens(rest)
 
 def parse_tokens(balanced: Bool, tokens: List<&2, Lex.Token>) -> Parsed:
-  match balanced:
-    case True{}:
+  match balanced tokens:
+    case True{} Nil{}:
+      Accepted{Core.Literal{Core.NullValue{}}}
+    case True{} tokens:
       drain(scan(tokens, ParseReady{Nil{}, Nil{}}, True{}))
-    case False{}:
+    case False{} tokens:
       ParseError{"Tokenizer: unbalanced parentheses"}
 
 def parse_numeric_tokens(valid: Bool, +tokens: List<&2, Lex.Token>) -> Parsed:
@@ -752,7 +761,7 @@ def parse_numeric_tokens(valid: Bool, +tokens: List<&2, Lex.Token>) -> Parsed:
       ParseError{"Tokenizer: invalid numeric literal"}
 
 def parse_syntax(source: String) -> Parsed:
-  +tokens = Lex.tokenize(source)
+  +tokens = Lex.tokenize(Comments.strip_comments(source))
   parse_numeric_tokens(valid_numeric_tokens(tokens), tokens)
 
 def validate_parsed(parsed: Parsed, sensitive: Bool) -> Parsed:
@@ -773,7 +782,7 @@ def preflight(missing: List<&2, String>, expr: Core.Expr, context: List<&2, Core
     case Nil{}:
       Core.evaluate_in(expr, context, sensitive)
     case names:
-      Core.Failure{"Unbound variable: " ++ String.join(Dependencies.unique(names, Nil{}), ", ")}
+      Core.Failure{"no value provided for variables: " ++ String.join(Dependencies.unique(names, Nil{}), ", ")}
 
 def evaluate_stored(+expr: Core.Expr, +context: List<&2, Core.Binding>, +sensitive: Bool) -> Core.Value:
   preflight(Dependencies.analyze(expr, context, sensitive, False{}), expr, context, sensitive)

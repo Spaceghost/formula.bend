@@ -107,6 +107,9 @@ type EvaluationMode is Data:
   EvaluateItems{kind: EnumerationKind, binder: String}
   EvaluateReduction{memo_binder: String, item_binder: String, memo: Value}
 
+def is_unbound_message(+message: String) -> Bool:
+  Bool.or(String.starts_with(message, "no value provided for variables: "), String.starts_with(message, "Unbound variable: "))
+
 def compact_pick(value: Decimal.Decimal, small: Bool) -> Value:
   match value small:
     case Decimal.Exact{digits, 0n} True{}:
@@ -681,7 +684,7 @@ def logical_chosen(done: Bool, value: Value, next: Unit -> Value) -> Value:
 def logical_left(value: Value, +is_and: Bool, next: Unit -> Value) -> Value:
   match value:
     case Failure{+e}:
-      logical_unbound(String.starts_with(e, "Unbound variable: "), Failure{e}, is_and, next)
+      logical_unbound(is_unbound_message(e), Failure{e}, is_and, next)
     case +value:
       logical_chosen(decisive(is_and, value), value, next)
 
@@ -733,7 +736,7 @@ def found(same: Bool, value: Value, rest: Unit -> Value) -> Value:
 def lookup(context: List<&2, Binding>, +name: String, +sensitive: Bool) -> Value:
   match context:
     case Nil{}:
-      Failure{"Unbound variable: " ++ name}
+      Failure{"no value provided for variables: " ++ normalize(sensitive, name)}
     case Bound{key, value} <> tail:
       found(String.eq(normalize(sensitive, key), normalize(sensitive, name)), value, u => lookup(tail, name, sensitive))
     case ScopedBound{key, value} <> tail:
@@ -2185,7 +2188,7 @@ def show(value: Value) -> String:
 
 # Typed, canonical snapshots for cross-runtime differential fixtures.
 def failure_snapshot(+message: String) -> String:
-  Bool.pick(String, String.starts_with(message, "Unbound variable: "), "error:Dentaku::UnboundVariableError", Bool.pick(String, String.eq(message, "Division by zero"), "error:Dentaku::ZeroDivisionError", Bool.pick(String, String.eq(message, "Index exceeds Ruby signed long range"), "error:RangeError", "error:Dentaku::ArgumentError")))
+  Bool.pick(String, is_unbound_message(message), "error:Dentaku::UnboundVariableError", Bool.pick(String, String.eq(message, "Division by zero"), "error:Dentaku::ZeroDivisionError", Bool.pick(String, String.eq(message, "Index exceeds Ruby signed long range"), "error:RangeError", "error:Dentaku::ArgumentError")))
 
 def snapshot_render(value: Value, +tail_mode: Bool) -> String:
   match value:

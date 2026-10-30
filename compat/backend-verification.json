@@ -1,168 +1,245 @@
 {
-  "source_commit": "5f62db6a28321354a5c73bcd091de671eee1519f",
-  "bend_version": "2.0.16",
-  "differential_cases": 114,
-  "scope": "correctness verification; not a performance shootout",
-  "checks": [
-    {
-      "target": "JavaScript",
-      "status": "passed"
-    },
-    {
+  "schema_version": 2,
+  "scope": "Correctness verification; the performance shootout remains pending.",
+  "latest_checkpoint": {
+    "source_commit": "07732870d03ac6c5d0aac3f5c33c8580b4bb1cfa",
+    "differential_cases": 951,
+    "scale_cases": 7,
+    "laws": 40,
+    "concrete_fixtures": 166,
+    "checks": [
+      {
+        "target": "JavaScript",
+        "bend_versions": [
+          "2.0.16",
+          "2.0.39"
+        ],
+        "status": "passed"
+      },
+      {
+        "target": "native CPU",
+        "bend_version": "2.0.39",
+        "compiler": "Ubuntu clang 19.1.1",
+        "optimization": "-O3",
+        "thread_counts": [
+          1,
+          8
+        ],
+        "status": "passed",
+        "artifact_sha256": "0cda239793846eac7e3a7466ae9a5e628f4aa1bfe161677361cecc6c42666798",
+        "generated_c_sha256": "0dfcdda1e6de416bd64119f72d334e5a76e794c53cc8e21e83cd936a2e52e84a",
+        "generated_c_bytes": 11963607,
+        "scale_artifact_sha256": "7578864a94f52172ad1598543eff4808e40b7878fcd79705e6a38a0b09e8b996",
+        "scale_generated_c_sha256": "ad0150ecf2c56487cfbdb1f9f4c09ff311202cf15ead3fdf4144b54f9628b443"
+      },
+      {
+        "target": "Lean-backed kernel",
+        "bend_version": "2.0.39",
+        "lean_version": "4.34.0",
+        "command": "bend PROOF.bend --verdict",
+        "status": "passed",
+        "kernel_source_sha256": "d7268ff461de974bd4cd875d9766c71c62ee6b2e6411b9bab84839870db68a80",
+        "kernel_artifact_sha256": "e5e82c061a37c48f2162f294df52c8bbb32b227af2e22a331b6b3e2d066190c9"
+      },
+      {
+        "target": "CUDA",
+        "status": "not yet verified"
+      },
+      {
+        "target": "Metal",
+        "status": "not yet verified"
+      }
+    ]
+  },
+  "historical_evidence": {
+    "source_commit": "5f62db6a28321354a5c73bcd091de671eee1519f",
+    "bend_version": "2.0.16",
+    "differential_cases": 114,
+    "scope": "correctness verification; not a performance shootout",
+    "checks": [
+      {
+        "target": "JavaScript",
+        "status": "passed"
+      },
+      {
+        "target": "native CPU",
+        "status": "passed",
+        "optimization": "-O3",
+        "artifact_sha256": "c9d62c58000cd66373670eec3bc5f6883a928f32daa3e5edc524fa26a9630e99"
+      },
+      {
+        "target": "CUDA",
+        "status": "not yet verified"
+      },
+      {
+        "target": "Metal",
+        "status": "not yet verified"
+      }
+    ],
+    "latest_verified_native": {
+      "source_commit": "25dafea1e9268f5a4adb5b493758531f8a90e39d",
+      "bend_version": "2.0.39",
+      "differential_cases": 733,
       "target": "native CPU",
+      "thread_counts": [
+        1,
+        8
+      ],
       "status": "passed",
       "optimization": "-O3",
-      "artifact_sha256": "c9d62c58000cd66373670eec3bc5f6883a928f32daa3e5edc524fa26a9630e99"
+      "artifact_sha256": "8984795d664f775f56ff5affeb85b2ffd613fa1bf66366a20c3e8bb7fdd1248a",
+      "scale_cases": 7,
+      "scale_artifact_sha256": "e66eab5d95719831145deebfa2f1b9f3af81119ed3b6c38eb4816fb289ae3291",
+      "scope": "correctness verification; no performance measurements"
     },
-    {
-      "target": "CUDA",
-      "status": "not yet verified"
-    },
-    {
-      "target": "Metal",
-      "status": "not yet verified"
-    }
-  ],
-  "latest_verified_native": {
-    "source_commit": "25dafea1e9268f5a4adb5b493758531f8a90e39d",
-    "bend_version": "2.0.39",
-    "differential_cases": 733,
-    "target": "native CPU",
-    "thread_counts": [1, 8],
-    "status": "passed",
-    "optimization": "-O3",
-    "artifact_sha256": "8984795d664f775f56ff5affeb85b2ffd613fa1bf66366a20c3e8bb7fdd1248a",
-    "scale_cases": 7,
-    "scale_artifact_sha256": "e66eab5d95719831145deebfa2f1b9f3af81119ed3b6c38eb4816fb289ae3291",
-    "scope": "correctness verification; no performance measurements"
-  },
-  "enumeration_checkpoint_native": {
-    "source_commit": "b871e0eb8c3d80b13c5098e7e40cdd3be7290488",
-    "bend_version": "2.0.39",
-    "differential_cases": 654,
-    "target": "native CPU",
-    "thread_counts": [1, 8],
-    "status": "passed",
-    "optimization": "-O3",
-    "artifact_sha256": "02490bdbe87d24ee7ce5a84dd9a4ed216684e547526cb54961ade619773e9c76",
-    "scale_cases": 7,
-    "scale_artifact_sha256": "94fc750b9db6cb68548a58153873d916bf9681b17469c460c49baa1a5f5ef094",
-    "scope": "correctness verification; no performance measurements"
-  },
-  "case_checkpoint_native": {
-    "source_commit": "0a366d6244c7f747f79561533bcd6d635eedce98",
-    "bend_version": "2.0.39",
-    "differential_cases": 592,
-    "target": "native CPU",
-    "thread_counts": [1, 8],
-    "status": "passed",
-    "optimization": "-O3",
-    "artifact_sha256": "f204f00e2a2514ccdf401ff1feb255df57d6ff4c4f85cfc18f73ae224486ed8a",
-    "scope": "correctness verification; no performance measurements"
-  },
-  "kernel_verification": {
-    "source_commit": "5d2b8b8f3d357ef5b19e004dd661caaf50dd55ae",
-    "bend_version": "2.0.39",
-    "command": "bend PROOF.bend --verdict",
-    "status": "passed",
-    "laws": 37,
-    "lean_version": "4.34.0",
-    "kernel_source_sha256": "d7268ff461de974bd4cd875d9766c71c62ee6b2e6411b9bab84839870db68a80",
-    "kernel_artifact_sha256": "e5e82c061a37c48f2162f294df52c8bbb32b227af2e22a331b6b3e2d066190c9"
-  },
-  "hash_kernel_checkpoint": {
-    "source_commit": "25dafea1e9268f5a4adb5b493758531f8a90e39d",
-    "bend_version": "2.0.39",
-    "command": "bend PROOF.bend --verdict",
-    "status": "passed",
-    "laws": 35,
-    "lean_version": "4.34.0",
-    "kernel_source_sha256": "d7268ff461de974bd4cd875d9766c71c62ee6b2e6411b9bab84839870db68a80",
-    "kernel_artifact_sha256": "e5e82c061a37c48f2162f294df52c8bbb32b227af2e22a331b6b3e2d066190c9"
-  },
-  "enumeration_kernel_checkpoint": {
-    "source_commit": "b871e0eb8c3d80b13c5098e7e40cdd3be7290488",
-    "bend_version": "2.0.39",
-    "command": "bend PROOF.bend --verdict",
-    "status": "passed",
-    "laws": 32,
-    "lean_version": "4.34.0",
-    "kernel_source_sha256": "d7268ff461de974bd4cd875d9766c71c62ee6b2e6411b9bab84839870db68a80",
-    "kernel_artifact_sha256": "e5e82c061a37c48f2162f294df52c8bbb32b227af2e22a331b6b3e2d066190c9"
-  },
-
-  "signed_zero_checkpoint_native": {
-    "source_commit": "6370afc964501340a1004cd3e6a2e5879423a956",
-    "bend_version": "2.0.39",
-    "differential_cases": 550,
-    "target": "native CPU",
-    "thread_counts": [1, 8],
-    "status": "passed",
-    "optimization": "-O3",
-    "artifact_sha256": "7692216a82cbb9f1ff88c9567d43bb7bb2c4a17752022fd775ca35baaf171e79",
-    "scope": "correctness verification; no performance measurements"
-  },
-  "string_function_checkpoint_native": {
-    "source_commit": "7a1999a0133608f2bcabc2d90403f5560d46d655",
-    "bend_version": "2.0.39",
-    "differential_cases": 501,
-    "target": "native CPU",
-    "thread_counts": [1, 8],
-    "status": "passed",
-    "optimization": "-O3",
-    "artifact_sha256": "2df6e6f1f1d1dd6924b60ef23c619bf6739737d7fb9b0c6d6947a2f49310a136",
-    "scope": "correctness verification; no performance measurements"
-  },
-  "numeric_type_checkpoint_native": {
-    "source_commit": "3cf7590944691dc0d03dc586dd71e64d7a49115f",
-    "bend_version": "2.0.39",
-    "differential_cases": 370,
-    "target": "native CPU",
-    "thread_counts": [1, 8],
-    "status": "passed",
-    "optimization": "-O3",
-    "artifact_sha256": "dc1b246d54973763229f6e3cd3b335c06fd6afcb0da388ab81592d3e5b709310",
-    "scope": "correctness verification; no performance measurements"
-  },
-  "numeric_literal_checkpoint_native": {
-    "source_commit": "abddc0b2612dde4037a94ddaba672ece9bad2e80",
-    "bend_version": "2.0.39",
-    "differential_cases": 296,
-    "target": "native CPU",
-    "thread_counts": [1, 8],
-    "status": "passed",
-    "optimization": "-O3",
-    "artifact_sha256": "e18b45a143f809526eada8716dda065da5a58a652cfc9e0e732ae389c6647114",
-    "scope": "correctness verification; no performance measurements"
-  },
-  "previous_verified_native": {
-    "source_commit": "b62f95de85f1ad122f2ab14773fe1cb93a5e04f9",
-    "bend_version": "2.0.39",
-    "differential_cases": 234,
-    "target": "native CPU",
-    "thread_counts": [1, 8],
-    "status": "passed",
-    "optimization": "-O3",
-    "artifact_sha256": "8e64b9c3920276c8d6ea18f32c01573ceb9859845869dd428d616a7e031b6d8b",
-    "scope": "correctness verification; no performance measurements"
-  },
-  "additional_toolchains": [
-    {
-      "source_commit": "418c114984dd14e1b6101ffdb2b2e5b4bcd229fa",
+    "enumeration_checkpoint_native": {
+      "source_commit": "b871e0eb8c3d80b13c5098e7e40cdd3be7290488",
       "bend_version": "2.0.39",
-      "differential_cases": 114,
-      "checks": [
-        {
-          "target": "JavaScript",
-          "status": "passed"
-        },
-        {
-          "target": "native CPU",
-          "status": "passed",
-          "optimization": "-O3",
-          "artifact_sha256": "152c06084d60bad76942be7d2ac59b6c9b4927ca7e262bc4fd0ac3c37f4a52a4"
-        }
-      ]
-    }
-  ]
+      "differential_cases": 654,
+      "target": "native CPU",
+      "thread_counts": [
+        1,
+        8
+      ],
+      "status": "passed",
+      "optimization": "-O3",
+      "artifact_sha256": "02490bdbe87d24ee7ce5a84dd9a4ed216684e547526cb54961ade619773e9c76",
+      "scale_cases": 7,
+      "scale_artifact_sha256": "94fc750b9db6cb68548a58153873d916bf9681b17469c460c49baa1a5f5ef094",
+      "scope": "correctness verification; no performance measurements"
+    },
+    "case_checkpoint_native": {
+      "source_commit": "0a366d6244c7f747f79561533bcd6d635eedce98",
+      "bend_version": "2.0.39",
+      "differential_cases": 592,
+      "target": "native CPU",
+      "thread_counts": [
+        1,
+        8
+      ],
+      "status": "passed",
+      "optimization": "-O3",
+      "artifact_sha256": "f204f00e2a2514ccdf401ff1feb255df57d6ff4c4f85cfc18f73ae224486ed8a",
+      "scope": "correctness verification; no performance measurements"
+    },
+    "kernel_verification": {
+      "source_commit": "5d2b8b8f3d357ef5b19e004dd661caaf50dd55ae",
+      "bend_version": "2.0.39",
+      "command": "bend PROOF.bend --verdict",
+      "status": "passed",
+      "laws": 37,
+      "lean_version": "4.34.0",
+      "kernel_source_sha256": "d7268ff461de974bd4cd875d9766c71c62ee6b2e6411b9bab84839870db68a80",
+      "kernel_artifact_sha256": "e5e82c061a37c48f2162f294df52c8bbb32b227af2e22a331b6b3e2d066190c9"
+    },
+    "hash_kernel_checkpoint": {
+      "source_commit": "25dafea1e9268f5a4adb5b493758531f8a90e39d",
+      "bend_version": "2.0.39",
+      "command": "bend PROOF.bend --verdict",
+      "status": "passed",
+      "laws": 35,
+      "lean_version": "4.34.0",
+      "kernel_source_sha256": "d7268ff461de974bd4cd875d9766c71c62ee6b2e6411b9bab84839870db68a80",
+      "kernel_artifact_sha256": "e5e82c061a37c48f2162f294df52c8bbb32b227af2e22a331b6b3e2d066190c9"
+    },
+    "enumeration_kernel_checkpoint": {
+      "source_commit": "b871e0eb8c3d80b13c5098e7e40cdd3be7290488",
+      "bend_version": "2.0.39",
+      "command": "bend PROOF.bend --verdict",
+      "status": "passed",
+      "laws": 32,
+      "lean_version": "4.34.0",
+      "kernel_source_sha256": "d7268ff461de974bd4cd875d9766c71c62ee6b2e6411b9bab84839870db68a80",
+      "kernel_artifact_sha256": "e5e82c061a37c48f2162f294df52c8bbb32b227af2e22a331b6b3e2d066190c9"
+    },
+    "signed_zero_checkpoint_native": {
+      "source_commit": "6370afc964501340a1004cd3e6a2e5879423a956",
+      "bend_version": "2.0.39",
+      "differential_cases": 550,
+      "target": "native CPU",
+      "thread_counts": [
+        1,
+        8
+      ],
+      "status": "passed",
+      "optimization": "-O3",
+      "artifact_sha256": "7692216a82cbb9f1ff88c9567d43bb7bb2c4a17752022fd775ca35baaf171e79",
+      "scope": "correctness verification; no performance measurements"
+    },
+    "string_function_checkpoint_native": {
+      "source_commit": "7a1999a0133608f2bcabc2d90403f5560d46d655",
+      "bend_version": "2.0.39",
+      "differential_cases": 501,
+      "target": "native CPU",
+      "thread_counts": [
+        1,
+        8
+      ],
+      "status": "passed",
+      "optimization": "-O3",
+      "artifact_sha256": "2df6e6f1f1d1dd6924b60ef23c619bf6739737d7fb9b0c6d6947a2f49310a136",
+      "scope": "correctness verification; no performance measurements"
+    },
+    "numeric_type_checkpoint_native": {
+      "source_commit": "3cf7590944691dc0d03dc586dd71e64d7a49115f",
+      "bend_version": "2.0.39",
+      "differential_cases": 370,
+      "target": "native CPU",
+      "thread_counts": [
+        1,
+        8
+      ],
+      "status": "passed",
+      "optimization": "-O3",
+      "artifact_sha256": "dc1b246d54973763229f6e3cd3b335c06fd6afcb0da388ab81592d3e5b709310",
+      "scope": "correctness verification; no performance measurements"
+    },
+    "numeric_literal_checkpoint_native": {
+      "source_commit": "abddc0b2612dde4037a94ddaba672ece9bad2e80",
+      "bend_version": "2.0.39",
+      "differential_cases": 296,
+      "target": "native CPU",
+      "thread_counts": [
+        1,
+        8
+      ],
+      "status": "passed",
+      "optimization": "-O3",
+      "artifact_sha256": "e18b45a143f809526eada8716dda065da5a58a652cfc9e0e732ae389c6647114",
+      "scope": "correctness verification; no performance measurements"
+    },
+    "previous_verified_native": {
+      "source_commit": "b62f95de85f1ad122f2ab14773fe1cb93a5e04f9",
+      "bend_version": "2.0.39",
+      "differential_cases": 234,
+      "target": "native CPU",
+      "thread_counts": [
+        1,
+        8
+      ],
+      "status": "passed",
+      "optimization": "-O3",
+      "artifact_sha256": "8e64b9c3920276c8d6ea18f32c01573ceb9859845869dd428d616a7e031b6d8b",
+      "scope": "correctness verification; no performance measurements"
+    },
+    "additional_toolchains": [
+      {
+        "source_commit": "418c114984dd14e1b6101ffdb2b2e5b4bcd229fa",
+        "bend_version": "2.0.39",
+        "differential_cases": 114,
+        "checks": [
+          {
+            "target": "JavaScript",
+            "status": "passed"
+          },
+          {
+            "target": "native CPU",
+            "status": "passed",
+            "optimization": "-O3",
+            "artifact_sha256": "152c06084d60bad76942be7d2ac59b6c9b4927ca7e262bc4fd0ac3c37f4a52a4"
+          }
+        ]
+      }
+    ]
+  }
 }

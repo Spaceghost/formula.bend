@@ -5,6 +5,13 @@ assert(arg[3] == nil or metadata_only, 'unknown generator option')
 local cases = dofile(input)
 assert(#cases > 0, 'corpus must contain at least one case')
 local function bend_string(s)
+  if s:find('[%z\1-\8\11\12\14-\31]') then
+    local points = {}
+    for _, cp in utf8.codes(s) do points[#points+1] = cp end
+    local expression = 'SNil{}'
+    for i = #points, 1, -1 do expression = 'SCon{Chr{' .. points[i] .. '}, ' .. expression .. '}' end
+    return expression
+  end
   return '"' .. s:gsub('\\', '\\\\'):gsub('"', '\\"'):gsub('\n', '\\n'):gsub('\r', '\\r'):gsub('\t', '\\t') .. '"'
 end
 local function json_string(s)
@@ -16,7 +23,9 @@ local function json_string(s)
 end
 -- Typed context values preserve exact decimal inputs across Lua, Ruby and Bend.
 -- Plain Lua strings/booleans/integers are supported, as are array tables,
--- {decimal='...'}, {integer='...'}, and {null=true}.
+-- {decimal='...'}, {integer='...'}, {null=true}, {symbol='...'}, and ordered
+-- {hash={{key,value},...}} entries with string/symbol keys. symbol_context
+-- distinguishes symbol keys in the original calculator context.
 local function context_value(value)
   local kind = type(value)
   if kind == 'string' then
@@ -87,14 +96,17 @@ end
 local program = not metadata_only and assert(io.open(prefix .. '.bend', 'w'))
 local expected = assert(io.open(prefix .. '.expected', 'w'))
 local formulas = assert(io.open(prefix .. '.formulas.tsv', 'w'))
-if program then program:write('import Base\nimport ../src/core.bend as Core\nimport ../src/parser.bend as Parser\n\n') end
+if program then program:write('import Base\nimport ../src/core.bend as Core\nimport ../src/parser.bend as Parser\nimport ../src/string.bend as StringOps\n\n') end
 local ids = {}
 local lines = {}
 for _, case in ipairs(cases) do
   assert(not ids[case.id], 'duplicate id: ' .. case.id)
   ids[case.id] = true
-  assert(not case.id:find('[\t\r\n]') and not case.formula:find('[\t\r\n]'), 'TSV control characters unsupported')
-  local operation = case.operation or 'evaluate'
+  assert(not case.id:find('[\t\r\n]'), 'case IDs cannot contain TSV control characters')
+  -- json_ frames snapshots without changing the evaluated operation or value.
+  local wire_operation = case.operation or 'evaluate'
+  local json_output = wire_operation:sub(1, 5) == 'json_'
+  local operation = json_output and wire_operation:sub(6) or wire_operation
   local context, encoded_context = context_values(case.context, case.symbol_context)
   local sensitive = case.sensitive and 'True{}' or 'False{}'
   local call
@@ -117,9 +129,10 @@ for _, case in ipairs(cases) do
     assert(operation == 'evaluate', 'unknown operation: ' .. operation)
     call = 'Parser.snapshot(' .. bend_string(case.formula) .. ', ' .. context .. ', ' .. sensitive .. ')'
   end
+  if json_output then call = '"json:" ++ StringOps.json_quote(' .. call .. ')' end
   lines[#lines+1] = '    IO.print(' .. bend_string(case.id .. '\t') .. ' ++ ' .. call .. ')\n'
   expected:write(case.id, '\t', case.expected, '\n')
-  formulas:write(case.id, '\t', case.formula, '\t', operation, '\t', encoded_context, '\t', tostring(not not case.sensitive), '\n')
+  formulas:write(case.id, '\t', json_string(case.formula), '\t', wire_operation, '\t', encoded_context, '\t', tostring(not not case.sensitive), '\tjson\n')
 end
 -- Keep monadic chains shallow enough for older Bend compiler stacks.
 if program then
