@@ -18,6 +18,7 @@ def context_value(value)
   case value
   when Array then value.map { |item| context_value(item) }
   when Hash
+    return value.fetch('float_words').pack('NN').unpack1('G') if value.key?('float_words')
     return value.fetch('text') if value.key?('text')
     return value.fetch('symbol').to_sym if value.key?('symbol')
     if value.key?('class') || value.key?('module')
@@ -74,6 +75,7 @@ def snapshot_value(value)
   when true, false then "boolean:#{value}"
   when BigDecimal then "number:#{value.to_s('F').sub(/\.0+\z/, '')}"
   when Integer then "number:#{value}"
+  when Float then value.nan? ? 'float:nan' : "float:#{[value].pack('G').unpack('NN').join(':')}"
   when String then "string:#{value}"
   when Symbol then "symbol:#{value}"
   when Class then "class-reference:#{value.name}"
@@ -224,7 +226,9 @@ File.foreach(ENV.fetch('FORMULA_ORACLE_CORPUS')) do |line|
     snapshot = "error:#{error.class.name}"
   rescue RangeError => error
     # These source operations leak native Ruby range failures in this baseline.
-    raise unless error.message.include?('too big to convert') || error.message == 'shift width too big'
+    raise unless error.is_a?(FloatDomainError) || error.message.include?('too big to convert') || error.message.include?('too small to convert') || error.message == 'shift width too big'
+    snapshot = ['message', 'coerce_message'].include?(operation) ? "message:#{error.message}" : "error:#{error.class.name}"
+  rescue ::ArgumentError, ::TypeError => error
     snapshot = ['message', 'coerce_message'].include?(operation) ? "message:#{error.message}" : "error:#{error.class.name}"
   end
   snapshot = "json:#{JSON.generate(snapshot)}" if json_output

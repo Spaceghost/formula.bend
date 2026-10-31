@@ -3,7 +3,8 @@
 `RubyBinaryDecimal.from_decimal` models BigDecimal#to_f in the pinned Ruby
 3.3.13 / BigDecimal 3.1.5 reference image with its default numeric settings.
 It is separate from the exact IEEE converter in `binary64_decimal.bend`.
-Neither module yet adds Float values to the formula evaluator.
+The evaluator selects this profile explicitly when a BigDecimal-to-Float path
+requires the pinned Ruby behavior.
 
 The BigDecimal implementation emits normalized `0.<digits>eN` text and passes
 it to Ruby's bundled `strtod`. That parser's fractional-digit loop stops

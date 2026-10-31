@@ -47,6 +47,12 @@ local function context_value(value)
   end
   assert(kind == 'table', 'unsupported context value: ' .. kind)
   if value.null then return 'Core.NullValue{}', 'null' end
+  if value.float_words then
+    local words = value.float_words
+    assert(type(words)=='table' and #words==2, 'Float needs two raw words')
+    for _,word in ipairs(words) do assert(math.type(word)=='integer' and word>=0 and word<=0xffffffff, 'invalid Float word') end
+    return ('Core.float_words(%u, %u)'):format(words[1],words[2]), ('{"float_words":[%u,%u]}'):format(words[1],words[2])
+  end
   if value.symbol then
     return 'Core.SymbolValue{' .. bend_string(value.symbol) .. '}', '{"symbol":' .. json_string(value.symbol) .. '}'
   end
@@ -101,6 +107,8 @@ local function context_value(value)
       -- Parse the magnitude before applying the sign so integer-looking -0
       -- retains BigDecimal's negative zero.
       expression = 'Core.decimal_result(Parser.evaluate(' .. bend_string(literal) .. ', Nil{}, False{}))'
+      if literal=='Infinity' then expression='Core.decimal_infinity(False{})' end
+      if literal=='NaN' then expression='Core.decimal_nan()' end
       if negative then expression = 'Core.negate_value(' .. expression .. ')' end
     end
     return expression, '{' .. json_string(key) .. ':' .. json_string(text) .. '}'

@@ -1,4 +1,13 @@
 return {
+  {input='F0:', message='Invalid Float words in corpus input'},
+  {input='F1:0', message='Invalid Float words in corpus input'},
+  {input='F4:0::0', message='Invalid Float words in corpus input'},
+  {input='F4:-1:0', message='Invalid Float words in corpus input'},
+  {input='F4:+1:0', message='Invalid Float words in corpus input'},
+  {input='F12:4294967296:0', message='Invalid Float words in corpus input'},
+  {input='F12:0:4294967296', message='Invalid Float words in corpus input'},
+  {input='F13:00000000000:0', message='Invalid Float words in corpus input'},
+  {input='F3:a:0', message='Invalid Float words in corpus input'},
   {input='r]', message='Invalid range descriptor in corpus input'},
   {input='rnnn]', message='Invalid range descriptor in corpus input'},
   {input='rnnff]', message='Invalid range descriptor in corpus input'},

@@ -46,8 +46,9 @@ Standalone binary64 layers provide arithmetic, exact decimal conversion,
 [Ruby Float formatting](docs/binary64-format.md),
 [pinned BigDecimal-to-Float conversion](docs/binary64-ruby-decimal.md), and
 [Float-to-BigDecimal coercion profiles](docs/binary64-bigdecimal.md).
-These have separate reference probes; Float values are not yet available in
-the formula evaluator.
+Formula bindings now carry typed Float values, with mixed numeric dispatch and
+native errors. See [Float evaluator behavior and limits](docs/float-values.md).
+The independent foundation probes and formula corpus measure separate scopes.
 
 Universal laws and concrete regression fixtures cover these
 parts. They do not establish full Ruby or spreadsheet compatibility.
@@ -125,7 +126,7 @@ The eight address runtime cases pass on both JavaScript and native CPU.
 
 Parity is measured against the pinned Ruby source and its complete 713-example
 suite. The Ruby reference passes all examples; that is not a claim that Bend does.
-A separate 8777-case corpus covers selected values,
+A separate 10392-case corpus covers selected values,
 dependencies, parse-error classification, and exception factories.
 `make parity-check` generates the fixtures using Lua.
 Use `LUA=/path/to/lua` if Lua is not on PATH.
@@ -137,12 +138,13 @@ invalid arithmetic operand types before evaluation, including unused branches.
 See [the parity checklist](compat/PARITY.md) for remaining rules and the shootout
 gate. No performance comparison is claimed yet.
 
-The corpus supports exact decimal, integer, string, Boolean, null, nested array,
+The corpus supports exact decimal, integer, raw-word Float, string, Boolean, null, nested array,
 ordered hash, named class/module and Range bindings, plus case-sensitive contexts.
-All 8,777 cases pass Bun and native CPU with one and eight threads at `-O3`.
-Seven scale checks over 1,025-item collections and 27 malformed-input checks
-also pass. All 97 laws pass Lean-backed verification on Bend 2.0.39. There are
-153 explicit upstream scenario mappings and 175 concrete regression fixtures.
+All 10,392 cases pass Bun. Seven scale checks over 1,025-item collections and
+36 malformed-input checks also pass. All 109 laws pass Lean-backed verification
+on Bend 2.0.39. There are 158 explicit upstream scenario mappings and 175 concrete
+regression fixtures. Native CPU and GPU replay of this evaluator source remains
+pending; the earlier 8,777-case checkpoint passed CPU with one and eight threads.
 
 The 79ca28c source checkpoint passes full 8,665-case static replay and 175
 concrete fixtures on Bend 2.0.39. All 112 added Calculator dependency and
@@ -190,15 +192,15 @@ Integer and BigDecimal results now remain distinct across parsing, arithmetic,
 division, aggregates, and rounding. The corpus checks result classes and direct
 NumericParser coercions as well as canonical values. Signed decimal zero is
 preserved through arithmetic, rounding, comparisons, indexing, and string
-conversion. Ruby Float inputs, special numeric values, and global BigDecimal
-modes remain pending.
+conversion. Float and non-finite numeric bindings are supported in the current
+numeric profile. Global BigDecimal modes and full numeric-class parity remain
+pending.
 
-A separate [binary64 arithmetic layer](docs/binary64.md) passes 4,595 native Ruby
-Float probes on both Bend versions' JavaScript output, native CPU with one and
-eight threads, and required CUDA execution on the P4000 with default NVRTC options.
-Its four new laws combine with the Calculator laws for 85 verified project laws. These probes are
-separate from the 8,486 formula/API cases. Float bindings, rendering, mixed
-numeric coercions and evaluator error integration remain pending.
+A separate [binary64 foundation](docs/binary64.md) passes 13,253 arithmetic,
+conversion, formatting and coercion probes on both Bend versions' JavaScript
+output, native CPU with one and eight threads, and required CUDA on the P4000
+with default NVRTC options at source `0f0aa97`. These probes are separate from
+the formula/API cases and do not establish full evaluator GPU parity.
 
 The oracle also checks AST result types and selected exact error messages.
 `make parity-check` validates the recorded upstream scenario mappings. New

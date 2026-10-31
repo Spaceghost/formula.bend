@@ -6,6 +6,12 @@ import ./string.bend as StringOps
 import ./unicode.bend as Unicode
 import ./remainder.bend as Remainder
 import ./bits.bend as Bits
+import ./binary64.bend as Binary
+import ./binary64_decimal.bend as BinaryDecimal
+import ./binary64_format.bend as BinaryFormat
+import ./numeric_float.bend as FloatNumeric
+import ./binary64_bigdecimal.bend as FloatBigDecimal
+import ./float_round.bend as FloatRound
 
 type ReferenceKind is Data:
   ClassReferenceKind{}
@@ -18,6 +24,8 @@ type Value is Data:
   NegativeInteger{value: Decimal.Decimal}
   DecimalNumber{value: Decimal.Decimal}
   NegativeNumber{value: Decimal.Decimal}
+  FloatNumber{value: Binary.Float}
+  DecimalNonfinite{value: FloatNumeric.Special}
   Logical{value: Bool}
   NullValue{}
   TextValue{value: String}
@@ -33,6 +41,7 @@ type Value is Data:
   ArgumentPair{left: Value, right: Value}
   EmptyArgumentValues{}
   Failure{message: String}
+  Raised{class_name: String, message: String}
 
 type Comparison is Data:
   EqualTo{}
@@ -41,6 +50,23 @@ type Comparison is Data:
   LessOrEqual{}
   GreaterThan{}
   GreaterOrEqual{}
+
+type DecimalMath is Data:
+  DecimalDivide{}
+  DecimalModulo{}
+
+type NumericInputs is Data:
+  NumericValues{values: List<&2, Value>}
+  NumericError{value: Value}
+
+def float_words(high: U32, low: U32) -> Value:
+  FloatNumber{Binary.from_words(high, low)}
+
+def decimal_infinity(negative: Bool) -> Value:
+  DecimalNonfinite{FloatNumeric.Infinity{negative}}
+
+def decimal_nan() -> Value:
+  DecimalNonfinite{FloatNumeric.NotANumber{}}
 
 type FunctionKind is Data:
   SumFunction{}
@@ -179,6 +205,61 @@ def numeric_result(integer: Bool, value: Value) -> Value:
     case False{}:
       decimal_result(value)
 
+def float_numeric(value: Value) -> Maybe<&2, FloatNumeric.Number>:
+  match value:
+    case Number{n}:
+      Some{FloatNumeric.Exact{FloatNumeric.IntegerKind{}, False{}, Decimal.from_nat(n)}}
+    case IntegerNumber{n}:
+      Some{FloatNumeric.Exact{FloatNumeric.IntegerKind{}, False{}, n}}
+    case NegativeInteger{n}:
+      Some{FloatNumeric.Exact{FloatNumeric.IntegerKind{}, True{}, n}}
+    case DecimalNumber{n}:
+      Some{FloatNumeric.Exact{FloatNumeric.DecimalKind{}, False{}, n}}
+    case NegativeNumber{n}:
+      Some{FloatNumeric.Exact{FloatNumeric.DecimalKind{}, True{}, n}}
+    case FloatNumber{n}:
+      Some{FloatNumeric.Floating{n}}
+    case DecimalNonfinite{n}:
+      Some{FloatNumeric.Exceptional{n}}
+    case value:
+      None{}
+
+def from_float_numeric(value: FloatNumeric.Number) -> Value:
+  match value:
+    case FloatNumeric.Exact{FloatNumeric.IntegerKind{}, negative, +magnitude}:
+      Bool.pick(Value, negative, NegativeInteger{magnitude}, compact(magnitude))
+    case FloatNumeric.Exact{FloatNumeric.DecimalKind{}, negative, +magnitude}:
+      Bool.pick(Value, negative, NegativeNumber{magnitude}, DecimalNumber{magnitude})
+    case FloatNumeric.Floating{value}:
+      FloatNumber{value}
+    case FloatNumeric.Exceptional{value}:
+      DecimalNonfinite{value}
+
+def floating_result(result: FloatNumeric.CalculationResult) -> Value:
+  match result:
+    case FloatNumeric.Calculated{value}:
+      from_float_numeric(value)
+    case FloatNumeric.Rejected{message}:
+      Failure{message}
+    case FloatNumeric.NativeRejected{class_name, message}:
+      Raised{class_name, message}
+
+def floating_operands(operation: FloatNumeric.Operation, a: Maybe<&2, FloatNumeric.Number>, b: Maybe<&2, FloatNumeric.Number>) -> Value:
+  match a b:
+    case Some{a} Some{b}:
+      floating_result(FloatNumeric.operate(operation, a, b))
+    case a b:
+      Failure{"Expected numbers"}
+
+def has_extended_numeric(value: Value) -> Bool:
+  match value:
+    case FloatNumber{value}:
+      True{}
+    case DecimalNonfinite{value}:
+      True{}
+    case value:
+      False{}
+
 def is_integer(value: Value) -> Bool:
   match value:
     case Number{n}:
@@ -201,6 +282,10 @@ def strip_integer(value: Value) -> Value:
 
 def has_negative_sign(value: Value) -> Bool:
   match value:
+    case FloatNumber{value}:
+      Binary.sign(value)
+    case DecimalNonfinite{FloatNumeric.Infinity{negative}}:
+      negative
     case NegativeNumber{n}:
       True{}
     case NegativeInteger{n}:
@@ -275,6 +360,10 @@ def range_separator(excluded: Bool) -> String:
 
 def ruby_render(value: Value, +inspect: Bool, tail_mode: Bool) -> String:
   match value:
+    case FloatNumber{value}:
+      BinaryFormat.show(value)
+    case DecimalNonfinite{value}:
+      FloatNumeric.special_text(value)
     case Number{n}:
       Nat.show(n)
     case IntegerNumber{n}:
@@ -321,6 +410,10 @@ def incompatible_numeric(value: Value) -> Value:
 
 def require_numeric_value(value: Value) -> Value:
   match value:
+    case FloatNumber{value}:
+      FloatNumber{value}
+    case DecimalNonfinite{value}:
+      DecimalNonfinite{value}
     case IntegerNumber{n}:
       IntegerNumber{n}
     case NegativeInteger{n}:
@@ -333,6 +426,8 @@ def require_numeric_value(value: Value) -> Value:
       NegativeNumber{n}
     case Failure{e}:
       Failure{e}
+    case Raised{error_class, error_message}:
+      Raised{error_class, error_message}
     case value:
       incompatible_numeric(value)
 
@@ -354,6 +449,8 @@ def array_join(left: Value, right: Value) -> Value:
       array_append(left, ArrayCons{head, tail})
     case Failure{e}:
       Failure{e}
+    case Raised{error_class, error_message}:
+      Raised{error_class, error_message}
     case right:
       Failure{"Expected an array"}
 
@@ -419,14 +516,38 @@ def with_value(value: Value, next: Value -> Value) -> Value:
   match value:
     case Failure{message}:
       Failure{message}
+    case Raised{error_class, error_message}:
+      Raised{error_class, error_message}
     case value:
       next(value)
 
 def hash_get(hash: Value, key: Value) -> Value:
   hash_get_found(hash_find(hash, key))
 
+def numeric_is_equal(order: Maybe<&2, Cmp>) -> Bool:
+  match order:
+    case Some{EQ{}}:
+      True{}
+    case order:
+      False{}
+
+def extended_equal(a: Maybe<&2, FloatNumeric.Number>, b: Maybe<&2, FloatNumeric.Number>) -> Bool:
+  match a b:
+    case Some{a} Some{b}:
+      numeric_is_equal(FloatNumeric.compare(a, b))
+    case a b:
+      False{}
+
 def value_equal(a: Value, b: Value, +strict: Bool) -> Bool:
   match a b:
+    case FloatNumber{a} b:
+      extended_equal(Some{FloatNumeric.Floating{a}}, float_numeric(b))
+    case a FloatNumber{b}:
+      extended_equal(float_numeric(a), Some{FloatNumeric.Floating{b}})
+    case DecimalNonfinite{a} b:
+      extended_equal(Some{FloatNumeric.Exceptional{a}}, float_numeric(b))
+    case a DecimalNonfinite{b}:
+      extended_equal(float_numeric(a), Some{FloatNumeric.Exceptional{b}})
     case RangeValue{af, al, ax} RangeValue{bf, bl, bx}:
       Bool.and(Cmp.is_eq(Bool.cmp(ax, bx)), Bool.and(value_equal(af, bf, True{}), value_equal(al, bl, True{})))
     case HashNil{} HashNil{}:
@@ -495,9 +616,25 @@ def value_equal(a: Value, b: Value, +strict: Bool) -> Bool:
 type NumericOperand is Data:
   Magnitude{negative: Bool, value: Decimal.Decimal}
   InvalidNumeric{message: String}
+  RaisedNumeric{class_name: String, message: String}
+
+def binary_numeric_operand(value: BinaryDecimal.Exact) -> NumericOperand:
+  match value:
+    case BinaryDecimal.Finite{negative, magnitude}:
+      Magnitude{negative, magnitude}
+    case BinaryDecimal.Infinite{negative}:
+      RaisedNumeric{"FloatDomainError", Bool.pick(String, negative, "-Infinity", "Infinity")}
+    case BinaryDecimal.NotANumber{}:
+      RaisedNumeric{"FloatDomainError", "NaN"}
 
 def numeric_operand_value(value: Value) -> NumericOperand:
   match value:
+    case FloatNumber{value}:
+      binary_numeric_operand(BinaryDecimal.to_exact(value))
+    case DecimalNonfinite{value}:
+      RaisedNumeric{"FloatDomainError", FloatNumeric.special_text(value)}
+    case Raised{class_name, message}:
+      RaisedNumeric{class_name, message}
     case IntegerNumber{n}:
       Magnitude{False{}, n}
     case NegativeInteger{n}:
@@ -515,6 +652,10 @@ def numeric_operand_value(value: Value) -> NumericOperand:
 
 def ruby_type_name(value: Value) -> String:
   match value:
+    case FloatNumber{value}:
+      "Float"
+    case DecimalNonfinite{value}:
+      "BigDecimal"
     case Number{n}:
       "Integer"
     case IntegerNumber{n}:
@@ -570,6 +711,10 @@ def bitwise_name(kind: Bits.BitwiseOperation) -> String:
 
 def value_equal_same_type(+a: Value, +b: Value) -> Bool:
   match a:
+    case FloatNumber{value}:
+      False{}
+    case DecimalNonfinite{value}:
+      False{}
     case Number{n}:
       False{}
     case IntegerNumber{n}:
@@ -590,12 +735,25 @@ def set_numeric_magnitudes(a: NumericOperand, b: NumericOperand) -> Bool:
     case a b:
       False{}
 
-def set_numeric_equal(+a: Value, +b: Value, +hashed: Bool) -> Bool:
+def set_exact_numeric_equal(+a: Value, +b: Value, +hashed: Bool) -> Bool:
   numeric = set_numeric_magnitudes(numeric_operand_value(a), numeric_operand_value(b))
   same_class = String.eq(ruby_type_name(a), ruby_type_name(b))
   class_ok = Bool.or(same_class, Bool.and(Bool.not(hashed), String.eq(ruby_type_name(a), "BigDecimal")))
   sign_ok = Bool.or(Bool.not(hashed), Cmp.is_eq(Bool.cmp(has_negative_sign(a), has_negative_sign(b))))
   Bool.and(numeric, Bool.and(class_ok, sign_ok))
+
+def set_numeric_equal(a: Value, b: Value, hashed: Bool) -> Bool:
+  match a b:
+    case FloatNumber{a} FloatNumber{b}:
+      numeric_is_equal(Binary.compare(a, b))
+    case FloatNumber{a} b:
+      False{}
+    case +a FloatNumber{b}:
+      Bool.and(Bool.and(Bool.not(hashed), String.eq(ruby_type_name(a), "BigDecimal")), extended_equal(float_numeric(a), Some{FloatNumeric.Floating{b}}))
+    case DecimalNonfinite{a} DecimalNonfinite{b}:
+      extended_equal(Some{FloatNumeric.Exceptional{a}}, Some{FloatNumeric.Exceptional{b}})
+    case a b:
+      set_exact_numeric_equal(a, b, hashed)
 
 def set_equal(a: Value, b: Value, +hashed: Bool) -> Bool:
   match a b:
@@ -671,6 +829,8 @@ def array_subtract(left: Value, right: Value) -> Value:
       array_difference(left, ArrayCons{head, tail})
     case Failure{e}:
       Failure{e}
+    case Raised{error_class, error_message}:
+      Raised{error_class, error_message}
     case right:
       Failure{"Expected an array"}
 
@@ -700,8 +860,21 @@ def array_repeat_decimal(value: Decimal.Decimal, negative_count: Bool, array: Va
     case Decimal.Exact{digits, scale}:
       array_repeat_digits(negative_count, Decimal.normalize_digits(Decimal.integer_digits(scale, digits)), array)
 
+def array_repeat_operand(value: NumericOperand, array: Value) -> Value:
+  match value:
+    case Magnitude{negative, magnitude}:
+      array_repeat_decimal(magnitude, negative, array)
+    case InvalidNumeric{message}:
+      Failure{message}
+    case RaisedNumeric{error_class, error_message}:
+      Raised{error_class, error_message}
+
 def array_multiply(array: Value, count: Value) -> Value:
   match count:
+    case FloatNumber{value}:
+      array_repeat_operand(binary_numeric_operand(BinaryDecimal.to_exact(value)), array)
+    case DecimalNonfinite{value}:
+      Raised{"FloatDomainError", FloatNumeric.special_text(value)}
     case IntegerNumber{n}:
       array_repeat_decimal(n, False{}, array)
     case NegativeInteger{n}:
@@ -714,6 +887,8 @@ def array_multiply(array: Value, count: Value) -> Value:
       array_repeat_decimal(n, True{}, array)
     case Failure{e}:
       Failure{e}
+    case Raised{error_class, error_message}:
+      Raised{error_class, error_message}
     case count:
       Failure{"Expected numeric repetition count"}
 
@@ -744,20 +919,50 @@ def add_values(a: Value, b: Value) -> Value:
       compact(Decimal.add(Decimal.from_nat(x), Decimal.from_nat(y)))
     case Failure{e} b:
       Failure{e}
+    case Raised{error_class, error_message} b:
+      Raised{error_class, error_message}
     case a Failure{e}:
       Failure{e}
+    case a Raised{error_class, error_message}:
+      Raised{error_class, error_message}
     case a b:
       Failure{"Expected numbers"}
 
 def add_cast(+a: Value, +b: Value) -> Value:
   decimal_zero_sign(Bool.and(has_negative_sign(a), has_negative_sign(b)), numeric_result(Bool.and(is_integer(a), is_integer(b)), add_values(strip_integer(a), strip_integer(b))))
 
+def add_extended(extended: Bool, +a: Value, +b: Value) -> Value:
+  match extended a:
+    case True{} ArrayNil{}:
+      add_cast(ArrayNil{}, b)
+    case True{} ArrayCons{head, tail}:
+      add_cast(ArrayCons{head, tail}, b)
+    case True{} a:
+      floating_operands(FloatNumeric.Sum{}, float_numeric(a), float_numeric(b))
+    case False{} a:
+      add_cast(a, b)
+
+def add_dispatch(+a: Value, +b: Value) -> Value:
+  match a b:
+    case Failure{message} b:
+      Failure{message}
+    case Raised{class_name, message} b:
+      Raised{class_name, message}
+    case a Failure{message}:
+      Failure{message}
+    case a Raised{class_name, message}:
+      Raised{class_name, message}
+    case +a +b:
+      add_extended(Bool.or(has_extended_numeric(a), has_extended_numeric(b)), a, b)
+
 def add(a: Value, b: Value) -> Value:
   match a:
     case Failure{e}:
       Failure{e}
+    case Raised{error_class, error_message}:
+      Raised{error_class, error_message}
     case a:
-      add_cast(cast_numeric(a), cast_numeric(b))
+      add_dispatch(cast_numeric(a), cast_numeric(b))
 
 def multiply_values(a: Value, b: Value) -> Value:
   match a b:
@@ -785,19 +990,53 @@ def multiply_values(a: Value, b: Value) -> Value:
       compact(Decimal.multiply(Decimal.from_nat(x), Decimal.from_nat(y)))
     case Failure{e} b:
       Failure{e}
+    case Raised{error_class, error_message} b:
+      Raised{error_class, error_message}
     case a Failure{e}:
       Failure{e}
+    case a Raised{error_class, error_message}:
+      Raised{error_class, error_message}
     case a b:
       Failure{"Expected numbers"}
 
 def multiply_cast(+a: Value, +b: Value) -> Value:
   decimal_zero_sign(Bool.xor(has_negative_sign(a), has_negative_sign(b)), numeric_result(Bool.and(is_integer(a), is_integer(b)), multiply_values(strip_integer(a), strip_integer(b))))
 
+def multiply_extended(extended: Bool, a: Value, b: Value) -> Value:
+  match extended a:
+    case True{} ArrayNil{}:
+      multiply_cast(ArrayNil{}, b)
+    case True{} ArrayCons{head, tail}:
+      multiply_cast(ArrayCons{head, tail}, b)
+    case True{} a:
+      floating_operands(FloatNumeric.Product{}, float_numeric(a), float_numeric(b))
+    case False{} a:
+      multiply_cast(a, b)
+
+def multiply_dispatch(+a: Value, +b: Value) -> Value:
+  match a b:
+    case Failure{message} b:
+      Failure{message}
+    case Raised{class_name, message} b:
+      Raised{class_name, message}
+    case a Failure{message}:
+      Failure{message}
+    case a Raised{class_name, message}:
+      Raised{class_name, message}
+    case +a +b:
+      multiply_extended(Bool.or(has_extended_numeric(a), has_extended_numeric(b)), a, b)
+
 def multiply(a: Value, b: Value) -> Value:
-  multiply_cast(cast_numeric(a), cast_numeric(b))
+  multiply_dispatch(cast_numeric(a), cast_numeric(b))
 
 def negate_value(value: Value) -> Value:
   match value:
+    case FloatNumber{value}:
+      FloatNumber{Binary.negate(value)}
+    case DecimalNonfinite{FloatNumeric.Infinity{negative}}:
+      DecimalNonfinite{FloatNumeric.Infinity{Bool.not(negative)}}
+    case DecimalNonfinite{FloatNumeric.NotANumber{}}:
+      DecimalNonfinite{FloatNumeric.NotANumber{}}
     case Number{n}:
       integer_result(negative(Decimal.from_nat(n)))
     case IntegerNumber{n}:
@@ -810,6 +1049,8 @@ def negate_value(value: Value) -> Value:
       DecimalNumber{n}
     case Failure{e}:
       Failure{e}
+    case Raised{error_class, error_message}:
+      Raised{error_class, error_message}
     case value:
       Failure{"Expected numbers"}
 
@@ -835,6 +1076,8 @@ def choose(c: Value, yes: Unit -> Value, no: Unit -> Value) -> Value:
       no(Unit{})
     case Failure{e}:
       Failure{e}
+    case Raised{error_class, error_message}:
+      Raised{error_class, error_message}
     case c:
       yes(Unit{})
 
@@ -844,6 +1087,8 @@ def logical_not(v: Value) -> Value:
       Logical{Bool.not(b)}
     case Failure{e}:
       Failure{e}
+    case Raised{error_class, error_message}:
+      Raised{error_class, error_message}
     case NullValue{}:
       Logical{True{}}
     case v:
@@ -865,6 +1110,8 @@ def logical_recovered(right: Value, left_error: Value, is_and: Bool) -> Value:
   match right:
     case Failure{e}:
       Failure{e}
+    case Raised{error_class, error_message}:
+      Raised{error_class, error_message}
     case +right:
       Bool.pick(Value, decisive(is_and, right), right, left_error)
 
@@ -897,6 +1144,8 @@ def strict_logical(value: Value) -> Value:
       Logical{False{}}
     case Failure{e}:
       Failure{e}
+    case Raised{error_class, error_message}:
+      Raised{error_class, error_message}
     case value:
       Failure{"Incompatible logical operand"}
 
@@ -906,8 +1155,12 @@ def xor_values(a: Value, b: Value) -> Value:
       Logical{Bool.xor(x, y)}
     case Failure{e} b:
       Failure{e}
+    case Raised{error_class, error_message} b:
+      Raised{error_class, error_message}
     case a Failure{e}:
       Failure{e}
+    case a Raised{error_class, error_message}:
+      Raised{error_class, error_message}
     case a b:
       Failure{"Incompatible logical operand"}
 
@@ -999,6 +1252,10 @@ def permissive_result(+value: Value) -> Value:
 
 def round_numeric(value: Value, +target: Nat, before: Nat, mode: Decimal.Rounding) -> Value:
   match value:
+    case FloatNumber{value}:
+      floating_result(FloatRound.round(mode, target, before, value))
+    case DecimalNonfinite{+value}:
+      Bool.pick(Value, Nat.is_gt(target, 0n), DecimalNonfinite{value}, Raised{"FloatDomainError", FloatNumeric.special_text(value)})
     case Number{n}:
       integer_result(compact(Decimal.round(Decimal.from_nat(n), target, before, mode, False{})))
     case IntegerNumber{n}:
@@ -1011,6 +1268,8 @@ def round_numeric(value: Value, +target: Nat, before: Nat, mode: Decimal.Roundin
       decimal_zero_sign(True{}, numeric_result(Nat.is_eq(target, 0n), negative(Decimal.round(n, target, before, mode, True{}))))
     case Failure{e}:
       Failure{e}
+    case Raised{error_class, error_message}:
+      Raised{error_class, error_message}
     case value:
       Failure{"Expected numbers"}
 
@@ -1021,12 +1280,30 @@ def round_direction(negative_places: Bool, count: Nat, value: Value, mode: Decim
     case True{}:
       round_numeric(value, 0n, count, mode)
 
+def precision_range_message(fits_long: Bool, digits: List<&2, U32>, +negative: Bool) -> Value:
+  match fits_long:
+    case True{}:
+      Raised{"RangeError", "integer " ++ Bool.pick(String, negative, "-", "") ++ Decimal.show(Decimal.Exact{digits, 0n}) ++ Bool.pick(String, negative, " too small", " too big") ++ " to convert to `int'"}
+    case False{}:
+      Raised{"RangeError", "bignum too big to convert into `long'"}
+
+def precision_range_digits(+digits: List<&2, U32>, +negative: Bool) -> Value:
+  limit : List<&2, U32> = [Bool.pick(U32, negative, 8, 7), 0, 8, 5, 7, 7, 4, 5, 8, 6, 3, 0, 2, 7, 3, 3, 2, 2, 9]
+  precision_range_message(Bool.not(Cmp.is_gt(Decimal.compare_digits(digits, limit))), digits, negative)
+
+def precision_range(digits: List<&2, U32>, negative: Bool, value: Value) -> Value:
+  match value:
+    case FloatNumber{value}:
+      precision_range_digits(digits, negative)
+    case value:
+      Failure{"Rounding precision exceeds supported index range"}
+
 def round_precision_fits(fits: Bool, digits: List<&2, U32>, negative_places: Bool, value: Value, mode: Decimal.Rounding) -> Value:
   match fits:
     case True{}:
       round_direction(negative_places, Decimal.coefficient(digits), value, mode)
     case False{}:
-      Failure{"Rounding precision exceeds supported index range"}
+      precision_range(digits, negative_places, value)
 
 def round_precision_digits(+digits: List<&2, U32>, negative_places: Bool, value: Value, mode: Decimal.Rounding) -> Value:
   round_precision_fits(Nat.is_le(List.length(&2, U32, digits), 14n), digits, negative_places, value, mode)
@@ -1040,6 +1317,8 @@ def round_values(value: Value, places: Value, mode: Decimal.Rounding) -> Value:
   match value places:
     case Failure{e} places:
       Failure{e}
+    case Raised{error_class, error_message} places:
+      Raised{error_class, error_message}
     case value Number{n}:
       round_numeric(value, n, 0n, mode)
     case value IntegerNumber{n}:
@@ -1052,12 +1331,62 @@ def round_values(value: Value, places: Value, mode: Decimal.Rounding) -> Value:
       round_precision(n, True{}, value, mode)
     case value Failure{e}:
       Failure{e}
+    case value Raised{error_class, error_message}:
+      Raised{error_class, error_message}
     case value places:
       Failure{"Expected numeric rounding precision"}
 
 
+def precision_projection(value: BinaryDecimal.Exact) -> Value:
+  match value:
+    case BinaryDecimal.Finite{negative, Decimal.Exact{digits, scale}}:
+      from_float_numeric(FloatNumeric.exact_result(FloatNumeric.IntegerKind{}, negative, Decimal.Exact{Decimal.normalize_digits(Decimal.integer_digits(scale, digits)), 0n}))
+    case BinaryDecimal.Infinite{negative}:
+      Raised{"FloatDomainError", Bool.pick(String, negative, "-Infinity", "Infinity")}
+    case BinaryDecimal.NotANumber{}:
+      Raised{"FloatDomainError", "NaN"}
+
+def precision_numeric(value: Value) -> Value:
+  match value:
+    case FloatNumber{value}:
+      precision_projection(BinaryDecimal.to_exact(value))
+    case DecimalNonfinite{value}:
+      Raised{"FloatDomainError", FloatNumeric.special_text(value)}
+    case DecimalNumber{Decimal.Exact{digits, scale}}:
+      compact(Decimal.Exact{Decimal.normalize_digits(Decimal.integer_digits(scale, digits)), 0n})
+    case NegativeNumber{Decimal.Exact{digits, scale}}:
+      from_float_numeric(FloatNumeric.exact_result(FloatNumeric.IntegerKind{}, True{}, Decimal.Exact{Decimal.normalize_digits(Decimal.integer_digits(scale, digits)), 0n}))
+    case value:
+      value
+
+def rounding_precision(value: Value) -> Value:
+  match value:
+    case NullValue{}:
+      Number{0n}
+    case Logical{False{}}:
+      Number{0n}
+    case value:
+      precision_numeric(require_numeric(value))
+
+def round_validation(value: Value, places: Value, mode: Decimal.Rounding) -> Value:
+  match mode:
+    case Decimal.HalfAway{}:
+      with_value(require_numeric(value), value => with_value(rounding_precision(places), places => round_values(value, places, Decimal.HalfAway{})))
+    case mode:
+      with_value(rounding_precision(places), places => with_value(require_numeric(value), value => round_values(value, places, mode)))
+
 def round(value: Value, places: Value, mode: Decimal.Rounding) -> Value:
-  round_values(cast_numeric(value), cast_numeric(places), mode)
+  match value places:
+    case Failure{message} places:
+      Failure{message}
+    case Raised{class_name, message} places:
+      Raised{class_name, message}
+    case value Failure{message}:
+      Failure{message}
+    case value Raised{class_name, message}:
+      Raised{class_name, message}
+    case value places:
+      round_validation(value, places, mode)
 
 def numeric_operand(value: Value) -> NumericOperand:
   numeric_operand_value(cast_numeric(value))
@@ -1082,8 +1411,12 @@ def divide_operands(a: NumericOperand, b: NumericOperand, places: Nat, mode: Dec
       division_result(Division.divide(x, y, places), Bool.xor(sx, sy), mode)
     case InvalidNumeric{e} b:
       Failure{e}
+    case RaisedNumeric{error_class, error_message} b:
+      Raised{error_class, error_message}
     case a InvalidNumeric{e}:
       Failure{e}
+    case a RaisedNumeric{error_class, error_message}:
+      Raised{error_class, error_message}
 
 # Explicit decimal places and rounding; callers select their compatibility policy.
 def divide_at(a: Value, b: Value, places: Nat, mode: Decimal.Rounding) -> Value:
@@ -1097,6 +1430,8 @@ def divide_nonzero(zero: Bool, a: NumericOperand, sy: Bool, +y: Decimal.Decimal)
       division_result(Division.divide(x, y, Division.ruby_places(x, y)), Bool.xor(sx, sy), Decimal.HalfAway{})
     case False{} InvalidNumeric{e}:
       Failure{e}
+    case False{} RaisedNumeric{error_class, error_message}:
+      Raised{error_class, error_message}
 
 def divide_default_operands(a: NumericOperand, b: NumericOperand) -> Value:
   match b:
@@ -1104,9 +1439,8 @@ def divide_default_operands(a: NumericOperand, b: NumericOperand) -> Value:
       divide_nonzero(Decimal.is_zero(y), a, sy, y)
     case InvalidNumeric{e}:
       Failure{e}
-
-def divide(a: Value, b: Value) -> Value:
-  divide_default_operands(numeric_operand(a), numeric_operand(b))
+    case RaisedNumeric{error_class, error_message}:
+      Raised{error_class, error_message}
 
 def modulo_result(result: Remainder.RemainderResult) -> Value:
   match result:
@@ -1121,6 +1455,8 @@ def modulo_nonzero(zero: Bool, a: NumericOperand, sy: Bool, y: Decimal.Decimal) 
       Failure{"Division by zero"}
     case False{} InvalidNumeric{message}:
       Failure{message}
+    case False{} RaisedNumeric{error_class, error_message}:
+      Raised{error_class, error_message}
     case False{} Magnitude{sx, x}:
       modulo_result(Remainder.remainder(x, y, sx, sy))
 
@@ -1128,11 +1464,10 @@ def modulo_operands(a: NumericOperand, b: NumericOperand) -> Value:
   match b:
     case InvalidNumeric{message}:
       Failure{message}
+    case RaisedNumeric{error_class, error_message}:
+      Raised{error_class, error_message}
     case Magnitude{sy, +y}:
       modulo_nonzero(Decimal.is_zero(y), a, sy, y)
-
-def modulo(a: Value, b: Value) -> Value:
-  modulo_operands(numeric_operand(a), numeric_operand(b))
 
 def modulo_right_nonzero(zero: Bool, sy: Bool, y: Decimal.Decimal, left: Unit -> Value) -> Value:
   match zero:
@@ -1145,8 +1480,83 @@ def modulo_right(right: NumericOperand, left: Unit -> Value) -> Value:
   match right:
     case InvalidNumeric{message}:
       Failure{message}
+    case RaisedNumeric{error_class, error_message}:
+      Raised{error_class, error_message}
     case Magnitude{sy, +y}:
       modulo_right_nonzero(Decimal.is_zero(y), sy, y, left)
+
+def decimal_cast(profile: FloatBigDecimal.Profile, value: Value) -> Value:
+  match value:
+    case FloatNumber{value}:
+      from_float_numeric(FloatNumeric.projected(FloatBigDecimal.from_float(profile, value)))
+    case value:
+      value
+
+def special_modulo(a: FloatNumeric.Number, b: FloatNumeric.Number) -> Value:
+  match a b:
+    case FloatNumeric.Exact{kind, negative, magnitude} FloatNumeric.Exceptional{FloatNumeric.Infinity{sign}}:
+      decimal_result(from_float_numeric(FloatNumeric.Exact{kind, negative, magnitude}))
+    case a b:
+      decimal_nan()
+
+def decimal_special(operation: DecimalMath, a: Maybe<&2, FloatNumeric.Number>, b: Maybe<&2, FloatNumeric.Number>) -> Value:
+  match operation a b:
+    case DecimalDivide{} Some{a} Some{b}:
+      from_float_numeric(FloatNumeric.projected(BinaryDecimal.to_exact(Binary.divide(FloatNumeric.proxy(a), FloatNumeric.proxy(b)))))
+    case DecimalModulo{} Some{a} Some{b}:
+      special_modulo(a, b)
+    case operation a b:
+      Failure{"Expected numbers"}
+
+def decimal_binary(extended: Bool, operation: DecimalMath, a: Value, b: Value) -> Value:
+  match extended operation:
+    case True{} operation:
+      decimal_special(operation, float_numeric(a), float_numeric(b))
+    case False{} DecimalDivide{}:
+      divide_default_operands(numeric_operand_value(a), numeric_operand_value(b))
+    case False{} DecimalModulo{}:
+      modulo_operands(numeric_operand_value(a), numeric_operand_value(b))
+
+def decimal_prepared(operation: DecimalMath, +a: Value, +b: Value) -> Value:
+  match a:
+    case Failure{message}:
+      Failure{message}
+    case Raised{class_name, message}:
+      Raised{class_name, message}
+    case a:
+      decimal_binary(Bool.or(has_extended_numeric(a), has_extended_numeric(b)), operation, a, b)
+
+def decimal_nonzero(zero: Bool, operation: DecimalMath, right: Value, left: Unit -> Value) -> Value:
+  match zero:
+    case True{}:
+      Failure{"Division by zero"}
+    case False{}:
+      decimal_prepared(operation, decimal_cast(FloatBigDecimal.Implicit{}, cast_numeric(left(Unit{}))), right)
+
+def decimal_right_operand(operand: Maybe<&2, FloatNumeric.Number>, operation: DecimalMath, right: Value, left: Unit -> Value) -> Value:
+  match operand:
+    case Some{number}:
+      decimal_nonzero(FloatNumeric.is_zero(number), operation, right, left)
+    case None{}:
+      Failure{"Expected numbers"}
+
+def decimal_right_prepared(operation: DecimalMath, +right: Value, left: Unit -> Value) -> Value:
+  match right:
+    case Failure{message}:
+      Failure{message}
+    case Raised{class_name, message}:
+      Raised{class_name, message}
+    case right:
+      decimal_right_operand(float_numeric(right), operation, right, left)
+
+def decimal_right_value(operation: DecimalMath, right: Value, left: Unit -> Value) -> Value:
+  decimal_right_prepared(operation, decimal_cast(FloatBigDecimal.ShortestText{}, cast_numeric(right)), left)
+
+def divide(a: Value, b: Value) -> Value:
+  decimal_right_value(DecimalDivide{}, b, u => a)
+
+def modulo(a: Value, b: Value) -> Value:
+  decimal_right_value(DecimalModulo{}, b, u => a)
 
 def incompatible_comparison(op: Comparison) -> Value:
   match op:
@@ -1307,12 +1717,40 @@ def compare_range(a: Value, b: Value, op: Comparison) -> Value:
     case op:
       missing_comparison_operator(op)
 
+def extended_order(order: Maybe<&2, Cmp>, op: Comparison) -> Value:
+  match order op:
+    case Some{order} op:
+      apply_order(op, order)
+    case None{} NotEqualTo{}:
+      Logical{True{}}
+    case None{} op:
+      Logical{False{}}
+
+def extended_comparison(a: Maybe<&2, FloatNumeric.Number>, b: Maybe<&2, FloatNumeric.Number>, op: Comparison) -> Value:
+  match a b:
+    case Some{a} Some{b}:
+      extended_order(FloatNumeric.compare(a, b), op)
+    case a b:
+      incompatible_comparison(op)
+
 def compare_values(a: Value, b: Value, op: Comparison) -> Value:
   match a b:
     case Failure{e} b:
       Failure{e}
+    case Raised{error_class, error_message} b:
+      Raised{error_class, error_message}
     case a Failure{e}:
       Failure{e}
+    case a Raised{error_class, error_message}:
+      Raised{error_class, error_message}
+    case FloatNumber{a} b:
+      extended_comparison(Some{FloatNumeric.Floating{a}}, float_numeric(b), op)
+    case a FloatNumber{b}:
+      extended_comparison(float_numeric(a), Some{FloatNumeric.Floating{b}}, op)
+    case DecimalNonfinite{a} b:
+      extended_comparison(Some{FloatNumeric.Exceptional{a}}, float_numeric(b), op)
+    case a DecimalNonfinite{b}:
+      extended_comparison(float_numeric(a), Some{FloatNumeric.Exceptional{b}}, op)
     case RangeValue{first, last, excluded} b:
       compare_range(RangeValue{first, last, excluded}, b, op)
     case a RangeValue{first, last, excluded}:
@@ -1363,6 +1801,8 @@ def next_argument_error(error: Maybe<&2, Value>, next: Unit -> Maybe<&2, Value>)
 
 def first_argument_error(tree: Value) -> Maybe<&2, Value>:
   match tree:
+    case ArgumentValue{Raised{class_name, message}}:
+      Some{Raised{class_name, message}}
     case ArgumentValue{Failure{e}}:
       Some{Failure{e}}
     case ArgumentValue{value}:
@@ -1384,6 +1824,8 @@ def logical_combine(left: Bool, right: Value, kind: FunctionKind) -> Value:
       Logical{Bool.xor(left, b)}
     case Failure{e} kind:
       Failure{e}
+    case Raised{error_class, error_message} kind:
+      Raised{error_class, error_message}
     case right kind:
       Failure{"Incompatible logical operand"}
 
@@ -1391,6 +1833,8 @@ def logical_fold_guard(accumulator: Value, kind: FunctionKind, next: Bool -> Val
   match accumulator kind:
     case Failure{e} kind:
       Failure{e}
+    case Raised{error_class, error_message} kind:
+      Raised{error_class, error_message}
     case Logical{False{}} AndFunction{}:
       Logical{False{}}
     case Logical{True{}} OrFunction{}:
@@ -1451,6 +1895,8 @@ def count_single(value: Value) -> Value:
   match value:
     case Failure{e}:
       Failure{e}
+    case Raised{error_class, error_message}:
+      Raised{error_class, error_message}
     case TextValue{s}:
       Number{String.length(s)}
     case ArrayNil{}:
@@ -1557,6 +2003,8 @@ def access_index(value: Value, index: Value) -> Value:
       access_numeric(n, True{}, value)
     case Failure{e}:
       Failure{e}
+    case Raised{error_class, error_message}:
+      Raised{error_class, error_message}
     case Number{n}:
       structure_at(value, n)
     case DecimalNumber{n}:
@@ -1608,8 +2056,12 @@ def bitwise_operands(kind: Bits.BitwiseOperation, a: NumericOperand, b: NumericO
   match a b:
     case InvalidNumeric{message} b:
       Failure{message}
+    case RaisedNumeric{error_class, error_message} b:
+      Raised{error_class, error_message}
     case a InvalidNumeric{message}:
       Failure{message}
+    case a RaisedNumeric{error_class, error_message}:
+      Raised{error_class, error_message}
     case Magnitude{sa, a} Magnitude{sb, b}:
       bitwise_result(Bits.calculate(kind, sa, a, sb, b))
 
@@ -1644,6 +2096,8 @@ def bitwise_right(kind: Bits.BitwiseOperation, a: Value, b: Value) -> Value:
   match b:
     case Failure{message}:
       Failure{message}
+    case Raised{error_class, error_message}:
+      Raised{error_class, error_message}
     case b:
       bitwise_values(kind, a, b)
 
@@ -1651,6 +2105,8 @@ def bitwise(kind: Bits.BitwiseOperation, a: Value, b: Value) -> Value:
   match a:
     case Failure{message}:
       Failure{message}
+    case Raised{error_class, error_message}:
+      Raised{error_class, error_message}
     case a:
       bitwise_right(kind, a, b)
 
@@ -1700,6 +2156,8 @@ def member_value(value: Value, member: String, sensitive: Bool) -> Value:
       NullValue{}
     case Failure{message}:
       Failure{message}
+    case Raised{error_class, error_message}:
+      Raised{error_class, error_message}
     case value:
       Failure{"Dentaku::AST::MemberAccess requires a hash, but got " ++ ruby_type_name(value)}
 
@@ -1709,6 +2167,8 @@ def access_value(value: Value, index: Unit -> Value) -> Value:
       NullValue{}
     case Failure{e}:
       Failure{e}
+    case Raised{error_class, error_message}:
+      Raised{error_class, error_message}
     case ArrayNil{}:
       access_index(ArrayNil{}, index(Unit{}))
     case ArrayCons{head, tail}:
@@ -1728,6 +2188,8 @@ def access_read(value: Value, index: Value, sensitive: Bool) -> Value:
       member_value(value, member, sensitive)
     case Failure{message}:
       Failure{message}
+    case Raised{error_class, error_message}:
+      Raised{error_class, error_message}
     case index:
       access_value(value, u => index)
 
@@ -1737,6 +2199,8 @@ def access_scoped(value: Value, index: Unit -> Value, sensitive: Bool) -> Value:
       NullValue{}
     case Failure{message}:
       Failure{message}
+    case Raised{error_class, error_message}:
+      Raised{error_class, error_message}
     case value:
       access_read(value, index(Unit{}), sensitive)
 
@@ -1767,6 +2231,8 @@ def string_count_operand(operand: NumericOperand, limit: Nat) -> Value:
       string_count_digits(negative_index, Decimal.normalize_digits(Decimal.integer_digits(scale, digits)), limit)
     case InvalidNumeric{message}:
       Failure{message}
+    case RaisedNumeric{error_class, error_message}:
+      Raised{error_class, error_message}
 
 def string_count(value: Value, limit: Nat) -> Value:
   string_count_operand(numeric_operand(require_numeric(value)), limit)
@@ -1784,6 +2250,8 @@ def slice_count(count: Value, +text: String, right: Bool) -> Value:
       TextValue{Bool.pick(String, right, StringOps.drop(text, Nat.sub(String.length(text), n)), StringOps.take(n, text))}
     case Failure{message}:
       Failure{message}
+    case Raised{error_class, error_message}:
+      Raised{error_class, error_message}
     case count:
       Failure{"Invalid string count"}
 
@@ -1797,6 +2265,8 @@ def mid_length(length: Value, +text: String, +offset: Nat) -> Value:
       TextValue{StringOps.take(n, StringOps.drop(text, Bool.pick(Nat, Nat.is_eq(offset, 0n), Nat.sub(String.length(text), 1n), Nat.sub(offset, 1n))))}
     case Failure{message}:
       Failure{message}
+    case Raised{error_class, error_message}:
+      Raised{error_class, error_message}
     case length:
       Failure{"Invalid string length"}
 
@@ -1806,6 +2276,8 @@ def mid_offset(offset: Value, +text: String, length: Unit -> Value) -> Value:
       mid_length(named_string_count(string_count(length(Unit{}), String.length(text)), "MID", "length"), text, n)
     case Failure{message}:
       Failure{message}
+    case Raised{error_class, error_message}:
+      Raised{error_class, error_message}
     case offset:
       Failure{"Invalid string offset"}
 
@@ -1813,6 +2285,8 @@ def mid_text(value: Value, offset: Unit -> Value, length: Unit -> Value) -> Valu
   match value:
     case Failure{message}:
       Failure{message}
+    case Raised{error_class, error_message}:
+      Raised{error_class, error_message}
     case value:
       +text = ruby_render(value, False{}, False{})
       mid_offset(named_string_count(string_count(offset(Unit{}), 1n+String.length(text)), "MID", "offset"), text, length)
@@ -1821,6 +2295,8 @@ def contains_needle(needle: Value, haystack: String) -> Value:
   match needle:
     case Failure{message}:
       Failure{message}
+    case Raised{error_class, error_message}:
+      Raised{error_class, error_message}
     case needle:
       Logical{contains_text(haystack, ruby_render(needle, False{}, False{}))}
 
@@ -1828,6 +2304,8 @@ def contains_haystack(haystack: Value, needle: Unit -> Value) -> Value:
   match haystack:
     case Failure{message}:
       Failure{message}
+    case Raised{error_class, error_message}:
+      Raised{error_class, error_message}
     case haystack:
       contains_needle(needle(Unit{}), ruby_render(haystack, False{}, False{}))
 
@@ -1898,22 +2376,56 @@ def extreme_pick(order: Value, a: Value, b: Value) -> Value:
       b
     case Failure{e}:
       Failure{e}
+    case Raised{error_class, error_message}:
+      Raised{error_class, error_message}
     case order:
       Failure{"Invalid numeric comparison"}
 
-def extreme_compare(is_min: Bool, +a: Value, +b: Value) -> Value:
-  match is_min:
-    case True{}:
+def extreme_failure(a: Value, b: Value) -> Value:
+  match a b:
+    case FloatNumber{value} b:
+      Raised{"ArgumentError", "comparison of Float with " ++ ruby_render(b, False{}, False{}) ++ " failed"}
+    case a FloatNumber{value}:
+      Raised{"ArgumentError", "comparison of Float with " ++ ruby_render(a, False{}, False{}) ++ " failed"}
+    case a b:
+      Raised{"ArgumentError", "comparison of " ++ ruby_type_name(a) ++ " with " ++ ruby_render(b, False{}, False{}) ++ " failed"}
+
+def extreme_extended_order(order: Maybe<&2, Cmp>, is_min: Bool, a: Value, b: Value) -> Value:
+  match order:
+    case Some{+order}:
+      Bool.pick(Value, Bool.pick(Bool, is_min, Bool.not(Cmp.is_gt(order)), Bool.not(Cmp.is_lt(order))), a, b)
+    case None{}:
+      extreme_failure(a, b)
+
+def extreme_operands(a: Maybe<&2, FloatNumeric.Number>, b: Maybe<&2, FloatNumeric.Number>, is_min: Bool, original_a: Value, original_b: Value) -> Value:
+  match a b:
+    case Some{a} Some{b}:
+      extreme_extended_order(FloatNumeric.compare(a, b), is_min, original_a, original_b)
+    case a b:
+      Failure{"Expected numbers"}
+
+def extreme_dispatch(extended: Bool, is_min: Bool, +a: Value, +b: Value) -> Value:
+  match extended is_min:
+    case True{} is_min:
+      extreme_operands(float_numeric(a), float_numeric(b), is_min, a, b)
+    case False{} True{}:
       extreme_pick(compare(a, b, LessOrEqual{}), a, b)
-    case False{}:
+    case False{} False{}:
       extreme_pick(compare(a, b, GreaterOrEqual{}), a, b)
+
+def extreme_compare(is_min: Bool, +a: Value, +b: Value) -> Value:
+  extreme_dispatch(Bool.or(has_extended_numeric(a), has_extended_numeric(b)), is_min, a, b)
 
 def extreme_value(accumulator: Value, candidate: Value, is_min: Bool) -> Value:
   match accumulator candidate:
     case Failure{e} candidate:
       Failure{e}
+    case Raised{error_class, error_message} candidate:
+      Raised{error_class, error_message}
     case accumulator Failure{e}:
       Failure{e}
+    case accumulator Raised{error_class, error_message}:
+      Raised{error_class, error_message}
     case NullValue{} candidate:
       candidate
     case accumulator NullValue{}:
@@ -1923,6 +2435,10 @@ def extreme_value(accumulator: Value, candidate: Value, is_min: Bool) -> Value:
 
 def abs_value(value: Value) -> Value:
   match value:
+    case FloatNumber{value}:
+      FloatNumber{BinaryFormat.absolute(value)}
+    case DecimalNonfinite{FloatNumeric.Infinity{negative}}:
+      DecimalNonfinite{FloatNumeric.Infinity{False{}}}
     case NegativeInteger{n}:
       compact(n)
     case NegativeNumber{n}:
@@ -2046,56 +2562,168 @@ def numeric_nodes(tree: Value) -> List<&2, Value>:
 def numeric_batch(tree: Value) -> Value:
   balanced_nodes(numeric_nodes(tree))
 
-def sum_tree(tree: Value) -> Value:
+def sum_balanced(tree: Value) -> Value:
   match tree:
     case ArgumentValue{value}:
-      sum_tree(value)
+      sum_balanced(value)
     case ArrayNil{}:
       Number{0n}
     case ArrayCons{head, tail}:
-      x y = sum_tree(head) sum_tree(tail)
+      x y = sum_balanced(head) sum_balanced(tail)
       add(x, y)
     case ArgumentPair{a, b}:
-      x y = sum_tree(a) sum_tree(b)
+      x y = sum_balanced(a) sum_balanced(b)
       add(x, y)
     case EmptyArgumentValues{}:
       Number{0n}
     case tree:
       require_numeric(tree)
+
+def product_balanced(tree: Value) -> Value:
+  match tree:
+    case ArgumentValue{value}:
+      product_balanced(value)
+    case ArrayNil{}:
+      Number{1n}
+    case ArrayCons{head, tail}:
+      x y = product_balanced(head) product_balanced(tail)
+      multiply(x, y)
+    case ArgumentPair{a, b}:
+      x y = product_balanced(a) product_balanced(b)
+      multiply(x, y)
+    case EmptyArgumentValues{}:
+      Number{1n}
+    case tree:
+      require_numeric(tree)
+
+def extreme_balanced(tree: Value, +is_min: Bool) -> Value:
+  match tree:
+    case ArgumentValue{value}:
+      extreme_balanced(value, is_min)
+    case ArrayNil{}:
+      NullValue{}
+    case ArrayCons{head, tail}:
+      x y = extreme_balanced(head, is_min) extreme_balanced(tail, is_min)
+      extreme_value(x, y, is_min)
+    case ArgumentPair{a, b}:
+      x y = extreme_balanced(a, is_min) extreme_balanced(b, is_min)
+      extreme_value(x, y, is_min)
+    case EmptyArgumentValues{}:
+      NullValue{}
+    case tree:
+      require_numeric(tree)
+
+def reduction_node(value: Value) -> Value:
+  match value:
+    case ArgumentValue{value}:
+      value
+    case value:
+      value
+
+def extended_nodes(nodes: List<&2, Value>) -> Bool:
+  match nodes:
+    case Nil{}:
+      False{}
+    case node <> rest:
+      Bool.or(has_extended_numeric(reduction_node(node)), extended_nodes(rest))
+
+def validate_reduction_value(value: Value, next: Value -> NumericInputs) -> NumericInputs:
+  match value:
+    case Failure{message}:
+      NumericError{Failure{message}}
+    case Raised{class_name, message}:
+      NumericError{Raised{class_name, message}}
+    case value:
+      next(value)
+
+def validate_reduction_nodes(nodes: List<&2, Value>, reversed: List<&2, Value>) -> NumericInputs:
+  match nodes:
+    case Nil{}:
+      NumericValues{List.reverse(&2, Value, reversed)}
+    case node <> rest:
+      validate_reduction_value(require_numeric(reduction_node(node)), value => validate_reduction_nodes(rest, value <> reversed))
+
+def unchecked_operands(operation: FloatNumeric.Operation, a: Maybe<&2, FloatNumeric.Number>, b: Maybe<&2, FloatNumeric.Number>) -> Value:
+  match a b:
+    case Some{a} Some{b}:
+      from_float_numeric(FloatNumeric.operate_unchecked(operation, a, b))
+    case a b:
+      Failure{"Expected numbers"}
+
+def reduction_kind_step(kind: FunctionKind, a: Value, b: Value) -> Value:
+  match kind:
+    case SumFunction{}:
+      unchecked_operands(FloatNumeric.Sum{}, float_numeric(a), float_numeric(b))
+    case ProductFunction{}:
+      unchecked_operands(FloatNumeric.Product{}, float_numeric(a), float_numeric(b))
+    case MinFunction{}:
+      extreme_value(a, b, True{})
+    case MaxFunction{}:
+      extreme_value(a, b, False{})
+    case kind:
+      Failure{"Invalid numeric reduction"}
+
+def reduction_step(kind: FunctionKind, a: Value, b: Value) -> Value:
+  match a b:
+    case Failure{message} b:
+      Failure{message}
+    case Raised{class_name, message} b:
+      Raised{class_name, message}
+    case a b:
+      reduction_kind_step(kind, a, b)
+
+def reduction_fold(nodes: List<&2, Value>, +kind: FunctionKind, accumulator: Value) -> Value:
+  match nodes:
+    case Nil{}:
+      accumulator
+    case node <> rest:
+      reduction_fold(rest, kind, reduction_step(kind, accumulator, node))
+
+def reduction_initial(kind: FunctionKind) -> Value:
+  match kind:
+    case SumFunction{}:
+      Number{0n}
+    case ProductFunction{}:
+      Number{1n}
+    case kind:
+      NullValue{}
+
+def reduction_validated(values: NumericInputs, +kind: FunctionKind) -> Value:
+  match values:
+    case NumericValues{nodes}:
+      reduction_fold(nodes, kind, reduction_initial(kind))
+    case NumericError{value}:
+      value
+
+# Argument evaluation stays balanced. Float reductions follow Ruby's dependent
+# left fold: rounding and mixed coercion make reassociation observable.
+def reduction_dispatch(extended: Bool, kind: FunctionKind, nodes: List<&2, Value>, tree: Value) -> Value:
+  match extended kind:
+    case True{} kind:
+      reduction_validated(validate_reduction_nodes(nodes, Nil{}), kind)
+    case False{} SumFunction{}:
+      sum_balanced(tree)
+    case False{} ProductFunction{}:
+      product_balanced(tree)
+    case False{} MinFunction{}:
+      extreme_balanced(tree, True{})
+    case False{} MaxFunction{}:
+      extreme_balanced(tree, False{})
+    case False{} kind:
+      Failure{"Invalid numeric reduction"}
+
+def numeric_reduction(kind: FunctionKind, +tree: Value) -> Value:
+  +nodes = numeric_nodes(tree)
+  reduction_dispatch(extended_nodes(nodes), kind, nodes, tree)
+
+def sum_tree(tree: Value) -> Value:
+  numeric_reduction(SumFunction{}, tree)
 
 def product_tree(tree: Value) -> Value:
-  match tree:
-    case ArgumentValue{value}:
-      product_tree(value)
-    case ArrayNil{}:
-      Number{1n}
-    case ArrayCons{head, tail}:
-      x y = product_tree(head) product_tree(tail)
-      multiply(x, y)
-    case ArgumentPair{a, b}:
-      x y = product_tree(a) product_tree(b)
-      multiply(x, y)
-    case EmptyArgumentValues{}:
-      Number{1n}
-    case tree:
-      require_numeric(tree)
+  numeric_reduction(ProductFunction{}, tree)
 
-def extreme_tree(tree: Value, +is_min: Bool) -> Value:
-  match tree:
-    case ArgumentValue{value}:
-      extreme_tree(value, is_min)
-    case ArrayNil{}:
-      NullValue{}
-    case ArrayCons{head, tail}:
-      x y = extreme_tree(head, is_min) extreme_tree(tail, is_min)
-      extreme_value(x, y, is_min)
-    case ArgumentPair{a, b}:
-      x y = extreme_tree(a, is_min) extreme_tree(b, is_min)
-      extreme_value(x, y, is_min)
-    case EmptyArgumentValues{}:
-      NullValue{}
-    case tree:
-      require_numeric(tree)
+def extreme_tree(tree: Value, is_min: Bool) -> Value:
+  numeric_reduction(Bool.pick(FunctionKind, is_min, MinFunction{}, MaxFunction{}), tree)
 
 def flattened_count(tree: Value) -> Nat:
   match tree:
@@ -2192,6 +2820,8 @@ def with_case_value(value: Value, next: Value -> Value) -> Value:
   match value:
     case Failure{message}:
       Failure{message}
+    case Raised{error_class, error_message}:
+      Raised{error_class, error_message}
     case value:
       next(value)
 
@@ -2199,6 +2829,8 @@ def case_when_value(key: Value, subject: Value, yes: Unit -> Value, no: Unit -> 
   match key:
     case Failure{message}:
       Failure{message}
+    case Raised{error_class, error_message}:
+      Raised{error_class, error_message}
     case key:
       choose(Logical{value_equal(key, subject, False{})}, yes, no)
 
@@ -2326,6 +2958,8 @@ def enumeration_leaf(kind: EnumerationKind, item: Value, mapped: Value) -> Value
       ArgumentValue{mapped}
     case kind Failure{message}:
       Failure{message}
+    case kind Raised{error_class, error_message}:
+      Raised{error_class, error_message}
     case FilterItems{} mapped:
       Bool.pick(Value, truthy(mapped), ArgumentValue{item}, EmptyArgumentValues{})
     case AllItems{} mapped:
@@ -2335,6 +2969,8 @@ def enumeration_leaf(kind: EnumerationKind, item: Value, mapped: Value) -> Value
 
 def filter_leaf(item: Value, mapped: Value) -> Value:
   match mapped:
+    case Raised{class_name, message}:
+      ArgumentValue{Raised{class_name, message}}
     case Failure{message}:
       ArgumentValue{Failure{message}}
     case mapped:
@@ -2353,6 +2989,8 @@ def enumeration_decide(left: Value, decisive_value: Bool, next: Unit -> Value) -
   match left:
     case Failure{message}:
       Failure{message}
+    case Raised{error_class, error_message}:
+      Raised{error_class, error_message}
     case Logical{+b}:
       logical_chosen(Cmp.is_eq(Bool.cmp(b, decisive_value)), Logical{b}, next)
     case left:
@@ -2436,10 +3074,9 @@ def evaluate_machine(e: Expr, +batch: Value, +context: List<&2, Binding>, +sensi
       x y = evaluate_machine(a, batch, context, sensitive, subjects, EvaluateOne{}) evaluate_machine(b, batch, context, sensitive, subjects, EvaluateOne{})
       add(x, y)
     case Divide{a, b} batch EvaluateOne{}:
-      x y = evaluate_machine(a, batch, context, sensitive, subjects, EvaluateOne{}) evaluate_machine(b, batch, context, sensitive, subjects, EvaluateOne{})
-      divide(x, y)
+      decimal_right_value(DecimalDivide{}, evaluate_machine(b, batch, context, sensitive, subjects, EvaluateOne{}), u => evaluate_machine(a, batch, context, sensitive, subjects, EvaluateOne{}))
     case Modulo{a, b} batch EvaluateOne{}:
-      modulo_right(numeric_operand(evaluate_machine(b, batch, context, sensitive, subjects, EvaluateOne{})), u => evaluate_machine(a, batch, context, sensitive, subjects, EvaluateOne{}))
+      decimal_right_value(DecimalModulo{}, evaluate_machine(b, batch, context, sensitive, subjects, EvaluateOne{}), u => evaluate_machine(a, batch, context, sensitive, subjects, EvaluateOne{}))
     case Bitwise{kind, a, b} batch EvaluateOne{}:
       with_value(evaluate_machine(a, batch, context, sensitive, subjects, EvaluateOne{}), left => with_value(evaluate_machine(b, batch, context, sensitive, subjects, EvaluateOne{}), right => bitwise(kind, left, right)))
     case Multiply{a, b} batch EvaluateOne{}:
@@ -2485,6 +3122,12 @@ def evaluate(e: Expr) -> Value:
 
 def show(value: Value) -> String:
   match value:
+    case Raised{class_name, message}:
+      message
+    case FloatNumber{value}:
+      BinaryFormat.show(value)
+    case DecimalNonfinite{value}:
+      FloatNumeric.special_text(value)
     case MemberIndex{name}:
       "Internal member index"
     case SymbolValue{s}:
@@ -2539,6 +3182,12 @@ def named_snapshot(kind: ReferenceKind, name: String) -> String:
 
 def snapshot_render(value: Value, +tail_mode: Bool) -> String:
   match value:
+    case Raised{class_name, message}:
+      "error:" ++ class_name
+    case FloatNumber{value}:
+      "float:" ++ Binary.snapshot(value)
+    case DecimalNonfinite{value}:
+      "number:" ++ FloatNumeric.special_text(value)
     case MemberIndex{name}:
       "internal:member-index"
     case IntegerNumber{n}:
@@ -2592,6 +3241,12 @@ def snapshot(value: Value) -> String:
 
 def class_snapshot(value: Value) -> String:
   match value:
+    case Raised{class_name, message}:
+      "error:" ++ class_name
+    case FloatNumber{value}:
+      "class:Float"
+    case DecimalNonfinite{value}:
+      "class:BigDecimal"
     case SymbolValue{s}:
       "class:Symbol"
     case NamedReference{kind, name, ancestors}:
@@ -2631,6 +3286,8 @@ def class_snapshot(value: Value) -> String:
 
 def message_snapshot(value: Value) -> String:
   match value:
+    case Raised{class_name, message}:
+      "message:" ++ message
     case Failure{message}:
       "message:" ++ message
     case value:

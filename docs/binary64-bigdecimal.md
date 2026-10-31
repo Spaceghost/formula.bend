@@ -3,7 +3,8 @@
 `BinaryBigDecimal.from_float` returns a signed exact decimal or an explicit
 non-finite descriptor. Its profiles model two distinct paths in pinned
 BigDecimal 3.1.5 / Ruby 3.3.13 with default numeric settings. They are standalone
-building blocks; evaluator Float integration remains open.
+building blocks used by the evaluator's mixed numeric dispatch. Full numeric
+API and Calculator parity remain open.
 
 `Implicit` models BigDecimal's coercion of a Float operand. The reference uses
 shortest-decimal conversion, then truncates the resulting coefficient to sixteen

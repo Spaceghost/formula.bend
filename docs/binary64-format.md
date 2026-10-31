@@ -3,7 +3,7 @@
 `BinaryFormat.show` renders a raw binary64 value in the pinned Ruby 3.3.13
 Float#to_s format. It preserves signed zero, renders infinities and NaNs, and
 chooses the shortest decimal inside the value's exact rounding interval. The
-standalone formatter does not yet add Float values to the formula evaluator.
+evaluator uses this formatter for Float display and error messages.
 
 The search starts with one significant decimal digit. At each precision it
 checks both neighboring decimal candidates, preferring the nearer one and

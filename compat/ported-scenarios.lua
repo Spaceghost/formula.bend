@@ -1,6 +1,4 @@
 -- Scenario correspondence, not a claim that the complete upstream suite passes.
--- COUNT's Float input is represented as exact decimal 2.3 in Bend; COUNT only
--- inspects its length capability, so this adaptation does not alter the result.
 return {
   ['spec/ast/node_spec.rb'] = {
     {'returns list of dependencies', {'node_upstream_add_dependencies', 'node_upstream_comparison_dependencies', 'node_upstream_literal_dependencies', 'node_upstream_group_dependencies', 'node_upstream_guard_dependencies', 'node_upstream_true_dependencies', 'node_upstream_false_dependencies', 'node_upstream_empty_dependencies'}},
@@ -189,7 +187,14 @@ return {
     {'raises argument error if a string is passed as identifier', {'pluck_bad_identifier','pluck_bad_identifier_message'}},
     {'raises argument error if a non array of hashes is passed as collection', {'pluck_non_hashes','pluck_non_hashes_message'}},
   },
+  ['spec/ast/arithmetic_spec.rb'] = {
+    {'leaves arithmetic alone when an operand is already infinite', {'float_value_11_4','float_value_11_7'}},
+  },
   ['spec/calculator_spec.rb'] = {
+    {'does not round up a float that is already exact', {'float_value_upstream_roundup_exact_07','float_value_upstream_roundup_exact_007'}, 'Context: calculator / roundup.'},
+    {'does not round down a float that is already exact', {'float_value_upstream_rounddown_exact_029','float_value_upstream_rounddown_exact_115'}, 'Context: calculator / rounddown.'},
+    {'returns the same type as its input, like round', {'float_value_upstream_roundup_float_type','float_value_upstream_roundup_float_type_class','float_value_upstream_roundup_integer_type','float_value_upstream_roundup_integer_type_class','float_value_upstream_roundup_decimal_type','float_value_upstream_roundup_decimal_type_class'}, 'Context: calculator / roundup.'},
+    {'returns the same type as its input, like round', {'float_value_upstream_rounddown_float_type','float_value_upstream_rounddown_float_type_class','float_value_upstream_rounddown_integer_type','float_value_upstream_rounddown_integer_type_class','float_value_upstream_rounddown_decimal_type','float_value_upstream_rounddown_decimal_type_class'}, 'Context: calculator / rounddown.'},
     {'respects quoted identifiers in dependencies', 'quoted_upstream_dependencies'},
     {'ignores dependencies passed in context for quoted identifiers', 'quoted_upstream_bound_dependency'},
     {'accepts special characters in quoted identifiers', {'quoted_upstream_special_one','quoted_upstream_special_two','quoted_upstream_special_three','quoted_upstream_special_four'}},

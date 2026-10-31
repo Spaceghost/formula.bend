@@ -23,6 +23,27 @@ import ./src/binary64_format.bend as BinaryFormat
 import ./src/binary64_ruby_decimal.bend as RubyBinaryDecimal
 import ./src/binary64_bigdecimal.bend as BinaryBigDecimal
 
+law float_numeric_identity:
+  for +value: Binary64.Float
+  {Core.require_numeric(Core.FloatNumber{value}) == Core.FloatNumber{value} : Core.Value}
+
+law float_is_truthy:
+  for value: Binary64.Float
+  for +yes: Core.Value
+  for no: Core.Value
+  {Core.choose(Core.FloatNumber{value}, u => yes, u => no) == yes : Core.Value}
+
+law float_keeps_native_right_error:
+  for value: Binary64.Float
+  for +class_name: String
+  for +message: String
+  {Core.add(Core.FloatNumber{value}, Core.Raised{class_name, message}) == Core.Raised{class_name, message} : Core.Value}
+
+law native_error_is_not_swallowed:
+  for +class_name: String
+  for +message: String
+  {Core.permissive_result(Core.Raised{class_name, message}) == Core.Raised{class_name, message} : Core.Value}
+
 law binary64_bigdecimal_zero:
   for profile: BinaryBigDecimal.Profile
   for +negative: Bool

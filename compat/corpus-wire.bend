@@ -153,6 +153,10 @@ def decimal_trim_left(text: String) -> String:
 
 def decimal_magnitude(text: String) -> Core.Value:
   match text:
+    case "Infinity":
+      Core.decimal_infinity(False{})
+    case "NaN":
+      Core.decimal_nan()
     case SCon{Chr{43}, rest}:
       Core.Failure{"Invalid decimal sign in corpus input"}
     case SCon{Chr{45}, rest}:
@@ -172,7 +176,46 @@ def decimal_signed(text: String) -> Core.Value:
 def decimal(text: String) -> Core.Value:
   decimal_signed(String.reverse(decimal_trim_left(String.reverse(decimal_trim_left(text)))))
 
-def scalar(tag: Char, text: String) -> Core.Value:
+def float_ascii(text: String) -> Bool:
+  match text:
+    case SNil{}:
+      True{}
+    case SCon{c, rest}:
+      +code = Char.to_u32(c)
+      Bool.and(Bool.and(U32.is_ge(code, 48), U32.is_le(code, 57)), float_ascii(rest))
+
+def float_word_checked(valid: Bool, text: String) -> Maybe<&2, Nat>:
+  match valid:
+    case True{}:
+      Nat.read(text)
+    case False{}:
+      None{}
+
+def float_word(+text: String) -> Maybe<&2, Nat>:
+  float_word_checked(Bool.and(Bool.and(Nat.is_gt(String.length(text), 0n), Nat.is_le(String.length(text), 10n)), float_ascii(text)), text)
+
+def float_pair(high: Maybe<&2, Nat>, low: Maybe<&2, Nat>) -> Core.Value:
+  match high low:
+    case Some{+high} Some{+low}:
+      Bool.pick(Core.Value, Bool.and(Nat.is_le(high, 4294967295n), Nat.is_le(low, 4294967295n)), Core.float_words(U32.from_nat(high), U32.from_nat(low)), Core.Failure{"Invalid Float words in corpus input"})
+    case high low:
+      Core.Failure{"Invalid Float words in corpus input"}
+
+def float_fields(fields: List<&2, String>) -> Core.Value:
+  match fields:
+    case high <> low <> Nil{}:
+      float_pair(float_word(high), float_word(low))
+    case fields:
+      Core.Failure{"Invalid Float words in corpus input"}
+
+def float_bounded(valid: Bool, text: String) -> Core.Value:
+  match valid:
+    case True{}:
+      float_fields(String.split(text, ':'))
+    case False{}:
+      Core.Failure{"Invalid Float words in corpus input"}
+
+def scalar(tag: Char, +text: String) -> Core.Value:
   match tag:
     case Chr{115}:
       Core.TextValue{text}
@@ -182,6 +225,8 @@ def scalar(tag: Char, text: String) -> Core.Value:
       integer(Core.require_numeric(Core.TextValue{text}))
     case Chr{100}:
       decimal(text)
+    case Chr{70}:
+      float_bounded(Nat.is_le(String.length(text), 21n), text)
     case tag:
       Core.Failure{"Unknown scalar type in corpus input"}
 
@@ -259,6 +304,8 @@ def tag_step(+c: Char, stack: List<&2, Frame>) -> State:
     case Chr{105}:
       Reading{Length{c, 0n, False{}}, stack}
     case Chr{100}:
+      Reading{Length{c, 0n, False{}}, stack}
+    case Chr{70}:
       Reading{Length{c, 0n, False{}}, stack}
     case c:
       Bool.pick(State, Char.is_space(c), Reading{AwaitValue{}, stack}, Broken{"Unknown type in corpus input"})

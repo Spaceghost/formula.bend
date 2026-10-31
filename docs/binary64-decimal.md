@@ -3,7 +3,8 @@
 `src/binary64_decimal.bend` converts a finite exact decimal to binary64 using
 nearest/even rounding, and projects a binary64 value to an exact signed decimal.
 Non-finite projections use explicit infinity/NaN variants. Signed zero survives
-both directions. This bridge does not yet expose Float values in the evaluator.
+both directions. The evaluator selects explicit conversion profiles through its
+[Float numeric layer](float-values.md).
 
 The exact projection removes powers of two from the significand before using
 `m * 2^k` or `m * 5^k / 10^k`. Decimal conversion uses integer binary division
@@ -51,7 +52,8 @@ explicitly the IEEE conversion. The separate
 Ruby path's decimal cutoff before IEEE rounding; it must be selected explicitly
 when the evaluator's coercion profile is added.
 [Float formatting](binary64-format.md) is implemented as a standalone layer.
-Ruby Float(text), mixed numeric coercions and evaluator integration remain open.
+Ruby Float(text) and full numeric API parity remain open; the evaluator's mixed
+coercion paths select the appropriate profile explicitly.
 
 References: [Ruby Float](https://docs.ruby-lang.org/en/3.3/Float.html#method-i-to_r),
 [BigDecimal conversion](https://docs.ruby-lang.org/en/3.3/BigDecimal.html#method-i-to_f),

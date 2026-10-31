@@ -16,6 +16,12 @@ local function value(item)
   end
   assert(kind == 'table', 'unsupported corpus value')
   if item.null then return 'n' end
+  if item.float_words then
+    local words=item.float_words
+    assert(type(words)=='table' and #words==2, 'Float needs two raw words')
+    for _,word in ipairs(words) do assert(math.type(word)=='integer' and word>=0 and word<=0xffffffff, 'invalid Float word') end
+    return text('F', ('%u:%u'):format(words[1],words[2]))
+  end
   if item.symbol then return text('y', item.symbol) end
   if item.class or item.module then
     local name = item.class or item.module

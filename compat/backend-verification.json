@@ -1,4 +1,16 @@
 {
+  "float_evaluator_checkpoint": {
+    "source_parent":"cb62d93", "scope":"Typed Float bindings, mixed Integer/BigDecimal arithmetic and comparison, native errors and numeric reductions/rounding; full Dentaku and Float object/API parity remain incomplete",
+    "source_manifest":"compat/verification/float-evaluator-source.sha256", "source_manifest_sha256":"a35cf43eb4887b8f4177284f989181a890d214468d59d800d95d1ccaf1b92348",
+    "formula_and_api_cases":10392,"new_float_cases":1615,"scale_cases":7,"malformed_input_cases":36,"laws":109,"source_scenario_mappings":158,"concrete_fixtures":175,
+    "kernel":{"status":"passed","bend_version":"2.0.39","lean_version":"4.34.0","memory_max_gib":48,"memory_swap_max_gib":8},
+    "javascript":{"status":"passed_full_formula_corpus","bend_version":"2.0.39","runtime":"Bun 1.3.1","js_sha256":"f02da3458ad102374e678ee8cf3e228b0d840a83b7d26b676f4d93b8ff5ba04b"},
+    "input_sha256":"f5e7c3df6f04fa075fb4e38fb72a731cfd9fb8529174dee6b21e3975bb2764b1","output_sha256":"b07cc1352d949d6e00e34744cd2900f3d0cc33d390d843925414961b187d4c56",
+    "reference":"Pinned Dentaku 1b9950be405ecb0d425f8683447b58cf29796d1f, Ruby3.3.13/BigDecimal3.1.5, 64-bit Linux",
+    "float_fixture_regeneration":"tools/float-value-cases.lua compat/float-value-cases.lua compat/float-value-oracle.tsv",
+    "reference_changes":"Direct Float word input and snapshots; native FloatDomainError, ArgumentError and TypeError are recorded as reference outcomes rather than aborting the corpus runner",
+    "static_replay":"not run for the complete current corpus","legacy_javascript":"not yet replayed","native_cpu":"not yet replayed","cuda":"unverified for this evaluator source","metal":"unverified","performance":"not measured"
+  },
   "float_foundation_integrated_checkpoint": {
     "source_commit":"0f0aa97", "scope":"Standalone arithmetic, decimal conversion, Ruby formatting and BigDecimal coercion profiles combined with Calculator dependency APIs; evaluator Float integration and full parity remain incomplete",
     "laws":105, "kernel":{"status":"passed", "bend_version":"2.0.39", "lean_version":"4.34.0"},

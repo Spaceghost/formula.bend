@@ -1,8 +1,8 @@
 # Binary64 arithmetic foundation
 
 `src/binary64.bend` implements a portable arithmetic layer for Ruby Float work.
-It does **not** yet add Float bindings or Float results to the formula evaluator.
-The existing formula corpus and this arithmetic corpus measure separate scopes.
+The evaluator integrates it through the [Float numeric layer](float-values.md).
+The formula corpus and this arithmetic corpus measure separate scopes.
 
 The API provides word encoding, classification, sign inversion, addition,
 subtraction, multiplication, division and ordered comparison. Operands enter as
@@ -30,7 +30,7 @@ formula-level error propagation remain required work. This is not a claim of
 complete IEEE 754 or Ruby Float support.
 
 The [standalone Ruby Float formatter](binary64-format.md) supplies shortest
-decimal output and Ruby notation rules without adding evaluator Float values.
+decimal output and Ruby notation rules used by evaluator Float values.
 
 ## Verification
 

@@ -8,6 +8,18 @@ import ./src/bits.bend as Bits
 import ./src/error_types.bend as ErrorTypes
 import ./src/binary64.bend as Binary64
 
+def Laws.float_numeric_identity(value):
+  {==}
+
+def Laws.float_is_truthy(value, yes, no):
+  {==}
+
+def Laws.float_keeps_native_right_error(value, class_name, message):
+  {==}
+
+def Laws.native_error_is_not_swallowed(class_name, message):
+  {==}
+
 def Laws.binary64_bigdecimal_zero(profile, negative):
   {==}
 
