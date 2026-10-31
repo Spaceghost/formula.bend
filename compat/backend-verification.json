@@ -2223,12 +2223,33 @@
       "stored_native_output_sha256": "b336ce922795e5953d4bc30e92ec7e5dcba7ec819e8e3e5620fa664f0ad7ab90"
     },
     "concrete_fixtures": "all 175 passed",
-    "static_new_formula_and_api_probes": "All 1350 formula/API probes passed; replay of 96 Calculator sessions is still running",
+    "static_new_formula_and_api_probes": {
+      "status": "passed all 1446",
+      "formula_and_api_probes": 1350,
+      "calculator_sessions": 96,
+      "log": "compat/verification/dependency-native-static.log"
+    },
     "static_new_stored_probes": {
       "status": "passed all 216",
       "log": "compat/verification/stored-native-static.log"
     },
-    "native_cpu": "pending for this source",
+    "native_cpu": {
+      "source_commit": "452f775372e6c59db416d170cd47f6d193882064",
+      "status": "passed all 12737 formula/API cases, all 499 stored probes, 7 scale and 36 malformed checks",
+      "threads": [
+        1,
+        8
+      ],
+      "compiler": "clang 19.1.1 -O3",
+      "peak_bytes": 5749387264,
+      "swap_peak_bytes": 0,
+      "log": "compat/verification/dependency-native-134-native.log",
+      "source_manifest": "compat/verification/dependency-native-134-native-source.sha256",
+      "formula_c_sha256": "642ce592f8a12a321b32307b39e0773b6074004876c207901041d5099b8e928c",
+      "formula_binary_sha256": "734f6ea14ded1f348c5707aec944e7b7966bb49134bc9aaa0c294c628a25cd9a",
+      "stored_c_sha256": "2ef9f9293894e1dfade0f671e7f539b8d207c3d49882e89705204f755022dc96",
+      "stored_binary_sha256": "3f0d8c23cf4ba5da6bb6cc69b83c7a3dacd16e007395600c9cab85768ab037d3"
+    },
     "cuda": "unverified for this source",
     "metal": "unverified",
     "performance": "not measured"

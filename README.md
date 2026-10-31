@@ -144,18 +144,16 @@ The corpus supports exact decimal, integer, raw-word Float, string, Boolean, nul
 ordered hash, named class/module and Range bindings, plus case-sensitive contexts.
 All 12,737 cases pass Bun, along with seven scale checks and 36 malformed-input
 checks. All 134 laws pass Lean-backed verification on Bend 2.0.39. There are 160
-upstream scenario mappings and 175 concrete regression fixtures. The preceding
-11,291-case checkpoint and its 283 stored probes passed native CPU with one and
-eight threads; the new dependency probes await native replay.
+upstream scenario mappings and 175 concrete regression fixtures. All 12,737 cases
+also pass native CPU with one and eight threads.
 GPU replay of this evaluator source remains pending.
 
 An additional 499 probes cover stored AST values, formula-aware dependencies and
-checked AST evaluation. They pass Bun on this source; their earlier checkpoint
-also passed native CPU with one and eight threads for its original 283 probes.
+checked AST evaluation. All 499 pass Bun and native CPU with one and eight threads.
 The corpus includes a 257-formula chain, locally rebound recursion, branch
 pruning, dependency-first errors and messages, including native guard failures.
-See [dependency errors](docs/dependency-errors.md) for result handling. The recursive runners remain
-outside termination proofs. Calculator state/cache evaluation entry points are
+See [dependency errors](docs/dependency-errors.md) for result handling.
+The recursive runners remain outside termination proofs. Calculator state/cache evaluation entry points are
 not yet connected; see [stored expressions](docs/stored-expressions.md).
 
 An earlier 8,798-case checkpoint passed full static replay and all concrete

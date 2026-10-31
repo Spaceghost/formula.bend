@@ -23,10 +23,10 @@ fused floating-point operation supplies an arithmetic result.
 
 The implementation does not expose floating-point exception flags or alternative
 rounding modes. An [exact decimal bridge](binary64-decimal.md) supplies IEEE
-nearest/even conversion and signed exact projection. Ruby-compatible decimal
-parsing, square roots, powers, transcendental functions,
-Integer/BigDecimal coercion, evaluator result guards and
-formula-level error propagation remain required work. This is not a claim of
+nearest/even conversion and signed exact projection. The evaluator integrates
+Ruby-profile Integer/BigDecimal coercion, numeric result guards and native error
+propagation; see [Float values](float-values.md). Square roots, powers,
+transcendental functions and complete Ruby numeric behavior remain required work. This is not a claim of
 complete IEEE 754 or Ruby Float support.
 
 The [standalone Ruby Float formatter](binary64-format.md) supplies shortest
