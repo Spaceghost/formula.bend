@@ -49,7 +49,7 @@ The unchanged upstream suite passes 713 examples with zero failures and 96.82%
 line coverage in the Ruby reference environment. `reference-summary.json` and
 `upstream-spec-catalog.json` record that run. These results describe Ruby only.
 
-The Lua-driven corpus has 11291 reference cases for Ruby values, parse
+The Lua-driven corpus has 12737 reference cases for Ruby values, parse
 error classification, or exception-factory descriptions. It covers truthiness, strings/null, comparisons, selected
 numeric-string coercions, and static operand rejection. It is a small subset of
 the upstream catalog. Native error classes/messages, all calculator methods,

@@ -1,0 +1,81 @@
+4bf5078554489b9d9f25db4ef1eb7320f280df6c
+ALL_11291_FORMULA_7_SCALE_CPU_THREADS_1_PASS
+ALL_11291_FORMULA_7_SCALE_CPU_THREADS_8_PASS
+36 malformed corpus inputs rejected without partial results
+stored CPU threads=1 PASS
+stored-dependencies CPU threads=1 PASS
+stored-checked CPU threads=1 PASS
+stored CPU threads=8 PASS
+stored-dependencies CPU threads=8 PASS
+stored-checked CPU threads=8 PASS
+ALL_283_STORED_CPU_BOTH_THREAD_COUNTS_PASS
+src/address.bend: OK
+src/binary64.bend: OK
+src/binary64_bigdecimal.bend: OK
+src/binary64_decimal.bend: OK
+src/binary64_format.bend: OK
+src/binary64_ruby_decimal.bend: OK
+src/bits.bend: OK
+src/calculator.bend: OK
+src/comments.bend: OK
+src/core.bend: OK
+src/decimal.bend: OK
+src/dependencies.bend: OK
+src/division.bend: OK
+src/errors.bend: OK
+src/error_types.bend: OK
+src/float_index.bend: OK
+src/float_round.bend: OK
+src/inspect.bend: OK
+src/lexer.bend: OK
+src/numeric_float.bend: OK
+src/parser.bend: OK
+src/rational_float.bend: OK
+src/reference.bend: OK
+src/remainder.bend: OK
+src/resolver.bend: OK
+src/stored.bend: OK
+src/stored_checked.bend: OK
+src/stored_dependencies.bend: OK
+src/string.bend: OK
+src/token.bend: OK
+src/token_matcher.bend: OK
+src/unicode.bend: OK
+compat/binary64-runtime.bend: OK
+compat/calculator_api.bend: OK
+compat/corpus-input.bend: OK
+compat/corpus-runtime.bend: OK
+compat/corpus-wire.bend: OK
+compat/cuda-toolchain-smoke.bend: OK
+compat/error_factory.bend: OK
+compat/gpu-corpus.bend: OK
+compat/stored_api.bend: OK
+compat/stored_checked_api.bend: OK
+compat/stored_dependencies_api.bend: OK
+compat/stored-runtime.bend: OK
+compat/token_api.bend: OK
+compat/token_matcher_api.bend: OK
+compat/unicode-runtime.bend: OK
+compat/binary64-coercion-oracle.tsv: OK
+compat/binary64-conversion-oracle.tsv: OK
+compat/binary64-format-oracle.tsv: OK
+compat/binary64-oracle.tsv: OK
+compat/binary64-ruby-conversion-oracle.tsv: OK
+compat/calculator-native-error-oracle.tsv: OK
+compat/float-access-oracle.tsv: OK
+compat/float-value-oracle.tsv: OK
+compat/integer-context-oracle.tsv: OK
+compat/percentage-oracle.tsv: OK
+compat/scalar-oracle.tsv: OK
+compat/stored-checked-oracle.tsv: OK
+compat/stored-dependency-oracle.tsv: OK
+compat/stored-oracle.tsv: OK
+efba7cecd2bfe9ec98c2fe68afc5d2a85e65be59a2034b452312e32e79e00609  build/formula.c
+f9e0495eae45af64df9d5a227ace3379ba0d4b42416a5d89882fa00b6fb128ab  build/formula
+d930d26a8b257bfb0eb29a3b950dd9cacbb22d1a7dea1a98c79b21956562a5c7  build/corpus.input
+6f600d4582efde89944d380a76297b4b0e75a1ca4cea611f8f57c26f7c5bdce1  build/formula-cpu-1.actual
+ALL_FLOAT_EVALUATOR_NATIVE_GATES_PASSED
+FLOAT_NATIVE_EXIT=0
+MemoryPeak=6379319296
+MemorySwapPeak=0
+Sat Oct 31 11:06:52 PM UTC 2026

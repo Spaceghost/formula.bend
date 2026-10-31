@@ -337,7 +337,7 @@ law argument_error_left:
 law sum_dependency_duplicates:
   for +name: String
   for +sensitive: Bool
-  {Dependencies.analyze(Core.FunctionCall{Core.SumFunction{}, Core.Arguments{Core.Argument{Core.Variable{name}, Core.RawArgument{}}, Core.Argument{Core.Variable{name}, Core.RawArgument{}}}}, Nil{}, sensitive, False{}) == [Core.normalize(sensitive, name), Core.normalize(sensitive, name)] : List<&2, String>}
+  {Dependencies.analyze(Core.FunctionCall{Core.SumFunction{}, Core.Arguments{Core.Argument{Core.Variable{name}, Core.RawArgument{}}, Core.Argument{Core.Variable{name}, Core.RawArgument{}}}}, Nil{}, sensitive, False{}) == Dependencies.AnalysisNames{[Core.normalize(sensitive, name), Core.normalize(sensitive, name)]} : Dependencies.DependencyResult}
 
 law null_access_skips_index:
   for index: Core.Expr
@@ -594,3 +594,65 @@ law calculator_permissive_keeps_native_error:
   for +class_name: String
   for +message: String
   {Calculator.permissive_value(Core.Raised{class_name, message}, state) == Calculator.Rejected{state, "error:" ++ class_name, message} : Calculator.Evaluation}
+
+law dependency_native_condition_skips_branches:
+  for +class_name: String
+  for +message: String
+  for yes: List<&2, String>
+  for no: List<&2, String>
+  for fallback: List<&2, String>
+  {Dependencies.conditional(Core.Raised{class_name, message}, u => Dependencies.AnalysisNames{yes}, u => Dependencies.AnalysisNames{no}, u => Dependencies.AnalysisNames{fallback}) == Dependencies.AnalysisNativeError{class_name, message} : Dependencies.DependencyResult}
+
+law dependency_left_native_error_wins:
+  for +class_name: String
+  for +message: String
+  for right: Dependencies.DependencyResult
+  {Dependencies.append_result(Dependencies.AnalysisNativeError{class_name, message}, right) == Dependencies.AnalysisNativeError{class_name, message} : Dependencies.DependencyResult}
+
+law dependency_union_keeps_right_native_error:
+  for names: List<&2, String>
+  for +class_name: String
+  for +message: String
+  {Dependencies.union_result(Dependencies.AnalysisNames{names}, Dependencies.AnalysisNativeError{class_name, message}) == Dependencies.AnalysisNativeError{class_name, message} : Dependencies.DependencyResult}
+
+law dependency_logical_probe_keeps_native_error:
+  for +class_name: String
+  for +message: String
+  for is_and: Bool
+  for names: List<&2, String>
+  for next: List<&2, String>
+  {Dependencies.logical_probe(Core.Raised{class_name, message}, is_and, names, u => Dependencies.AnalysisNames{next}) == Dependencies.AnalysisNativeError{class_name, message} : Dependencies.DependencyResult}
+
+law dependency_case_native_error_skips_clauses:
+  for +class_name: String
+  for +message: String
+  for subject: List<&2, String>
+  for clauses: List<&2, String>
+  {Dependencies.case_dependencies(Dependencies.CaseNativeError{class_name, message}, u => Dependencies.AnalysisNames{subject}, u => Dependencies.AnalysisNames{clauses}) == Dependencies.AnalysisNativeError{class_name, message} : Dependencies.DependencyResult}
+
+law dependency_static_marker_rejects_numeric_truthiness:
+  {Dependencies.static_mode(Core.Number{1n}) == False{} : Bool}
+
+law dependency_static_analysis_never_probes_native_guard:
+  for class_name: String
+  for message: String
+  {Dependencies.analyze(Core.If{Core.Literal{Core.Raised{class_name, message}}, Core.Variable{"a"}, Core.Variable{"b"}}, Nil{}, False{}, True{}) == Dependencies.AnalysisNames{["a", "b"]} : Dependencies.DependencyResult}
+
+law native_logical_error_cannot_be_recovered:
+  for +class_name: String
+  for +message: String
+  for is_and: Bool
+  for right: Core.Value
+  {Core.logical_left(Core.Raised{class_name, message}, is_and, u => right) == Core.Raised{class_name, message} : Core.Value}
+
+law comparison_wraps_native_argument_error:
+  for +message: String
+  {Core.comparator_native_result(Core.Raised{"ArgumentError", message}) == Core.Failure{message} : Core.Value}
+
+law comparison_wraps_native_type_error:
+  for +message: String
+  {Core.comparator_native_result(Core.Raised{"TypeError", message}) == Core.Failure{message} : Core.Value}
+
+law comparison_keeps_native_range_error:
+  for +message: String
+  {Core.comparator_native_result(Core.Raised{"RangeError", message}) == Core.Raised{"RangeError", message} : Core.Value}

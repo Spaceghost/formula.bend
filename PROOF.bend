@@ -565,3 +565,36 @@ def Laws.calculator_native_error_aborts_both_modes(state, class_name, message, s
 
 def Laws.calculator_permissive_keeps_native_error(state, class_name, message):
   {==}
+
+def Laws.dependency_native_condition_skips_branches(class_name, message, yes, no, fallback):
+  {==}
+
+def Laws.dependency_left_native_error_wins(class_name, message, right):
+  {==}
+
+def Laws.dependency_union_keeps_right_native_error(names, class_name, message):
+  {==}
+
+def Laws.dependency_logical_probe_keeps_native_error(class_name, message, is_and, names, next):
+  {==}
+
+def Laws.dependency_case_native_error_skips_clauses(class_name, message, subject, clauses):
+  {==}
+
+def Laws.dependency_static_marker_rejects_numeric_truthiness():
+  {==}
+
+def Laws.dependency_static_analysis_never_probes_native_guard(class_name, message):
+  {==}
+
+def Laws.native_logical_error_cannot_be_recovered(class_name, message, is_and, right):
+  {==}
+
+def Laws.comparison_wraps_native_argument_error(message):
+  {==}
+
+def Laws.comparison_wraps_native_type_error(message):
+  {==}
+
+def Laws.comparison_keeps_native_range_error(message):
+  {==}

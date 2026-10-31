@@ -11,11 +11,13 @@ def static_mode(value: Core.Value) -> Bool:
     case value:
       False{}
 
-def preflight(missing: List<&2, String>, expression: Core.Expr, context: List<&2, Core.Binding>, sensitive: Bool) -> Core.Value:
+def preflight(missing: Names.DependencyResult, expression: Core.Expr, context: List<&2, Core.Binding>, sensitive: Bool) -> Core.Value:
   match missing:
-    case Nil{}:
+    case Names.AnalysisNativeError{class_name, message}:
+      Core.Raised{class_name, message}
+    case Names.AnalysisNames{Nil{}}:
       Stored.evaluate_in(expression, context, sensitive)
-    case names:
+    case Names.AnalysisNames{names}:
       Core.Failure{"no value provided for variables: " ++ String.join(Names.unique(names, Nil{}), ", ")}
 
 def evaluate_prepared(+expression: Core.Expr, +context: List<&2, Core.Binding>, +sensitive: Bool) -> Core.Value:

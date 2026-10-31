@@ -102,5 +102,5 @@ subsequent formulas do not populate the AST cache. Temporary bindings are restor
 and later session commands can continue. The 60 native-error sessions cover
 RangeError, ArgumentError and FloatDomainError with caching on/off, nested bulk
 expressions and both evaluation modes. Ordinary Dentaku errors keep their
-permissive null behavior. Native errors arising during dependency guard analysis
-still require separate parity work.
+permissive null behavior. Dependency queries now preserve native guard errors
+and stop bulk queries at the failure; see [dependency errors](dependency-errors.md).

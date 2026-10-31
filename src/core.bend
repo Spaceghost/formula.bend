@@ -1141,6 +1141,8 @@ def logical_chosen(done: Bool, value: Value, next: Unit -> Value) -> Value:
 
 def logical_left(value: Value, +is_and: Bool, next: Unit -> Value) -> Value:
   match value:
+    case Raised{class_name, message}:
+      Raised{class_name, message}
     case Failure{+e}:
       logical_unbound(is_unbound_message(e), Failure{e}, is_and, next)
     case +value:
@@ -1809,8 +1811,15 @@ def compare_values(a: Value, b: Value, op: Comparison) -> Value:
     case a b:
       numeric_comparison(numeric_operand(a), numeric_operand(b), op)
 
+def comparator_native_result(value: Value) -> Value:
+  match value:
+    case Raised{+class_name, +message}:
+      Bool.pick(Value, Bool.or(String.eq(class_name, "ArgumentError"), String.eq(class_name, "TypeError")), Failure{message}, Raised{class_name, message})
+    case value:
+      value
+
 def compare(a: Value, b: Value, op: Comparison) -> Value:
-  compare_values(cast_numeric(a), cast_numeric(b), op)
+  comparator_native_result(compare_values(cast_numeric(a), cast_numeric(b), op))
 
 # Arguments are evaluated before the function implementation sees their values.
 # XOR validates each argument during collection, as in Dentaku's custom node.

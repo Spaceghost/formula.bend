@@ -3,10 +3,18 @@ import ../src/core.bend as Core
 import ../src/parser.bend as Parser
 import ../src/calculator.bend as Calculator
 import ../src/stored_dependencies.bend as Dependencies
+import ../src/dependencies.bend as Names
 import ./stored_api.bend as Api
 
+def names_snapshot(result: Names.DependencyResult) -> String:
+  match result:
+    case Names.AnalysisNames{names}:
+      Core.snapshot(Calculator.name_values(names))
+    case Names.AnalysisNativeError{class_name, message}:
+      Core.snapshot(Core.Raised{class_name, message})
+
 def names(expression: Core.Expr, +context: List<&2, Core.Binding>, +sensitive: Bool) -> String:
-  Core.snapshot(Calculator.name_values(Dependencies.analyze(expression, context, sensitive, Calculator.dependency_static(Core.lookup(context, "__static_dependencies", sensitive)))))
+  names_snapshot(Dependencies.analyze(expression, context, sensitive, Calculator.dependency_static(Core.lookup(context, "__static_dependencies", sensitive))))
 
 def parsed_snapshot(parsed: Parser.Parsed, context: List<&2, Core.Binding>, sensitive: Bool) -> String:
   match parsed:

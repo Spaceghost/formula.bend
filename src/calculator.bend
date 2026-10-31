@@ -308,6 +308,8 @@ def query_context(static: Bool, data: Core.Value, state: State) -> List<&2, Core
 
 def query_names(result: Parser.NamesResult, state: State) -> Evaluation:
   match result:
+    case Parser.NamesNativeError{class_name, message}:
+      Rejected{state, "error:" ++ class_name, message}
     case Parser.FoundNames{names}:
       Calculated{state, name_values(names)}
     case Parser.NamesError{+message}:
@@ -323,7 +325,7 @@ def dependency_static(value: Core.Value) -> Bool:
 def query_parsed(parsed: Parser.Parsed, +context: List<&2, Core.Binding>, +origin: Bool, static: Bool) -> Parser.NamesResult:
   match parsed:
     case Parser.Accepted{expression}:
-      Parser.FoundNames{Dependencies.analyze(expression, context, origin, Bool.or(static, dependency_static(Core.lookup(context, "__static_dependencies", origin))))}
+      Parser.names_mode(Dependencies.analyze(expression, context, origin, Bool.or(static, dependency_static(Core.lookup(context, "__static_dependencies", origin)))), False{})
     case Parser.ParseError{message}:
       Parser.NamesError{message}
 

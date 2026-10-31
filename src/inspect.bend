@@ -105,10 +105,12 @@ def function_info(kind: Core.FunctionKind, info: Info) -> Info:
     case Metadata{old, dynamic, valid}:
       Metadata{function_kind(kind), dynamic, valid}
 
-def scoped_info(info: Info, dependencies: List<&2, String>) -> Info:
-  match info:
-    case Metadata{kind, dynamic, valid}:
+def scoped_info(info: Info, dependencies: Dependencies.DependencyResult) -> Info:
+  match info dependencies:
+    case Metadata{kind, dynamic, valid} Dependencies.AnalysisNames{dependencies}:
       Metadata{kind, Bool.not(List.is_empty(&2, String, dependencies)), valid}
+    case Metadata{kind, dynamic, valid} Dependencies.AnalysisNativeError{class_name, message}:
+      Metadata{kind, dynamic, False{}}
 
 # This pass inspects syntax only; it never evaluates a guard or user function.
 def analyze_in(+expr: Core.Expr, +sensitive: Bool) -> Info:

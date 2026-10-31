@@ -46,61 +46,101 @@ def union(a: List<&2, String>, b: List<&2, String>) -> List<&2, String>:
 def variable(+name: String, context: List<&2, Core.Binding>, +sensitive: Bool, static: Bool) -> List<&2, String>:
   Bool.pick(List<&2, String>, Bool.not(present(context, name, sensitive)), [Core.normalize(sensitive, name)], Nil{})
 
-def branch(chosen: Bool, yes: Unit -> List<&2, String>, no: Unit -> List<&2, String>) -> List<&2, String>:
+# Native guard failures are distinct from unresolved variable names. Dentaku
+# failures still trigger fallback analysis, as in the pinned Ruby implementation.
+type DependencyResult is Data:
+  AnalysisNames{names: List<&2, String>}
+  AnalysisNativeError{class_name: String, message: String}
+
+def static_mode(value: Core.Value) -> Bool:
+  match value:
+    case Core.Logical{True{}}:
+      True{}
+    case value:
+      False{}
+
+def append_result(a: DependencyResult, b: DependencyResult) -> DependencyResult:
+  match a:
+    case AnalysisNativeError{class_name, message}:
+      AnalysisNativeError{class_name, message}
+    case AnalysisNames{a}:
+      match b:
+        case AnalysisNativeError{class_name, message}:
+          AnalysisNativeError{class_name, message}
+        case AnalysisNames{b}:
+          AnalysisNames{List.append(&2, String, a, b)}
+
+def unique_result(result: DependencyResult) -> DependencyResult:
+  match result:
+    case AnalysisNames{names}:
+      AnalysisNames{unique(names, Nil{})}
+    case result:
+      result
+
+def union_result(a: DependencyResult, b: DependencyResult) -> DependencyResult:
+  unique_result(append_result(a, b))
+
+def branch(chosen: Bool, yes: Unit -> DependencyResult, no: Unit -> DependencyResult) -> DependencyResult:
   match chosen:
     case True{}:
       yes(Unit{})
     case False{}:
       no(Unit{})
 
-def conditional(value: Core.Value, yes: Unit -> List<&2, String>, no: Unit -> List<&2, String>, fallback: Unit -> List<&2, String>) -> List<&2, String>:
+def conditional(value: Core.Value, yes: Unit -> DependencyResult, no: Unit -> DependencyResult, fallback: Unit -> DependencyResult) -> DependencyResult:
   match value:
+    case Core.Raised{class_name, message}:
+      AnalysisNativeError{class_name, message}
     case Core.Failure{e}:
       fallback(Unit{})
     case value:
       branch(Core.truthy(value), yes, no)
 
-def probe(value: Core.Value, is_and: Bool) -> Bool:
+def logical_probe(value: Core.Value, is_and: Bool, names: List<&2, String>, next: Unit -> DependencyResult) -> DependencyResult:
   match value:
+    case Core.Raised{class_name, message}:
+      AnalysisNativeError{class_name, message}
     case Core.Failure{e}:
-      False{}
+      AnalysisNames{names}
     case value:
-      Core.decisive(is_and, value)
+      branch(Core.decisive(is_and, value), u => AnalysisNames{Nil{}}, next)
 
-def logical_using(~evaluate: Core.Expr -> List<&2, Core.Binding> -> Bool -> Core.Value, a: List<&2, String>, b: List<&2, String>, left: Core.Expr, right: Core.Expr, is_and: Bool, +context: List<&2, Core.Binding>, +sensitive: Bool) -> List<&2, String>:
+def logical_right_using(~evaluate: Core.Expr -> List<&2, Core.Binding> -> Bool -> Core.Value, +a: List<&2, String>, b: List<&2, String>, right: Core.Expr, is_and: Bool, context: List<&2, Core.Binding>, sensitive: Bool) -> DependencyResult:
+  match b:
+    case Nil{}:
+      logical_probe(evaluate(right, context, sensitive), is_and, unique(a, Nil{}), u => AnalysisNames{unique(a, Nil{})})
+    case b:
+      AnalysisNames{union(a, b)}
+
+def logical_using(~evaluate: Core.Expr -> List<&2, Core.Binding> -> Bool -> Core.Value, a: DependencyResult, b: DependencyResult, left: Core.Expr, +right: Core.Expr, +is_and: Bool, +context: List<&2, Core.Binding>, +sensitive: Bool) -> DependencyResult:
   match a b:
-    case Nil{} Nil{}:
-      Nil{}
-    case Nil{} +b:
-      Bool.pick(List<&2, String>, probe(evaluate(left, context, sensitive), is_and), Nil{}, unique(b, Nil{}))
-    case +a Nil{}:
-      Bool.pick(List<&2, String>, probe(evaluate(right, context, sensitive), is_and), Nil{}, unique(a, Nil{}))
-    case a b:
-      union(a, b)
+    case AnalysisNativeError{class_name, message} b:
+      AnalysisNativeError{class_name, message}
+    case a AnalysisNativeError{class_name, message}:
+      AnalysisNativeError{class_name, message}
+    case AnalysisNames{Nil{}} AnalysisNames{+b}:
+      logical_probe(evaluate(left, context, sensitive), is_and, unique(b, Nil{}), u => logical_right_using(~evaluate, Nil{}, b, right, is_and, context, sensitive))
+    case AnalysisNames{a} AnalysisNames{b}:
+      logical_right_using(~evaluate, a, b, right, is_and, context, sensitive)
 
-def logical(a: List<&2, String>, b: List<&2, String>, left: Core.Expr, right: Core.Expr, is_and: Bool, +context: List<&2, Core.Binding>, +sensitive: Bool) -> List<&2, String>:
-  logical_using(~Core.evaluate_in, a, b, left, right, is_and, context, sensitive)
-
-def logical_mode_using(~evaluate: Core.Expr -> List<&2, Core.Binding> -> Bool -> Core.Value, static: Bool, +a: List<&2, String>, +b: List<&2, String>, left: Core.Expr, right: Core.Expr, is_and: Bool, context: List<&2, Core.Binding>, sensitive: Bool) -> List<&2, String>:
+def logical_mode_using(~evaluate: Core.Expr -> List<&2, Core.Binding> -> Bool -> Core.Value, static: Bool, a: DependencyResult, b: DependencyResult, left: Core.Expr, right: Core.Expr, is_and: Bool, context: List<&2, Core.Binding>, sensitive: Bool) -> DependencyResult:
   match static:
     case True{}:
-      union(a, b)
+      union_result(a, b)
     case False{}:
       logical_using(~evaluate, a, b, left, right, is_and, context, sensitive)
-
-def logical_mode(static: Bool, +a: List<&2, String>, +b: List<&2, String>, left: Core.Expr, right: Core.Expr, is_and: Bool, context: List<&2, Core.Binding>, sensitive: Bool) -> List<&2, String>:
-  logical_mode_using(~Core.evaluate_in, static, a, b, left, right, is_and, context, sensitive)
 
 type CaseChoice is Data:
   CaseUnresolved{}
   CaseSelected{index: Nat}
+  CaseNativeError{class_name: String, message: String}
 
 def next_case_choice(choice: CaseChoice) -> CaseChoice:
   match choice:
     case CaseSelected{n}:
       CaseSelected{1n+n}
-    case CaseUnresolved{}:
-      CaseUnresolved{}
+    case choice:
+      choice
 
 def case_key_decision(matches: Bool, next: Unit -> CaseChoice) -> CaseChoice:
   match matches:
@@ -111,6 +151,8 @@ def case_key_decision(matches: Bool, next: Unit -> CaseChoice) -> CaseChoice:
 
 def case_key(key: Core.Value, subject: Core.Value, next: Unit -> CaseChoice) -> CaseChoice:
   match key:
+    case Core.Raised{class_name, message}:
+      CaseNativeError{class_name, message}
     case Core.Failure{message}:
       CaseUnresolved{}
     case key:
@@ -127,18 +169,14 @@ def select_case_using(~evaluate: Core.Expr -> List<&2, Core.Binding> -> Bool -> 
     case clauses:
       CaseUnresolved{}
 
-def select_case(clauses: Core.Expr, +subject: Core.Value, +context: List<&2, Core.Binding>, +sensitive: Bool) -> CaseChoice:
-  select_case_using(~Core.evaluate_in, clauses, subject, context, sensitive)
-
 def select_case_subject_using(~evaluate: Core.Expr -> List<&2, Core.Binding> -> Bool -> Core.Value, subject: Core.Value, clauses: Core.Expr, context: List<&2, Core.Binding>, sensitive: Bool) -> CaseChoice:
   match subject:
+    case Core.Raised{class_name, message}:
+      CaseNativeError{class_name, message}
     case Core.Failure{message}:
       CaseUnresolved{}
     case subject:
       select_case_using(~evaluate, clauses, subject, context, sensitive)
-
-def select_case_subject(subject: Core.Value, clauses: Core.Expr, context: List<&2, Core.Binding>, sensitive: Bool) -> CaseChoice:
-  select_case_subject_using(~Core.evaluate_in, subject, clauses, context, sensitive)
 
 def case_choice_using(~evaluate: Core.Expr -> List<&2, Core.Binding> -> Bool -> Core.Value, static: Bool, subject: Core.Expr, clauses: Core.Expr, +context: List<&2, Core.Binding>, +sensitive: Bool) -> CaseChoice:
   match static:
@@ -147,18 +185,19 @@ def case_choice_using(~evaluate: Core.Expr -> List<&2, Core.Binding> -> Bool -> 
     case False{}:
       select_case_subject_using(~evaluate, evaluate(subject, context, sensitive), clauses, context, sensitive)
 
-def case_choice(static: Bool, subject: Core.Expr, clauses: Core.Expr, +context: List<&2, Core.Binding>, +sensitive: Bool) -> CaseChoice:
-  case_choice_using(~Core.evaluate_in, static, subject, clauses, context, sensitive)
-
-def case_dependencies(choice: CaseChoice, subject: Unit -> List<&2, String>, clauses: List<&2, String>) -> List<&2, String>:
+def case_dependencies(choice: CaseChoice, subject: Unit -> DependencyResult, clauses: Unit -> DependencyResult) -> DependencyResult:
   match choice:
+    case CaseNativeError{class_name, message}:
+      AnalysisNativeError{class_name, message}
     case CaseUnresolved{}:
-      List.append(&2, String, subject(Unit{}), clauses)
+      append_result(subject(Unit{}), clauses(Unit{}))
     case CaseSelected{n}:
-      clauses
+      clauses(Unit{})
 
-def when_dependencies(choice: CaseChoice, all: Unit -> List<&2, String>, yes: Unit -> List<&2, String>, no: Nat -> List<&2, String>) -> List<&2, String>:
+def when_dependencies(choice: CaseChoice, all: Unit -> DependencyResult, yes: Unit -> DependencyResult, no: Nat -> DependencyResult) -> DependencyResult:
   match choice:
+    case CaseNativeError{class_name, message}:
+      AnalysisNativeError{class_name, message}
     case CaseUnresolved{}:
       all(Unit{})
     case CaseSelected{0n}:
@@ -180,77 +219,84 @@ def remove_binder_dependencies(names: List<&2, String>, +binders: List<&2, Strin
     case +head <> rest:
       unique_pick(binder_dependency(binders, head), head, u => remove_binder_dependencies(rest, binders))
 
-def resolve_variable(name: String, context: List<&2, Core.Binding>, sensitive: Bool, static: Bool) -> List<&2, String>:
-  variable(name, context, sensitive, static)
+def remove_binder_result(result: DependencyResult, binders: List<&2, String>) -> DependencyResult:
+  match result:
+    case AnalysisNames{names}:
+      AnalysisNames{remove_binder_dependencies(names, binders)}
+    case result:
+      result
 
-def analyze_using(~resolve: String -> List<&2, Core.Binding> -> Bool -> Bool -> List<&2, String>, ~evaluate: Core.Expr -> List<&2, Core.Binding> -> Bool -> Core.Value, expr: Core.Expr, +context: List<&2, Core.Binding>, +sensitive: Bool, +static: Bool, choice: CaseChoice) -> List<&2, String>:
+def resolve_variable(name: String, context: List<&2, Core.Binding>, sensitive: Bool, static: Bool) -> DependencyResult:
+  AnalysisNames{variable(name, context, sensitive, static)}
+
+def analyze_using(~resolve: String -> List<&2, Core.Binding> -> Bool -> Bool -> DependencyResult, ~evaluate: Core.Expr -> List<&2, Core.Binding> -> Bool -> Core.Value, expr: Core.Expr, +context: List<&2, Core.Binding>, +sensitive: Bool, +static: Bool, choice: CaseChoice) -> DependencyResult:
   match expr:
     case Core.MidExpression{value, offset, length}:
-      List.append(&2, String, analyze_using(~resolve, ~evaluate, value, context, sensitive, static, CaseUnresolved{}), List.append(&2, String, analyze_using(~resolve, ~evaluate, offset, context, sensitive, static, CaseUnresolved{}), analyze_using(~resolve, ~evaluate, length, context, sensitive, static, CaseUnresolved{})))
+      append_result(analyze_using(~resolve, ~evaluate, value, context, sensitive, static, CaseUnresolved{}), append_result(analyze_using(~resolve, ~evaluate, offset, context, sensitive, static, CaseUnresolved{}), analyze_using(~resolve, ~evaluate, length, context, sensitive, static, CaseUnresolved{})))
     case Core.ContainsExpression{needle, haystack}:
-      List.append(&2, String, analyze_using(~resolve, ~evaluate, needle, context, sensitive, static, CaseUnresolved{}), analyze_using(~resolve, ~evaluate, haystack, context, sensitive, static, CaseUnresolved{}))
+      append_result(analyze_using(~resolve, ~evaluate, needle, context, sensitive, static, CaseUnresolved{}), analyze_using(~resolve, ~evaluate, haystack, context, sensitive, static, CaseUnresolved{}))
     case Core.CountOneExpression{value}:
       analyze_using(~resolve, ~evaluate, value, context, sensitive, static, CaseUnresolved{})
     case Core.CountManyExpression{arguments, count}:
       analyze_using(~resolve, ~evaluate, arguments, context, sensitive, static, CaseUnresolved{})
     case Core.EnumerationExpression{kind, collection, binder, body}:
-      List.append(&2, String, analyze_using(~resolve, ~evaluate, collection, context, sensitive, static, CaseUnresolved{}), remove_binder_dependencies(analyze_using(~resolve, ~evaluate, body, context, sensitive, static, CaseUnresolved{}), [Core.normalize(sensitive, binder)]))
+      append_result(analyze_using(~resolve, ~evaluate, collection, context, sensitive, static, CaseUnresolved{}), remove_binder_result(analyze_using(~resolve, ~evaluate, body, context, sensitive, static, CaseUnresolved{}), [Core.normalize(sensitive, binder)]))
     case Core.ReductionExpression{collection, memo_binder, item_binder, body, initial}:
-      List.append(&2, String, analyze_using(~resolve, ~evaluate, collection, context, sensitive, static, CaseUnresolved{}), List.append(&2, String, remove_binder_dependencies(analyze_using(~resolve, ~evaluate, body, context, sensitive, static, CaseUnresolved{}), [Core.normalize(sensitive, memo_binder), Core.normalize(sensitive, item_binder)]), analyze_using(~resolve, ~evaluate, initial, context, sensitive, static, CaseUnresolved{})))
+      append_result(analyze_using(~resolve, ~evaluate, collection, context, sensitive, static, CaseUnresolved{}), append_result(remove_binder_result(analyze_using(~resolve, ~evaluate, body, context, sensitive, static, CaseUnresolved{}), [Core.normalize(sensitive, memo_binder), Core.normalize(sensitive, item_binder)]), analyze_using(~resolve, ~evaluate, initial, context, sensitive, static, CaseUnresolved{})))
     case Core.CaseExpression{+subject, +clauses}:
       +selected = case_choice_using(~evaluate, static, subject, clauses, context, sensitive)
-      case_dependencies(selected, u => analyze_using(~resolve, ~evaluate, subject, context, sensitive, static, CaseUnresolved{}), analyze_using(~resolve, ~evaluate, clauses, context, sensitive, static, selected))
+      case_dependencies(selected, u => analyze_using(~resolve, ~evaluate, subject, context, sensitive, static, CaseUnresolved{}), u => analyze_using(~resolve, ~evaluate, clauses, context, sensitive, static, selected))
     case Core.WhenExpression{key, +value, +rest}:
-      when_dependencies(choice, u => List.append(&2, String, analyze_using(~resolve, ~evaluate, key, context, sensitive, static, CaseUnresolved{}), List.append(&2, String, analyze_using(~resolve, ~evaluate, value, context, sensitive, static, CaseUnresolved{}), analyze_using(~resolve, ~evaluate, rest, context, sensitive, static, CaseUnresolved{}))), u => analyze_using(~resolve, ~evaluate, value, context, sensitive, static, CaseUnresolved{}), p => analyze_using(~resolve, ~evaluate, rest, context, sensitive, static, CaseSelected{p}))
+      when_dependencies(choice, u => append_result(analyze_using(~resolve, ~evaluate, key, context, sensitive, static, CaseUnresolved{}), append_result(analyze_using(~resolve, ~evaluate, value, context, sensitive, static, CaseUnresolved{}), analyze_using(~resolve, ~evaluate, rest, context, sensitive, static, CaseUnresolved{}))), u => analyze_using(~resolve, ~evaluate, value, context, sensitive, static, CaseUnresolved{}), p => analyze_using(~resolve, ~evaluate, rest, context, sensitive, static, CaseSelected{p}))
     case Core.ElseExpression{value}:
       analyze_using(~resolve, ~evaluate, value, context, sensitive, static, CaseUnresolved{})
     case Core.NoCaseMatch{}:
-      Nil{}
+      AnalysisNames{Nil{}}
     case Core.ArrayLiteral{a}:
       analyze_using(~resolve, ~evaluate, a, context, sensitive, static, CaseUnresolved{})
     case Core.Access{a, b}:
       x y = analyze_using(~resolve, ~evaluate, a, context, sensitive, static, CaseUnresolved{}) analyze_using(~resolve, ~evaluate, b, context, sensitive, static, CaseUnresolved{})
-      List.append(&2, String, x, y)
+      append_result(x, y)
     case Core.EmptyArguments{}:
-      Nil{}
+      AnalysisNames{Nil{}}
     case Core.Argument{a, validation}:
       analyze_using(~resolve, ~evaluate, a, context, sensitive, static, CaseUnresolved{})
     case Core.Arguments{a, b}:
       x y = analyze_using(~resolve, ~evaluate, a, context, sensitive, static, CaseUnresolved{}) analyze_using(~resolve, ~evaluate, b, context, sensitive, static, CaseUnresolved{})
-      List.append(&2, String, x, y)
+      append_result(x, y)
     case Core.FunctionCall{kind, arguments}:
       analyze_using(~resolve, ~evaluate, arguments, context, sensitive, static, CaseUnresolved{})
     case Core.Literal{v}:
-      Nil{}
+      AnalysisNames{Nil{}}
     case Core.Variable{name}:
       resolve(name, context, sensitive, static)
     case Core.Add{a, b}:
       x y = analyze_using(~resolve, ~evaluate, a, context, sensitive, static, CaseUnresolved{}) analyze_using(~resolve, ~evaluate, b, context, sensitive, static, CaseUnresolved{})
-      union(x, y)
+      union_result(x, y)
     case Core.Subtract{a, b}:
       x y = analyze_using(~resolve, ~evaluate, a, context, sensitive, static, CaseUnresolved{}) analyze_using(~resolve, ~evaluate, b, context, sensitive, static, CaseUnresolved{})
-      union(x, y)
+      union_result(x, y)
     case Core.Multiply{a, b}:
       x y = analyze_using(~resolve, ~evaluate, a, context, sensitive, static, CaseUnresolved{}) analyze_using(~resolve, ~evaluate, b, context, sensitive, static, CaseUnresolved{})
-      union(x, y)
+      union_result(x, y)
     case Core.Divide{a, b}:
       x y = analyze_using(~resolve, ~evaluate, a, context, sensitive, static, CaseUnresolved{}) analyze_using(~resolve, ~evaluate, b, context, sensitive, static, CaseUnresolved{})
-      union(x, y)
+      union_result(x, y)
     case Core.Modulo{a, b}:
       x y = analyze_using(~resolve, ~evaluate, a, context, sensitive, static, CaseUnresolved{}) analyze_using(~resolve, ~evaluate, b, context, sensitive, static, CaseUnresolved{})
-      union(x, y)
+      union_result(x, y)
     case Core.Bitwise{kind, a, b}:
       x y = analyze_using(~resolve, ~evaluate, a, context, sensitive, static, CaseUnresolved{}) analyze_using(~resolve, ~evaluate, b, context, sensitive, static, CaseUnresolved{})
-      union(x, y)
+      union_result(x, y)
     case Core.Compare{op, a, b}:
       x y = analyze_using(~resolve, ~evaluate, a, context, sensitive, static, CaseUnresolved{}) analyze_using(~resolve, ~evaluate, b, context, sensitive, static, CaseUnresolved{})
-      union(x, y)
+      union_result(x, y)
     case Core.Xor{a, b}:
       x y = analyze_using(~resolve, ~evaluate, a, context, sensitive, static, CaseUnresolved{}) analyze_using(~resolve, ~evaluate, b, context, sensitive, static, CaseUnresolved{})
-      union(x, y)
+      union_result(x, y)
     case Core.Round{a, places, mode}:
       x y = analyze_using(~resolve, ~evaluate, a, context, sensitive, static, CaseUnresolved{}) analyze_using(~resolve, ~evaluate, places, context, sensitive, static, CaseUnresolved{})
-      List.append(&2, String, x, y)
+      append_result(x, y)
     case Core.Negate{a}:
       analyze_using(~resolve, ~evaluate, a, context, sensitive, static, CaseUnresolved{})
     case Core.Percentage{a}:
@@ -268,10 +314,10 @@ def analyze_using(~resolve: String -> List<&2, Core.Binding> -> Bool -> Bool -> 
       x y = analyze_using(~resolve, ~evaluate, a, context, sensitive, static, CaseUnresolved{}) analyze_using(~resolve, ~evaluate, b, context, sensitive, static, CaseUnresolved{})
       logical_mode_using(~evaluate, static, x, y, a, b, False{}, context, sensitive)
     case Core.If{+c, +a, +b}:
-      branch(static, u => union(analyze_using(~resolve, ~evaluate, c, context, sensitive, True{}, CaseUnresolved{}), union(analyze_using(~resolve, ~evaluate, a, context, sensitive, True{}, CaseUnresolved{}), analyze_using(~resolve, ~evaluate, b, context, sensitive, True{}, CaseUnresolved{}))), u => conditional(evaluate(c, context, sensitive), u => analyze_using(~resolve, ~evaluate, a, context, sensitive, False{}, CaseUnresolved{}), u => analyze_using(~resolve, ~evaluate, b, context, sensitive, False{}, CaseUnresolved{}), u => union(analyze_using(~resolve, ~evaluate, c, context, sensitive, False{}, CaseUnresolved{}), union(analyze_using(~resolve, ~evaluate, a, context, sensitive, False{}, CaseUnresolved{}), analyze_using(~resolve, ~evaluate, b, context, sensitive, False{}, CaseUnresolved{})))))
+      branch(static, u => union_result(analyze_using(~resolve, ~evaluate, c, context, sensitive, True{}, CaseUnresolved{}), union_result(analyze_using(~resolve, ~evaluate, a, context, sensitive, True{}, CaseUnresolved{}), analyze_using(~resolve, ~evaluate, b, context, sensitive, True{}, CaseUnresolved{}))), u => conditional(evaluate(c, context, sensitive), u => analyze_using(~resolve, ~evaluate, a, context, sensitive, False{}, CaseUnresolved{}), u => analyze_using(~resolve, ~evaluate, b, context, sensitive, False{}, CaseUnresolved{}), u => union_result(analyze_using(~resolve, ~evaluate, c, context, sensitive, False{}, CaseUnresolved{}), union_result(analyze_using(~resolve, ~evaluate, a, context, sensitive, False{}, CaseUnresolved{}), analyze_using(~resolve, ~evaluate, b, context, sensitive, False{}, CaseUnresolved{})))))
 
-def analyze_mode(expr: Core.Expr, +context: List<&2, Core.Binding>, +sensitive: Bool, +static: Bool, choice: CaseChoice) -> List<&2, String>:
+def analyze_mode(expr: Core.Expr, +context: List<&2, Core.Binding>, +sensitive: Bool, +static: Bool, choice: CaseChoice) -> DependencyResult:
   analyze_using(~resolve_variable, ~Core.evaluate_in, expr, context, sensitive, static, choice)
 
-def analyze(expr: Core.Expr, context: List<&2, Core.Binding>, sensitive: Bool, static: Bool) -> List<&2, String>:
+def analyze(expr: Core.Expr, context: List<&2, Core.Binding>, sensitive: Bool, static: Bool) -> DependencyResult:
   analyze_mode(expr, context, sensitive, static, CaseUnresolved{})

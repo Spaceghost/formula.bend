@@ -844,15 +844,17 @@ def parse_in(source: String, sensitive: Bool) -> Parsed:
 def parse(source: String) -> Parsed:
   parse_in(source, False{})
 
-def preflight(missing: List<&2, String>, expr: Core.Expr, context: List<&2, Core.Binding>, sensitive: Bool) -> Core.Value:
+def preflight(missing: Dependencies.DependencyResult, expr: Core.Expr, context: List<&2, Core.Binding>, sensitive: Bool) -> Core.Value:
   match missing:
-    case Nil{}:
+    case Dependencies.AnalysisNativeError{class_name, message}:
+      Core.Raised{class_name, message}
+    case Dependencies.AnalysisNames{Nil{}}:
       Core.evaluate_in(expr, context, sensitive)
-    case names:
+    case Dependencies.AnalysisNames{names}:
       Core.Failure{"no value provided for variables: " ++ String.join(Dependencies.unique(names, Nil{}), ", ")}
 
 def evaluate_stored(+expr: Core.Expr, +context: List<&2, Core.Binding>, +sensitive: Bool) -> Core.Value:
-  preflight(Dependencies.analyze(expr, context, sensitive, False{}), expr, context, sensitive)
+  preflight(Dependencies.analyze(expr, context, sensitive, Dependencies.static_mode(Core.lookup(context, "__static_dependencies", sensitive))), expr, context, sensitive)
 
 def evaluate_checked(expr: Core.Expr, context: List<&2, Core.Binding>, sensitive: Bool) -> Core.Value:
   evaluate_stored(expr, Core.store_context(Core.evaluation_context(context, True{})), sensitive)
@@ -938,18 +940,26 @@ def type_snapshot(source: String) -> String:
 type NamesResult is Data:
   FoundNames{names: List<&2, String>}
   NamesError{message: String}
+  NamesNativeError{class_name: String, message: String}
 
-def names_mode(names: List<&2, String>, static: Bool) -> NamesResult:
+def names_list_mode(names: List<&2, String>, static: Bool) -> NamesResult:
   match static:
     case True{}:
       FoundNames{Dependencies.unique(names, Nil{})}
     case False{}:
       FoundNames{names}
 
-def names_result(parsed: Parsed, context: List<&2, Core.Binding>, sensitive: Bool, +static: Bool) -> NamesResult:
+def names_mode(result: Dependencies.DependencyResult, static: Bool) -> NamesResult:
+  match result:
+    case Dependencies.AnalysisNames{names}:
+      names_list_mode(names, static)
+    case Dependencies.AnalysisNativeError{class_name, message}:
+      NamesNativeError{class_name, message}
+
+def names_result(parsed: Parsed, +context: List<&2, Core.Binding>, +sensitive: Bool, +static: Bool) -> NamesResult:
   match parsed:
     case Accepted{expr}:
-      names_mode(Dependencies.analyze(expr, context, sensitive, static), static)
+      names_mode(Dependencies.analyze(expr, context, sensitive, Bool.or(static, Dependencies.static_mode(Core.lookup(context, "__static_dependencies", sensitive)))), static)
     case ParseError{e}:
       NamesError{e}
 
@@ -961,6 +971,8 @@ def dependencies(source: String, context: List<&2, Core.Binding>, +sensitive: Bo
 
 def names_snapshot(result: NamesResult) -> String:
   match result:
+    case NamesNativeError{class_name, message}:
+      "error:" ++ class_name
     case FoundNames{names}:
       "names:" ++ String.join(names, ",")
     case NamesError{e}:

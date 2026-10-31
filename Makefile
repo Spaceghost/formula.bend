@@ -164,6 +164,7 @@ stored-dependencies-check:
 	$(LUA) tools/generate-wire.lua compat/stored-cases.lua build/stored.input
 	$(LUA) tools/generate-wire.lua compat/stored-dependency-cases.lua build/stored-dependencies.input
 	$(LUA) tools/generate-wire.lua compat/stored-checked-cases.lua build/stored-checked.input
+	$(LUA) tools/generate-wire.lua compat/stored-native-error-cases.lua build/stored-native-error.input
 	$(BEND) compat/stored-runtime.bend -o build/stored-analysis-runtime.js
 	$(BUN) build/stored-analysis-runtime.js build/stored-dependencies.input > build/stored-dependencies.actual
 	diff -u compat/stored-dependency-oracle.tsv build/stored-dependencies.actual
@@ -171,3 +172,5 @@ stored-dependencies-check:
 	diff -u compat/stored-checked-oracle.tsv build/stored-checked.actual
 	$(BUN) build/stored-analysis-runtime.js build/stored.input > build/stored-analysis-values.actual
 	diff -u compat/stored-oracle.tsv build/stored-analysis-values.actual
+	$(BUN) build/stored-analysis-runtime.js build/stored-native-error.input > build/stored-native-error.actual
+	diff -u compat/stored-native-error-oracle.tsv build/stored-native-error.actual

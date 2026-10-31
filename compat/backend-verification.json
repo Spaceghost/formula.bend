@@ -2177,8 +2177,59 @@
       "status": "passed all 60",
       "log": "compat/verification/calculator-native-error-static.log"
     },
-    "native_cpu": "pending for new Calculator error propagation",
+    "native_cpu": {
+      "source_commit": "4bf5078554489b9d9f25db4ef1eb7320f280df6c",
+      "status": "passed all 11291 formula/API cases, 283 stored probes, 7 scale and 36 malformed checks",
+      "threads": [
+        1,
+        8
+      ],
+      "compiler": "clang 19.1.1 -O3",
+      "peak_bytes": 6379319296,
+      "swap_peak_bytes": 0,
+      "log": "compat/verification/calculator-native-errors-123-native.log",
+      "source_manifest": "compat/verification/calculator-native-errors-123-native-source.sha256",
+      "formula_c_sha256": "efba7cecd2bfe9ec98c2fe68afc5d2a85e65be59a2034b452312e32e79e00609",
+      "formula_binary_sha256": "f9e0495eae45af64df9d5a227ace3379ba0d4b42416a5d89882fa00b6fb128ab",
+      "stored_c_sha256": "26ee7a6578f70e5adcd488a890738e608911d0e4f43246573620a8c311fecdad",
+      "stored_binary_sha256": "dd5ee0c61824cfa3f50a934e263076f0fb1ea5e7b4632225a8cc980d8d7ffac0"
+    },
     "cuda": "unverified for this evaluator source",
+    "metal": "unverified",
+    "performance": "not measured"
+  },
+  "dependency_native_errors_checkpoint": {
+    "source_parent": "4bf5078",
+    "scope": "Native guard errors in IF/CASE/logical dependency analysis, comparison rescue boundaries, parser/Calculator/stored query propagation and exact static context markers; full parity remains unfinished",
+    "formula_and_api_cases": 12737,
+    "new_formula_and_api_probes": 1446,
+    "new_stored_probes": 216,
+    "total_stored_probes": 499,
+    "baseline_failures": 746,
+    "baseline_case_count": 1446,
+    "failures_after": 0,
+    "laws": 134,
+    "existing_law_representation_change": "sum_dependency_duplicates retains the exact ordered duplicate payload inside AnalysisNames; every prior success contract remains enforced",
+    "kernel": "passed Lean-backed Bend 2.0.39",
+    "source_manifest": "compat/verification/dependency-native-source.sha256",
+    "javascript": {
+      "status": "passed full 12737 formula/API cases, all 499 stored probes, 7 scale and 36 malformed checks",
+      "runtime": "Bun 1.3.1",
+      "formula_js_sha256": "8c343f4672f060de25610e7ad8f89042766390fde3b1360b6ef46dac4382509d",
+      "formula_input_sha256": "a1149b9aa429ca77e2f644ccc3b0431eb4d50be1814b42b2ef8e11e2247f41dc",
+      "formula_output_sha256": "00a56185b167181db7b2cafec3d15d0864c9d4a7693f038507b02d352ecdf40c",
+      "stored_js_sha256": "a3bc0cfddd68d89c18ac375933d149ae9565a371923e3d8e3cb49c3ac40fe2f5",
+      "stored_native_input_sha256": "6c8b86a55672b90cbb41c5821b29806f949e162879d7343d6adf7ccddac237f8",
+      "stored_native_output_sha256": "b336ce922795e5953d4bc30e92ec7e5dcba7ec819e8e3e5620fa664f0ad7ab90"
+    },
+    "concrete_fixtures": "all 175 passed",
+    "static_new_formula_and_api_probes": "All 1350 formula/API probes passed; replay of 96 Calculator sessions is still running",
+    "static_new_stored_probes": {
+      "status": "passed all 216",
+      "log": "compat/verification/stored-native-static.log"
+    },
+    "native_cpu": "pending for this source",
+    "cuda": "unverified for this source",
     "metal": "unverified",
     "performance": "not measured"
   }

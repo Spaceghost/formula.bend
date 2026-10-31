@@ -128,7 +128,7 @@ The eight address runtime cases pass on both JavaScript and native CPU.
 
 Parity is measured against the pinned Ruby source and its complete 713-example
 suite. The Ruby reference passes all examples; that is not a claim that Bend does.
-A separate 11291-case corpus covers selected values,
+A separate 12737-case corpus covers selected values,
 dependencies, parse-error classification, and exception factories.
 `make parity-check` generates the fixtures using Lua.
 Use `LUA=/path/to/lua` if Lua is not on PATH.
@@ -142,18 +142,19 @@ gate. No performance comparison is claimed yet.
 
 The corpus supports exact decimal, integer, raw-word Float, string, Boolean, null, nested array,
 ordered hash, named class/module and Range bindings, plus case-sensitive contexts.
-All 11,291 cases pass Bun, along with seven scale checks and 36 malformed-input
-checks. All 123 laws pass Lean-backed verification on Bend 2.0.39. There are 160
-upstream scenario mappings and 175 concrete regression fixtures. The preceding 11,231-case checkpoint and all 283 stored
-probes passed native CPU with one and eight threads; the 60 new Calculator
-native-error sessions await native replay.
+All 12,737 cases pass Bun, along with seven scale checks and 36 malformed-input
+checks. All 134 laws pass Lean-backed verification on Bend 2.0.39. There are 160
+upstream scenario mappings and 175 concrete regression fixtures. The preceding
+11,291-case checkpoint and its 283 stored probes passed native CPU with one and
+eight threads; the new dependency probes await native replay.
 GPU replay of this evaluator source remains pending.
 
-An additional 283 probes cover stored AST values, formula-aware dependencies and
+An additional 499 probes cover stored AST values, formula-aware dependencies and
 checked AST evaluation. They pass Bun on this source; their earlier checkpoint
-also passed native CPU with one and eight threads.
+also passed native CPU with one and eight threads for its original 283 probes.
 The corpus includes a 257-formula chain, locally rebound recursion, branch
-pruning, dependency-first errors and messages. The recursive runners remain
+pruning, dependency-first errors and messages, including native guard failures.
+See [dependency errors](docs/dependency-errors.md) for result handling. The recursive runners remain
 outside termination proofs. Calculator state/cache evaluation entry points are
 not yet connected; see [stored expressions](docs/stored-expressions.md).
 
