@@ -8,6 +8,9 @@ import ./src/bits.bend as Bits
 import ./src/error_types.bend as ErrorTypes
 import ./src/binary64.bend as Binary64
 
+def Laws.binary64_ruby_decimal_zero(negative, scale):
+  {==}
+
 def Laws.binary64_decimal_zero(negative, scale):
   {==}
 

@@ -2,6 +2,7 @@ import Base
 import ../src/binary64.bend as Binary
 import ../src/binary64_decimal.bend as Conversion
 import ../src/decimal.bend as Decimal
+import ../src/binary64_ruby_decimal.bend as RubyConversion
 
 type Operation is Data:
   Add{}
@@ -24,6 +25,7 @@ type Work is Data:
   Leaf{id: String, operation: Operation, left: Binary.Float, right: Binary.Float}
   Fork{left: Work, right: Work}
   DecimalLeaf{id: String, negative: Bool, magnitude: Decimal.Decimal}
+  RubyDecimalLeaf{id: String, negative: Bool, magnitude: Decimal.Decimal}
 
 type Loaded is Data:
   LoadedWork{work: Work}
@@ -152,10 +154,19 @@ def decimal_row(id: String, negative: Maybe<&2, Bool>, digits: Maybe<&2, List<&2
     case negative digits scale:
       Invalid{}
 
+def ruby_row(loaded: Loaded) -> Loaded:
+  match loaded:
+    case LoadedWork{DecimalLeaf{id, negative, magnitude}}:
+      LoadedWork{RubyDecimalLeaf{id, negative, magnitude}}
+    case loaded:
+      Invalid{}
+
 def row(fields: List<&2, String>) -> Loaded:
   match fields:
     case id <> "from_decimal" <> sign <> digits <> scale <> Nil{}:
       decimal_row(id, negative(sign), coefficient(digits), Nat.read(scale))
+    case id <> "from_ruby_decimal" <> sign <> digits <> scale <> Nil{}:
+      ruby_row(decimal_row(id, negative(sign), coefficient(digits), Nat.read(scale)))
     case id <> op <> ah <> al <> bh <> bl <> Nil{}:
       loaded_row(id, operation(op), word(ah), word(al), word(bh), word(bl))
     case fields:
@@ -262,6 +273,8 @@ def execute(work: Work) -> Results:
       Row{id, snapshot(calculate(operation, left, right))}
     case DecimalLeaf{id, negative, magnitude}:
       Row{id, Binary.snapshot(Conversion.from_decimal(negative, magnitude))}
+    case RubyDecimalLeaf{id, negative, magnitude}:
+      Row{id, Binary.snapshot(RubyConversion.from_decimal(negative, magnitude))}
     case Fork{left, right}:
       a b = execute(left) execute(right)
       Joined{a, b}
