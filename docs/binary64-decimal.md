@@ -48,7 +48,8 @@ by fixture ID, with BigDecimal#to_f, Float(text), and exact IEEE results. They
 remain incomplete Ruby compatibility items. `from_decimal` is explicitly the
 IEEE conversion; it must not silently stand in for the pinned Ruby conversion
 when the evaluator's coercion profile is added. Ruby-compatible conversion,
-Float formatting and mixed numeric coercions remain required work.
+[Float formatting](binary64-format.md) is implemented as a standalone layer;
+mixed numeric coercions and evaluator integration remain required work.
 
 References: [Ruby Float](https://docs.ruby-lang.org/en/3.3/Float.html#method-i-to_r),
 [BigDecimal conversion](https://docs.ruby-lang.org/en/3.3/BigDecimal.html#method-i-to_f),

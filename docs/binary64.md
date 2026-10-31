@@ -25,9 +25,12 @@ The implementation does not expose floating-point exception flags or alternative
 rounding modes. An [exact decimal bridge](binary64-decimal.md) supplies IEEE
 nearest/even conversion and signed exact projection. Ruby-compatible decimal
 parsing, square roots, powers, transcendental functions,
-Ruby Float formatting, Integer/BigDecimal coercion, evaluator result guards and
+Integer/BigDecimal coercion, evaluator result guards and
 formula-level error propagation remain required work. This is not a claim of
 complete IEEE 754 or Ruby Float support.
+
+The [standalone Ruby Float formatter](binary64-format.md) supplies shortest
+decimal output and Ruby notation rules without adding evaluator Float values.
 
 ## Verification
 

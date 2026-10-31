@@ -64,6 +64,10 @@ File.foreach(ENV.fetch('BINARY64_INPUT')) do |line|
   end
   a = [Integer(ah), Integer(al)].pack('NN').unpack1('G')
   b = [Integer(bh), Integer(bl)].pack('NN').unpack1('G')
+  if op == 'format'
+    puts "#{id}\t#{a.to_s}"
+    next
+  end
   if op == 'to_exact'
     if a.nan?
       snapshot = 'nan'
