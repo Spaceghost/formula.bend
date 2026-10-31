@@ -17,6 +17,20 @@ import ./src/reference.bend as Ref
 import ./src/error_types.bend as ErrorTypes
 import ./src/errors.bend as Errors
 import ./src/binary64.bend as Binary64
+import ./src/binary64_decimal.bend as BinaryDecimal
+
+law binary64_decimal_zero:
+  for negative: Bool
+  for scale: Nat
+  {BinaryDecimal.from_decimal(negative, Decimal.Exact{Nil{}, scale}) == Binary64.zero(negative) : Binary64.Float}
+
+law binary64_exact_zero:
+  for +negative: Bool
+  {BinaryDecimal.to_exact(Binary64.zero(negative)) == BinaryDecimal.Finite{negative, Decimal.Exact{Nil{}, 0n}} : BinaryDecimal.Exact}
+
+law binary64_exact_infinity:
+  for +negative: Bool
+  {BinaryDecimal.from_exact(BinaryDecimal.to_exact(Binary64.infinity(negative))) == Binary64.infinity(negative) : Binary64.Float}
 
 law binary64_negate_twice:
   for +value: Binary64.Float

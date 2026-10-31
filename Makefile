@@ -25,16 +25,24 @@ binary64-check:
 	$(BEND) compat/binary64-runtime.bend -o build/binary64-runtime.js
 	$(BUN) build/binary64-runtime.js build/binary64.input > build/binary64.actual
 	diff -u compat/binary64-oracle.tsv build/binary64.actual
+	$(LUA) tools/generate-binary64-conversion-cases.lua build/binary64-conversion.input
+	$(BUN) build/binary64-runtime.js build/binary64-conversion.input > build/binary64-conversion.actual
+	diff -u compat/binary64-conversion-oracle.tsv build/binary64-conversion.actual
 
 .PHONY: binary64-native-check
 binary64-native-check:
 	mkdir -p build
 	$(LUA) tools/generate-binary64-cases.lua build/binary64.input
+	$(LUA) tools/generate-binary64-conversion-cases.lua build/binary64-conversion.input
 	$(BEND) compat/binary64-runtime.bend -o build/binary64-runtime-native
 	./build/binary64-runtime-native build/binary64.input +RTS --gpu off --threads 1 > build/binary64-native-1.actual
 	diff -u compat/binary64-oracle.tsv build/binary64-native-1.actual
 	./build/binary64-runtime-native build/binary64.input +RTS --gpu off --threads 8 > build/binary64-native-8.actual
 	diff -u compat/binary64-oracle.tsv build/binary64-native-8.actual
+	./build/binary64-runtime-native build/binary64-conversion.input +RTS --gpu off --threads 1 > build/binary64-conversion-native-1.actual
+	diff -u compat/binary64-conversion-oracle.tsv build/binary64-conversion-native-1.actual
+	./build/binary64-runtime-native build/binary64-conversion.input +RTS --gpu off --threads 8 > build/binary64-conversion-native-8.actual
+	diff -u compat/binary64-conversion-oracle.tsv build/binary64-conversion-native-8.actual
 
 unicode-check:
 	mkdir -p build
