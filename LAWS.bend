@@ -21,6 +21,12 @@ import ./src/binary64.bend as Binary64
 import ./src/binary64_decimal.bend as BinaryDecimal
 import ./src/binary64_format.bend as BinaryFormat
 import ./src/binary64_ruby_decimal.bend as RubyBinaryDecimal
+import ./src/binary64_bigdecimal.bend as BinaryBigDecimal
+
+law binary64_bigdecimal_zero:
+  for profile: BinaryBigDecimal.Profile
+  for +negative: Bool
+  {BinaryBigDecimal.from_float(profile, Binary64.zero(negative)) == BinaryDecimal.Finite{negative, Decimal.Exact{Nil{}, 0n}} : BinaryDecimal.Exact}
 
 law binary64_format_zero:
   for +negative: Bool

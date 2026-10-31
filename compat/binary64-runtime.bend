@@ -4,6 +4,7 @@ import ../src/binary64_decimal.bend as Conversion
 import ../src/decimal.bend as Decimal
 import ../src/binary64_format.bend as Format
 import ../src/binary64_ruby_decimal.bend as RubyConversion
+import ../src/binary64_bigdecimal.bend as BigDecimal
 
 type Operation is Data:
   Add{}
@@ -16,6 +17,8 @@ type Operation is Data:
   ToExact{}
   ExactRoundTrip{}
   Format{}
+  BigDecimalImplicit{}
+  BigDecimalText{}
 
 type Calculation is Data:
   Value{value: Binary.Float}
@@ -63,6 +66,10 @@ def operation(text: String) -> Maybe<&2, Operation>:
       Some{ExactRoundTrip{}}
     case "format":
       Some{Format{}}
+    case "bigdecimal_implicit":
+      Some{BigDecimalImplicit{}}
+    case "bigdecimal_text":
+      Some{BigDecimalText{}}
     case text:
       None{}
 
@@ -247,6 +254,10 @@ def calculate(op: Operation, +a: Binary.Float, b: Binary.Float) -> Calculation:
       Value{Conversion.from_exact(Conversion.to_exact(a))}
     case Format{}:
       Formatted{Format.show(a)}
+    case BigDecimalImplicit{}:
+      ExactValue{BigDecimal.from_float(BigDecimal.Implicit{}, a)}
+    case BigDecimalText{}:
+      ExactValue{BigDecimal.from_float(BigDecimal.ShortestText{}, a)}
 
 def ordering_snapshot(order: Maybe<&2, Cmp>) -> String:
   match order:

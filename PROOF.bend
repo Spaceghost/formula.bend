@@ -8,6 +8,9 @@ import ./src/bits.bend as Bits
 import ./src/error_types.bend as ErrorTypes
 import ./src/binary64.bend as Binary64
 
+def Laws.binary64_bigdecimal_zero(profile, negative):
+  {==}
+
 def Laws.binary64_format_zero(negative):
   {==}
 

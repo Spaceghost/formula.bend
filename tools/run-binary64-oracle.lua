@@ -20,6 +20,23 @@ LIBC_STRTOD = Fiddle::Function.new(Fiddle::Handle::DEFAULT['strtod'],
 def word_snapshot(value)
   value.nan? ? 'nan' : [value].pack('G').unpack('NN').join(':')
 end
+def decimal_snapshot(value)
+  return 'nan' if value.nan?
+  return value.negative? ? 'negative-infinity' : 'positive-infinity' if value.infinite?
+  sign = value.sign < 0 ? '-' : '+'
+  return "finite:#{sign}0:0" if value.zero?
+  _, coefficient, _, exponent = value.split
+  scale = coefficient.length - exponent
+  if scale < 0
+    coefficient += '0' * -scale
+    scale = 0
+  end
+  while scale > 0 && coefficient.end_with?('0')
+    coefficient = coefficient[0...-1]
+    scale -= 1
+  end
+  "finite:#{sign}#{coefficient}:#{scale}"
+end
 def ieee_decimal(coefficient, scale)
   coefficient = coefficient.sub(/\A0+/, '')
   return 0.0 if coefficient.empty?
@@ -68,6 +85,11 @@ File.foreach(ENV.fetch('BINARY64_INPUT')) do |line|
   end
   a = [Integer(ah), Integer(al)].pack('NN').unpack1('G')
   b = [Integer(bh), Integer(bl)].pack('NN').unpack1('G')
+  if op == 'bigdecimal_implicit' || op == 'bigdecimal_text'
+    value = op == 'bigdecimal_implicit' ? BigDecimal('0').coerce(a).first : BigDecimal(a.to_s, 16)
+    puts "#{id}\t#{decimal_snapshot(value)}"
+    next
+  end
   if op == 'format'
     puts "#{id}\t#{a.to_s}"
     next
