@@ -64,7 +64,10 @@ make native-check
 execution with expected output. `make native-check` needs a compatible clang and
 compares the native program with the same output. Build outputs stay in `build/`.
 All nineteen arithmetic/function runtime cases and eight rounding runtime cases
-have passed on JavaScript and native CPU. CUDA and Metal remain unverified.
+have passed on JavaScript and native CPU. A frozen 2,516-case interpreter
+checkpoint and seven scale cases also pass CUDA on a Quadro P4000 with the
+explicit `--Ofast-compile=max` profile. Default-profile CUDA, newer interpreter
+changes, and Metal remain unverified. No performance comparison is claimed.
 
 ## Compatibility limits
 

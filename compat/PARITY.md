@@ -142,7 +142,7 @@ The 114-case corpus passes on JavaScript and native CPU with Bend 2.0.16 and
 2.0.39. Native checks run from frozen Git worktrees, with source commit and
 artifact checksums recorded in backend-verification.json. The parser uses the
 internal constructor ParseReady to avoid a collision with the newer Base library.
-CUDA and Metal are still unverified; this is not a performance shootout.
+At that checkpoint CUDA and Metal were unverified; this is not a performance shootout.
 
 ## Arrays, indexing, and COUNT
 
@@ -498,8 +498,8 @@ of allowing CPU fallback. `tools/run-cuda-smoke.lua` reproduces that check from
 a frozen worktree using the existing development container and an external
 CUDA toolkit. Toolkit archives were checked against NVIDIA's redistribution
 manifest. Source, binary and GPU artifact hashes are recorded separately from
-formula correctness evidence. This is a compiler/runtime check; the formula
-corpus has not yet run on CUDA, and it supplies no performance comparison.
+formula correctness evidence. This is a compiler/runtime smoke check; it
+supplies no formula parity evidence or performance comparison by itself.
 
 ## Runtime-loaded correctness harness
 
@@ -528,13 +528,28 @@ from the earlier generated-program checkpoints.
 
 `tools/run-cuda-corpus.lua FROZEN_WORKTREE BEND_PACKAGE CUDA_TOOLKIT SCRATCH`
 builds one native executable and shader, checks both CPU pool sizes, and checks
-the shared corpus and scale inputs in required CUDA mode. CUDA formula
+the shared corpus and scale inputs in required CUDA mode. Default-profile CUDA
 correctness is still unverified: the default NVRTC builds have a long
 optimization phase. The optional `tools/configure-cuda.lua` changes only the
 generated host invocation to request a labeled --Ofast-compile profile, retaining
-the existing --fmad=false setting and shader source. [NVIDIA documents this](https://docs.nvidia.com/cuda/archive/13.0.2/nvrtc/index.html#supported-compile-options) as
+the existing --fmad=false setting and device implementation. [NVIDIA documents this](https://docs.nvidia.com/cuda/archive/13.0.2/nvrtc/index.html#supported-compile-options) as
 a compile-time/runtime optimization tradeoff, so it must be recorded separately
 from the default profile. No performance comparison is claimed.
+
+The frozen `29854e6` interpreter now passes all 2,516 differential cases and
+seven scale checks in required CUDA mode on a Quadro P4000, with a 1-GB GPU
+heap, CUDA 12.9.86 and driver 580.178.04. This pass explicitly uses
+`--Ofast-compile=max`; it is separate from the still-unverified default profile.
+Both CPU pool sizes pass before the GPU checks. GPU outputs match the exact
+reference files, and source/executable/shader/output hashes are recorded in
+`backend-verification.json`. The generated runtime uses `cuLaunchKernel` for
+the GPU bang and treats launch or synchronization failure as an error.
+
+This result predates the later exception and decimal-transport changes. It
+does not establish CUDA parity for the current corpus, Metal correctness, or
+any performance ranking. The full source is embedded with `#embed __FILE__`;
+the host-option edit changes those embedded bytes, while leaving the device
+implementation unchanged. Keep every profile's shader artifact separate.
 
 ## Exception descriptions and factories
 

@@ -1,4 +1,34 @@
 {
+  "cuda_formula_checkpoints": [
+    {
+      "status": "passed",
+      "scope": "Frozen 2516-case interpreter checkpoint; excludes later exception factories and decimal transport changes; no performance claim",
+      "engine_source_commit": "29854e6780e808c23783d7b7db298b5ef25d4230",
+      "differential_cases": 2516,
+      "scale_cases": 7,
+      "bend_version": "2.0.39",
+      "host": "fedora",
+      "gpu": "NVIDIA Quadro P4000",
+      "compute_capability": "6.1",
+      "driver_version": "580.178.04",
+      "host_compiler": "Ubuntu clang 19.1.1",
+      "host_optimization": "-O3",
+      "cuda_bundle": "12.9.1",
+      "nvrtc_version": "12.9.86",
+      "profile": "--Ofast-compile=max",
+      "fmad": false,
+      "required_gpu_heap": "1GB",
+      "cpu_thread_counts_checked": [1, 8],
+      "default_profile_status": "unverified",
+      "generated_c_sha256": "fbea11f742d0f98d7e531bc584ea6aff6b30b9ef232da8f38fab8086e3fdb0df",
+      "artifact_sha256": "84905fc4cc4172d13f5fac20fa5f665c7de97f8c347e8827470f6e6f4841e1ce",
+      "gpu_artifact_sha256": "8a72ed108b086d2d33aa753d9f0bf95e325cda62b15e163e91802c00350e2528",
+      "main_input_sha256": "382ac3192d4266b1de34a9e1ea8946538fda0e0a155868608ace4357c02b2c28",
+      "main_output_sha256": "1df85530631b740a8a7f55a8de9342ecc0d33508a95fb4fd31967d8f08078b5f",
+      "scale_input_sha256": "d05a7b3c1663780f7edb896a7c665a78e44925a567c6effbf1142e8278803603",
+      "scale_output_sha256": "1622d34d26cdfb85586752ab86ab4d71067ac7d4bba1ccdfbd485d314c8bc5e2"
+    }
+  ],
   "decimal_integration_checkpoint": {
     "source_commit": "c22a813d86f5c616e9eaa76cb7b6d68f7e13b0dc",
     "scope": "Merged exception factories, compact reason dispatch and typed decimal transport; correctness only",
@@ -175,7 +205,7 @@
     "cuda_formula_status": "unverified"
   },
   "runtime_fixture_checks": {
-    "scope": "Runtime fixture transport and balanced dispatcher; CUDA formula execution still unverified",
+    "scope": "Runtime fixture transport and balanced dispatcher; default-profile CUDA formula execution still unverified",
     "engine_source_commit": "eccf7dc6acd7357d4e88ae667f42712a87c0d44d",
     "differential_cases": 2516,
     "scale_cases": 7,
