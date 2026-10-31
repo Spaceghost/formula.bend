@@ -551,3 +551,18 @@ law prepared_binding_first_wins:
 
 law ruby_zero_division_default_message:
   {Core.message_snapshot(Core.Failure{"Division by zero"}) == "message:Dentaku::ZeroDivisionError" : String}
+
+law float_infinite_index_is_native_range_error:
+  for value: Core.Value
+  {Core.access_index(value, Core.float_words(2146435072, 0)) == Core.Raised{"RangeError", "float Inf out of range of integer"} : Core.Value}
+
+law float_nan_index_is_native_range_error:
+  for value: Core.Value
+  {Core.access_index(value, Core.float_words(2146959360, 1)) == Core.Raised{"RangeError", "float NaN out of range of integer"} : Core.Value}
+
+law float_shift_count_truncates_toward_zero:
+  {Core.bitwise(Bits.ShiftLeft{}, Core.Number{8n}, Core.float_words(3222011904, 0)) == Core.Number{1n} : Core.Value}
+
+law array_repetition_wraps_nonfinite_conversion:
+  for array: Core.Value
+  {Core.array_multiply(array, Core.float_words(2146435072, 0)) == Core.Failure{"float Inf out of range of integer"} : Core.Value}

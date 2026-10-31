@@ -531,3 +531,15 @@ def Laws.prepared_binding_first_wins(first, second):
 
 def Laws.ruby_zero_division_default_message():
   {==}
+
+def Laws.float_infinite_index_is_native_range_error(value):
+  {==}
+
+def Laws.float_nan_index_is_native_range_error(value):
+  {==}
+
+def Laws.float_shift_count_truncates_toward_zero():
+  {==}
+
+def Laws.array_repetition_wraps_nonfinite_conversion(array):
+  {==}

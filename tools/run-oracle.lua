@@ -242,7 +242,7 @@ File.foreach(ENV.fetch('FORMULA_ORACLE_CORPUS')) do |line|
     snapshot = "error:#{error.class.name}"
   rescue RangeError => error
     # These source operations leak native Ruby range failures in this baseline.
-    raise unless error.is_a?(FloatDomainError) || error.message.include?('too big to convert') || error.message.include?('too small to convert') || error.message == 'shift width too big'
+    raise unless error.is_a?(FloatDomainError) || error.message.include?('too big to convert') || error.message.include?('too small to convert') || error.message == 'shift width too big' || error.message.include?('out of range of integer')
     snapshot = ['message', 'coerce_message', 'stored_checked_message'].include?(operation) ? "message:#{error.message}" : "error:#{error.class.name}"
   rescue ::ArgumentError, ::TypeError => error
     snapshot = ['message', 'coerce_message', 'stored_checked_message'].include?(operation) ? "message:#{error.message}" : "error:#{error.class.name}"

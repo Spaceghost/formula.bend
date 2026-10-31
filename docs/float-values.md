@@ -38,6 +38,14 @@ regressions with result-class checks. It is a verified subset of Dentaku parity,
 not a replacement for the full upstream scenario inventory. The former COUNT
 fixture adaptation now uses actual Float bindings.
 
+Float Array/String indices truncate toward zero and enforce Ruby’s signed
+64-bit long range. Range failures retain the original Float rendered with Ruby’s
+10-significant-digit error profile. Shift counts accept finite Floats and
+truncate toward zero; bitwise AND/OR still reject Float operands. Array repetition
+translates index-conversion errors into Dentaku argument errors. The separate
+450-case Float access corpus checks values and error messages at signed-long
+boundaries, infinities, signed zeros and NaNs.
+
 Full Ruby object identity for Float values, numeric Hash keys, global BigDecimal
 modes, remaining built-ins and complete Calculator coverage remain unfinished.
 The reference profile is Ruby 3.3.13 / BigDecimal 3.1.5 on 64-bit Linux. Foundation

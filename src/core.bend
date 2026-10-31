@@ -12,6 +12,7 @@ import ./binary64_format.bend as BinaryFormat
 import ./numeric_float.bend as FloatNumeric
 import ./binary64_bigdecimal.bend as FloatBigDecimal
 import ./float_round.bend as FloatRound
+import ./float_index.bend as FloatIndex
 
 type ReferenceKind is Data:
   ClassReferenceKind{}
@@ -852,7 +853,7 @@ def array_repeat_fits(fits: Bool, digits: List<&2, U32>, array: Value) -> Value:
 def array_repeat_digits(negative_count: Bool, +digits: List<&2, U32>, array: Value) -> Value:
   match negative_count:
     case True{}:
-      Bool.pick(Value, List.is_empty(&2, U32, digits), ArrayNil{}, Failure{"Negative array repetition count"})
+      Bool.pick(Value, List.is_empty(&2, U32, digits), ArrayNil{}, Failure{"negative argument"})
     case False{}:
       array_repeat_fits(Nat.is_le(List.length(&2, U32, digits), 14n), digits, array)
 
@@ -868,14 +869,21 @@ def array_repeat_operand(value: NumericOperand, array: Value) -> Value:
     case InvalidNumeric{message}:
       Failure{message}
     case RaisedNumeric{error_class, error_message}:
-      Raised{error_class, error_message}
+      Failure{error_message}
+
+def array_repeat_float(result: FloatIndex.IndexResult, array: Value) -> Value:
+  match result:
+    case FloatIndex.Index{sign, magnitude}:
+      array_repeat_decimal(magnitude, sign, array)
+    case FloatIndex.OutOfRange{message}:
+      Failure{message}
 
 def array_multiply(array: Value, count: Value) -> Value:
   match count:
     case FloatNumber{value}:
-      array_repeat_operand(binary_numeric_operand(BinaryDecimal.to_exact(value)), array)
+      array_repeat_float(FloatIndex.convert(value), array)
     case DecimalNonfinite{value}:
-      Raised{"FloatDomainError", FloatNumeric.special_text(value)}
+      Failure{FloatNumeric.special_text(value)}
     case IntegerNumber{n}:
       array_repeat_decimal(n, False{}, array)
     case NegativeInteger{n}:
@@ -2015,8 +2023,17 @@ def access_substring(value: Value, +s: String) -> Value:
     case value:
       Failure{"Invalid index type"}
 
+def access_float(result: FloatIndex.IndexResult, value: Value) -> Value:
+  match result:
+    case FloatIndex.Index{sign, magnitude}:
+      access_numeric(magnitude, sign, value)
+    case FloatIndex.OutOfRange{message}:
+      Raised{"RangeError", message}
+
 def access_index(value: Value, index: Value) -> Value:
   match index:
+    case FloatNumber{value_index}:
+      access_float(FloatIndex.convert(value_index), value)
     case IntegerNumber{n}:
       access_numeric(n, False{}, value)
     case NegativeInteger{n}:
@@ -2050,8 +2067,26 @@ def bitwise_decimal_operand(+kind: Bits.BitwiseOperation, sign: Bool, value: Dec
     case kind:
       InvalidNumeric{"Dentaku::AST::" ++ bitwise_name(kind) ++ " requires integer operands, but got BigDecimal"}
 
+def bitwise_float_projection(exact: BinaryDecimal.Exact, kind: Bits.BitwiseOperation) -> NumericOperand:
+  match exact:
+    case BinaryDecimal.Finite{sign, magnitude}:
+      bitwise_decimal_operand(kind, sign, magnitude)
+    case exact:
+      binary_numeric_operand(exact)
+
+def bitwise_float_operand(+value: Binary.Float, kind: Bits.BitwiseOperation) -> NumericOperand:
+  match kind:
+    case Bits.ShiftLeft{}:
+      bitwise_float_projection(BinaryDecimal.to_exact(value), Bits.ShiftLeft{})
+    case Bits.ShiftRight{}:
+      bitwise_float_projection(BinaryDecimal.to_exact(value), Bits.ShiftRight{})
+    case kind:
+      InvalidNumeric{"Dentaku::AST::" ++ bitwise_name(kind) ++ " requires integer operands, but got Float"}
+
 def bitwise_operand(value: Value, kind: Bits.BitwiseOperation, left: Bool) -> NumericOperand:
   match value left:
+    case FloatNumber{value} False{}:
+      bitwise_float_operand(value, kind)
     case Number{n} left:
       Magnitude{False{}, Decimal.from_nat(n)}
     case IntegerNumber{n} left:

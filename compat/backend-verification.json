@@ -2010,7 +2010,21 @@
     "laws": 113,
     "kernel": "passed Lean-backed Bend 2.0.39",
     "javascript": "passed full corpus, stored probes, 7 scale and 36 malformed checks; Bun 1.3.1",
-    "native_cpu": "pending for merged evaluator source",
+    "native_cpu": {
+      "source_commit": "eaa8ce1d3f815e54332b9d131fdb64d984c080ed",
+      "status": "passed all 10413 formula/API cases, 7 scale and 36 malformed probes",
+      "threads": [
+        1,
+        8
+      ],
+      "compiler": "clang 19.1.1 -O3",
+      "peak_bytes": 6318968832,
+      "swap_peak_bytes": 0,
+      "log": "compat/verification/float-evaluator-113-native.log",
+      "source_manifest": "compat/verification/float-evaluator-113-native-source.sha256",
+      "c_sha256": "db9dfb729956ab47235e17e752e96552f4bd1cf73174160e617305e2639feb46",
+      "binary_sha256": "b99f2f1b46c115d9c35f9a01ff9392633f0fe9e64bc508dc0b74184bd18cb561"
+    },
     "cuda": "unverified for merged evaluator source",
     "metal": "unverified",
     "performance": "not measured"
@@ -2049,6 +2063,32 @@
     "legacy_js_peak_bytes": 2522271744,
     "swap_peak_bytes": 0,
     "metal": "unverified",
+    "performance": "not measured"
+  },
+  "float_access_checkpoint": {
+    "source_parent": "eaa8ce1",
+    "formula_and_api_cases": 10863,
+    "new_access_value_and_message_cases": 450,
+    "stored_probes": 283,
+    "laws": 117,
+    "source_manifest": "compat/verification/float-access-source.sha256",
+    "kernel": "passed Lean-backed Bend 2.0.39",
+    "javascript": {
+      "status": "passed all cases, 7 scale and 36 malformed probes",
+      "runtime": "Bun 1.3.1",
+      "js_sha256": "b41a2a386002f2280e73073cff63f1ef1b51bbda1c3b7bae02fa4e8447c4759d",
+      "input_sha256": "842f30069172d4e4ae9c12039817f50a090d7abb689e08d301339a1682acce12",
+      "output_sha256": "fc4cc1aa943cb3f95aa96c59513c5cd87f3cfbd6ff274474843f4a9f10365967"
+    },
+    "legacy_compiler": {
+      "version": "2.0.16",
+      "status": "unsupported by current stored-AST/value mutual types; syntax and inference failures also observed",
+      "scope": "The separate numerical corpus still passes both compiler versions"
+    },
+    "native_cpu": "pending for added access probes",
+    "cuda": "unverified for this evaluator source",
+    "metal": "unverified",
+    "full_static_replay": "pending",
     "performance": "not measured"
   }
 }

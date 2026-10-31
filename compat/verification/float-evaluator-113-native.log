@@ -1,0 +1,70 @@
+eaa8ce1d3f815e54332b9d131fdb64d984c080ed
+ALL_10413_FORMULA_7_SCALE_CPU_THREADS_1_PASS
+ALL_10413_FORMULA_7_SCALE_CPU_THREADS_8_PASS
+36 malformed corpus inputs rejected without partial results
+src/address.bend: OK
+src/binary64.bend: OK
+src/binary64_bigdecimal.bend: OK
+src/binary64_decimal.bend: OK
+src/binary64_format.bend: OK
+src/binary64_ruby_decimal.bend: OK
+src/bits.bend: OK
+src/calculator.bend: OK
+src/comments.bend: OK
+src/core.bend: OK
+src/decimal.bend: OK
+src/dependencies.bend: OK
+src/division.bend: OK
+src/errors.bend: OK
+src/error_types.bend: OK
+src/float_round.bend: OK
+src/inspect.bend: OK
+src/lexer.bend: OK
+src/numeric_float.bend: OK
+src/parser.bend: OK
+src/rational_float.bend: OK
+src/reference.bend: OK
+src/remainder.bend: OK
+src/resolver.bend: OK
+src/stored.bend: OK
+src/stored_checked.bend: OK
+src/stored_dependencies.bend: OK
+src/string.bend: OK
+src/token.bend: OK
+src/token_matcher.bend: OK
+src/unicode.bend: OK
+compat/binary64-runtime.bend: OK
+compat/calculator_api.bend: OK
+compat/corpus-input.bend: OK
+compat/corpus-runtime.bend: OK
+compat/corpus-wire.bend: OK
+compat/cuda-toolchain-smoke.bend: OK
+compat/error_factory.bend: OK
+compat/gpu-corpus.bend: OK
+compat/stored_api.bend: OK
+compat/stored_checked_api.bend: OK
+compat/stored_dependencies_api.bend: OK
+compat/stored-runtime.bend: OK
+compat/token_api.bend: OK
+compat/token_matcher_api.bend: OK
+compat/unicode-runtime.bend: OK
+compat/binary64-coercion-oracle.tsv: OK
+compat/binary64-conversion-oracle.tsv: OK
+compat/binary64-format-oracle.tsv: OK
+compat/binary64-oracle.tsv: OK
+compat/binary64-ruby-conversion-oracle.tsv: OK
+compat/float-value-oracle.tsv: OK
+compat/integer-context-oracle.tsv: OK
+compat/scalar-oracle.tsv: OK
+compat/stored-checked-oracle.tsv: OK
+compat/stored-dependency-oracle.tsv: OK
+compat/stored-oracle.tsv: OK
+db9dfb729956ab47235e17e752e96552f4bd1cf73174160e617305e2639feb46  build/formula.c
+b99f2f1b46c115d9c35f9a01ff9392633f0fe9e64bc508dc0b74184bd18cb561  build/formula
+9879d719d8d82cacdae0bfeaec6e0126a98b30a7477219c6312fa998e7b222dd  build/corpus.input
+e6363c5fe4bd0c4b1c4c8e9cbc7391f3feef8cf12fdb251eb3bc4e411a0689cd  build/formula-cpu-1.actual
+ALL_FLOAT_EVALUATOR_NATIVE_GATES_PASSED
+FLOAT_NATIVE_EXIT=0
+MemoryPeak=6318968832
+MemorySwapPeak=0
+Sat Oct 31 10:43:20 PM UTC 2026
