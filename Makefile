@@ -4,6 +4,7 @@ BUN ?= bun
 
 .PHONY: parity-check check native-check rounding-check division-check address-check enumeration-check unicode-check unicode-boundary-check wire-check
 check:
+	$(MAKE) integer-context-check
 	$(BEND) PROOF.bend
 	$(BEND) tests.bend
 	mkdir -p build
@@ -90,3 +91,7 @@ native-check:
 	$(BEND) enumeration-runtime.bend -o build/enumeration-runtime
 	./build/enumeration-runtime > build/enumeration-native.actual
 	diff -u enumeration-runtime.expected build/enumeration-native.actual
+
+.PHONY: integer-context-check
+integer-context-check:
+	$(LUA) tools/check-integer-context.lua

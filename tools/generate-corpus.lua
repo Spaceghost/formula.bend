@@ -1,3 +1,4 @@
+local IntegerContext = dofile((debug.getinfo(1, 'S').source:match('^@(.*/)') or './') .. 'integer-context.lua')
 local input = assert(arg[1], 'usage: lua tools/generate-corpus.lua CASES.lua OUTPUT_PREFIX [--metadata-only | --slice START COUNT | --gpu | --gpu-slice START COUNT]')
 local prefix = assert(arg[2], 'missing output prefix')
 local metadata_only = arg[3] == '--metadata-only'
@@ -81,15 +82,19 @@ local function context_value(value)
   if value.decimal or value.integer then
     local key = value.decimal and 'decimal' or 'integer'
     local text = value[key]
-    local expression = 'Parser.evaluate(' .. bend_string(text) .. ', Nil{}, False{})'
+    local literal_text = key == 'integer' and IntegerContext.canonical(text) or text
+    local expression = 'Parser.evaluate(' .. bend_string(literal_text) .. ', Nil{}, False{})'
     if key == 'decimal' then
-      -- Parse the magnitude before applying the decimal sign. Parsing "-0"
-      -- as an Integer first would discard BigDecimal's negative zero.
-      if text:sub(1, 1) == '-' then
-        expression = 'Core.negate_value(Core.decimal_result(Parser.evaluate(' .. bend_string(text:sub(2)) .. ', Nil{}, False{})))'
-      else
-        expression = 'Core.decimal_result(' .. expression .. ')'
-      end
+      -- Typed BigDecimal values admit surrounding ASCII whitespace and a +
+      -- sign. Keep the original text in the reference payload below.
+      local literal = text:gsub('^[\t\n\v\f\r ]+', ''):gsub('[\t\n\v\f\r ]+$', '')
+      local negative = literal:sub(1, 1) == '-'
+      if negative or literal:sub(1, 1) == '+' then literal = literal:sub(2) end
+      assert(not literal:match('^[+-]'), 'invalid typed decimal sign')
+      -- Parse the magnitude before applying the sign so integer-looking -0
+      -- retains BigDecimal's negative zero.
+      expression = 'Core.decimal_result(Parser.evaluate(' .. bend_string(literal) .. ', Nil{}, False{}))'
+      if negative then expression = 'Core.negate_value(' .. expression .. ')' end
     end
     return expression, '{' .. json_string(key) .. ':' .. json_string(text) .. '}'
   end

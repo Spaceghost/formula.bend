@@ -1,5 +1,5 @@
 -- Bend 2.0.39 does not expose NVRTC's build-time optimization setting.
--- Change only its generated host compiler invocation, retaining BEND_SRC and
+-- Change only its generated host compiler invocation, retaining device code and
 -- strict floating-point options. Refuse an unfamiliar runtime layout.
 local input = assert(arg[1], 'usage: lua tools/configure-cuda.lua GENERATED.c OUTPUT.c FAST_COMPILE_LEVEL')
 local output = assert(arg[2], 'missing output path')

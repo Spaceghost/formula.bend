@@ -3,6 +3,9 @@
 -- inspects its length capability, so this adaptation does not alter the result.
 return {
   ['spec/exceptions_spec.rb'] = {
+    {'builds a message from reason and metadata (ParseError)', 'named_parse_class_operation'},
+    {'describes an :incompatible expectation as requiring compatible operands', 'named_parse_class_incompatible'},
+    {'builds an invalid_operator message', 'named_argument_class_operator'},
     {'includes variable name(s) in message', 'error_unbound_attributes'},
     {'is included in every Dentaku exception, even those subclassing Ruby built-ins', {'error_parse_override_assigned', 'error_tokenizer_override_assigned', 'error_argument_override_assigned', 'error_unbound_attributes', 'error_math_domain_attributes', 'error_node_array_coercion_1', 'error_zero_division'}},
     {'preserves stdlib ancestry for exceptions subclassing Ruby built-ins', {'error_argument_and_type', 'error_zero_division'}},

@@ -49,7 +49,7 @@ The unchanged upstream suite passes 713 examples with zero failures and 96.82%
 line coverage in the Ruby reference environment. `reference-summary.json` and
 `upstream-spec-catalog.json` record that run. These results describe Ruby only.
 
-The Lua-driven corpus has 2647 cases matched against Ruby values, parse
+The Lua-driven corpus has 5279 cases matched against Ruby values, parse
 error classification, or exception-factory descriptions. It covers truthiness, strings/null, comparisons, selected
 numeric-string coercions, and static operand rejection. It is a small subset of
 the upstream catalog. Native error classes/messages, all calculator methods,
@@ -90,7 +90,7 @@ lua tools/run-oracle.lua PROJECT UPSTREAM GEMS STORAGE RUNROOT OUTPUT
 The probe catches Dentaku errors and records their class; unexpected Ruby failures
 abort without replacing the output. Compare the result before updating committed
 goldens. Parser snapshots currently preserve parse-error classification, while
-full runtime error-class/message parity remains unfinished. The 2647-case value and dependency
+full runtime error-class/message parity remains unfinished. The 5279-case value and dependency
 corpus passes on JavaScript; the 951-case checkpoint passed native CPU with one
 and eight threads. This is correctness verification,
 not the requested performance shootout.
@@ -142,7 +142,7 @@ The 114-case corpus passes on JavaScript and native CPU with Bend 2.0.16 and
 2.0.39. Native checks run from frozen Git worktrees, with source commit and
 artifact checksums recorded in backend-verification.json. The parser uses the
 internal constructor ParseReady to avoid a collision with the newer Base library.
-CUDA and Metal are still unverified; this is not a performance shootout.
+At that checkpoint CUDA and Metal were unverified; this is not a performance shootout.
 
 ## Arrays, indexing, and COUNT
 
@@ -498,8 +498,8 @@ of allowing CPU fallback. `tools/run-cuda-smoke.lua` reproduces that check from
 a frozen worktree using the existing development container and an external
 CUDA toolkit. Toolkit archives were checked against NVIDIA's redistribution
 manifest. Source, binary and GPU artifact hashes are recorded separately from
-formula correctness evidence. This is a compiler/runtime check; the formula
-corpus has not yet run on CUDA, and it supplies no performance comparison.
+formula correctness evidence. This is a compiler/runtime smoke check; it
+supplies no formula parity evidence or performance comparison by itself.
 
 ## Runtime-loaded correctness harness
 
@@ -528,13 +528,28 @@ from the earlier generated-program checkpoints.
 
 `tools/run-cuda-corpus.lua FROZEN_WORKTREE BEND_PACKAGE CUDA_TOOLKIT SCRATCH`
 builds one native executable and shader, checks both CPU pool sizes, and checks
-the shared corpus and scale inputs in required CUDA mode. CUDA formula
+the shared corpus and scale inputs in required CUDA mode. Default-profile CUDA
 correctness is still unverified: the default NVRTC builds have a long
 optimization phase. The optional `tools/configure-cuda.lua` changes only the
 generated host invocation to request a labeled --Ofast-compile profile, retaining
-the existing --fmad=false setting and shader source. [NVIDIA documents this](https://docs.nvidia.com/cuda/archive/13.0.2/nvrtc/index.html#supported-compile-options) as
+the existing --fmad=false setting and device implementation. [NVIDIA documents this](https://docs.nvidia.com/cuda/archive/13.0.2/nvrtc/index.html#supported-compile-options) as
 a compile-time/runtime optimization tradeoff, so it must be recorded separately
 from the default profile. No performance comparison is claimed.
+
+The frozen `29854e6` interpreter now passes all 2,516 differential cases and
+seven scale checks in required CUDA mode on a Quadro P4000, with a 1-GB GPU
+heap, CUDA 12.9.86 and driver 580.178.04. This pass explicitly uses
+`--Ofast-compile=max`; it is separate from the still-unverified default profile.
+Both CPU pool sizes pass before the GPU checks. GPU outputs match the exact
+reference files, and source/executable/shader/output hashes are recorded in
+`backend-verification.json`. The generated runtime uses `cuLaunchKernel` for
+the GPU bang and treats launch or synchronization failure as an error.
+
+This result predates the later exception and decimal-transport changes. It
+does not establish CUDA parity for the current corpus, Metal correctness, or
+any performance ranking. The full source is embedded with `#embed __FILE__`;
+the host-option edit changes those embedded bytes, while leaving the device
+implementation unchanged. Keep every profile's shader artifact separate.
 
 ## Exception descriptions and factories
 
@@ -561,8 +576,9 @@ has 134 correspondences; the Ruby reference still has 713 examples.
 This is factory parity for supported typed values, not complete exception
 propagation. The evaluator's string failures have not yet been replaced by
 structured descriptions. Metadata accepts the existing ordered hashes and
-value types; Ruby Class/Float/Range values, including open-ended arity ranges,
-remain unsupported. Those limits leave upstream exception examples unported.
+value types. At this factory-only checkpoint, Ruby Class/Float/Range values,
+including open-ended arity ranges, were unsupported. Named class references
+are added by the later checkpoint below; Float and Range remain open.
 The new operation is available in both generated and runtime-loaded corpus
 checkers; it is a test adapter, not additional formula syntax. Native and GPU
 checkpoints remain tied to their recorded source revision and case count.
@@ -575,3 +591,87 @@ shrinks from 8,089,118 to 6,758,889 bytes (16.4%). This is generated-code size,
 not a runtime timing result. All 131 factory cases pass both Bend versions;
 all 2,647 cases and seven scale cases pass Bun and native CPU at `-O3` with
 one and eight threads. Both transports reject all 14 malformed inputs.
+
+## Typed decimal fixture transport
+
+Typed BigDecimal fixture values preserve their sign across exterior ASCII
+whitespace, including integer-looking negative zero. A single leading plus is
+accepted. The static fixture generator and runtime decoder normalize these
+inputs before converting the magnitude to a decimal and applying its sign.
+The original text remains in the Ruby reference payload. Formula string
+coercion keeps its existing whitespace rules.
+
+Ten reference cases cover negative and positive zero, signed nonzero values,
+scientific notation, spaces, tabs, newlines, carriage returns, vertical tabs
+and form feeds. Three transport laws preserve both zero signs and reject a
+second sign. The wire rejection corpus now has 18 cases, including all four
+doubled-sign combinations.
+All 2,526 cases pass on both Bend 2.0.16 and 2.0.39. The 51-law gate passes
+Lean-backed checking on Bend 2.0.39. Bun 1.3.1 and native clang 19.1.1 at `-O3`
+pass the full runtime-loaded corpus, seven scale checks and 18 malformed inputs;
+the native checks pass with both one and eight threads. The typed decimal
+checkpoint records exact artifact and input hashes in `backend-verification.json`.
+The merged checkpoint at `c22a813` combines exception dispatch and typed decimal
+transport: 2,657 cases, 55 laws, seven scale checks and 18 malformed inputs.
+Bun and native CPU pass the complete runtime-loaded corpus; native checks use
+one and eight threads at `-O3`. Bend 2.0.16 reuses the byte-identical 2,304-case
+prefix from its verified transport checkpoint and executes both changed
+batches, covering all 353 remaining cases. Existing source modules were checked
+for changes before reuse, and every retained output matches the merged golden.
+The prefix artifact hashes and all checkpoint hashes are recorded in the repo.
+
+## Typed integer fixture imports
+
+Fixture `{integer='...'}` inputs use Ruby's `Integer(String)` rules with an
+inferred base. The static and wire encoders share a Lua normalizer for binary,
+octal, decimal and hexadecimal prefixes, leading-zero octal, one sign, digit
+separators and exterior ASCII whitespace. Nondecimal magnitudes are converted
+to decimal digits without putting the complete value in a Lua number. Ruby
+reference payloads retain their original strings.
+
+Twenty formula cases exercise these imports through CONCAT, including values
+larger than 64 bits. A separate pinned Ruby 3.3.13 profile checks 5,326 strings:
+1,768 accepted and 3,558 rejected. These are fixture-converter checks, counted
+separately from formula parity. `make integer-context-check` validates the
+profile; `tools/run-integer-reference.lua STORAGE RUNROOT OUTPUT` regenerates
+it in the pinned Ruby reference container. Formula numeric-literal grammar is
+unchanged by this fixture transport normalization.
+The integer-import checkpoint adds 20 formula cases for a total of 2,677.
+All 20 run on both Bend 2.0.16 and 2.0.39; the full corpus and seven scale
+cases pass Bun and native CPU with one and eight threads. The existing native
+and JS executables are reused only after checking that their Bend source is
+unchanged. The 55-law Lean-backed gate passes as well. This adds no new claim
+about GPU execution of these imports or about complete Ruby numeric classes.
+
+## Named class and module values
+
+`Core.NamedReference` carries a class/module kind, canonical name and ordered
+ancestor names. Typed bindings use `{class='...', ancestors={...}}` or
+`{module='...', ancestors={...}}`. The caller supplies the owning runtime's
+complete ancestor list, excluding the reference itself; the engine does not
+resolve Ruby constants. The reference adapter validates every descriptor against
+the actual pinned Ruby object. The probes load JSON as the oracle does, because
+its included modules can affect those ancestor lists.
+
+The new values preserve rendering, identity, truthiness, value classes, hash
+keys and array-set behavior. Subtype comparisons include class/module mixins
+and return nil for unrelated references. Mixed comparison failures distinguish
+missing operators, scalar comparison failures, Hash conversion failures and
+comparisons against non-class/module operands. Exception metadata now retains
+actual named classes, including Dentaku::AST::Addition and Numeric, rather than
+using display strings in their place. Three further exception examples have
+exact source correspondences.
+
+The 2,602 additional Ruby comparisons include a complete six-operator matrix
+for 19 named references, mixed scalar comparisons, hash keys and exact exception
+payloads. The integrated corpus has 5,279 cases, 60 laws, 175 concrete fixtures
+and 137 source scenario correspondences. Its full checks run on both Bend
+versions; Bun and native CPU check the full runtime-loaded corpus plus seven
+scale cases. Native checks use one and eight threads at `-O3`. Both transports
+reject 23 malformed inputs, including invalid named-reference framing.
+
+Named references remain immutable descriptors. Ruby class execution,
+reflection, anonymous objects and namespace mutation are not implemented.
+Range and Float values, full structured evaluator failures, and broader
+calculator/function-registry behavior remain open. The recorded CUDA pass
+continues to cover only the earlier 2,516-case source checkpoint.

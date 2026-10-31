@@ -1,4 +1,5 @@
 import Base
+import ./compat/corpus-wire.bend as Wire
 import ./src/core.bend as Core
 import ./src/decimal.bend as Decimal
 import ./src/division.bend as Division
@@ -301,3 +302,13 @@ law all_skips_later_predicate:
 law any_skips_later_predicate:
   for later: Core.Expr
   {Core.evaluate(Core.EnumerationExpression{Core.AnyItems{}, Core.Literal{Core.ArrayCons{Core.Logical{True{}}, Core.ArrayCons{Core.Logical{False{}}, Core.ArrayNil{}}}}, "x", Core.If{Core.Variable{"x"}, Core.Literal{Core.Logical{True{}}}, later}}) == Core.Logical{True{}} : Core.Value}
+# Typed decimal transport must preserve signs without broadening ordinary
+# formula string coercion or accepting a second sign.
+law wire_decimal_negative_zero:
+  {Wire.decimal(" \t-0\r\n") == Core.NegativeNumber{Decimal.Exact{Nil{}, 0n}} : Core.Value}
+
+law wire_decimal_positive_zero:
+  {Wire.decimal(" \t+0\r\n") == Core.DecimalNumber{Decimal.Exact{Nil{}, 0n}} : Core.Value}
+
+law wire_decimal_single_sign:
+  {Wire.decimal(" --0 ") == Core.Failure{"Invalid decimal sign in corpus input"} : Core.Value}

@@ -338,3 +338,11 @@ def Laws.empty_reduction_batch(body, memo_name, item_name, initial, context, sen
       {==}
     case Core.CountManyExpression{x0, x1}:
       {==}
+def Laws.wire_decimal_negative_zero():
+  {==}
+
+def Laws.wire_decimal_positive_zero():
+  {==}
+
+def Laws.wire_decimal_single_sign():
+  {==}

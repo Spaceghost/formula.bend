@@ -129,12 +129,38 @@ def integer(value: Core.Value) -> Core.Value:
     case value:
       Core.Failure{"Non-integer corpus input"}
 
-def decimal(text: String) -> Core.Value:
+# This is typed BigDecimal input, not formula-string numeric coercion.
+def decimal_space(c: Char) -> Bool:
+  +code = Char.to_u32(c)
+  Bool.or(U32.is_eq(code, 32), Bool.and(U32.is_ge(code, 9), U32.is_le(code, 13)))
+
+def decimal_trim_left(text: String) -> String:
   match text:
+    case SNil{}:
+      SNil{}
+    case SCon{+c, +rest}:
+      Bool.pick(String, decimal_space(c), decimal_trim_left(rest), SCon{c, rest})
+
+def decimal_magnitude(text: String) -> Core.Value:
+  match text:
+    case SCon{Chr{43}, rest}:
+      Core.Failure{"Invalid decimal sign in corpus input"}
     case SCon{Chr{45}, rest}:
-      Core.negate_value(Core.decimal_result(Core.require_numeric(Core.TextValue{rest})))
+      Core.Failure{"Invalid decimal sign in corpus input"}
     case text:
       Core.decimal_result(Core.require_numeric(Core.TextValue{text}))
+
+def decimal_signed(text: String) -> Core.Value:
+  match text:
+    case SCon{Chr{45}, rest}:
+      Core.negate_value(decimal_magnitude(rest))
+    case SCon{Chr{43}, rest}:
+      decimal_magnitude(rest)
+    case text:
+      decimal_magnitude(text)
+
+def decimal(text: String) -> Core.Value:
+  decimal_signed(String.reverse(decimal_trim_left(String.reverse(decimal_trim_left(text)))))
 
 def scalar(tag: Char, text: String) -> Core.Value:
   match tag:

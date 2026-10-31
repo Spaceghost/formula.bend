@@ -1,3 +1,4 @@
+local IntegerContext = dofile((debug.getinfo(1, 'S').source:match('^@(.*/)') or './') .. 'integer-context.lua')
 -- Runtime fixture data keeps corpus size out of the compiled GPU program.
 local cases = dofile(assert(arg[1], 'usage: lua tools/generate-wire.lua CASES.lua OUTPUT'))
 local output = assert(arg[2], 'missing output path')
@@ -27,7 +28,7 @@ local function value(item)
     parents[#parents+1] = ']'
     return (item.class and 'c' or 'm') .. text('s', name) .. table.concat(parents) .. ']'
   end
-  if item.integer then return text('i', item.integer) end
+  if item.integer then return text('i', IntegerContext.canonical(item.integer)) end
   if item.decimal then return text('d', item.decimal) end
   local parts = {}
   if item.hash then

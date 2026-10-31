@@ -64,7 +64,10 @@ make native-check
 execution with expected output. `make native-check` needs a compatible clang and
 compares the native program with the same output. Build outputs stay in `build/`.
 All nineteen arithmetic/function runtime cases and eight rounding runtime cases
-have passed on JavaScript and native CPU. CUDA and Metal remain unverified.
+have passed on JavaScript and native CPU. A frozen 2,516-case interpreter
+checkpoint and seven scale cases also pass CUDA on a Quadro P4000 with the
+explicit `--Ofast-compile=max` profile. Default-profile CUDA, newer interpreter
+changes, and Metal remain unverified. No performance comparison is claimed.
 
 ## Compatibility limits
 
@@ -108,7 +111,7 @@ The eight address runtime cases pass on both JavaScript and native CPU.
 
 Parity is measured against the pinned Ruby source and its complete 713-example
 suite. The Ruby reference passes all examples; that is not a claim that Bend does.
-A separate 2647-case corpus matches Ruby on JavaScript for selected values,
+A separate 5279-case corpus matches Ruby on JavaScript for selected values,
 dependencies, parse-error classification, and exception factories.
 `make parity-check` generates the fixtures using Lua.
 Use `LUA=/path/to/lua` if Lua is not on PATH.
@@ -123,19 +126,29 @@ gate. No performance comparison is claimed yet.
 The corpus supports exact decimal, integer, string, Boolean, null, and nested
 array and ordered hash bindings plus case-sensitive contexts. MAP, FILTER, ALL, ANY, and REDUCE
 also pass seven reference checks over 1,025-item collections. Both Bend 2.0.16
-and 2.0.39 pass all 2,647 cases on JavaScript, with 52 laws and 175 concrete
+and 2.0.39 pass all 5,279 cases on JavaScript, with 60 laws and 175 concrete
 fixtures. The checker runs the corpus in batches of 256 to bound peak memory.
-All 52 laws pass Lean-backed kernel verification on Bend 2.0.39.
-The 2,647-case checkpoint and seven scale
+All 60 laws pass Lean-backed kernel verification on Bend 2.0.39.
+The 5,279-case checkpoint and seven scale
 checks pass native CPU with one and eight threads at `-O3`.
 Source commits and checksums are recorded in
 `compat/backend-verification.json`.
+The named-value integration reruns the full corpus on both Bend versions.
+Earlier unchanged-case reuse is documented with its original checkpoints.
+The separate 5,326-string Ruby Integer profile checks fixture conversion
+rather than formula coverage.
 
 Exception factories preserve reasons, metadata, constructor attributes, message
 overrides and assignment values. Their 131 differential cases cover every
 factory reason and shared/stdlib error relationships. The Bend API uses
 immutable descriptions. Evaluator errors still need integration with those
-descriptions; Float/Class/Range metadata is not yet supported.
+descriptions; Float/Range metadata is not yet supported.
+
+Named class and module values preserve their canonical names, kind and ancestor
+names. They support identity, subtype comparisons, truthiness, hash keys and
+class-valued exception metadata. Callers supply the complete ancestor list from
+the owning runtime. These descriptors do not execute Ruby class methods or
+represent anonymous objects.
 
 Scientific exponents support at most 14 significant exponent digits; scales and
 indexes remain bounded by the runtime Nat representation. Hex coefficients use
