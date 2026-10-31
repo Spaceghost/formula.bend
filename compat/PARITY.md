@@ -49,7 +49,7 @@ The unchanged upstream suite passes 713 examples with zero failures and 96.82%
 line coverage in the Ruby reference environment. `reference-summary.json` and
 `upstream-spec-catalog.json` record that run. These results describe Ruby only.
 
-The Lua-driven corpus has 7951 reference cases for Ruby values, parse
+The Lua-driven corpus has 8477 reference cases for Ruby values, parse
 error classification, or exception-factory descriptions. It covers truthiness, strings/null, comparisons, selected
 numeric-string coercions, and static operand rejection. It is a small subset of
 the upstream catalog. Native error classes/messages, all calculator methods,
@@ -759,3 +759,26 @@ wire inputs. All62laws pass .39Lean-backed verification. There are147explicit
 source-scenario mappings. Source and artifact hashes are recorded in
 token_matcher_scenarios_checkpoint. Mutable aliasing, arbitrary Ruby values,
 and scanner integration remain unfinished; the spec family remains partial.
+
+## Integer Range conversion in exception construction
+
+Finite integer-start ranges enumerate expected operand values for `NodeError`
+and `ParseError`'s `node_invalid` reason. Integer endpoints remain exact even
+when they exceed a machine word. Decimal blocks retain the complete span count
+without converting it to a bounded Nat. Materializing a range still requires
+memory proportional to its length. Exclusive, descending, negative and mixed integer/decimal
+end bounds follow the reference checks. Endless ranges produce Ruby's native
+`RangeError`; beginless and non-iterable ranges produce `TypeError` with their
+class-specific messages. A parse error without an operation skips conversion,
+preserving the reference's lazy message branch.
+
+The 51 added Ruby-oracle checks cover these constructor paths and their complete
+snapshots. String and Symbol successor enumeration, Range hash keys, Float
+endpoints and arbitrary Ruby object iteration remain unfinished.
+
+The exact-block checkpoint at `b1fe795` passes 5,797 cases and seven scale checks
+on Bun and native CPU with one and eight threads at `-O3`, including 27 malformed
+input rejections. Its 66 laws pass Lean-backed verification. The 77 new constructor
+and block-boundary cases pass static replay on Bend 2.0.39; the 26 block-boundary
+cases also pass Bend 2.0.16. Full static replay and Range-source GPU checks remain
+pending. Source and artifact hashes are in `backend-verification.json`.

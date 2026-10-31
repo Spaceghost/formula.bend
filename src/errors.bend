@@ -1,6 +1,7 @@
 import Base
 import ./core.bend as Core
 import ./error_types.bend as Types
+import ./decimal.bend as Decimal
 
 type ReasonCode is Data:
   NodeInvalid{}
@@ -82,6 +83,13 @@ def render(value: Core.Value) -> String:
 def shown(meta: Core.Value, name: String) -> String:
   render(field(meta, name))
 
+def expected_count(value: Core.Value) -> String:
+  match value:
+    case Core.RangeValue{first, Core.NullValue{}, excluded}:
+      "at least " ++ render(first)
+    case value:
+      render(value)
+
 def parents(base: String, dentaku: Bool) -> List<&2, String>:
   match dentaku:
     case True{}:
@@ -111,8 +119,71 @@ def hash_array(value: Core.Value) -> Core.Value:
     case value:
       Core.ArrayNil{}
 
+def integer_range_pick(within: Core.Value, first: Core.Value) -> Core.Value:
+  match within:
+    case Core.Logical{True{}}:
+      Core.ArrayCons{first, Core.ArrayNil{}}
+    case within:
+      Core.ArrayNil{}
+
+# A depth-d block contains ten depth-(d-1) blocks. Only the small block
+# counter uses Nat; the complete span remains an exact decimal coefficient.
+def range_block(+depth: Nat, count: Nat, +first: Core.Value, +stride: Core.Value, +last: Core.Value, +excluded: Bool) -> Core.Value:
+  match depth count:
+    case depth 0n:
+      Core.ArrayNil{}
+    case 0n 1n+rest:
+      left right = integer_range_pick(Core.compare_values(first, last, Bool.pick(Core.Comparison, excluded, Core.LessThan{}, Core.LessOrEqual{})), first) range_block(0n, rest, Core.add(first, stride), stride, last, excluded)
+      Core.array_append(left, right)
+    case 1n+smaller 1n+rest:
+      left right = range_block(smaller, 10n, first, Core.integer_result(Core.divide(stride, Core.Number{10n})), last, excluded) range_block(1n+smaller, rest, Core.add(first, stride), stride, last, excluded)
+      Core.array_append(left, right)
+
+# Each call shrinks the digit list and advances by one decimal place.
+# Independent lower and higher blocks run concurrently.
+def range_digits(digits: List<&2, U32>, +depth: Nat, +first: Core.Value, +stride: Core.Value, +last: Core.Value, +excluded: Bool) -> Core.Value:
+  match digits:
+    case Nil{}:
+      Core.ArrayNil{}
+    case +digit <> rest:
+      low high = range_block(depth, U32.to_nat(digit), first, stride, last, excluded) range_digits(rest, 1n+depth, Core.add(first, Core.multiply(stride, Core.Number{U32.to_nat(digit)})), Core.multiply(stride, Core.Number{10n}), last, excluded)
+      Core.array_append(low, high)
+
+def integer_range_span(operand: Core.NumericOperand, first: Core.Value, +last: Core.Value, +excluded: Bool) -> Core.Value:
+  match operand:
+    case Core.Magnitude{True{}, value}:
+      Core.ArrayNil{}
+    case Core.Magnitude{False{}, Decimal.Exact{digits, places}}:
+      range_digits(Decimal.add_digits(Decimal.integer_digits(places, digits), [1], 0), 0n, first, Core.Number{1n}, last, excluded)
+    case operand:
+      Core.ArrayNil{}
+
+# Array(range) belongs to exception construction as well as value semantics.
+# String/Symbol successor enumeration is a separate, still-open compatibility gap.
+def range_array_kind(integer: Bool, +first: Core.Value, +last: Core.Value, excluded: Bool) -> Core.Value:
+  match integer:
+    case True{}:
+      integer_range_span(Core.numeric_operand_value(Core.subtract(last, first)), first, last, excluded)
+    case False{}:
+      match first:
+        case Core.TextValue{text}:
+          Core.ArrayCons{Core.RangeValue{Core.TextValue{text}, last, excluded}, Core.ArrayNil{}}
+        case Core.SymbolValue{text}:
+          Core.ArrayCons{Core.RangeValue{Core.SymbolValue{text}, last, excluded}, Core.ArrayNil{}}
+        case first:
+          Core.Failure{"can't iterate from " ++ Core.ruby_type_name(first)}
+
+def range_array(+first: Core.Value, last: Core.Value, excluded: Bool) -> Core.Value:
+  match last:
+    case Core.NullValue{}:
+      Core.Failure{"cannot convert endless range to an array"}
+    case last:
+      range_array_kind(Core.is_integer(first), first, last, excluded)
+
 def as_array(value: Core.Value) -> Core.Value:
   match value:
+    case Core.RangeValue{first, last, excluded}:
+      range_array(first, last, excluded)
     case Core.NullValue{}:
       Core.ArrayNil{}
     case Core.ArrayNil{}:
@@ -125,6 +196,10 @@ def as_array(value: Core.Value) -> Core.Value:
       hash_array(Core.HashEntry{key, item, tail})
     case value:
       Core.ArrayCons{value, Core.ArrayNil{}}
+
+def array_conversion_error(+message: String) -> Types.Description<Core.Value>:
+  class_name = Bool.pick(String, String.eq(message, "cannot convert endless range to an array"), "RangeError", "TypeError")
+  build(class_name, ["StandardError", "Exception", "Object", "Kernel", "BasicObject"], None{}, Core.HashNil{}, Core.HashNil{}, message)
 
 def join_separator(values: Core.Value, separator: String) -> String:
   match values:
@@ -210,9 +285,9 @@ def argument_message_code(reason: ReasonCode, +meta: Core.Value) -> Maybe<&2, St
     case InvalidValue{}:
       Some{Bool.pick(String, has(meta, "expected"), "'" ++ shown(meta, "actual") ++ "' is not a valid " ++ shown(meta, "expected"), Bool.pick(String, has(meta, "actual"), "'" ++ shown(meta, "actual") ++ "' is not a valid value", "Invalid value"))}
     case TooFewArguments{}:
-      Some{shown(meta, "function_name") ++ "() has too few arguments (given " ++ shown(meta, "actual") ++ ", expected " ++ shown(meta, "expected") ++ ")"}
+      Some{shown(meta, "function_name") ++ "() has too few arguments (given " ++ shown(meta, "actual") ++ ", expected " ++ expected_count(field(meta, "expected")) ++ ")"}
     case WrongNumberOfArguments{}:
-      Some{shown(meta, "function_name") ++ "() has the wrong number of arguments (given " ++ shown(meta, "actual") ++ ", expected " ++ shown(meta, "expected") ++ ")"}
+      Some{shown(meta, "function_name") ++ "() has the wrong number of arguments (given " ++ shown(meta, "actual") ++ ", expected " ++ expected_count(field(meta, "expected")) ++ ")"}
     case reason:
       None{}
 
@@ -232,10 +307,24 @@ def completed(message: Maybe<&2, String>, class_name: String, base: String, reas
     case None{}:
       unhandled(reason)
 
+def parse_error_expected(expected: Core.Value, name: String, +meta: Core.Value) -> Types.Description<Core.Value>:
+  match expected:
+    case Core.Failure{message}:
+      array_conversion_error(message)
+    case expected:
+      reasoned("Dentaku::ParseError", "Dentaku::BaseError", Core.SymbolValue{name}, meta, shown(meta, "operation") ++ " requires " ++ expected_names(expected, "") ++ " operands, but got " ++ shown(meta, "actual"))
+
+def parse_error_conversion(convert: Bool, +name: String, +meta: Core.Value) -> Types.Description<Core.Value>:
+  match convert:
+    case True{}:
+      parse_error_expected(as_array(field(meta, "expected")), name, meta)
+    case False{}:
+      completed(parse_message(name, meta), "Dentaku::ParseError", "Dentaku::BaseError", Core.SymbolValue{name}, meta)
+
 def parse_error(+reason: Core.Value, +meta: Core.Value) -> Types.Description<Core.Value>:
   match reason:
-    case Core.SymbolValue{name}:
-      completed(parse_message(name, meta), "Dentaku::ParseError", "Dentaku::BaseError", Core.SymbolValue{name}, meta)
+    case Core.SymbolValue{+name}:
+      parse_error_conversion(Bool.and(String.eq(name, "node_invalid"), has(meta, "operation")), name, meta)
     case reason:
       unhandled(reason)
 
@@ -259,8 +348,15 @@ def unbound_variable_error(variables: Core.Value) -> Types.Description<Core.Valu
 def math_domain_error(name: Core.Value, arguments: Core.Value) -> Types.Description<Core.Value>:
   simple("Dentaku::MathDomainError", Core.HashEntry{Core.SymbolValue{"function_name"}, name, Core.HashEntry{Core.SymbolValue{"args"}, arguments, Core.HashNil{}}})
 
+def node_error_expected(expected: Core.Value, actual: Core.Value, operand: Core.Value) -> Types.Description<Core.Value>:
+  match expected:
+    case Core.Failure{message}:
+      array_conversion_error(message)
+    case expected:
+      simple("Dentaku::NodeError", Core.HashEntry{Core.SymbolValue{"expected"}, expected, Core.HashEntry{Core.SymbolValue{"actual"}, actual, Core.HashEntry{Core.SymbolValue{"operand"}, operand, Core.HashNil{}}}})
+
 def node_error(expected: Core.Value, actual: Core.Value, operand: Core.Value) -> Types.Description<Core.Value>:
-  simple("Dentaku::NodeError", Core.HashEntry{Core.SymbolValue{"expected"}, as_array(expected), Core.HashEntry{Core.SymbolValue{"actual"}, actual, Core.HashEntry{Core.SymbolValue{"operand"}, operand, Core.HashNil{}}}})
+  node_error_expected(as_array(expected), actual, operand)
 
 def zero_division_error() -> Types.Description<Core.Value>:
   build("Dentaku::ZeroDivisionError", parents("ZeroDivisionError", True{}), None{}, Core.HashNil{}, Core.HashNil{}, "Dentaku::ZeroDivisionError")

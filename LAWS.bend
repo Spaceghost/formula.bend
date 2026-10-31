@@ -14,6 +14,42 @@ import ./src/resolver.bend as Resolver
 
 import ./src/reference.bend as Ref
 import ./src/error_types.bend as ErrorTypes
+import ./src/errors.bend as Errors
+
+law range_zero_blocks:
+  for depth: Nat
+  for first: Core.Value
+  for stride: Core.Value
+  for last: Core.Value
+  for excluded: Bool
+  {Errors.range_block(depth, 0n, first, stride, last, excluded) == Core.ArrayNil{} : Core.Value}
+
+law endless_range_array:
+  for first: Core.Value
+  for excluded: Bool
+  {Errors.as_array(Core.RangeValue{first, Core.NullValue{}, excluded}) == Core.Failure{"cannot convert endless range to an array"} : Core.Value}
+
+law beginless_integer_range_array:
+  for last: Nat
+  for excluded: Bool
+  {Errors.as_array(Core.RangeValue{Core.NullValue{}, Core.Number{last}, excluded}) == Core.Failure{"can't iterate from NilClass"} : Core.Value}
+
+law range_type_name:
+  for first: Core.Value
+  for last: Core.Value
+  for excluded: Bool
+  {Core.ruby_type_name(Core.RangeValue{first, last, excluded}) == "Range" : String}
+
+law range_truthy:
+  for first: Core.Value
+  for last: Core.Value
+  for excluded: Bool
+  {Core.truthy(Core.RangeValue{first, last, excluded}) == True{} : Bool}
+
+law endless_arity:
+  for +first: Core.Value
+  for excluded: Bool
+  {Errors.expected_count(Core.RangeValue{first, Core.NullValue{}, excluded}) == "at least " ++ Errors.render(first) : String}
 
 law named_class_type:
   for name: String

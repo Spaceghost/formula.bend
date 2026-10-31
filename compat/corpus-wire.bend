@@ -8,6 +8,7 @@ type Container is Data:
   ArrayContainer{}
   HashContainer{}
   ReferenceContainer{kind: Core.ReferenceKind}
+  RangeContainer{}
 
 type Frame is Data:
   Open{kind: Container, reversed: List<&2, Core.Value>}
@@ -104,6 +105,13 @@ def named_reference(values: List<&2, Core.Value>, kind: Core.ReferenceKind) -> C
     case values:
       Core.Failure{"Invalid named reference in corpus input"}
 
+def range_value(values: List<&2, Core.Value>) -> Core.Value:
+  match values:
+    case first <> last <> Core.Logical{excluded} <> Nil{}:
+      Core.RangeValue{first, last, excluded}
+    case values:
+      Core.Failure{"Invalid range descriptor in corpus input"}
+
 def close(stack: List<&2, Frame>, end: Char) -> State:
   match stack end:
     case Open{ArrayContainer{}, reversed} <> rest Chr{93}:
@@ -113,6 +121,8 @@ def close(stack: List<&2, Frame>, end: Char) -> State:
       close_hash(even_fields(values), values, rest)
     case Open{ReferenceContainer{kind}, reversed} <> rest Chr{93}:
       accept(named_reference(List.reverse(&2, Core.Value, reversed), kind), rest)
+    case Open{RangeContainer{}, reversed} <> rest Chr{93}:
+      accept(range_value(List.reverse(&2, Core.Value, reversed)), rest)
     case stack end:
       Broken{"Unmatched container end in corpus input"}
 
@@ -236,6 +246,8 @@ def tag_step(+c: Char, stack: List<&2, Frame>) -> State:
       Reading{AwaitValue{}, Open{ReferenceContainer{Core.ClassReferenceKind{}}, Nil{}} <> stack}
     case Chr{109}:
       Reading{AwaitValue{}, Open{ReferenceContainer{Core.ModuleReferenceKind{}}, Nil{}} <> stack}
+    case Chr{114}:
+      Reading{AwaitValue{}, Open{RangeContainer{}, Nil{}} <> stack}
     case Chr{93}:
       close(stack, c)
     case Chr{125}:

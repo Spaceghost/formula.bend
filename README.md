@@ -111,7 +111,7 @@ The eight address runtime cases pass on both JavaScript and native CPU.
 
 Parity is measured against the pinned Ruby source and its complete 713-example
 suite. The Ruby reference passes all examples; that is not a claim that Bend does.
-A separate 7951-case corpus covers selected values,
+A separate 8477-case corpus covers selected values,
 dependencies, parse-error classification, and exception factories.
 `make parity-check` generates the fixtures using Lua.
 Use `LUA=/path/to/lua` if Lua is not on PATH.
@@ -127,7 +127,7 @@ The corpus supports exact decimal, integer, string, Boolean, null, nested array,
 ordered hash, and named class/module bindings, plus case-sensitive contexts.
 MAP, FILTER, ALL, ANY, and REDUCE also have seven reference checks over
 1,025-item collections. The checker batches static replay to bound memory.
-The current 7,951-case corpus and seven scale checks pass Bun and native CPU
+The 7,951-case integration checkpoint and seven scale checks pass Bun and native CPU
 with one and eight threads at `-O3`. All 23 malformed inputs are rejected, and
 all 67 laws pass Lean-backed verification. Combined static replay on both Bend
 versions, current-source CUDA and Metal remain pending.
@@ -163,7 +163,13 @@ Exception factories preserve reasons, metadata, constructor attributes, message
 overrides and assignment values. Their 131 differential cases cover every
 factory reason and shared/stdlib error relationships. The Bend API uses
 immutable descriptions. Evaluator errors still need integration with those
-descriptions; Float/Range metadata is not yet supported.
+descriptions; Float metadata is not yet supported.
+
+Range values retain inclusive/exclusive endpoints, Ruby rendering, truthiness,
+comparisons and open-ended arity metadata. Integer-start ranges enumerate values
+for exception constructor arguments using exact decimal blocks; endless and
+non-iterable ranges preserve native conversion errors. String/Symbol successor
+enumeration, Range hash keys and Float endpoints remain incomplete.
 
 Named class and module values preserve their canonical names, kind and ancestor
 names. They support identity, subtype comparisons, truthiness, hash keys and

@@ -21,6 +21,7 @@ return {
     {'compares category and value to determine equality', 'token_upstream_equality'},
   },
   ['spec/exceptions_spec.rb'] = {
+    {'describes an at-least arity as a range', 'range_arity_3_too_few_arguments'},
     {'builds a message from reason and metadata (ParseError)', 'named_parse_class_operation'},
     {'describes an :incompatible expectation as requiring compatible operands', 'named_parse_class_incompatible'},
     {'builds an invalid_operator message', 'named_argument_class_operator'},

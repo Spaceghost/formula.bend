@@ -63,6 +63,13 @@ local function context_value(value)
     local kind = category == 'class' and 'ClassReferenceKind' or 'ModuleReferenceKind'
     return 'Core.NamedReference{Core.' .. kind .. '{}, ' .. bend_string(name) .. ', [' .. table.concat(parents, ', ') .. ']}', '{' .. json_string(category) .. ':' .. json_string(name) .. ',"ancestors":[' .. table.concat(encoded, ',') .. ']}'
   end
+  if value.range then
+    local range = value.range
+    assert(range.first ~= nil and range.last ~= nil and type(range.exclude_end) == 'boolean', 'range needs explicit endpoints and exclusion flag')
+    local first, first_json = context_value(range.first)
+    local last, last_json = context_value(range.last)
+    return 'Core.RangeValue{' .. first .. ', ' .. last .. ', ' .. (range.exclude_end and 'True{}' or 'False{}') .. '}', '{"range":{"first":' .. first_json .. ',"last":' .. last_json .. ',"exclude_end":' .. tostring(range.exclude_end) .. '}}'
+  end
   if value.hash then
     local entries, encoded, seen = {}, {}, {}
     for i, pair in ipairs(value.hash) do
