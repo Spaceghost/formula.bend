@@ -14,6 +14,16 @@ import ./src/reference.bend as Ref
 import ./src/error_types.bend as ErrorTypes
 import ./src/errors.bend as Errors
 
+law endless_range_array:
+  for first: Core.Value
+  for excluded: Bool
+  {Errors.as_array(Core.RangeValue{first, Core.NullValue{}, excluded}) == Core.Failure{"cannot convert endless range to an array"} : Core.Value}
+
+law beginless_integer_range_array:
+  for last: Nat
+  for excluded: Bool
+  {Errors.as_array(Core.RangeValue{Core.NullValue{}, Core.Number{last}, excluded}) == Core.Failure{"can't iterate from NilClass"} : Core.Value}
+
 law range_type_name:
   for first: Core.Value
   for last: Core.Value

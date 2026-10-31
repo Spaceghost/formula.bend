@@ -52,8 +52,8 @@ def error_factory(factory, input)
     when 'zero_division' then Dentaku::ZeroDivisionError.new
     else Dentaku::BaseError.new
     end
-  rescue ::ArgumentError => error
-    # Invalid factory reasons deliberately raise a native ArgumentError.
+  rescue ::ArgumentError, ::RangeError, ::TypeError => error
+    # Invalid reasons and Array(range) conversion can raise native errors.
   end
   error = error.exception(input[:override_message]) if input.key?(:override_message)
   error.assigned_to = input[:assigned_to] if input.key?(:assigned_to)

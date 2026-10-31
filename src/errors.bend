@@ -1,6 +1,7 @@
 import Base
 import ./core.bend as Core
 import ./error_types.bend as Types
+import ./decimal.bend as Decimal
 
 type ReasonCode is Data:
   NodeInvalid{}
@@ -118,8 +119,55 @@ def hash_array(value: Core.Value) -> Core.Value:
     case value:
       Core.ArrayNil{}
 
+def integer_range_pick(within: Core.Value, first: Core.Value, next: Unit -> Core.Value) -> Core.Value:
+  match within:
+    case Core.Logical{True{}}:
+      Core.ArrayCons{first, next(Unit{})}
+    case within:
+      Core.ArrayNil{}
+
+def integer_range_step(fuel: Nat, +first: Core.Value, +last: Core.Value, +excluded: Bool) -> Core.Value:
+  match fuel:
+    case 0n:
+      Core.ArrayNil{}
+    case 1n+rest:
+      integer_range_pick(Core.compare_values(first, last, Bool.pick(Core.Comparison, excluded, Core.LessThan{}, Core.LessOrEqual{})), first, u => integer_range_step(rest, Core.add(first, Core.Number{1n}), last, excluded))
+
+def range_fuel(operand: Core.NumericOperand) -> Nat:
+  match operand:
+    case Core.Magnitude{True{}, value}:
+      0n
+    case Core.Magnitude{False{}, Decimal.Exact{digits, places}}:
+      1n+Decimal.coefficient(Decimal.integer_digits(places, digits))
+    case operand:
+      0n
+
+# Array(range) belongs to exception construction as well as value semantics.
+# String/Symbol successor enumeration is a separate, still-open compatibility gap.
+def range_array_kind(integer: Bool, +first: Core.Value, +last: Core.Value, excluded: Bool) -> Core.Value:
+  match integer:
+    case True{}:
+      integer_range_step(range_fuel(Core.numeric_operand_value(Core.subtract(last, first))), first, last, excluded)
+    case False{}:
+      match first:
+        case Core.TextValue{text}:
+          Core.ArrayCons{Core.RangeValue{Core.TextValue{text}, last, excluded}, Core.ArrayNil{}}
+        case Core.SymbolValue{text}:
+          Core.ArrayCons{Core.RangeValue{Core.SymbolValue{text}, last, excluded}, Core.ArrayNil{}}
+        case first:
+          Core.Failure{"can't iterate from " ++ Core.ruby_type_name(first)}
+
+def range_array(+first: Core.Value, last: Core.Value, excluded: Bool) -> Core.Value:
+  match last:
+    case Core.NullValue{}:
+      Core.Failure{"cannot convert endless range to an array"}
+    case last:
+      range_array_kind(Core.is_integer(first), first, last, excluded)
+
 def as_array(value: Core.Value) -> Core.Value:
   match value:
+    case Core.RangeValue{first, last, excluded}:
+      range_array(first, last, excluded)
     case Core.NullValue{}:
       Core.ArrayNil{}
     case Core.ArrayNil{}:
@@ -132,6 +180,10 @@ def as_array(value: Core.Value) -> Core.Value:
       hash_array(Core.HashEntry{key, item, tail})
     case value:
       Core.ArrayCons{value, Core.ArrayNil{}}
+
+def array_conversion_error(+message: String) -> Types.Description<Core.Value>:
+  class_name = Bool.pick(String, String.eq(message, "cannot convert endless range to an array"), "RangeError", "TypeError")
+  build(class_name, ["StandardError", "Exception", "Object", "Kernel", "BasicObject"], None{}, Core.HashNil{}, Core.HashNil{}, message)
 
 def join_separator(values: Core.Value, separator: String) -> String:
   match values:
@@ -239,10 +291,24 @@ def completed(message: Maybe<&2, String>, class_name: String, base: String, reas
     case None{}:
       unhandled(reason)
 
+def parse_error_expected(expected: Core.Value, name: String, +meta: Core.Value) -> Types.Description<Core.Value>:
+  match expected:
+    case Core.Failure{message}:
+      array_conversion_error(message)
+    case expected:
+      reasoned("Dentaku::ParseError", "Dentaku::BaseError", Core.SymbolValue{name}, meta, shown(meta, "operation") ++ " requires " ++ expected_names(expected, "") ++ " operands, but got " ++ shown(meta, "actual"))
+
+def parse_error_conversion(convert: Bool, +name: String, +meta: Core.Value) -> Types.Description<Core.Value>:
+  match convert:
+    case True{}:
+      parse_error_expected(as_array(field(meta, "expected")), name, meta)
+    case False{}:
+      completed(parse_message(name, meta), "Dentaku::ParseError", "Dentaku::BaseError", Core.SymbolValue{name}, meta)
+
 def parse_error(+reason: Core.Value, +meta: Core.Value) -> Types.Description<Core.Value>:
   match reason:
-    case Core.SymbolValue{name}:
-      completed(parse_message(name, meta), "Dentaku::ParseError", "Dentaku::BaseError", Core.SymbolValue{name}, meta)
+    case Core.SymbolValue{+name}:
+      parse_error_conversion(Bool.and(String.eq(name, "node_invalid"), has(meta, "operation")), name, meta)
     case reason:
       unhandled(reason)
 
@@ -266,8 +332,15 @@ def unbound_variable_error(variables: Core.Value) -> Types.Description<Core.Valu
 def math_domain_error(name: Core.Value, arguments: Core.Value) -> Types.Description<Core.Value>:
   simple("Dentaku::MathDomainError", Core.HashEntry{Core.SymbolValue{"function_name"}, name, Core.HashEntry{Core.SymbolValue{"args"}, arguments, Core.HashNil{}}})
 
+def node_error_expected(expected: Core.Value, actual: Core.Value, operand: Core.Value) -> Types.Description<Core.Value>:
+  match expected:
+    case Core.Failure{message}:
+      array_conversion_error(message)
+    case expected:
+      simple("Dentaku::NodeError", Core.HashEntry{Core.SymbolValue{"expected"}, expected, Core.HashEntry{Core.SymbolValue{"actual"}, actual, Core.HashEntry{Core.SymbolValue{"operand"}, operand, Core.HashNil{}}}})
+
 def node_error(expected: Core.Value, actual: Core.Value, operand: Core.Value) -> Types.Description<Core.Value>:
-  simple("Dentaku::NodeError", Core.HashEntry{Core.SymbolValue{"expected"}, as_array(expected), Core.HashEntry{Core.SymbolValue{"actual"}, actual, Core.HashEntry{Core.SymbolValue{"operand"}, operand, Core.HashNil{}}}})
+  node_error_expected(as_array(expected), actual, operand)
 
 def zero_division_error() -> Types.Description<Core.Value>:
   build("Dentaku::ZeroDivisionError", parents("ZeroDivisionError", True{}), None{}, Core.HashNil{}, Core.HashNil{}, "Dentaku::ZeroDivisionError")

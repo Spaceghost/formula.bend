@@ -675,3 +675,18 @@ reflection, anonymous objects and namespace mutation are not implemented.
 Range and Float values, full structured evaluator failures, and broader
 calculator/function-registry behavior remain open. The recorded CUDA pass
 continues to cover only the earlier 2,516-case source checkpoint.
+
+## Integer Range conversion in exception construction
+
+Finite integer-start ranges enumerate expected operand values for `NodeError`
+and `ParseError`'s `node_invalid` reason. Integer endpoints remain exact even
+when they exceed a machine word, provided the materialized span fits the runtime
+Nat representation. Exclusive, descending, negative and mixed integer/decimal
+end bounds follow the reference checks. Endless ranges produce Ruby's native
+`RangeError`; beginless and non-iterable ranges produce `TypeError` with their
+class-specific messages. A parse error without an operation skips conversion,
+preserving the reference's lazy message branch.
+
+The 51 added Ruby-oracle checks cover these constructor paths and their complete
+snapshots. String and Symbol successor enumeration, Range hash keys, Float
+endpoints and arbitrary Ruby object iteration remain unfinished.
