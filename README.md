@@ -130,7 +130,8 @@ Seven scale checks over 1,025-item collections and 27 malformed-input checks
 also pass. All 73 laws pass Lean-backed verification on Bend 2.0.39. There are
 153 explicit upstream scenario mappings and 175 concrete regression fixtures.
 
-Full combined static replay on Bend 2.0.16 and 2.0.39 remains pending. Historical
+The full 8,486-case static replay and 175 concrete fixtures pass Bend 2.0.39.
+The full Bend 2.0.16 replay remains pending. Historical
 checks, source revisions and artifact hashes are recorded separately in
 `compat/backend-verification.json`. Current-source CUDA and Metal remain
 unverified; no performance result is claimed.

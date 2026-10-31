@@ -10,7 +10,7 @@
       "runtime_js_sha256":"22fc0b391c92b9956a6bd235387187d720ff580f897feddba33b327d7844dce9"
     },
     "kernel":{"status":"passed", "bend_version":"2.0.39", "lean_version":"4.34.0"},
-    "static_replay":{"full_combined_status":"pending", "exact_node_cases":9, "node_cases_passed_versions":["2.0.16","2.0.39"]},
+    "static_replay":{"full_combined_status":"partial", "full_make_check_passed":{"bend_version":"2.0.39", "source_commit":"818a5ae", "cases":8486, "concrete_fixtures":175}, "bend_2_0_16":"pending", "exact_node_cases":9, "node_cases_passed_versions":["2.0.16","2.0.39"]},
     "native_cpu": {
       "status":"passed", "compiler":"Ubuntu clang 19.1.1", "optimization":"-O3", "thread_counts":[1,8],
       "runtime_reused_for_data_only_node_additions":true,

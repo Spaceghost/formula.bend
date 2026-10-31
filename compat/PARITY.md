@@ -87,6 +87,10 @@ which delegates to the parsed node with the supplied context for these cases.
 AST purity, memoization and the broader Calculator API remain incomplete.
 Combined full static replay and current-source GPU checks are still pending.
 
+The frozen `818a5ae` source also passes the complete Bend 2.0.39 `make check`,
+including all 8,486 static corpus cases and 175 concrete fixtures. Full Bend
+2.0.16 replay is still queued behind the earlier Range checks.
+
 ## Reference runner
 
 `tools/reference.Containerfile` pins the Ruby image manifest and adds Git for the
