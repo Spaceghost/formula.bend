@@ -126,7 +126,7 @@ The eight address runtime cases pass on both JavaScript and native CPU.
 
 Parity is measured against the pinned Ruby source and its complete 713-example
 suite. The Ruby reference passes all examples; that is not a claim that Bend does.
-A separate 10392-case corpus covers selected values,
+A separate 10413-case corpus covers selected values,
 dependencies, parse-error classification, and exception factories.
 `make parity-check` generates the fixtures using Lua.
 Use `LUA=/path/to/lua` if Lua is not on PATH.
@@ -140,19 +140,25 @@ gate. No performance comparison is claimed yet.
 
 The corpus supports exact decimal, integer, raw-word Float, string, Boolean, null, nested array,
 ordered hash, named class/module and Range bindings, plus case-sensitive contexts.
-All 10,392 cases pass Bun. Seven scale checks over 1,025-item collections and
-36 malformed-input checks also pass. All 109 laws pass Lean-backed verification
-on Bend 2.0.39. There are 158 explicit upstream scenario mappings and 175 concrete
-regression fixtures. Native CPU and GPU replay of this evaluator source remains
-pending; the earlier 8,777-case checkpoint passed CPU with one and eight threads.
+All 10,413 cases pass Bun, along with seven scale checks and 36 malformed-input
+checks. All 113 laws pass Lean-backed verification on Bend 2.0.39. There are 158
+upstream scenario mappings and 175 concrete regression fixtures. Native CPU and GPU
+replay of this evaluator source remains pending.
 
-The 79ca28c source checkpoint passes full 8,665-case static replay and 175
-concrete fixtures on Bend 2.0.39. All 112 added Calculator dependency and
-identifier sessions pass static replay on that version. A full 8,777-case
-static replay has not run. The original 51 Calculator sessions and older
-2,376 matcher cases pass both Bend versions at their recorded source checkpoints.
-Historical checks, source revisions and artifact hashes are recorded separately
-in `compat/backend-verification.json`. Current-source CUDA and Metal remain
+An additional 283 probes cover stored AST values, formula-aware dependencies and
+checked AST evaluation. They pass Bun on this source; their earlier checkpoint
+also passed native CPU with one and eight threads.
+The corpus includes a 257-formula chain, locally rebound recursion, branch
+pruning, dependency-first errors and messages. The recursive runners remain
+outside termination proofs. Calculator state/cache evaluation entry points are
+not yet connected; see [stored expressions](docs/stored-expressions.md).
+
+An earlier 8,798-case checkpoint passed full static replay and all concrete
+fixtures on Bend 2.0.39; the expanded source awaits that complete static gate.
+The checker launcher requests a 64 MiB process stack for large diagnostics;
+FORMULA_CHECK_STACK_KIB overrides it within the host hard limit.
+Historical source revisions and artifact hashes are recorded separately in
+compat/backend-verification.json. Current-source CUDA and Metal remain
 unverified; no performance result is claimed.
 
 Typed token descriptors and matchers include counterparts of all 11 upstream

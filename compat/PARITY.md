@@ -49,7 +49,7 @@ The unchanged upstream suite passes 713 examples with zero failures and 96.82%
 line coverage in the Ruby reference environment. `reference-summary.json` and
 `upstream-spec-catalog.json` record that run. These results describe Ruby only.
 
-The Lua-driven corpus has 10392 reference cases for Ruby values, parse
+The Lua-driven corpus has 10413 reference cases for Ruby values, parse
 error classification, or exception-factory descriptions. It covers truthiness, strings/null, comparisons, selected
 numeric-string coercions, and static operand rejection. It is a small subset of
 the upstream catalog. Native error classes/messages, all calculator methods,
@@ -914,3 +914,57 @@ Stored AST/callable bindings, mutable identity, full error propagation, Float
 evaluator integration, spreadsheet dialects and the broader parity/shootout
 requirements remain unfinished. These results do not claim current-source CUDA
 or Metal verification, performance results, or complete Dentaku parity.
+
+## Typed stored AST execution and Float integration
+
+The merged source passes 8,798 formula/API cases and 84 separate direct AST value
+probes on Bun and native CPU with one and eight threads at clang 19 -O3. Seven
+scale checks and 27 malformed-input cases pass. All 107 laws pass the Lean-backed
+gate, and all 175 concrete fixtures pass. The 13,253 standalone Float probes pass
+on Bun; their historical component target evidence remains separately scoped.
+
+Stored values retain their creator's case mode and resolve through the current
+context. The shared evaluator retains lazy branches, balanced enumeration and
+parallel arithmetic. The direct value corpus includes transitive chains, a
+257-formula chain, and locally rebound recursion through depth 65 without a
+fixed semantic depth limit. The recursive runner is excluded from termination
+proofs. Calculator dependency preflight, mutable identity, callable bindings,
+reflection, Float evaluator integration, spreadsheet dialects and full parity
+remain unfinished.
+
+The tokenizer now separates malformed characters and unfinished quotes from
+decimal adjacency and dotted identifiers. Twenty-one additional Ruby boundary
+probes pass. The obsolete quote/token expectations in two concrete fixtures were
+corrected; repeated decimal points retain their Ruby ParseError classification.
+
+The pre-Float 986fd47 checkpoint completed full make check and 8,798-case static
+replay. The new merged source has passed the kernel, concrete fixtures and runtime
+gates; its full static replay has not yet been verified. Current-source CUDA,
+Metal and performance results are not claimed.
+
+## Stored dependencies and checked AST execution
+
+The combined source passes 8,798 regular formula/API cases and 283 separate
+stored-expression probes on Bun and native CPU with one and eight threads:
+84 direct value, 101 dependency, and 98 checked-value/message probes.
+Full 8,798-case static replay, all 175 concrete fixtures, seven scale checks
+and 27 malformed-input checks pass. All 109 laws pass Lean-backed verification.
+The separate 13,253 Float probes pass on Bun.
+
+Dependency analysis expands stored ASTs and evaluates stored guards in their
+creator modes. Checked AST evaluation reports unsatisfied dependencies before
+running the value expression, retaining first-occurrence name order. The
+default zero-division diagnostic now uses Ruby's class-name message while the
+internal failure representation stays stable.
+
+The shared analyzer and evaluator retain their total wrappers for the proof
+imports. Recursive stored execution and analysis remain outside termination
+proofs. The process stack was raised to 64 MiB for the large Range diagnostic;
+the checker launcher now requests that size, capped by the host hard limit.
+An explicit resume index retains original case indices, and joined results are
+compared with the complete oracle.
+
+Calculator state/cache entry points, native guard-error propagation, callbacks,
+aliases, mutable identity, reflection, Float evaluator integration, spreadsheet
+dialects and the complete upstream port remain unfinished. No current-source
+GPU/Metal or performance result is claimed.

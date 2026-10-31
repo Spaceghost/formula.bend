@@ -5,6 +5,10 @@ local metadata_only = arg[3] == '--metadata-only'
 local gpu = arg[3] == '--gpu' or arg[3] == '--gpu-slice'
 assert(arg[3] == nil or metadata_only or arg[3] == '--slice' or gpu, 'unknown generator option')
 local cases = dofile(input)
+local needs_stored = false
+local needs_stored_dependencies = false
+local needs_stored_checked = false
+for _, case in ipairs(cases) do if case.operation == 'stored_value' then needs_stored = true elseif case.operation == 'stored_dependencies' then needs_stored_dependencies = true elseif case.operation == 'stored_checked' or case.operation == 'stored_checked_message' then needs_stored_checked = true end end
 assert(#cases > 0, 'corpus must contain at least one case')
 if arg[3] == '--slice' or arg[3] == '--gpu-slice' then
   local start, count = assert(tonumber(arg[4]), 'missing slice start'), assert(tonumber(arg[5]), 'missing slice count')
@@ -190,6 +194,9 @@ end
 local ids = {}
 local lines = {}
 local gpu_inputs = {}
+if program and needs_stored then program:write('import ../compat/stored_api.bend as StoredApi\n') end
+if program and needs_stored_dependencies then program:write('import ../compat/stored_dependencies_api.bend as StoredDependencyApi\n') end
+if program and needs_stored_checked then program:write('import ../compat/stored_checked_api.bend as StoredCheckedApi\n') end
 local gpu_operations = {
   evaluate='Evaluate', permissive='Permissive', identifiers='Identifiers', dependencies='Dependencies',
   class='Class', type='StaticType', message='Message', coerce='Coerce', coerce_class='CoerceClass',
@@ -206,7 +213,13 @@ for _, case in ipairs(cases) do
   local context, encoded_context = context_values(case.context, case.symbol_context)
   local sensitive = case.sensitive and 'True{}' or 'False{}'
   local call
-  if operation == 'calculator_session' then
+  if operation == 'stored_checked' or operation == 'stored_checked_message' then
+    call = 'StoredCheckedApi.snapshot(Core.lookup(' .. context .. ', "input", False{}), ' .. (operation == 'stored_checked_message' and 'True{}' or 'False{}') .. ')'
+  elseif operation == 'stored_dependencies' then
+    call = 'StoredDependencyApi.snapshot(Core.lookup(' .. context .. ', "input", False{}))'
+  elseif operation == 'stored_value' then
+    call = 'StoredApi.snapshot(Core.lookup(' .. context .. ', "input", False{}))'
+  elseif operation == 'calculator_session' then
     call = 'CalculatorApi.snapshot(Core.lookup(' .. context .. ', "input", False{}))'
   elseif operation == 'token_matcher' then
     call = 'MatcherApi.snapshot(' .. bend_string(case.formula) .. ', Core.lookup(' .. context .. ', "input", False{}))'

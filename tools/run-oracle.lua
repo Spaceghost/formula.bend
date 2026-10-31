@@ -71,6 +71,7 @@ def error_factory(factory, input)
 end
 def snapshot_value(value)
   case value
+  when Dentaku::AST::Node then 'ast'
   when nil then 'null'
   when true, false then "boolean:#{value}"
   when BigDecimal then "number:#{value.to_s('F').sub(/\.0+\z/, '')}"
@@ -174,6 +175,21 @@ File.foreach(ENV.fetch('FORMULA_ORACLE_CORPUS')) do |line|
     end
     calculator = Dentaku::Calculator.new(case_sensitive: sensitive == 'true')
     value = case operation
+    when 'stored_value', 'stored_dependencies', 'stored_checked', 'stored_checked_message'
+      input = context.fetch('input')
+      receiver = Dentaku::Calculator.new(case_sensitive: input.fetch(:receiver_sensitive, false))
+      receiver.store(input.fetch(:data, {}))
+      input.fetch(:programs, {}).each do |name, descriptor|
+        creator = Dentaku::Calculator.new(case_sensitive: descriptor.fetch(:sensitive, false))
+        receiver.store(name, creator.ast(descriptor.fetch(:source)))
+      end
+      creator = Dentaku::Calculator.new(case_sensitive: input.fetch(:root_sensitive, false))
+      node = creator.ast(input.fetch(:source))
+      case operation
+      when 'stored_dependencies' then node.dependencies(receiver.memory)
+      when 'stored_checked', 'stored_checked_message' then receiver.evaluate!(node)
+      else node.value(receiver.memory)
+      end
     when 'calculator_session' then calculator_session(context.fetch('input'))
     when 'token_matcher'
       input = context.fetch('input')
@@ -216,20 +232,20 @@ File.foreach(ENV.fetch('FORMULA_ORACLE_CORPUS')) do |line|
     when 'identifiers', 'dependencies' then "names:#{value.join(',')}"
     when 'class', 'coerce_class' then "class:#{value.class.name}"
     when 'type' then "type:#{value || 'nil'}"
-    when 'message', 'coerce_message' then 'no-error'
+    when 'message', 'coerce_message', 'stored_checked_message' then 'no-error'
     else snapshot_value(value)
     end
   rescue Dentaku::Error => error
-    snapshot = ['message', 'coerce_message'].include?(operation) ? "message:#{error.message}" : "error:#{error.class.name}"
+    snapshot = ['message', 'coerce_message', 'stored_checked_message'].include?(operation) ? "message:#{error.message}" : "error:#{error.class.name}"
   rescue TSort::Cyclic => error
     raise unless ['resolve_order', 'resolve_cycles'].include?(operation)
     snapshot = "error:#{error.class.name}"
   rescue RangeError => error
     # These source operations leak native Ruby range failures in this baseline.
     raise unless error.is_a?(FloatDomainError) || error.message.include?('too big to convert') || error.message.include?('too small to convert') || error.message == 'shift width too big'
-    snapshot = ['message', 'coerce_message'].include?(operation) ? "message:#{error.message}" : "error:#{error.class.name}"
+    snapshot = ['message', 'coerce_message', 'stored_checked_message'].include?(operation) ? "message:#{error.message}" : "error:#{error.class.name}"
   rescue ::ArgumentError, ::TypeError => error
-    snapshot = ['message', 'coerce_message'].include?(operation) ? "message:#{error.message}" : "error:#{error.class.name}"
+    snapshot = ['message', 'coerce_message', 'stored_checked_message'].include?(operation) ? "message:#{error.message}" : "error:#{error.class.name}"
   end
   snapshot = "json:#{JSON.generate(snapshot)}" if json_output
   puts "#{id}\t#{snapshot}"

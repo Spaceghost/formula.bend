@@ -519,3 +519,15 @@ def Laws.static_dependencies_respect_context(value, sensitive):
 
 def Laws.unspaced_logical_alias_is_parse_error():
   {==}
+
+def Laws.stored_ast_is_truthy(expression, sensitive):
+  {==}
+
+def Laws.stored_ast_snapshot_is_typed(expression, sensitive):
+  {==}
+
+def Laws.prepared_binding_first_wins(first, second):
+  {==}
+
+def Laws.ruby_zero_division_default_message():
+  {==}

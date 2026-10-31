@@ -1,262 +1,827 @@
 {
-  "float_evaluator_checkpoint": {
-    "source_parent":"cb62d93", "scope":"Typed Float bindings, mixed Integer/BigDecimal arithmetic and comparison, native errors and numeric reductions/rounding; full Dentaku and Float object/API parity remain incomplete",
-    "source_manifest":"compat/verification/float-evaluator-source.sha256", "source_manifest_sha256":"a35cf43eb4887b8f4177284f989181a890d214468d59d800d95d1ccaf1b92348",
-    "formula_and_api_cases":10392,"new_float_cases":1615,"scale_cases":7,"malformed_input_cases":36,"laws":109,"source_scenario_mappings":158,"concrete_fixtures":175,
-    "kernel":{"status":"passed","bend_version":"2.0.39","lean_version":"4.34.0","memory_max_gib":48,"memory_swap_max_gib":8},
-    "javascript":{"status":"passed_full_formula_corpus","bend_version":"2.0.39","runtime":"Bun 1.3.1","js_sha256":"f02da3458ad102374e678ee8cf3e228b0d840a83b7d26b676f4d93b8ff5ba04b"},
-    "input_sha256":"f5e7c3df6f04fa075fb4e38fb72a731cfd9fb8529174dee6b21e3975bb2764b1","output_sha256":"b07cc1352d949d6e00e34744cd2900f3d0cc33d390d843925414961b187d4c56",
-    "reference":"Pinned Dentaku 1b9950be405ecb0d425f8683447b58cf29796d1f, Ruby3.3.13/BigDecimal3.1.5, 64-bit Linux",
-    "float_fixture_regeneration":"tools/float-value-cases.lua compat/float-value-cases.lua compat/float-value-oracle.tsv",
-    "reference_changes":"Direct Float word input and snapshots; native FloatDomainError, ArgumentError and TypeError are recorded as reference outcomes rather than aborting the corpus runner",
-    "static_replay":"not run for the complete current corpus","legacy_javascript":"not yet replayed","native_cpu":"not yet replayed","cuda":"unverified for this evaluator source","metal":"unverified","performance":"not measured"
+  "stored_dependency_checked_checkpoint": {
+    "source_parent_commit": "0c811d54cd83fbb0d1a2bbf9bf0b375b958f5361",
+    "scope": "Formula-aware AST dependency expansion and dependency-first checked AST execution; Calculator state/cache entry points, native guard-error propagation and full parity remain incomplete",
+    "formula_and_api_cases": 8798,
+    "separate_stored_probes": 283,
+    "stored_probe_families": {
+      "value": 84,
+      "dependencies": 101,
+      "checked_value_and_message": 98
+    },
+    "separate_binary64_probes": 13253,
+    "laws": 109,
+    "concrete_fixtures": 175,
+    "source_scenario_mappings": 153,
+    "scale_cases": 7,
+    "malformed_input_cases": 27,
+    "source_manifest": "compat/verification/stored-analysis-source.sha256",
+    "source_manifest_sha256": "139fe4591d191562094ed91bc07e3084ead307eae49ebe34c88c7495b2e0e435",
+    "kernel": {
+      "status": "passed",
+      "bend_version": "2.0.39",
+      "lean_version": "4.34.0",
+      "scope": "Shared total core and analyzer wrappers; recursive stored execution and analysis remain outside termination proofs"
+    },
+    "full_make_check": {
+      "status": "passed",
+      "static_regular_cases": 8798,
+      "stored_js_probes": 283,
+      "standalone_float_js_probes": 13253
+    },
+    "checker_stack": "Raised the live full replay to 64 MiB before the large Range diagnostic; updated launchers request 64 MiB, capped by the host hard limit",
+    "post_gate_tooling": {
+      "changes": [
+        "Generate the value input in the standalone analysis check",
+        "Set child checker stack and allow explicit resume index"
+      ],
+      "engine_and_oracles_unchanged_after_gates": true,
+      "fresh_empty_build_analysis_target": "passed all 283 stored probes"
+    },
+    "formula_runtime": {
+      "status": "passed",
+      "javascript": "Bun 1.3.1",
+      "native_cpu_threads": [
+        1,
+        8
+      ],
+      "compiler": "clang 19.1.1",
+      "optimization": "-O3",
+      "js_sha256": "bd04a0d60b0ffea4616be6bf611454dc13f7ab09a1bc24c2ec9cabfd7997ce1b",
+      "c_sha256": "5b2e3f5e9f37798f04724b02db5190a21c9cf728ea96fca9b830e95d9c184cca",
+      "artifact_sha256": "6c5bf1796cb662b3b66849b31fc69f01e3010b487cdda1373e194231d81a579e",
+      "input_sha256": "e8bdfc7d7035c755793e026b31952ddf32b95910476f6d39085b9fa222b1454e",
+      "output_sha256": "885f47a478c182dda642f58ff973760af522cb2ce7cda38811758ec6ac3d7fd1"
+    },
+    "stored_runtime": {
+      "status": "passed_all_283",
+      "javascript": "Bun 1.3.1",
+      "native_cpu_threads": [
+        1,
+        8
+      ],
+      "js_sha256": "6624b738d4065170eaad22701323a824cb6c6c92aa7cd3bb6bd286b2e0b09c0e",
+      "c_sha256": "e70e1ca8525079968f8e6d81f70d8b94ee9d923ed2277f503bdcb1d0e29ce494",
+      "artifact_sha256": "a55d48e09c54b3e2d55e352ff519f43b698ff2bde7049b680e046cd730224b1f",
+      "value_output_sha256": "4f7ab1c5a8025df9f368fba67207d2470a86c92db638d2c260233dbbfca514c7",
+      "dependency_output_sha256": "a498ad20d6aca9c50b7029a6282d41823143a312e62e393bc23bc939773ed0e8",
+      "checked_output_sha256": "dcac0a41f07b3b474e50422cc98e041dd2827a69742dbac5b7de542e2e12e934"
+    },
+    "cuda": "unverified for this source",
+    "metal": "unverified",
+    "performance": "not measured"
+  },
+  "stored_ast_float_integration_checkpoint": {
+    "source_parent_commits": [
+      "986fd47d67ad9faa89c450fc951245ae1e046506",
+      "cb62d932a32a2580e1f4e78f15d6cebc637cbb9b"
+    ],
+    "scope": "Typed stored AST value execution and lexical boundary corrections combined with the standalone Float foundation; Calculator stored-formula entry points and full parity remain incomplete",
+    "formula_and_api_cases": 8798,
+    "separate_stored_value_probes": 84,
+    "separate_binary64_probes": 13253,
+    "laws": 107,
+    "concrete_fixtures": 175,
+    "source_scenario_mappings": 153,
+    "scale_cases": 7,
+    "malformed_input_cases": 27,
+    "source_manifest": "compat/verification/stored-float-integration-source.sha256",
+    "source_manifest_sha256": "2adb169788d6cf87ad4e8184950279338f30a0ad441572709c1b363c5d093617",
+    "kernel": {
+      "status": "passed",
+      "bend_version": "2.0.39",
+      "lean_version": "4.34.0",
+      "scope": "Shared total core, representation contracts and standalone Float laws; the recursive stored runner is excluded"
+    },
+    "formula_runtime": {
+      "status": "passed",
+      "javascript": "Bun 1.3.1",
+      "native_cpu_threads": [
+        1,
+        8
+      ],
+      "compiler": "clang 19.1.1",
+      "optimization": "-O3",
+      "artifact_reuse": false,
+      "js_sha256": "4ae7f95cf68164660a004c64ec9781c3efbb34357fb5181e31c221921bb82231",
+      "c_sha256": "98f25e5c73b1dad308cc2057026b9bdea469dc3bc95f21292d77b9cbc6451961",
+      "artifact_sha256": "c80d95e514b7fa4b9bf5baa71cb1816bbdb7f31fb75ef54c4f003a3d4a49585b",
+      "input_sha256": "e8bdfc7d7035c755793e026b31952ddf32b95910476f6d39085b9fa222b1454e",
+      "output_sha256": "885f47a478c182dda642f58ff973760af522cb2ce7cda38811758ec6ac3d7fd1"
+    },
+    "stored_value_runtime": {
+      "status": "passed",
+      "reference": "Direct pinned Ruby AST value(context), not Calculator dependency preflight",
+      "javascript": "Bun 1.3.1",
+      "native_cpu_threads": [
+        1,
+        8
+      ],
+      "js_sha256": "be21b1a69a9ff22c2778e6fc67e0488c8f8ea6404357fe4e92b2b5b4c22491ee",
+      "c_sha256": "c03c37f3a9d5c13d624e0c6fc97b81718187002897049d7524be9327aa6fe881",
+      "artifact_sha256": "e41517c6000a029312406a4a94349e168a010c4e19894e6f21b61f817c669d07",
+      "input_sha256": "3f65b1ff9a579f45f8c8a01077231cca6816659485233b03a47420e89531d0f7",
+      "output_sha256": "4f7ab1c5a8025df9f368fba67207d2470a86c92db638d2c260233dbbfca514c7",
+      "longest_chain": 257,
+      "largest_locally_rebound_recursion_probe": 65,
+      "semantic_depth_limit": false
+    },
+    "binary64_current_js": {
+      "status": "passed",
+      "probes": 13253,
+      "native_cuda_scope": "Retained component-specific historical evidence; not a new merged formula GPU pass"
+    },
+    "recursive_runner_verdict": {
+      "status": "outside termination proofs",
+      "expected_rejection": "bridge, resolve, expand, evaluate_in depend on unsafe recursion"
+    },
+    "fresh_full8798_static_replay": "not yet verified on this merged source",
+    "cuda": "unverified for this source",
+    "metal": "unverified",
+    "performance": "not measured"
+  },
+  "stored_ast_pre_float_checkpoint": {
+    "source_commit": "986fd47d67ad9faa89c450fc951245ae1e046506",
+    "formula_and_api_cases": 8798,
+    "separate_stored_value_probes": 84,
+    "laws": 99,
+    "full_make_check": {
+      "status": "passed",
+      "checker": "Bend 2.0.39",
+      "concrete_fixtures": 175,
+      "full_static_cases": 8798
+    },
+    "native_cpu_threads": [
+      1,
+      8
+    ],
+    "javascript": "Bun 1.3.1",
+    "scale_cases": 7,
+    "malformed_input_cases": 27,
+    "source_manifest": "compat/verification/stored-values-source.sha256",
+    "source_manifest_sha256": "93520256b51a6b28f3c0218c897896acf19dabe005aef3a024e2623a522225b9"
   },
   "float_foundation_integrated_checkpoint": {
-    "source_commit":"0f0aa97", "scope":"Standalone arithmetic, decimal conversion, Ruby formatting and BigDecimal coercion profiles combined with Calculator dependency APIs; evaluator Float integration and full parity remain incomplete",
-    "laws":105, "kernel":{"status":"passed", "bend_version":"2.0.39", "lean_version":"4.34.0"},
-    "formula_and_api_cases":8777, "separate_binary64_probes":13253,
-    "probe_families":{"arithmetic":4595,"ieee_decimal":441,"ruby_decimal":1239,"ruby_format":6668,"bigdecimal_coercion":310},
-    "coercion_source_manifest":"compat/verification/binary64-bigdecimal-source.sha256", "coercion_source_manifest_sha256":"b5f05fea9231e018fd35d324fdc65bf459ea4fd7dbb4eeee73624c95f3ab4b41",
-    "formula_runtime":{"source_commit":"3d934e8", "status":"passed", "artifact_reuse":false, "post_merge_artifact_identity":"Regenerated C and JavaScript at 0f0aa97 byte-compare identical after standalone module merges", "javascript":"Bun 1.3.1", "native_cpu_threads":[1,8], "scale_cases":7, "malformed_cases":27,
-      "source_manifest":"compat/verification/float-foundation-formula-source.sha256", "source_manifest_sha256":"ec957b983da9f5c92a62fed6d8cf1d23afc80739570f529630ec25dd60661c07",
-      "js_sha256":"1660d515fd4d93754181eb75e126df28911a52b636fed4af4882a6fe9b4dca53",
-      "c_sha256":"0417ce724f49860b621ec3f0f63164dfe8ac02bc59c3ed28eb604f2d772f07a0", "artifact_sha256":"7b75ab7c4280d5101fef8d8a766ce0afa077381fbbcf7286c2ed38194f1d0116",
-      "input_sha256":"a4af83e89ed4145e8cfb600afc1127c0615ea3e288f7354bab737a5f5336b7b2", "output_sha256":"14b9dcaecec3de998a1afb9938ffdb1510f8b01900ff73fa847bfeec23a92832"},
-    "component_verification":{"arithmetic_and_ieee_decimal":"5036 passed both JS compilers, CPU threads1/8 and required default-profile CUDA at b604167",
-      "ruby_format":"6668 passed both JS compilers, CPU threads1/8 and required default-profile CUDA; legacy JS completed after an alpha-equivalent binder fix with identical emitted C",
-      "ruby_decimal":"1239 passed both JS compilers and CPU threads1/8 at c1d5cf1; required CUDA running",
-      "bigdecimal_coercion":"310 direct Ruby reference probes passed Bend2.0.39/Bun at 0f0aa97"},
-    "combined_13253_matrix":{"status":"running on frozen 0f0aa97 source", "javascript_compilers":["2.0.16","2.0.39"], "native_cpu_threads":[1,8], "cuda":"RequiredGPU(1GB), default NVRTC profile; no fallback", "memory_max_gib":48, "memory_swap_max_gib":8},
-    "full_current_static_corpus":"not run", "current_formula_cuda":"unverified", "metal":"unverified", "performance":"not measured"
+    "source_commit": "0f0aa97",
+    "scope": "Standalone arithmetic, decimal conversion, Ruby formatting and BigDecimal coercion profiles combined with Calculator dependency APIs; evaluator Float integration and full parity remain incomplete",
+    "laws": 105,
+    "kernel": {
+      "status": "passed",
+      "bend_version": "2.0.39",
+      "lean_version": "4.34.0"
+    },
+    "formula_and_api_cases": 8777,
+    "separate_binary64_probes": 13253,
+    "probe_families": {
+      "arithmetic": 4595,
+      "ieee_decimal": 441,
+      "ruby_decimal": 1239,
+      "ruby_format": 6668,
+      "bigdecimal_coercion": 310
+    },
+    "coercion_source_manifest": "compat/verification/binary64-bigdecimal-source.sha256",
+    "coercion_source_manifest_sha256": "b5f05fea9231e018fd35d324fdc65bf459ea4fd7dbb4eeee73624c95f3ab4b41",
+    "formula_runtime": {
+      "source_commit": "3d934e8",
+      "status": "passed",
+      "artifact_reuse": false,
+      "post_merge_artifact_identity": "Regenerated C and JavaScript at 0f0aa97 byte-compare identical after standalone module merges",
+      "javascript": "Bun 1.3.1",
+      "native_cpu_threads": [
+        1,
+        8
+      ],
+      "scale_cases": 7,
+      "malformed_cases": 27,
+      "source_manifest": "compat/verification/float-foundation-formula-source.sha256",
+      "source_manifest_sha256": "ec957b983da9f5c92a62fed6d8cf1d23afc80739570f529630ec25dd60661c07",
+      "js_sha256": "1660d515fd4d93754181eb75e126df28911a52b636fed4af4882a6fe9b4dca53",
+      "c_sha256": "0417ce724f49860b621ec3f0f63164dfe8ac02bc59c3ed28eb604f2d772f07a0",
+      "artifact_sha256": "7b75ab7c4280d5101fef8d8a766ce0afa077381fbbcf7286c2ed38194f1d0116",
+      "input_sha256": "a4af83e89ed4145e8cfb600afc1127c0615ea3e288f7354bab737a5f5336b7b2",
+      "output_sha256": "14b9dcaecec3de998a1afb9938ffdb1510f8b01900ff73fa847bfeec23a92832"
+    },
+    "component_verification": {
+      "arithmetic_and_ieee_decimal": "5036 passed both JS compilers, CPU threads1/8 and required default-profile CUDA at b604167",
+      "ruby_format": "6668 passed both JS compilers, CPU threads1/8 and required default-profile CUDA; legacy JS completed after an alpha-equivalent binder fix with identical emitted C",
+      "ruby_decimal": "1239 passed both JS compilers, CPU threads1/8 and required default-profile CUDA at c1d5cf1",
+      "bigdecimal_coercion": "310 direct Ruby reference probes passed Bend2.0.39/Bun at 0f0aa97"
+    },
+    "combined_13253_matrix": {
+      "status": "passed_all_13253_probes_on_every_listed_backend",
+      "source_commit": "0f0aa978660d18f9f93c2600293efb4600341955",
+      "source_manifest": "compat/verification/float-foundation-joint-target-source.sha256",
+      "javascript_compilers": [
+        "2.0.16",
+        "2.0.39"
+      ],
+      "javascript_runtime": "Bun 1.3.1",
+      "native_cpu_threads": [
+        1,
+        8
+      ],
+      "cuda": "RequiredGPU(1GB), default NVRTC profile; no fallback",
+      "gpu": "Quadro P4000",
+      "compiler": "clang 19.1.1 -O3",
+      "toolkit": "12.9.1",
+      "nvrtc": "12.9.86",
+      "device_stack_limit_increased": false,
+      "js_39_sha256": "67984d84edbfc81308b84b8bbfdac61c315c0ee026393d9ea00079d24549e6ce",
+      "js_16_sha256": "dd4a877f67e7b006849346a55f0f4dcf6f8bc697fd20c6d6eba7c038456335a4",
+      "c_sha256": "9348aaea8e83e5bbe4d80f17a6367937bc5b70211694f331c6673c285d27d93a",
+      "artifact_sha256": "5626ffcbb1ca4ed1f132459ea07f790d484b40fd188df4605eda86884f553665",
+      "shader_sha256": "f276b58b62245ad6e71ac7ed150b1308cd707e4466334249ed8b974400bf8ed5",
+      "coercion_input_sha256": "e6bc0de70c601822472d5e20575bcc363fbb55f0090455c1dc3cdc708f5e453c",
+      "coercion_output_sha256": "9f88b6641e661cbf861ed29541b85c12921d26dff1acc6b4da4878aa1919317a",
+      "memory_max_gib": 48,
+      "memory_swap_max_gib": 8,
+      "observed_modern_job_peak_bytes": 2605301760,
+      "observed_legacy_job_peak_bytes": 2622074880,
+      "observed_job_swap_peak_bytes": 0,
+      "modern_log": "compat/verification/float-foundation-joint-targets.log",
+      "legacy_log": "compat/verification/float-foundation-joint-16.log"
+    },
+    "full_current_static_corpus": "not run",
+    "current_formula_cuda": "unverified",
+    "metal": "unverified",
+    "performance": "not measured"
   },
   "decimal_cache_integration_checkpoint": {
-    "runtime_source_commit":"6490cbf", "source_parent_commits":["02bd3c2","79ca28c"],
-    "scope":"Exact decimal bridge and shared Decimal tail traversals combined with Calculator creator-mode and storage fixes; full Float evaluator and Dentaku parity remain incomplete",
-    "formula_and_api_cases":8665, "separate_arithmetic_probes":4595, "separate_conversion_probes":441, "laws":93,
-    "scale_cases":7, "malformed_input_cases":27, "concrete_fixtures":175, "source_scenario_mappings":153,
-    "source_manifest":"compat/verification/binary64-decimal-cache-formula-source.sha256",
-    "kernel":{"status":"passed", "bend_version":"2.0.39", "lean_version":"4.34.0"},
-    "formula_runtime":{"status":"passed", "artifact_reuse":false, "javascript":"Bun 1.3.1", "native_cpu_threads":[1,8],
-      "js_sha256":"e0de36974346ec5fb5124cd4e838e472b81a4642747a8390ba76c90356ab3e99",
-      "c_sha256":"a0aac9e932c457f8dd65f2f3930dafe9ba58cfa0ddaa472775ab276ec103b39f",
-      "artifact_sha256":"e5002a52f358a25c848de05fdd88659c2b05bc0a4aeb77ccb0d5fbcd619bc52e",
-      "input_sha256":"995f1d9ea1b9c8f85a34a91186cdc5a41d53709fb0cb913eaf4865d06337d471", "output_sha256":"ae940c2e39f7221ff44e93fef2ba50bf73d6bbad2df73342c7175465456da183"},
-    "binary64_target_scope":"Unchanged dependency graph from b604167: 5036 probes passed both JS compilers, CPU threads1/8 and required default-profile CUDA; regenerated integrated JS byte-compares identical",
-    "full_current_static_replay":"not run; older complete static checkpoints remain separately scoped",
-    "current_formula_cuda":"unverified", "metal":"unverified", "performance":"not measured"
+    "runtime_source_commit": "6490cbf",
+    "source_parent_commits": [
+      "02bd3c2",
+      "79ca28c"
+    ],
+    "scope": "Exact decimal bridge and shared Decimal tail traversals combined with Calculator creator-mode and storage fixes; full Float evaluator and Dentaku parity remain incomplete",
+    "formula_and_api_cases": 8665,
+    "separate_arithmetic_probes": 4595,
+    "separate_conversion_probes": 441,
+    "laws": 93,
+    "scale_cases": 7,
+    "malformed_input_cases": 27,
+    "concrete_fixtures": 175,
+    "source_scenario_mappings": 153,
+    "source_manifest": "compat/verification/binary64-decimal-cache-formula-source.sha256",
+    "kernel": {
+      "status": "passed",
+      "bend_version": "2.0.39",
+      "lean_version": "4.34.0"
+    },
+    "formula_runtime": {
+      "status": "passed",
+      "artifact_reuse": false,
+      "javascript": "Bun 1.3.1",
+      "native_cpu_threads": [
+        1,
+        8
+      ],
+      "js_sha256": "e0de36974346ec5fb5124cd4e838e472b81a4642747a8390ba76c90356ab3e99",
+      "c_sha256": "a0aac9e932c457f8dd65f2f3930dafe9ba58cfa0ddaa472775ab276ec103b39f",
+      "artifact_sha256": "e5002a52f358a25c848de05fdd88659c2b05bc0a4aeb77ccb0d5fbcd619bc52e",
+      "input_sha256": "995f1d9ea1b9c8f85a34a91186cdc5a41d53709fb0cb913eaf4865d06337d471",
+      "output_sha256": "ae940c2e39f7221ff44e93fef2ba50bf73d6bbad2df73342c7175465456da183"
+    },
+    "binary64_target_scope": "Unchanged dependency graph from b604167: 5036 probes passed both JS compilers, CPU threads1/8 and required default-profile CUDA; regenerated integrated JS byte-compares identical",
+    "full_current_static_replay": "not run; older complete static checkpoints remain separately scoped",
+    "current_formula_cuda": "unverified",
+    "metal": "unverified",
+    "performance": "not measured"
   },
   "binary64_decimal_checkpoint": {
-    "source_commit":"b604167",
-    "scope":"Standalone exact decimal projection and IEEE nearest/even decimal conversion; evaluator Float values and Ruby-compatible decimal parsing remain incomplete",
-    "source_manifest":"compat/verification/binary64-decimal-source.sha256",
-    "source_manifest_sha256":"2995e9ae4b774a1682368fecfc6e1170504d4123c8773f1ced8fd0b39069f5c4",
-    "conversion_probes":441, "separate_arithmetic_probes":4595,
-    "conversion_oracle":"Exact rational midpoint intervals; libc supplies only an initial candidate",
-    "ruby_parser_discrepancy_rows":72,
-    "ruby_parser_discrepancies":"compat/binary64-conversion-ruby-profile.tsv; these are open compatibility items, not passing Ruby parity cases",
-    "kernel":{"status":"passed", "laws":88, "bend_version":"2.0.39", "lean_version":"4.34.0"},
-    "javascript":{"status":"passed_all_5036_probes", "bend_version":"2.0.39", "runtime":"Bun 1.3.1", "js_sha256":"4783c628b409512cdee0a57c25fe7cd80caf6dc80392f613fb62c20bd4f11c04"},
-    "legacy_javascript":{"bend_version":"2.0.16", "status":"passed_all_5036_probes", "runtime":"Bun 1.3.1"},
-    "native_cpu":{"status":"passed_all_5036_probes", "threads":[1,8], "compiler":"clang 19.1.1", "optimization":"-O3", "cuda_capable_artifact":true,
-      "c_sha256":"f4e7222d3a38d447689e7d5d71f5aab13003fb807ef9c1bcdb72d1e79ad2204d", "artifact_sha256":"db60252f17e807d635cef130d6f6971b4e94c1b788cda7d5a2eb6b5c2f8ed7a6"},
-    "cuda":{"status":"passed_all_5036_probes", "requested_mode":"RequiredGPU(1GB)", "fallback":false, "profile":"default NVRTC options", "gpu":"Quadro P4000", "toolkit":"12.9.1", "nvrtc":"12.9.86",
-      "shader_sha256":"8036c52a7f0ea87dd3108c1e61da1936eacc36a4b5ef66059864717d55642115", "device_stack_limit_increased":false,
-      "conversion_input_sha256":"6120fb3b5c0b5922afa71c7fbbdf435d284793f3ec49e73f12074b87ee76d20e", "conversion_output_sha256":"e7d07b66ae24506a14f0f722dcb90256cd851044af90644214721d00479ac67f"},
-    "fresh_formula_regression":{"cases":8537, "scale_cases":7, "malformed_cases":27, "bun":"passed", "native_cpu_threads":[1,8], "native_cpu_status":"passed",
-      "artifact_reuse":false, "source_manifest":"compat/verification/binary64-decimal-formula-source.sha256",
-      "js_sha256":"094363b04ce6df5a1e773836fc98ec108119406afda0a033a5b34e196d146ac2",
-      "c_sha256":"d27667a69ac66cc7bb6d522be4a75f5bc69458ffb6916f5179f6f993c880fa8f",
-      "artifact_sha256":"daa42e4db16e9ec71eef7797c8774bec6d8a92790302c942f740c841c4e6cb4c",
-      "input_sha256":"c62cbf4be7fbf899a00202383b47feebd357cec568c696da53f09142432553ad", "output_sha256":"0f42aba958bd651e442046ecb8db8358bbabc404eebc6effa42117be64aee93e"},
-    "formula_cuda":"unverified for this source", "metal":"unverified", "performance":"not measured"
+    "source_commit": "b604167",
+    "scope": "Standalone exact decimal projection and IEEE nearest/even decimal conversion; evaluator Float values and Ruby-compatible decimal parsing remain incomplete",
+    "source_manifest": "compat/verification/binary64-decimal-source.sha256",
+    "source_manifest_sha256": "2995e9ae4b774a1682368fecfc6e1170504d4123c8773f1ced8fd0b39069f5c4",
+    "conversion_probes": 441,
+    "separate_arithmetic_probes": 4595,
+    "conversion_oracle": "Exact rational midpoint intervals; libc supplies only an initial candidate",
+    "ruby_parser_discrepancy_rows": 72,
+    "ruby_parser_discrepancies": "compat/binary64-conversion-ruby-profile.tsv; these are open compatibility items, not passing Ruby parity cases",
+    "kernel": {
+      "status": "passed",
+      "laws": 88,
+      "bend_version": "2.0.39",
+      "lean_version": "4.34.0"
+    },
+    "javascript": {
+      "status": "passed_all_5036_probes",
+      "bend_version": "2.0.39",
+      "runtime": "Bun 1.3.1",
+      "js_sha256": "4783c628b409512cdee0a57c25fe7cd80caf6dc80392f613fb62c20bd4f11c04"
+    },
+    "legacy_javascript": {
+      "bend_version": "2.0.16",
+      "status": "passed_all_5036_probes",
+      "runtime": "Bun 1.3.1"
+    },
+    "native_cpu": {
+      "status": "passed_all_5036_probes",
+      "threads": [
+        1,
+        8
+      ],
+      "compiler": "clang 19.1.1",
+      "optimization": "-O3",
+      "cuda_capable_artifact": true,
+      "c_sha256": "f4e7222d3a38d447689e7d5d71f5aab13003fb807ef9c1bcdb72d1e79ad2204d",
+      "artifact_sha256": "db60252f17e807d635cef130d6f6971b4e94c1b788cda7d5a2eb6b5c2f8ed7a6"
+    },
+    "cuda": {
+      "status": "passed_all_5036_probes",
+      "requested_mode": "RequiredGPU(1GB)",
+      "fallback": false,
+      "profile": "default NVRTC options",
+      "gpu": "Quadro P4000",
+      "toolkit": "12.9.1",
+      "nvrtc": "12.9.86",
+      "shader_sha256": "8036c52a7f0ea87dd3108c1e61da1936eacc36a4b5ef66059864717d55642115",
+      "device_stack_limit_increased": false,
+      "conversion_input_sha256": "6120fb3b5c0b5922afa71c7fbbdf435d284793f3ec49e73f12074b87ee76d20e",
+      "conversion_output_sha256": "e7d07b66ae24506a14f0f722dcb90256cd851044af90644214721d00479ac67f"
+    },
+    "fresh_formula_regression": {
+      "cases": 8537,
+      "scale_cases": 7,
+      "malformed_cases": 27,
+      "bun": "passed",
+      "native_cpu_threads": [
+        1,
+        8
+      ],
+      "native_cpu_status": "passed",
+      "artifact_reuse": false,
+      "source_manifest": "compat/verification/binary64-decimal-formula-source.sha256",
+      "js_sha256": "094363b04ce6df5a1e773836fc98ec108119406afda0a033a5b34e196d146ac2",
+      "c_sha256": "d27667a69ac66cc7bb6d522be4a75f5bc69458ffb6916f5179f6f993c880fa8f",
+      "artifact_sha256": "daa42e4db16e9ec71eef7797c8774bec6d8a92790302c942f740c841c4e6cb4c",
+      "input_sha256": "c62cbf4be7fbf899a00202383b47feebd357cec568c696da53f09142432553ad",
+      "output_sha256": "0f42aba958bd651e442046ecb8db8358bbabc404eebc6effa42117be64aee93e"
+    },
+    "formula_cuda": "unverified for this source",
+    "metal": "unverified",
+    "performance": "not measured"
   },
   "calculator_dependency_checkpoint": {
-    "source_parent_commit":"79ca28c8e7531ef78fcc609d38ebfa24aa8e9a1e",
-    "scope":"Calculator dependencies and identifiers, transferred AST origin, static context bindings, tokenizer classification; stored formulas and full parity unfinished",
-    "source_manifest":"compat/verification/calculator-dependencies-source.sha256",
-    "source_manifest_sha256":"6ddb2085cd75a6d56a5e8d65a07f8ba8fb2aa7ae9e1ed14d7bd3e4f55c573c73",
-    "formula_and_api_cases":8777,"new_session_cases":112,"laws":97,
-    "source_scenario_mappings":153,"concrete_fixtures":175,"scale_cases":7,"malformed_input_cases":27,
-    "new_cases_static_replay":{"status":"passed","version":"2.0.39"},
-    "fresh_full8777_static_replay":"not run",
-    "javascript":{"status":"passed","runtime":"Bun 1.3.1","artifact_sha256":"b600b8b2d354515fa4924ed6eb5ca3c6c5bab99c48957406a008294b810259e1"},
-    "native_cpu":{"status":"passed","compiler":"clang 19.1.1","optimization":"-O3","thread_counts":[1,8],"generated_c_sha256":"8044c365b22cd443fedd139e4c2d83cac2dde2c5809a19196beddef1bbc19179","artifact_sha256":"b76ea2f120f0a683f6367e1ceb7875f8c1d77fd3aa277c0207c70c5b0a7b44f3"},
-    "input_sha256":"a4af83e89ed4145e8cfb600afc1127c0615ea3e288f7354bab737a5f5336b7b2","output_sha256":"14b9dcaecec3de998a1afb9938ffdb1510f8b01900ff73fa847bfeec23a92832",
-    "kernel":{"status":"passed","bend_version":"2.0.39","lean_version":"4.34.0"},
-    "cuda":"unverified for this source","metal":"unverified","performance":"not measured"
+    "source_parent_commit": "79ca28c8e7531ef78fcc609d38ebfa24aa8e9a1e",
+    "scope": "Calculator dependencies and identifiers, transferred AST origin, static context bindings, tokenizer classification; stored formulas and full parity unfinished",
+    "source_manifest": "compat/verification/calculator-dependencies-source.sha256",
+    "source_manifest_sha256": "6ddb2085cd75a6d56a5e8d65a07f8ba8fb2aa7ae9e1ed14d7bd3e4f55c573c73",
+    "formula_and_api_cases": 8777,
+    "new_session_cases": 112,
+    "laws": 97,
+    "source_scenario_mappings": 153,
+    "concrete_fixtures": 175,
+    "scale_cases": 7,
+    "malformed_input_cases": 27,
+    "new_cases_static_replay": {
+      "status": "passed",
+      "version": "2.0.39"
+    },
+    "fresh_full8777_static_replay": "not run",
+    "javascript": {
+      "status": "passed",
+      "runtime": "Bun 1.3.1",
+      "artifact_sha256": "b600b8b2d354515fa4924ed6eb5ca3c6c5bab99c48957406a008294b810259e1"
+    },
+    "native_cpu": {
+      "status": "passed",
+      "compiler": "clang 19.1.1",
+      "optimization": "-O3",
+      "thread_counts": [
+        1,
+        8
+      ],
+      "generated_c_sha256": "8044c365b22cd443fedd139e4c2d83cac2dde2c5809a19196beddef1bbc19179",
+      "artifact_sha256": "b76ea2f120f0a683f6367e1ceb7875f8c1d77fd3aa277c0207c70c5b0a7b44f3"
+    },
+    "input_sha256": "a4af83e89ed4145e8cfb600afc1127c0615ea3e288f7354bab737a5f5336b7b2",
+    "output_sha256": "14b9dcaecec3de998a1afb9938ffdb1510f8b01900ff73fa847bfeec23a92832",
+    "kernel": {
+      "status": "passed",
+      "bend_version": "2.0.39",
+      "lean_version": "4.34.0"
+    },
+    "cuda": "unverified for this source",
+    "metal": "unverified",
+    "performance": "not measured"
   },
   "cache_binary64_full_static_checkpoint": {
-    "source_commit":"79ca28c8e7531ef78fcc609d38ebfa24aa8e9a1e",
-    "status":"passed","checker":"Bend 2.0.39","formula_and_api_cases":8665,
-    "full_make_check":true,"concrete_fixtures":175,"separate_binary64_probes":4595,
-    "output_sha256":"ae940c2e39f7221ff44e93fef2ba50bf73d6bbad2df73342c7175465456da183",
-    "terminal_log_sha256":"8a699451c3455a8450e886df260ce788f014d70489f70751cbe96a0d3fb3fc59"
+    "source_commit": "79ca28c8e7531ef78fcc609d38ebfa24aa8e9a1e",
+    "status": "passed",
+    "checker": "Bend 2.0.39",
+    "formula_and_api_cases": 8665,
+    "full_make_check": true,
+    "concrete_fixtures": 175,
+    "separate_binary64_probes": 4595,
+    "output_sha256": "ae940c2e39f7221ff44e93fef2ba50bf73d6bbad2df73342c7175465456da183",
+    "terminal_log_sha256": "8a699451c3455a8450e886df260ce788f014d70489f70751cbe96a0d3fb3fc59"
   },
   "cache_binary64_integration_checkpoint": {
-    "source_parent_commits":["dd01d269aa43d0d098fe5e6a4712ebbe0c5f33a9","b2bbe9b447deb6ca418ecbebe544a3d12bea2bc1"],
-    "source_manifest":"compat/verification/cache-binary64-source.sha256",
-    "source_manifest_sha256":"d94a0188c41fd44a616b011928ad170fddc4e56d2d4fd0e51f7e3f205765b7db",
-    "scope":"Creator-mode cache and storage-overload fixes combined with standalone binary64 arithmetic; Float evaluator integration and full parity incomplete",
-    "formula_and_api_cases":8665,"separate_binary64_probes":4595,"laws":90,
-    "concrete_fixtures":175,"source_scenario_mappings":153,"scale_cases":7,"malformed_input_cases":27,
-    "formula_runtime":{"status":"passed","javascript":"Bun 1.3.1","native_cpu_threads":[1,8],
-      "artifact_reuse":"Re-emitted formula C and JavaScript byte-compare identical after the independent binary64 merge; replayed the complete corpus and scale inputs on verified artifacts.",
-      "generated_c_sha256":"f2a120d4c94494d0fe4df30daca9e5ad43f23c8a2aa2e45364244daf7849d76c",
-      "runtime_js_sha256":"cfa07349f5cd66e29b78c8043079b33ea21f16ddee2c83087c4c3d758b547600",
-      "native_artifact_sha256":"faf5c66c4e08e1e81e7b48d7bbb65fad94f434554c49b983d84d1cd2c5e5daa7",
-      "input_sha256":"995f1d9ea1b9c8f85a34a91186cdc5a41d53709fb0cb913eaf4865d06337d471",
-      "output_sha256":"ae940c2e39f7221ff44e93fef2ba50bf73d6bbad2df73342c7175465456da183"},
-    "binary64_replay":{"status":"passed","runtime":"Bun 1.3.1","cases":4595,
-      "runtime_js_sha256":"630c6cd58bea74d734457bca3dfa25a361f563e9d8f3ffd5813eacef4a419edc",
-      "output_sha256":"9eb1e29fc5fa3d7cdf1ea816e4d5ffda938e6afc5d4d5dc6755f5176b752e01a"},
-    "kernel":{"status":"passed","bend_version":"2.0.39","lean_version":"4.34.0"},
-    "fresh_full8665_static_replay":"not run",
-    "current_formula_cuda":"unverified","metal":"unverified","performance":"not measured"
+    "source_parent_commits": [
+      "dd01d269aa43d0d098fe5e6a4712ebbe0c5f33a9",
+      "b2bbe9b447deb6ca418ecbebe544a3d12bea2bc1"
+    ],
+    "source_manifest": "compat/verification/cache-binary64-source.sha256",
+    "source_manifest_sha256": "d94a0188c41fd44a616b011928ad170fddc4e56d2d4fd0e51f7e3f205765b7db",
+    "scope": "Creator-mode cache and storage-overload fixes combined with standalone binary64 arithmetic; Float evaluator integration and full parity incomplete",
+    "formula_and_api_cases": 8665,
+    "separate_binary64_probes": 4595,
+    "laws": 90,
+    "concrete_fixtures": 175,
+    "source_scenario_mappings": 153,
+    "scale_cases": 7,
+    "malformed_input_cases": 27,
+    "formula_runtime": {
+      "status": "passed",
+      "javascript": "Bun 1.3.1",
+      "native_cpu_threads": [
+        1,
+        8
+      ],
+      "artifact_reuse": "Re-emitted formula C and JavaScript byte-compare identical after the independent binary64 merge; replayed the complete corpus and scale inputs on verified artifacts.",
+      "generated_c_sha256": "f2a120d4c94494d0fe4df30daca9e5ad43f23c8a2aa2e45364244daf7849d76c",
+      "runtime_js_sha256": "cfa07349f5cd66e29b78c8043079b33ea21f16ddee2c83087c4c3d758b547600",
+      "native_artifact_sha256": "faf5c66c4e08e1e81e7b48d7bbb65fad94f434554c49b983d84d1cd2c5e5daa7",
+      "input_sha256": "995f1d9ea1b9c8f85a34a91186cdc5a41d53709fb0cb913eaf4865d06337d471",
+      "output_sha256": "ae940c2e39f7221ff44e93fef2ba50bf73d6bbad2df73342c7175465456da183"
+    },
+    "binary64_replay": {
+      "status": "passed",
+      "runtime": "Bun 1.3.1",
+      "cases": 4595,
+      "runtime_js_sha256": "630c6cd58bea74d734457bca3dfa25a361f563e9d8f3ffd5813eacef4a419edc",
+      "output_sha256": "9eb1e29fc5fa3d7cdf1ea816e4d5ffda938e6afc5d4d5dc6755f5176b752e01a"
+    },
+    "kernel": {
+      "status": "passed",
+      "bend_version": "2.0.39",
+      "lean_version": "4.34.0"
+    },
+    "fresh_full8665_static_replay": "not run",
+    "current_formula_cuda": "unverified",
+    "metal": "unverified",
+    "performance": "not measured"
   },
   "calculator_original_legacy_completion_checkpoint": {
-    "source_commit":"c852ba48c1241a72f91ff3eedc9f397d4981ba43",
-    "status":"passed","session_cases":51,"preserved_prefix_cases":8,"resumed_cases":43,
-    "checker":"Bend 2.0.16","resumed_batch_size":8,
-    "scope":"Original Calculator sessions only; excludes newer creator-mode and overload additions"
+    "source_commit": "c852ba48c1241a72f91ff3eedc9f397d4981ba43",
+    "status": "passed",
+    "session_cases": 51,
+    "preserved_prefix_cases": 8,
+    "resumed_cases": 43,
+    "checker": "Bend 2.0.16",
+    "resumed_batch_size": 8,
+    "scope": "Original Calculator sessions only; excludes newer creator-mode and overload additions"
   },
   "cache_origin_checkpoint": {
-    "source_commit":"eba187acc0c2edcca02cd592593f83c1b5d3523d",
-    "source_manifest":"compat/verification/cache-origin-source.sha256",
-    "source_manifest_sha256":"b952e1a9915dbd7f9d29d4fd6a78eb738dc37fbb5c8c1753efa30ef6ea23da3e",
-    "scope":"Creator case mode in cached ASTs, exact prepared memory, and hash/array storage overloads; stored formulas and full Calculator parity incomplete",
-    "formula_and_api_cases":8665,"new_session_cases":128,"laws":86,
-    "concrete_fixtures":175,"source_scenario_mappings":153,"scale_cases":7,"malformed_input_cases":27,
-    "new_cases_static_replay":{"status":"passed","version":"2.0.39"},
-    "fresh_full8665_static_replay":"not run",
-    "historical_full8537_static":{"status":"passed","source_commit":"bce55b25876130316b1e53154c0b085c6cb0b927","version":"2.0.39","concrete_fixtures":175},
-    "javascript":{"status":"passed","runtime":"Bun 1.3.1","runtime_js_sha256":"cfa07349f5cd66e29b78c8043079b33ea21f16ddee2c83087c4c3d758b547600"},
-    "native_cpu":{"status":"passed","compiler":"Ubuntu clang 19.1.1","optimization":"-O3","thread_counts":[1,8],"compiled_with_cuda":false,
-      "generated_c_bytes":8959093,"generated_c_sha256":"f2a120d4c94494d0fe4df30daca9e5ad43f23c8a2aa2e45364244daf7849d76c",
-      "artifact_sha256":"faf5c66c4e08e1e81e7b48d7bbb65fad94f434554c49b983d84d1cd2c5e5daa7"},
-    "input_sha256":"995f1d9ea1b9c8f85a34a91186cdc5a41d53709fb0cb913eaf4865d06337d471",
-    "output_sha256":"ae940c2e39f7221ff44e93fef2ba50bf73d6bbad2df73342c7175465456da183",
-    "kernel":{"status":"passed","bend_version":"2.0.39","lean_version":"4.34.0"},
-    "cuda":"unverified for this source","metal":"unverified","performance":"not measured"
+    "source_commit": "eba187acc0c2edcca02cd592593f83c1b5d3523d",
+    "source_manifest": "compat/verification/cache-origin-source.sha256",
+    "source_manifest_sha256": "b952e1a9915dbd7f9d29d4fd6a78eb738dc37fbb5c8c1753efa30ef6ea23da3e",
+    "scope": "Creator case mode in cached ASTs, exact prepared memory, and hash/array storage overloads; stored formulas and full Calculator parity incomplete",
+    "formula_and_api_cases": 8665,
+    "new_session_cases": 128,
+    "laws": 86,
+    "concrete_fixtures": 175,
+    "source_scenario_mappings": 153,
+    "scale_cases": 7,
+    "malformed_input_cases": 27,
+    "new_cases_static_replay": {
+      "status": "passed",
+      "version": "2.0.39"
+    },
+    "fresh_full8665_static_replay": "not run",
+    "historical_full8537_static": {
+      "status": "passed",
+      "source_commit": "bce55b25876130316b1e53154c0b085c6cb0b927",
+      "version": "2.0.39",
+      "concrete_fixtures": 175
+    },
+    "javascript": {
+      "status": "passed",
+      "runtime": "Bun 1.3.1",
+      "runtime_js_sha256": "cfa07349f5cd66e29b78c8043079b33ea21f16ddee2c83087c4c3d758b547600"
+    },
+    "native_cpu": {
+      "status": "passed",
+      "compiler": "Ubuntu clang 19.1.1",
+      "optimization": "-O3",
+      "thread_counts": [
+        1,
+        8
+      ],
+      "compiled_with_cuda": false,
+      "generated_c_bytes": 8959093,
+      "generated_c_sha256": "f2a120d4c94494d0fe4df30daca9e5ad43f23c8a2aa2e45364244daf7849d76c",
+      "artifact_sha256": "faf5c66c4e08e1e81e7b48d7bbb65fad94f434554c49b983d84d1cd2c5e5daa7"
+    },
+    "input_sha256": "995f1d9ea1b9c8f85a34a91186cdc5a41d53709fb0cb913eaf4865d06337d471",
+    "output_sha256": "ae940c2e39f7221ff44e93fef2ba50bf73d6bbad2df73342c7175465456da183",
+    "kernel": {
+      "status": "passed",
+      "bend_version": "2.0.39",
+      "lean_version": "4.34.0"
+    },
+    "cuda": "unverified for this source",
+    "metal": "unverified",
+    "performance": "not measured"
   },
   "token_matcher_static_completion_checkpoint": {
-    "source_commit":"1f5cda59d3b81bdc6a99075e52c79d727dd9128e",
-    "cases":2376,"versions":["2.0.16","2.0.39"],"status":"passed",
-    "legacy_preserved_prefix_cases":896,"legacy_resumed_cases":1480,
-    "legacy_resumed_batch_size":64,
-    "output_sha256":"a5ee2531016fac36b11ba9f5573b7ad1e9917f11c0ee4644ce15d8116e0c2093"
+    "source_commit": "1f5cda59d3b81bdc6a99075e52c79d727dd9128e",
+    "cases": 2376,
+    "versions": [
+      "2.0.16",
+      "2.0.39"
+    ],
+    "status": "passed",
+    "legacy_preserved_prefix_cases": 896,
+    "legacy_resumed_cases": 1480,
+    "legacy_resumed_batch_size": 64,
+    "output_sha256": "a5ee2531016fac36b11ba9f5573b7ad1e9917f11c0ee4644ce15d8116e0c2093"
   },
   "binary64_format_checkpoint": {
-    "source_commit":"ec1588d", "scope":"Standalone Ruby Float#to_s shortest decimal formatting; evaluator Float values remain incomplete",
-    "source_manifest":"compat/verification/binary64-format-source.sha256", "source_manifest_sha256":"45d2dd6b012adff28df73b029cd80b75b218d0be9a2f531c6d14264a335d8a8d",
-    "probes":6668, "reference":"Pinned Ruby 3.3.13 Float#to_s", "formula_case_count_includes_these_probes":false,
-    "kernel":{"status":"passed", "laws":91, "bend_version":"2.0.39", "lean_version":"4.34.0"},
-    "javascript":{"status":"passed_full_probe_corpus", "bend_version":"2.0.39", "runtime":"Bun 1.3.1", "js_sha256":"06e1c453630b2bf25ea699f3967e3c30000d7b5ff8159df9832c19d04f116723"},
-    "legacy_javascript":{"bend_version":"2.0.16", "status":"passed_full_probe_corpus", "runtime":"Bun 1.3.1", "js_sha256":"293c744d5226d0b9bd1c13090fedaa72b9688166b7a17d78cd0c1e079a101d04"},
-    "native_cpu":{"status":"passed_full_probe_corpus", "threads":[1,8], "compiler":"clang 19.1.1", "optimization":"-O3", "cuda_capable_artifact":true},
-    "cuda":{"status":"passed_full_probe_corpus", "requested_mode":"RequiredGPU(1GB)", "fallback":false, "profile":"default NVRTC options", "gpu":"Quadro P4000", "toolkit":"12.9.1", "nvrtc":"12.9.86", "device_stack_limit_increased":false,
-      "shader_sha256":"f6a06bfc1d3bf2265f54859cc49303f42fc58688e7615a35f3162a640902b0f4"},
-    "generated_c_bytes":10790682, "c_sha256":"c1bfe658e0f2f2ca9ec588d43b6a7b9cf66838a821d4cba5b58dfa4010e18085", "artifact_sha256":"f39ec1e9cfb7b5ffa303e2008542bdc42e9220df8c20bcd54fdcd45448380850",
-    "input_sha256":"851a6f2da204942ad33c55c7af3e08fe09c7f07b9a304c6c782cdd87085b72dc", "output_sha256":"65112ad4e26542ce669e86751724a0141891ae05ee19e087e399694b659dd9b6",
-    "legacy_source_fix":"Only a local binder was renamed to avoid a 2.0.16 parser collision; regenerated 2.0.39 C byte-compares identical to the verified artifact's C",
-    "metal":"unverified", "performance":"not measured"
+    "source_commit": "ec1588d",
+    "scope": "Standalone Ruby Float#to_s shortest decimal formatting; evaluator Float values remain incomplete",
+    "source_manifest": "compat/verification/binary64-format-source.sha256",
+    "source_manifest_sha256": "45d2dd6b012adff28df73b029cd80b75b218d0be9a2f531c6d14264a335d8a8d",
+    "probes": 6668,
+    "reference": "Pinned Ruby 3.3.13 Float#to_s",
+    "formula_case_count_includes_these_probes": false,
+    "kernel": {
+      "status": "passed",
+      "laws": 91,
+      "bend_version": "2.0.39",
+      "lean_version": "4.34.0"
+    },
+    "javascript": {
+      "status": "passed_full_probe_corpus",
+      "bend_version": "2.0.39",
+      "runtime": "Bun 1.3.1",
+      "js_sha256": "06e1c453630b2bf25ea699f3967e3c30000d7b5ff8159df9832c19d04f116723"
+    },
+    "legacy_javascript": {
+      "bend_version": "2.0.16",
+      "status": "passed_full_probe_corpus",
+      "runtime": "Bun 1.3.1",
+      "js_sha256": "293c744d5226d0b9bd1c13090fedaa72b9688166b7a17d78cd0c1e079a101d04"
+    },
+    "native_cpu": {
+      "status": "passed_full_probe_corpus",
+      "threads": [
+        1,
+        8
+      ],
+      "compiler": "clang 19.1.1",
+      "optimization": "-O3",
+      "cuda_capable_artifact": true
+    },
+    "cuda": {
+      "status": "passed_full_probe_corpus",
+      "requested_mode": "RequiredGPU(1GB)",
+      "fallback": false,
+      "profile": "default NVRTC options",
+      "gpu": "Quadro P4000",
+      "toolkit": "12.9.1",
+      "nvrtc": "12.9.86",
+      "device_stack_limit_increased": false,
+      "shader_sha256": "f6a06bfc1d3bf2265f54859cc49303f42fc58688e7615a35f3162a640902b0f4"
+    },
+    "generated_c_bytes": 10790682,
+    "c_sha256": "c1bfe658e0f2f2ca9ec588d43b6a7b9cf66838a821d4cba5b58dfa4010e18085",
+    "artifact_sha256": "f39ec1e9cfb7b5ffa303e2008542bdc42e9220df8c20bcd54fdcd45448380850",
+    "input_sha256": "851a6f2da204942ad33c55c7af3e08fe09c7f07b9a304c6c782cdd87085b72dc",
+    "output_sha256": "65112ad4e26542ce669e86751724a0141891ae05ee19e087e399694b659dd9b6",
+    "legacy_source_fix": "Only a local binder was renamed to avoid a 2.0.16 parser collision; regenerated 2.0.39 C byte-compares identical to the verified artifact's C",
+    "metal": "unverified",
+    "performance": "not measured"
   },
   "calculator_binary64_integration_checkpoint": {
-    "source_parent_commits":["3b002a7","bce55b25876130316b1e53154c0b085c6cb0b927"],
-    "source_manifest":"compat/verification/binary64-calculator-integrated-source.sha256",
-    "source_manifest_sha256":"e1c4648e8aa2476d5e6db2c60c9abd57386598587f80694665b4521e5cc16644",
-    "scope":"Calculator state/cache source combined with the independent binary64 arithmetic layer; Float evaluator integration and full Dentaku parity remain incomplete",
-    "formula_and_api_cases":8537, "separate_binary64_probes":4595, "laws":85,
-    "concrete_fixtures":175, "source_scenario_mappings":153, "scale_cases":7, "malformed_input_cases":27,
-    "kernel":{"status":"passed", "bend_version":"2.0.39", "lean_version":"4.34.0"},
-    "formula_runtime_replay":{
-      "status":"passed", "javascript":"Bun 1.3.1", "native_cpu_threads":[1,8],
-      "artifact_reuse":"Calculator runtime source manifest entries match exactly except LAWS.bend and PROOF.bend, which gain the independent binary64 laws. The binary64 module is not in the formula runtime dependency graph. Copied artifacts were hash-checked and the full 8537 input, scale input and malformed cases replayed.",
-      "runtime_js_sha256":"d59f73cab5ecb1b28ac550adb2b58172a46cd90873875187231117cce001052e",
-      "native_artifact_sha256":"25862c2427468dcee4b93b09bf4f62e95dbd3ea37a32e81f2854c0c8757dbbfe",
-      "input_sha256":"c62cbf4be7fbf899a00202383b47feebd357cec568c696da53f09142432553ad",
-      "output_sha256":"0f42aba958bd651e442046ecb8db8358bbabc404eebc6effa42117be64aee93e"
+    "source_parent_commits": [
+      "3b002a7",
+      "bce55b25876130316b1e53154c0b085c6cb0b927"
+    ],
+    "source_manifest": "compat/verification/binary64-calculator-integrated-source.sha256",
+    "source_manifest_sha256": "e1c4648e8aa2476d5e6db2c60c9abd57386598587f80694665b4521e5cc16644",
+    "scope": "Calculator state/cache source combined with the independent binary64 arithmetic layer; Float evaluator integration and full Dentaku parity remain incomplete",
+    "formula_and_api_cases": 8537,
+    "separate_binary64_probes": 4595,
+    "laws": 85,
+    "concrete_fixtures": 175,
+    "source_scenario_mappings": 153,
+    "scale_cases": 7,
+    "malformed_input_cases": 27,
+    "kernel": {
+      "status": "passed",
+      "bend_version": "2.0.39",
+      "lean_version": "4.34.0"
     },
-    "binary64_verification":"Runtime source unchanged from binary64_arithmetic_checkpoint: all 4595 pass both JS compilers, native CPU threads1/8, and required default-profile CUDA",
-    "full_combined_static_replay":"pending; completed 8486-case Bend2.0.39 source checkpoint and selected Calculator sessions remain separately scoped",
-    "formula_cuda":"unverified for current source", "metal":"unverified", "performance":"not measured"
+    "formula_runtime_replay": {
+      "status": "passed",
+      "javascript": "Bun 1.3.1",
+      "native_cpu_threads": [
+        1,
+        8
+      ],
+      "artifact_reuse": "Calculator runtime source manifest entries match exactly except LAWS.bend and PROOF.bend, which gain the independent binary64 laws. The binary64 module is not in the formula runtime dependency graph. Copied artifacts were hash-checked and the full 8537 input, scale input and malformed cases replayed.",
+      "runtime_js_sha256": "d59f73cab5ecb1b28ac550adb2b58172a46cd90873875187231117cce001052e",
+      "native_artifact_sha256": "25862c2427468dcee4b93b09bf4f62e95dbd3ea37a32e81f2854c0c8757dbbfe",
+      "input_sha256": "c62cbf4be7fbf899a00202383b47feebd357cec568c696da53f09142432553ad",
+      "output_sha256": "0f42aba958bd651e442046ecb8db8358bbabc404eebc6effa42117be64aee93e"
+    },
+    "binary64_verification": "Runtime source unchanged from binary64_arithmetic_checkpoint: all 4595 pass both JS compilers, native CPU threads1/8, and required default-profile CUDA",
+    "full_combined_static_replay": "pending; completed 8486-case Bend2.0.39 source checkpoint and selected Calculator sessions remain separately scoped",
+    "formula_cuda": "unverified for current source",
+    "metal": "unverified",
+    "performance": "not measured"
   },
   "binary64_arithmetic_checkpoint": {
-    "source_commit":"ab757f87e8b67521c70af39f64a9930dcc1d2f56",
-    "scope":"Standalone binary64 arithmetic foundation; Float evaluator bindings, formatting, mixed coercion, result guards and other Float operations remain incomplete",
-    "probe_cases":4595, "arithmetic_cases":3428, "comparison_cases":857, "value_roundtrip_cases":155, "word_transport_cases":155,
-    "formula_case_count_includes_these_probes":false,
-    "operations":["add","subtract","multiply","divide","compare","roundtrip","words"],
-    "rounding":"nearest, ties to even; gradual underflow; arithmetic NaNs canonicalized, raw payload transport checked separately",
-    "reference":"Ruby 3.3.13 native Float operations",
-    "fixture_seed":"0x6d2b79f5",
-    "project_laws":77, "new_laws":4,
-    "term_checkers_passed":["2.0.16","2.0.39"],
-    "kernel":{"status":"passed", "bend_version":"2.0.39", "lean_version":"4.34.0"},
-    "javascript":{
-      "status":"passed_full_probe_corpus", "bend_versions":["2.0.16","2.0.39"], "runtime":"Bun 1.3.1",
-      "bend_2_0_39_js_sha256":"630c6cd58bea74d734457bca3dfa25a361f563e9d8f3ffd5813eacef4a419edc",
-      "bend_2_0_16_js_sha256":"8696cfe2a75535c74c3865e18e4bb4d4cdfcbf96b0102edf499e6fd6d24900d6"
+    "source_commit": "ab757f87e8b67521c70af39f64a9930dcc1d2f56",
+    "scope": "Standalone binary64 arithmetic foundation; Float evaluator bindings, formatting, mixed coercion, result guards and other Float operations remain incomplete",
+    "probe_cases": 4595,
+    "arithmetic_cases": 3428,
+    "comparison_cases": 857,
+    "value_roundtrip_cases": 155,
+    "word_transport_cases": 155,
+    "formula_case_count_includes_these_probes": false,
+    "operations": [
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "compare",
+      "roundtrip",
+      "words"
+    ],
+    "rounding": "nearest, ties to even; gradual underflow; arithmetic NaNs canonicalized, raw payload transport checked separately",
+    "reference": "Ruby 3.3.13 native Float operations",
+    "fixture_seed": "0x6d2b79f5",
+    "project_laws": 77,
+    "new_laws": 4,
+    "term_checkers_passed": [
+      "2.0.16",
+      "2.0.39"
+    ],
+    "kernel": {
+      "status": "passed",
+      "bend_version": "2.0.39",
+      "lean_version": "4.34.0"
     },
-    "native_cpu":{
-      "status":"passed_full_probe_corpus", "artifact_profile":"CUDA-capable binary with --gpu off", "compiler":"Ubuntu clang 19.1.1", "optimization":"-O3", "thread_counts":[1,8]
+    "javascript": {
+      "status": "passed_full_probe_corpus",
+      "bend_versions": [
+        "2.0.16",
+        "2.0.39"
+      ],
+      "runtime": "Bun 1.3.1",
+      "bend_2_0_39_js_sha256": "630c6cd58bea74d734457bca3dfa25a361f563e9d8f3ffd5813eacef4a419edc",
+      "bend_2_0_16_js_sha256": "8696cfe2a75535c74c3865e18e4bb4d4cdfcbf96b0102edf499e6fd6d24900d6"
     },
-    "cuda":{
-      "status":"passed_full_probe_corpus", "fallback":false, "requested_mode":"RequiredGPU(1GB)",
-      "gpu":"NVIDIA Quadro P4000", "compute_capability":"6.1", "driver":"580.178.04",
-      "toolkit":"12.9.1", "nvrtc":"12.9.86", "profile":"default NVRTC options; no --Ofast-compile flag", "fmad":false,
-      "device_stack_limit_increased":false,
-      "shader_sha256":"c1b916dec54556466f2b2a4f5ee91c2ab0a9703297706cc14dda934299345f75"
+    "native_cpu": {
+      "status": "passed_full_probe_corpus",
+      "artifact_profile": "CUDA-capable binary with --gpu off",
+      "compiler": "Ubuntu clang 19.1.1",
+      "optimization": "-O3",
+      "thread_counts": [
+        1,
+        8
+      ]
     },
-    "generated_c_bytes":420530,
-    "generated_c_sha256":"9d26c5e9d719ae95f36d273219031fd300be701bb3eb864913d95151c659b894",
-    "artifact_sha256":"a5f55cbdc1714886213ad3d27b7ad95da9fd884c8b2532134eaa022cbffb5a05",
-    "input_sha256":"d54dcc2ea38ba3662995e56ebc74465b49e3209dfbdc7ccb5b981d6dad4e5e4b",
-    "output_sha256":"9eb1e29fc5fa3d7cdf1ea816e4d5ffda938e6afc5d4d5dc6755f5176b752e01a",
-    "metal_status":"unverified", "performance_status":"not benchmarked"
+    "cuda": {
+      "status": "passed_full_probe_corpus",
+      "fallback": false,
+      "requested_mode": "RequiredGPU(1GB)",
+      "gpu": "NVIDIA Quadro P4000",
+      "compute_capability": "6.1",
+      "driver": "580.178.04",
+      "toolkit": "12.9.1",
+      "nvrtc": "12.9.86",
+      "profile": "default NVRTC options; no --Ofast-compile flag",
+      "fmad": false,
+      "device_stack_limit_increased": false,
+      "shader_sha256": "c1b916dec54556466f2b2a4f5ee91c2ab0a9703297706cc14dda934299345f75"
+    },
+    "generated_c_bytes": 420530,
+    "generated_c_sha256": "9d26c5e9d719ae95f36d273219031fd300be701bb3eb864913d95151c659b894",
+    "artifact_sha256": "a5f55cbdc1714886213ad3d27b7ad95da9fd884c8b2532134eaa022cbffb5a05",
+    "input_sha256": "d54dcc2ea38ba3662995e56ebc74465b49e3209dfbdc7ccb5b981d6dad4e5e4b",
+    "output_sha256": "9eb1e29fc5fa3d7cdf1ea816e4d5ffda938e6afc5d4d5dc6755f5176b752e01a",
+    "metal_status": "unverified",
+    "performance_status": "not benchmarked"
   },
   "calculator_integration_checkpoint": {
-    "source_parent_commits":["c852ba48c1241a72f91ff3eedc9f397d4981ba43","90d749ed8ebfd173a6369cb289c8288352aaef21"],
-    "source_manifest":"compat/verification/calculator-integrated-source.sha256",
-    "source_manifest_sha256":"5a60d85a6435b1e1b337ecffcdd7b0b1ff3d1a3d30a26289ee34ce418b12d100",
-    "scope":"Persistent Calculator memory and AST cache, with prior named-reference, Range, token and matcher cases preserved; full Calculator and spreadsheet parity incomplete",
-    "formula_and_api_cases":8537,"new_calculator_sessions":51,
-    "laws":81,"concrete_fixtures":175,"source_scenario_mappings":153,
-    "scale_cases":7,"malformed_input_cases":27,
-    "javascript":{"status":"passed","bend_version":"2.0.39","runtime":"Bun 1.3.1","runtime_js_sha256":"d59f73cab5ecb1b28ac550adb2b58172a46cd90873875187231117cce001052e"},
-    "native_cpu":{"status":"passed","compiler":"Ubuntu clang 19.1.1","optimization":"-O3","thread_counts":[1,8],"compiled_with_cuda":false,
-      "generated_c_bytes":8888486,"generated_c_sha256":"f32bf1a7d349790b6e3e73246c7584320179fb1dbfd8687394e32fcd0c77ffd6",
-      "artifact_sha256":"25862c2427468dcee4b93b09bf4f62e95dbd3ea37a32e81f2854c0c8757dbbfe"},
-    "input_sha256":"c62cbf4be7fbf899a00202383b47feebd357cec568c696da53f09142432553ad",
-    "output_sha256":"0f42aba958bd651e442046ecb8db8358bbabc404eebc6effa42117be64aee93e",
-    "kernel":{"status":"passed","bend_version":"2.0.39","lean_version":"4.34.0"},
-    "static_replay":{"new51sessions_bend2.0.39":"passed at c852ba4","fresh_full8537":"passed at bce55b25876130316b1e53154c0b085c6cb0b927",
-      "legacy2.0.16":{"verified_sessions":8,"total_sessions":51,"remaining_sessions":43,"status":"queued on frozen c852ba4 source","observed8session_checker_peak_gib":28.1,"single_session_probe":"exceeded16GiBcompilerCap"}},
-    "cuda":"unverified for integrated source","metal":"unverified","performance":"not measured"
+    "source_parent_commits": [
+      "c852ba48c1241a72f91ff3eedc9f397d4981ba43",
+      "90d749ed8ebfd173a6369cb289c8288352aaef21"
+    ],
+    "source_manifest": "compat/verification/calculator-integrated-source.sha256",
+    "source_manifest_sha256": "5a60d85a6435b1e1b337ecffcdd7b0b1ff3d1a3d30a26289ee34ce418b12d100",
+    "scope": "Persistent Calculator memory and AST cache, with prior named-reference, Range, token and matcher cases preserved; full Calculator and spreadsheet parity incomplete",
+    "formula_and_api_cases": 8537,
+    "new_calculator_sessions": 51,
+    "laws": 81,
+    "concrete_fixtures": 175,
+    "source_scenario_mappings": 153,
+    "scale_cases": 7,
+    "malformed_input_cases": 27,
+    "javascript": {
+      "status": "passed",
+      "bend_version": "2.0.39",
+      "runtime": "Bun 1.3.1",
+      "runtime_js_sha256": "d59f73cab5ecb1b28ac550adb2b58172a46cd90873875187231117cce001052e"
+    },
+    "native_cpu": {
+      "status": "passed",
+      "compiler": "Ubuntu clang 19.1.1",
+      "optimization": "-O3",
+      "thread_counts": [
+        1,
+        8
+      ],
+      "compiled_with_cuda": false,
+      "generated_c_bytes": 8888486,
+      "generated_c_sha256": "f32bf1a7d349790b6e3e73246c7584320179fb1dbfd8687394e32fcd0c77ffd6",
+      "artifact_sha256": "25862c2427468dcee4b93b09bf4f62e95dbd3ea37a32e81f2854c0c8757dbbfe"
+    },
+    "input_sha256": "c62cbf4be7fbf899a00202383b47feebd357cec568c696da53f09142432553ad",
+    "output_sha256": "0f42aba958bd651e442046ecb8db8358bbabc404eebc6effa42117be64aee93e",
+    "kernel": {
+      "status": "passed",
+      "bend_version": "2.0.39",
+      "lean_version": "4.34.0"
+    },
+    "static_replay": {
+      "new51sessions_bend2.0.39": "passed at c852ba4",
+      "fresh_full8537": "passed at bce55b25876130316b1e53154c0b085c6cb0b927",
+      "legacy2.0.16": {
+        "verified_sessions": 8,
+        "total_sessions": 51,
+        "remaining_sessions": 43,
+        "status": "queued on frozen c852ba4 source",
+        "observed8session_checker_peak_gib": 28.1,
+        "single_session_probe": "exceeded16GiBcompilerCap"
+      }
+    },
+    "cuda": "unverified for integrated source",
+    "metal": "unverified",
+    "performance": "not measured"
   },
   "integrated_range_node_checkpoint": {
-    "runtime_source_commit":"16281666a0cfebd784668d151d422bcc2f1e42b3",
-    "scope":"Named references, Range constructor enumeration and token/matcher integration; full Ruby object, Calculator and scanner parity remains incomplete",
-    "formula_and_api_cases":8486, "base_compile_corpus_cases":8477, "additional_data_only_node_cases":9,
-    "laws":73, "concrete_fixtures":175, "source_scenario_mappings":153,
-    "scale_cases":7, "malformed_input_cases":27,
+    "runtime_source_commit": "16281666a0cfebd784668d151d422bcc2f1e42b3",
+    "scope": "Named references, Range constructor enumeration and token/matcher integration; full Ruby object, Calculator and scanner parity remains incomplete",
+    "formula_and_api_cases": 8486,
+    "base_compile_corpus_cases": 8477,
+    "additional_data_only_node_cases": 9,
+    "laws": 73,
+    "concrete_fixtures": 175,
+    "source_scenario_mappings": 153,
+    "scale_cases": 7,
+    "malformed_input_cases": 27,
     "javascript": {
-      "status":"passed_file_input_runtime", "bend_version":"2.0.39", "runtime":"Bun 1.3.1",
-      "runtime_js_sha256":"22fc0b391c92b9956a6bd235387187d720ff580f897feddba33b327d7844dce9"
+      "status": "passed_file_input_runtime",
+      "bend_version": "2.0.39",
+      "runtime": "Bun 1.3.1",
+      "runtime_js_sha256": "22fc0b391c92b9956a6bd235387187d720ff580f897feddba33b327d7844dce9"
     },
-    "kernel":{"status":"passed", "bend_version":"2.0.39", "lean_version":"4.34.0"},
-    "static_replay":{"full_combined_status":"passed at the scoped source checkpoint", "full_make_check_passed":{"bend_versions":["2.0.16","2.0.39"], "source_commit":"818a5ae", "cases":8486, "concrete_fixtures":175}, "bend_2_0_16":"passed; terminal success 2026-10-31 20:21:35 UTC", "exact_node_cases":9, "node_cases_passed_versions":["2.0.16","2.0.39"]},
+    "kernel": {
+      "status": "passed",
+      "bend_version": "2.0.39",
+      "lean_version": "4.34.0"
+    },
+    "static_replay": {
+      "full_combined_status": "passed at the scoped source checkpoint",
+      "full_make_check_passed": {
+        "bend_versions": [
+          "2.0.16",
+          "2.0.39"
+        ],
+        "source_commit": "818a5ae",
+        "cases": 8486,
+        "concrete_fixtures": 175
+      },
+      "bend_2_0_16": "passed; terminal success 2026-10-31 20:21:35 UTC",
+      "exact_node_cases": 9,
+      "node_cases_passed_versions": [
+        "2.0.16",
+        "2.0.39"
+      ]
+    },
     "native_cpu": {
-      "status":"passed", "compiler":"Ubuntu clang 19.1.1", "optimization":"-O3", "thread_counts":[1,8],
-      "runtime_reused_for_data_only_node_additions":true,
-      "generated_c_bytes":8133835,
-      "generated_c_sha256":"aeea9441c43cde273678dc1edb1ec4ff9713cbd4fb509a3a32da05c8c98e516a",
-      "artifact_sha256":"56551460231213cd74e0c0a2bc29d28e0325deaedae5f1834084b8d31b29e3e8",
-      "input_sha256":"b1a98b063397ed000e1df116fbfc75ec8acf45551616bdd856fdc0e929e34359",
-      "output_sha256":"84b77cf64196bb35db006edda8c4540f060820d036516bd99afd9ff54750a8d4",
-      "base_8477_input_sha256":"501912646329c2350fa40d0207462fcbcf105dc7cedb23939cebe4cd6c59ed65",
-      "base_8477_output_sha256":"00b03db98f2298e31ca8258c4a49af37570baa70735f0102d0b3f1e774dd1ddb"
+      "status": "passed",
+      "compiler": "Ubuntu clang 19.1.1",
+      "optimization": "-O3",
+      "thread_counts": [
+        1,
+        8
+      ],
+      "runtime_reused_for_data_only_node_additions": true,
+      "generated_c_bytes": 8133835,
+      "generated_c_sha256": "aeea9441c43cde273678dc1edb1ec4ff9713cbd4fb509a3a32da05c8c98e516a",
+      "artifact_sha256": "56551460231213cd74e0c0a2bc29d28e0325deaedae5f1834084b8d31b29e3e8",
+      "input_sha256": "b1a98b063397ed000e1df116fbfc75ec8acf45551616bdd856fdc0e929e34359",
+      "output_sha256": "84b77cf64196bb35db006edda8c4540f060820d036516bd99afd9ff54750a8d4",
+      "base_8477_input_sha256": "501912646329c2350fa40d0207462fcbcf105dc7cedb23939cebe4cd6c59ed65",
+      "base_8477_output_sha256": "00b03db98f2298e31ca8258c4a49af37570baa70735f0102d0b3f1e774dd1ddb"
     },
-    "cuda_status":"unverified for integrated source", "metal_status":"unverified"
+    "cuda_status": "unverified for integrated source",
+    "metal_status": "unverified"
   },
   "named_matcher_scenarios_integration_checkpoint": {
     "source_commit": "5103172ed99007d858ae8c1e10ff683e725a51f1",
@@ -268,20 +833,39 @@
     "concrete_fixtures": 175,
     "source_scenario_mappings": 150,
     "javascript": {
-      "status": "passed_file_input_runtime", "bend_version": "2.0.39", "runtime": "Bun 1.3.1",
+      "status": "passed_file_input_runtime",
+      "bend_version": "2.0.39",
+      "runtime": "Bun 1.3.1",
       "runtime_js_sha256": "1a73c8b6e8c0bf7a7c786c70ca1458db5c3919d494169c44db7d3d0c3a2c9eab"
     },
-    "kernel": {"status":"passed", "bend_version":"2.0.39", "lean_version":"4.34.0"},
-    "static_replay": {"status":"pending_combined_replay", "versions":["2.0.16","2.0.39"]},
+    "kernel": {
+      "status": "passed",
+      "bend_version": "2.0.39",
+      "lean_version": "4.34.0"
+    },
+    "static_replay": {
+      "status": "pending_combined_replay",
+      "versions": [
+        "2.0.16",
+        "2.0.39"
+      ]
+    },
     "native_cpu": {
-      "status": "passed", "compiler": "Ubuntu clang 19.1.1", "optimization": "-O3", "thread_counts": [1,8],
+      "status": "passed",
+      "compiler": "Ubuntu clang 19.1.1",
+      "optimization": "-O3",
+      "thread_counts": [
+        1,
+        8
+      ],
       "generated_c_bytes": 8014297,
       "generated_c_sha256": "805bcc561ea9e6c6d67256400a06f28e64c1fc78ae3040b20b3881dc8a508526",
       "artifact_sha256": "9d5ddd58307b5be8342f2c8a38e96e4544dd14d4ba4fcf9ea5019c1166aab90c",
       "input_sha256": "910929d5c2ddd46f9782c44eae57e70c0a4298a1e81bb2e078be1c95c2d3814c",
       "output_sha256": "ee777de4bdc6dc68014de54d1e9faccf99bf6c7243705fecb1c37cbe6ced3c03"
     },
-    "cuda_status": "unverified for integrated source", "metal_status": "unverified"
+    "cuda_status": "unverified for integrated source",
+    "metal_status": "unverified"
   },
   "named_matcher_integration_checkpoint": {
     "source_commit": "5da966d172e477c535eb3de891c2a542411ef265",
@@ -298,14 +882,30 @@
       "runtime": "Bun 1.3.1",
       "runtime_js_sha256": "b562d64dddb0e50c2420d604cd323db234c8c05743a03c06b322ffe48a774fac"
     },
-    "kernel": {"status":"passed", "bend_version":"2.0.39", "lean_version":"4.34.0"},
-    "concrete_fixture_check": {"status":"passed", "bend_version":"2.0.39"},
-    "static_replay": {"status":"pending_combined_replay", "versions":["2.0.16","2.0.39"]},
+    "kernel": {
+      "status": "passed",
+      "bend_version": "2.0.39",
+      "lean_version": "4.34.0"
+    },
+    "concrete_fixture_check": {
+      "status": "passed",
+      "bend_version": "2.0.39"
+    },
+    "static_replay": {
+      "status": "pending_combined_replay",
+      "versions": [
+        "2.0.16",
+        "2.0.39"
+      ]
+    },
     "native_cpu": {
       "status": "passed",
       "compiler": "Ubuntu clang 19.1.1",
       "optimization": "-O3",
-      "thread_counts": [1,8],
+      "thread_counts": [
+        1,
+        8
+      ],
       "generated_c_bytes": 7990937,
       "generated_c_sha256": "a476c7b4ef461bfc972cb0d689a8a9837c9699dacaf7f88c1499f3fe0061564c",
       "artifact_sha256": "148ccf891196d571ec4a41b26b28d11ae347ac379b703a0669cc52f98b9c807f",
@@ -328,16 +928,26 @@
     "malformed_input_cases": 23,
     "javascript": {
       "status": "passed_full_replays",
-      "bend_versions": ["2.0.16", "2.0.39"],
+      "bend_versions": [
+        "2.0.16",
+        "2.0.39"
+      ],
       "file_input_runtime": "Bun 1.3.1",
       "runtime_js_sha256": "fcf765854554dc1c94ad8be0ef5f0f67b4b8ad0e5d3ab8394958db77cbea74da"
     },
-    "kernel": {"status": "passed", "bend_version": "2.0.39", "lean_version": "4.34.0"},
+    "kernel": {
+      "status": "passed",
+      "bend_version": "2.0.39",
+      "lean_version": "4.34.0"
+    },
     "native_cpu": {
       "status": "passed",
       "compiler": "Ubuntu clang 19.1.1",
       "optimization": "-O3",
-      "thread_counts": [1, 8],
+      "thread_counts": [
+        1,
+        8
+      ],
       "generated_c_bytes": 6834868,
       "generated_c_sha256": "1e002f6a3d8b947955955dff60a7d250c92a9d036d59d5e7507b839fee8abf72",
       "artifact_sha256": "ec069d99ad5f743b3976379b5c2997ac67ed58d3590219c383e977bfc9320b79",
@@ -356,22 +966,47 @@
     "source_scenario_mappings": 147,
     "laws": 62,
     "concrete_fixtures": 175,
-    "new_cases_static_replay": {"status":"passed","versions":["2.0.16","2.0.39"]},
-    "prior2376matcher_cases_static_replay": {"source_commit":"1f5cda5","2.0.39":"passed","2.0.16":"pending"},
-    "bun": {"status":"passed","version":"1.3.1"},
-    "native_cpu": {
-      "status":"passed", "compiler":"Ubuntu clang19.1.1", "optimization":"-O3",
-      "thread_counts":[1,8], "compiled_with_cuda":false,
-      "generated_c_bytes":7946468,
-      "generated_c_sha256":"903c13b8a4ca67e2d0306b7ec60412cca0ed2827de8e7c98f32dd6abee95e6bf",
-      "artifact_sha256":"733cb869e1c54779bc28622792edcfb740bb2e64b8c1a3a5ccfe04623df29398"
+    "new_cases_static_replay": {
+      "status": "passed",
+      "versions": [
+        "2.0.16",
+        "2.0.39"
+      ]
     },
-    "kernel": {"status":"passed","bend_version":"2.0.39","lean_version":"4.34.0"},
-    "scale_cases":7, "malformed_input_cases":18,
-    "generated_js_sha256":"21d6f44e8950c3464ef716efb4a3266591862e1e1971f1bfe0b44278980789db",
-    "combined_input_sha256":"86f33516b83d245a6c9b8204fad1c3e684ae6c2369557a10e15392d62f76d200",
-    "combined_output_sha256":"666379fb587bf58ecf2d889238d50c5c85a6774ffb748d89bc1ea0406ada3e23",
-    "cuda":"unverified for this source", "metal":"unverified"
+    "prior2376matcher_cases_static_replay": {
+      "source_commit": "1f5cda5",
+      "2.0.39": "passed",
+      "2.0.16": "pending"
+    },
+    "bun": {
+      "status": "passed",
+      "version": "1.3.1"
+    },
+    "native_cpu": {
+      "status": "passed",
+      "compiler": "Ubuntu clang19.1.1",
+      "optimization": "-O3",
+      "thread_counts": [
+        1,
+        8
+      ],
+      "compiled_with_cuda": false,
+      "generated_c_bytes": 7946468,
+      "generated_c_sha256": "903c13b8a4ca67e2d0306b7ec60412cca0ed2827de8e7c98f32dd6abee95e6bf",
+      "artifact_sha256": "733cb869e1c54779bc28622792edcfb740bb2e64b8c1a3a5ccfe04623df29398"
+    },
+    "kernel": {
+      "status": "passed",
+      "bend_version": "2.0.39",
+      "lean_version": "4.34.0"
+    },
+    "scale_cases": 7,
+    "malformed_input_cases": 18,
+    "generated_js_sha256": "21d6f44e8950c3464ef716efb4a3266591862e1e1971f1bfe0b44278980789db",
+    "combined_input_sha256": "86f33516b83d245a6c9b8204fad1c3e684ae6c2369557a10e15392d62f76d200",
+    "combined_output_sha256": "666379fb587bf58ecf2d889238d50c5c85a6774ffb748d89bc1ea0406ada3e23",
+    "cuda": "unverified for this source",
+    "metal": "unverified"
   },
   "token_matcher_checkpoint": {
     "source_commit": "4644bd476213675b54f0b6b3611ea9aecd28c2e8",
@@ -381,21 +1016,44 @@
     "laws": 61,
     "concrete_fixtures": 175,
     "source_scenario_mappings": 136,
-    "bun": {"status":"passed", "version":"1.3.1"},
-    "static_replay": {"status":"pending", "versions":["2.0.16","2.0.39"]},
-    "native_cpu": {
-      "status":"passed", "compiler":"Ubuntu clang 19.1.1", "optimization":"-O3",
-      "thread_counts":[1,8], "compiled_with_cuda":false,
-      "generated_c_bytes":7923109,
-      "generated_c_sha256":"7feeaf6aef55024420cf3ac0d94e218244fc6f8488016f26be77450aec779a34",
-      "artifact_sha256":"2513234383e59e5efc0fe517b6fe647f605a79fabca20bea9d94abeb70d1e911",
-      "combined_output_sha256":"6ff04fdc01173f9f7582222aaa127d06e1649a28d17f8340d50b76a2c35e8e84"
+    "bun": {
+      "status": "passed",
+      "version": "1.3.1"
     },
-    "cuda": {"status":"unverified for matcher source"},
-    "metal": {"status":"unverified"},
+    "static_replay": {
+      "status": "pending",
+      "versions": [
+        "2.0.16",
+        "2.0.39"
+      ]
+    },
+    "native_cpu": {
+      "status": "passed",
+      "compiler": "Ubuntu clang 19.1.1",
+      "optimization": "-O3",
+      "thread_counts": [
+        1,
+        8
+      ],
+      "compiled_with_cuda": false,
+      "generated_c_bytes": 7923109,
+      "generated_c_sha256": "7feeaf6aef55024420cf3ac0d94e218244fc6f8488016f26be77450aec779a34",
+      "artifact_sha256": "2513234383e59e5efc0fe517b6fe647f605a79fabca20bea9d94abeb70d1e911",
+      "combined_output_sha256": "6ff04fdc01173f9f7582222aaa127d06e1649a28d17f8340d50b76a2c35e8e84"
+    },
+    "cuda": {
+      "status": "unverified for matcher source"
+    },
+    "metal": {
+      "status": "unverified"
+    },
     "scale_cases": 7,
     "malformed_input_cases": 18,
-    "kernel": {"status":"passed","bend_version":"2.0.39","lean_version":"4.34.0"},
+    "kernel": {
+      "status": "passed",
+      "bend_version": "2.0.39",
+      "lean_version": "4.34.0"
+    },
     "generated_js_sha256": "b2d4f8acc0fdc0e86991b0f1f7833aa2bf139b04cd1b12c14e42a0f0f903c390",
     "combined_input_sha256": "c400db2c464bbc2aab44bf10750886a441d6ef052ffe6ce4cb9b318c6e46be8f",
     "combined_output_sha256": "6ff04fdc01173f9f7582222aaa127d06e1649a28d17f8340d50b76a2c35e8e84"
@@ -408,17 +1066,31 @@
     "laws": 58,
     "concrete_fixtures": 175,
     "source_scenario_mappings": 136,
-    "new_static_cases_checked_on_bend_versions": ["2.0.16", "2.0.39"],
-    "complete_runtime_corpus_checked_on": ["Bun 1.3.1", "native CPU threads=1", "native CPU threads=8"],
+    "new_static_cases_checked_on_bend_versions": [
+      "2.0.16",
+      "2.0.39"
+    ],
+    "complete_runtime_corpus_checked_on": [
+      "Bun 1.3.1",
+      "native CPU threads=1",
+      "native CPU threads=8"
+    ],
     "scale_cases": 7,
     "malformed_input_cases": 18,
-    "kernel": {"status": "passed", "bend_version": "2.0.39", "lean_version": "4.34.0"},
+    "kernel": {
+      "status": "passed",
+      "bend_version": "2.0.39",
+      "lean_version": "4.34.0"
+    },
     "generated_js_sha256": "a46b6e7088bcdce555641cae700a0c9898cec692215d35eccf3a1c52118bd78f",
     "native_cpu": {
       "status": "passed",
       "compiler": "Ubuntu clang 19.1.1",
       "optimization": "-O3",
-      "thread_counts": [1, 8],
+      "thread_counts": [
+        1,
+        8
+      ],
       "compiled_with_cuda": false,
       "generated_c_bytes": 6859063,
       "generated_c_sha256": "ea26d3dc6038ec7962dc239344e6a4fd2e486c8bec7c062b4749e01588a8b437",
@@ -431,20 +1103,45 @@
   "range_exact_blocks_checkpoint": {
     "source_commit": "b1fe7956175b94d6440d0004034167787be21bf8",
     "scope": "Range descriptors and exact integer-start enumeration in exception constructors; String/Symbol successor enumeration, Range hash keys and Float endpoints incomplete",
-    "formula_and_api_cases": 5797, "scale_cases": 7, "malformed_input_cases": 27,
-    "laws": 66, "concrete_fixtures": 175, "source_scenario_mappings": 138,
-    "javascript": {"status":"passed_file_input_runtime", "bend_version":"2.0.39", "runtime":"Bun 1.3.1", "runtime_js_sha256":"06be7a1ddc7840957381d87e798d2f668d25cb8251cbe6de793f3c6cc5f11a37"},
-    "kernel": {"status":"passed", "bend_version":"2.0.39", "lean_version":"4.34.0"},
-    "static_replay": {"status":"partial", "new_constructor_cases_on_bend_2_0_39":77, "block_boundary_cases_on_bend_2_0_16":26, "full_combined_replay":"pending"},
-    "native_cpu": {
-      "status":"passed", "compiler":"Ubuntu clang 19.1.1", "optimization":"-O3", "thread_counts":[1,8],
-      "generated_c_bytes":6954264,
-      "generated_c_sha256":"d7f410e9da3be728b64406de96f4e9067abac44badd361020451940ec33e6f84",
-      "artifact_sha256":"aadd19c9ed8b0b4aaa5e2b869d9cb32191e6e1f8e6711135e4c4b64361e6a245",
-      "input_sha256":"ac849580310421f312aa9783fef45f1fc90cc5ae80a54a183435ec849ee29a20",
-      "output_sha256":"8a3a5b329a7d5465aac6efa415e6d2b3802e90281d98b32ad8a3d304520eb60b"
+    "formula_and_api_cases": 5797,
+    "scale_cases": 7,
+    "malformed_input_cases": 27,
+    "laws": 66,
+    "concrete_fixtures": 175,
+    "source_scenario_mappings": 138,
+    "javascript": {
+      "status": "passed_file_input_runtime",
+      "bend_version": "2.0.39",
+      "runtime": "Bun 1.3.1",
+      "runtime_js_sha256": "06be7a1ddc7840957381d87e798d2f668d25cb8251cbe6de793f3c6cc5f11a37"
     },
-    "cuda_status":"unverified for Range source", "metal_status":"unverified"
+    "kernel": {
+      "status": "passed",
+      "bend_version": "2.0.39",
+      "lean_version": "4.34.0"
+    },
+    "static_replay": {
+      "status": "partial",
+      "new_constructor_cases_on_bend_2_0_39": 77,
+      "block_boundary_cases_on_bend_2_0_16": 26,
+      "full_combined_replay": "pending"
+    },
+    "native_cpu": {
+      "status": "passed",
+      "compiler": "Ubuntu clang 19.1.1",
+      "optimization": "-O3",
+      "thread_counts": [
+        1,
+        8
+      ],
+      "generated_c_bytes": 6954264,
+      "generated_c_sha256": "d7f410e9da3be728b64406de96f4e9067abac44badd361020451940ec33e6f84",
+      "artifact_sha256": "aadd19c9ed8b0b4aaa5e2b869d9cb32191e6e1f8e6711135e4c4b64361e6a245",
+      "input_sha256": "ac849580310421f312aa9783fef45f1fc90cc5ae80a54a183435ec849ee29a20",
+      "output_sha256": "8a3a5b329a7d5465aac6efa415e6d2b3802e90281d98b32ad8a3d304520eb60b"
+    },
+    "cuda_status": "unverified for Range source",
+    "metal_status": "unverified"
   },
   "integer_fixture_checkpoint": {
     "fixture_source_commit": "dd4c68bfc01a09060dc8040d60f14568047db9ae",
@@ -455,11 +1152,22 @@
     "integer_string_profile_checks": 5326,
     "integer_string_profile_accepted": 1768,
     "integer_string_profile_rejected": 3558,
-    "new_static_cases_checked_on_bend_versions": ["2.0.16", "2.0.39"],
-    "complete_runtime_corpus_checked_on": ["Bun 1.3.1", "native CPU threads=1", "native CPU threads=8"],
+    "new_static_cases_checked_on_bend_versions": [
+      "2.0.16",
+      "2.0.39"
+    ],
+    "complete_runtime_corpus_checked_on": [
+      "Bun 1.3.1",
+      "native CPU threads=1",
+      "native CPU threads=8"
+    ],
     "scale_cases": 7,
     "laws": 55,
-    "kernel": {"status": "passed", "bend_version": "2.0.39", "lean_version": "4.34.0"},
+    "kernel": {
+      "status": "passed",
+      "bend_version": "2.0.39",
+      "lean_version": "4.34.0"
+    },
     "reused_js_sha256": "877992df01dafc86d5e4346257c8704313a5f32f82a8e80bf88b052b331c00a6",
     "reused_native_artifact_sha256": "fe1ef94788a8fde07f9baf91394c8fefd62ba9cd3ffdfcabb71722692b8ed181",
     "input_sha256": "302d58ba979c5129b1503636e11a8226488b002dbd9a479b33cba6739e245786",
@@ -468,19 +1176,35 @@
   },
   "cuda_formula_checkpoints": [
     {
-      "status":"passed","scope":"Frozen earlier2790token API cases; excludes newer matcher, named-reference, Range and Calculator changes; no performance claim",
-      "engine_source_commit":"ef2cb1da57bc4a5c358800dedfabf91a8a19dada",
-      "differential_cases":2790,"scale_cases":7,"host":"fedora","gpu":"NVIDIA Quadro P4000","compute_capability":"6.1",
-      "driver_version":"580.178.04","bend_version":"2.0.39","host_compiler":"Ubuntu clang 19.1.1","host_optimization":"-O3",
-      "cuda_bundle":"12.9.1","nvrtc_version":"12.9.86","profile":"--Ofast-compile=max","fmad":false,"required_gpu_heap":"1GB",
-      "cpu_thread_counts_checked":[1,8],"default_profile_status":"unverified",
-      "generated_c_sha256":"535caa0a8be13d70f4a4d7e321858caa5d9bf3716883100cbd4e511005748268",
-      "artifact_sha256":"67d166ff18c320b365d725567b156761220994f79cb3fd13b13d41b12a831a83",
-      "gpu_artifact_sha256":"b1bfe6d634bbb2397509dc7eaa149252f73145b2919c46a3023dbff29f9ade3d",
-      "main_input_sha256":"80c9a5d97fa694b95c221676216e5185590febe3971831facfe9a3c97a1fa1c1",
-      "main_output_sha256":"27ec6c86fae953c8b9f3149fb2f90cae1a07cd8d19567d886c517680375f0b75",
-      "scale_input_sha256":"d05a7b3c1663780f7edb896a7c665a78e44925a567c6effbf1142e8278803603",
-      "scale_output_sha256":"1622d34d26cdfb85586752ab86ab4d71067ac7d4bba1ccdfbd485d314c8bc5e2"
+      "status": "passed",
+      "scope": "Frozen earlier2790token API cases; excludes newer matcher, named-reference, Range and Calculator changes; no performance claim",
+      "engine_source_commit": "ef2cb1da57bc4a5c358800dedfabf91a8a19dada",
+      "differential_cases": 2790,
+      "scale_cases": 7,
+      "host": "fedora",
+      "gpu": "NVIDIA Quadro P4000",
+      "compute_capability": "6.1",
+      "driver_version": "580.178.04",
+      "bend_version": "2.0.39",
+      "host_compiler": "Ubuntu clang 19.1.1",
+      "host_optimization": "-O3",
+      "cuda_bundle": "12.9.1",
+      "nvrtc_version": "12.9.86",
+      "profile": "--Ofast-compile=max",
+      "fmad": false,
+      "required_gpu_heap": "1GB",
+      "cpu_thread_counts_checked": [
+        1,
+        8
+      ],
+      "default_profile_status": "unverified",
+      "generated_c_sha256": "535caa0a8be13d70f4a4d7e321858caa5d9bf3716883100cbd4e511005748268",
+      "artifact_sha256": "67d166ff18c320b365d725567b156761220994f79cb3fd13b13d41b12a831a83",
+      "gpu_artifact_sha256": "b1bfe6d634bbb2397509dc7eaa149252f73145b2919c46a3023dbff29f9ade3d",
+      "main_input_sha256": "80c9a5d97fa694b95c221676216e5185590febe3971831facfe9a3c97a1fa1c1",
+      "main_output_sha256": "27ec6c86fae953c8b9f3149fb2f90cae1a07cd8d19567d886c517680375f0b75",
+      "scale_input_sha256": "d05a7b3c1663780f7edb896a7c665a78e44925a567c6effbf1142e8278803603",
+      "scale_output_sha256": "1622d34d26cdfb85586752ab86ab4d71067ac7d4bba1ccdfbd485d314c8bc5e2"
     },
     {
       "status": "passed",
@@ -502,7 +1226,10 @@
       "profile": "--Ofast-compile=max",
       "fmad": false,
       "required_gpu_heap": "1GB",
-      "cpu_thread_counts_checked": [1, 8],
+      "cpu_thread_counts_checked": [
+        1,
+        8
+      ],
       "default_profile_status": "unverified",
       "generated_c_sha256": "665487a57aa9157e93f80f78546c433799ab4ec4ac170e983d855452610e6689",
       "artifact_sha256": "bf3828fe906b42865cb57013b2344b68e7427eaf98abce6ba4f45bdea9bdce60",
@@ -530,7 +1257,10 @@
       "profile": "--Ofast-compile=max",
       "fmad": false,
       "required_gpu_heap": "1GB",
-      "cpu_thread_counts_checked": [1, 8],
+      "cpu_thread_counts_checked": [
+        1,
+        8
+      ],
       "default_profile_status": "unverified",
       "generated_c_sha256": "fbea11f742d0f98d7e531bc584ea6aff6b30b9ef232da8f38fab8086e3fdb0df",
       "artifact_sha256": "84905fc4cc4172d13f5fac20fa5f665c7de97f8c347e8827470f6e6f4841e1ce",
@@ -549,7 +1279,11 @@
     "concrete_fixtures": 175,
     "scale_cases": 7,
     "malformed_input_cases": 18,
-    "javascript_bend_2_0_39": {"status": "passed", "runtime": "Bun 1.3.1", "generated_js_sha256": "877992df01dafc86d5e4346257c8704313a5f32f82a8e80bf88b052b331c00a6"},
+    "javascript_bend_2_0_39": {
+      "status": "passed",
+      "runtime": "Bun 1.3.1",
+      "generated_js_sha256": "877992df01dafc86d5e4346257c8704313a5f32f82a8e80bf88b052b331c00a6"
+    },
     "javascript_bend_2_0_16": {
       "status": "passed",
       "cases": 2657,
@@ -559,13 +1293,20 @@
       "reuse_rule": "Existing src files unchanged, generated batch byte-identical, retained result matches new golden",
       "prefix_artifact_hashes": "compat/verification/decimal-prefix-baseline.sha256"
     },
-    "kernel": {"status": "passed", "bend_version": "2.0.39", "lean_version": "4.34.0"},
+    "kernel": {
+      "status": "passed",
+      "bend_version": "2.0.39",
+      "lean_version": "4.34.0"
+    },
     "native_cpu": {
       "status": "passed",
       "bend_version": "2.0.39",
       "compiler": "Ubuntu clang 19.1.1",
       "optimization": "-O3",
-      "thread_counts": [1, 8],
+      "thread_counts": [
+        1,
+        8
+      ],
       "compiled_with_cuda": false,
       "generated_c_bytes": 6767050,
       "generated_c_sha256": "70b51a28c6b8f5bd3bfd8ce5c5a2bdf9ad2cf8a55382c9a8b6f79ef50be2c1db",
@@ -583,8 +1324,15 @@
     "scale_cases": 7,
     "laws": 51,
     "concrete_fixtures": 175,
-    "javascript_full_checks": ["2.0.16", "2.0.39"],
-    "kernel": {"status": "passed", "bend_version": "2.0.39", "lean_version": "4.34.0"},
+    "javascript_full_checks": [
+      "2.0.16",
+      "2.0.39"
+    ],
+    "kernel": {
+      "status": "passed",
+      "bend_version": "2.0.39",
+      "lean_version": "4.34.0"
+    },
     "static_generator_invalid_sign_rejections": 4,
     "runtime_fixture_transport": {
       "status": "passed",
@@ -598,7 +1346,10 @@
       "bend_version": "2.0.39",
       "compiler": "Ubuntu clang 19.1.1",
       "optimization": "-O3",
-      "thread_counts": [1, 8],
+      "thread_counts": [
+        1,
+        8
+      ],
       "gpu_option": "off",
       "compiled_with_cuda": false,
       "malformed_input_cases": 18,
@@ -623,7 +1374,10 @@
     "universal_laws": 52,
     "javascript": {
       "factory_cases_status": "passed",
-      "factory_case_bend_versions": ["2.0.16", "2.0.39"],
+      "factory_case_bend_versions": [
+        "2.0.16",
+        "2.0.39"
+      ],
       "full_runtime_corpus_status": "passed",
       "file_input_runtime": "Bun 1.3.1",
       "generated_runtime_js_sha256": "10c2e265845b2a623b22353820b01519fda891b173cad96e62735d3607608c70"
@@ -634,7 +1388,10 @@
       "bend_version": "2.0.39",
       "compiler": "Ubuntu clang 19.1.1",
       "optimization": "-O3",
-      "thread_counts": [1, 8],
+      "thread_counts": [
+        1,
+        8
+      ],
       "generated_c_bytes": 6758889,
       "previous_generated_c_bytes": 8089118,
       "generated_c_sha256": "cc9f114fb7b5728656da79ae4fdcda037d36ed7fda05be96f55453f2272b16e8",
@@ -656,7 +1413,10 @@
     "source_scenario_mappings": 134,
     "javascript": {
       "status": "passed",
-      "bend_versions": ["2.0.16", "2.0.39"],
+      "bend_versions": [
+        "2.0.16",
+        "2.0.39"
+      ],
       "file_input_runtime": "Bun 1.3.1",
       "generated_runtime_js_sha256": "1d4707748df6569457fd8b1f86b114ddd808c19e2993f0abe701467a8614fb46"
     },
@@ -670,9 +1430,15 @@
       "host": "fedora",
       "bend_version": "2.0.39",
       "compiler": "Ubuntu clang 19.1.1",
-      "build_flags": ["-std=c11", "-O3"],
+      "build_flags": [
+        "-std=c11",
+        "-O3"
+      ],
       "cuda_compiled_in": false,
-      "thread_counts": [1, 8],
+      "thread_counts": [
+        1,
+        8
+      ],
       "generated_c_bytes": 8089118,
       "generated_c_sha256": "cf7a263aa5fa4eb1fe67e15c90fcdcfb334a0ca109b5411b662e379581d3715e",
       "artifact_sha256": "7901f293002d0b813c6ee45909d62a90b48a2a6948e602903612e2a0fc1f6a48",
@@ -691,8 +1457,15 @@
     "laws": 48,
     "concrete_fixtures": 175,
     "unicode_boundary_probes": 6351,
-    "javascript_full_checks": ["2.0.16", "2.0.39"],
-    "kernel": {"status": "passed", "bend_version": "2.0.39", "lean_version": "4.34.0"},
+    "javascript_full_checks": [
+      "2.0.16",
+      "2.0.39"
+    ],
+    "kernel": {
+      "status": "passed",
+      "bend_version": "2.0.39",
+      "lean_version": "4.34.0"
+    },
     "runtime_fixture_transport": {
       "status": "passed",
       "runtime": "Bun 1.3.1",
@@ -705,7 +1478,10 @@
       "bend_version": "2.0.39",
       "compiler": "Ubuntu clang 19.1.1",
       "optimization": "-O3",
-      "thread_counts": [1, 8],
+      "thread_counts": [
+        1,
+        8
+      ],
       "gpu_option": "off",
       "compiled_with_cuda": true,
       "cuda_bundle": "12.9.1",
@@ -1186,5 +1962,57 @@
         ]
       }
     ]
+  },
+  "float_evaluator_checkpoint": {
+    "source_parent": "cb62d93",
+    "scope": "Typed Float bindings, mixed Integer/BigDecimal arithmetic and comparison, native errors and numeric reductions/rounding; full Dentaku and Float object/API parity remain incomplete",
+    "source_manifest": "compat/verification/float-evaluator-source.sha256",
+    "source_manifest_sha256": "a35cf43eb4887b8f4177284f989181a890d214468d59d800d95d1ccaf1b92348",
+    "formula_and_api_cases": 10392,
+    "new_float_cases": 1615,
+    "scale_cases": 7,
+    "malformed_input_cases": 36,
+    "laws": 109,
+    "source_scenario_mappings": 158,
+    "concrete_fixtures": 175,
+    "kernel": {
+      "status": "passed",
+      "bend_version": "2.0.39",
+      "lean_version": "4.34.0",
+      "memory_max_gib": 48,
+      "memory_swap_max_gib": 8
+    },
+    "javascript": {
+      "status": "passed_full_formula_corpus",
+      "bend_version": "2.0.39",
+      "runtime": "Bun 1.3.1",
+      "js_sha256": "f02da3458ad102374e678ee8cf3e228b0d840a83b7d26b676f4d93b8ff5ba04b"
+    },
+    "input_sha256": "f5e7c3df6f04fa075fb4e38fb72a731cfd9fb8529174dee6b21e3975bb2764b1",
+    "output_sha256": "b07cc1352d949d6e00e34744cd2900f3d0cc33d390d843925414961b187d4c56",
+    "reference": "Pinned Dentaku 1b9950be405ecb0d425f8683447b58cf29796d1f, Ruby3.3.13/BigDecimal3.1.5, 64-bit Linux",
+    "float_fixture_regeneration": "tools/float-value-cases.lua compat/float-value-cases.lua compat/float-value-oracle.tsv",
+    "reference_changes": "Direct Float word input and snapshots; native FloatDomainError, ArgumentError and TypeError are recorded as reference outcomes rather than aborting the corpus runner",
+    "static_replay": "not run for the complete current corpus",
+    "legacy_javascript": "not yet replayed",
+    "native_cpu": "not yet replayed",
+    "cuda": "unverified for this evaluator source",
+    "metal": "unverified",
+    "performance": "not measured"
+  },
+  "float_stored_integration_checkpoint": {
+    "source_parents": [
+      "436f9da",
+      "37abd98"
+    ],
+    "formula_and_api_cases": 10413,
+    "stored_probes": 283,
+    "laws": 113,
+    "kernel": "passed Lean-backed Bend 2.0.39",
+    "javascript": "passed full corpus, stored probes, 7 scale and 36 malformed checks; Bun 1.3.1",
+    "native_cpu": "pending for merged evaluator source",
+    "cuda": "unverified for merged evaluator source",
+    "metal": "unverified",
+    "performance": "not measured"
   }
 }
