@@ -62,6 +62,33 @@
     },
     "cuda_status": "unverified for named-reference source"
   },
+  "token_matcher_scenarios_checkpoint": {
+    "source_commit": "b8d437ce269b813fcae11e58f758da044d42ee7f",
+    "scope": "Exact11TokenMatcher source examples and parameterized function-name constructor over supported value descriptors; mutable aliasing and scanner integration incomplete",
+    "formula_and_api_cases": 5349,
+    "new_cases": 183,
+    "exact_upstream_example_cases": 27,
+    "function_constructor_cases": 156,
+    "source_scenario_mappings": 147,
+    "laws": 62,
+    "concrete_fixtures": 175,
+    "new_cases_static_replay": {"status":"passed","versions":["2.0.16","2.0.39"]},
+    "prior2376matcher_cases_static_replay": {"source_commit":"1f5cda5","2.0.39":"passed","2.0.16":"pending"},
+    "bun": {"status":"passed","version":"1.3.1"},
+    "native_cpu": {
+      "status":"passed", "compiler":"Ubuntu clang19.1.1", "optimization":"-O3",
+      "thread_counts":[1,8], "compiled_with_cuda":false,
+      "generated_c_bytes":7946468,
+      "generated_c_sha256":"903c13b8a4ca67e2d0306b7ec60412cca0ed2827de8e7c98f32dd6abee95e6bf",
+      "artifact_sha256":"733cb869e1c54779bc28622792edcfb740bb2e64b8c1a3a5ccfe04623df29398"
+    },
+    "kernel": {"status":"passed","bend_version":"2.0.39","lean_version":"4.34.0"},
+    "scale_cases":7, "malformed_input_cases":18,
+    "generated_js_sha256":"21d6f44e8950c3464ef716efb4a3266591862e1e1971f1bfe0b44278980789db",
+    "combined_input_sha256":"86f33516b83d245a6c9b8204fad1c3e684ae6c2369557a10e15392d62f76d200",
+    "combined_output_sha256":"666379fb587bf58ecf2d889238d50c5c85a6774ffb748d89bc1ea0406ada3e23",
+    "cuda":"unverified for this source", "metal":"unverified"
+  },
   "token_matcher_checkpoint": {
     "source_commit": "4644bd476213675b54f0b6b3611ea9aecd28c2e8",
     "scope": "Immutable TokenMatcher API over supported Core.Value descriptors; scanner, lexer integration, arbitrary Ruby objects and mutable aliasing incomplete",

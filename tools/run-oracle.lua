@@ -86,7 +86,7 @@ end
 require 'dentaku/token_matcher'
 def matcher_construct(data)
   matcher = if data[:builtin]
-    Dentaku::TokenMatcher.public_send(data[:builtin])
+    data[:builtin] == 'function' ? Dentaku::TokenMatcher.function(data[:values]) : Dentaku::TokenMatcher.public_send(data[:builtin])
   else
     Dentaku::TokenMatcher.new(data[:categories], data[:values], (data[:children] || []).map { |child| child && matcher_construct(child) })
   end

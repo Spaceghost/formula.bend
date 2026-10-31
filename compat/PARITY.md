@@ -49,7 +49,7 @@ The unchanged upstream suite passes 713 examples with zero failures and 96.82%
 line coverage in the Ruby reference environment. `reference-summary.json` and
 `upstream-spec-catalog.json` record that run. These results describe Ruby only.
 
-The Lua-driven corpus has 7768 reference cases for Ruby values, parse
+The Lua-driven corpus has 7951 reference cases for Ruby values, parse
 error classification, or exception-factory descriptions. It covers truthiness, strings/null, comparisons, selected
 numeric-string coercions, and static operand rejection. It is a small subset of
 the upstream catalog. Native error classes/messages, all calculator methods,
@@ -738,3 +738,18 @@ replay on Bend 2.0.16 and 2.0.39 remains pending at this checkpoint. Do not infe
 The tests cover supported Core.Value descriptors. Mutable Ruby aliasing,
 arbitrary objects, Float identity, scanner behavior, and lexer/visitor
 integration remain incomplete. The matcher spec family remains partial.
+## Exact matcher scenarios and parameterized functions
+
+The 27 assertions from all 11 declarations of the pinned TokenMatcher spec now
+have exact differential counterparts, including its standard/star/plus stream
+contexts. The final :'(' input in its arguments example retains the
+spec helper's :identifier category. A further 156 probes cover the function
+constructor with supported nil, Symbol, String, Boolean, numeric, array and
+ordered-hash name values.
+
+All 183 new probes pass Bend 2.0.16 and 2.0.39. The complete5,349-case runtime
+corpus passes Bun and clang19-O3CPU1&8, with seven scale checks and18invalid
+wire inputs. All62laws pass .39Lean-backed verification. There are147explicit
+source-scenario mappings. Source and artifact hashes are recorded in
+token_matcher_scenarios_checkpoint. Mutable aliasing, arbitrary Ruby values,
+and scanner integration remain unfinished; the spec family remains partial.

@@ -2,6 +2,20 @@
 -- COUNT's Float input is represented as exact decimal 2.3 in Bend; COUNT only
 -- inspects its length capability, so this adaptation does not alter the result.
 return {
+  ['spec/token_matcher_spec.rb'] = {
+    {'with single category matches token category', 'matcher_upstream_single_category'},
+    {'with multiple categories matches any included token category', {'matcher_upstream_multiple_categories_1', 'matcher_upstream_multiple_categories_2', 'matcher_upstream_multiple_categories_3'}},
+    {'with single category and value matches token category and value', {'matcher_upstream_single_value_1', 'matcher_upstream_single_value_2'}},
+    {'with multiple values matches any included token value', {'matcher_upstream_multiple_values_1', 'matcher_upstream_multiple_values_2', 'matcher_upstream_multiple_values_3', 'matcher_upstream_multiple_values_4'}},
+    {'is invertible', {'matcher_upstream_invert_1', 'matcher_upstream_invert_2', 'matcher_upstream_invert_3'}},
+    {'matches either', {'matcher_upstream_either_1', 'matcher_upstream_either_2'}},
+    {'matches any value', {'matcher_upstream_value_1', 'matcher_upstream_value_2', 'matcher_upstream_value_3', 'matcher_upstream_value_4', 'matcher_upstream_value_5'}},
+    {'matches zero or more occurrences in a token stream', {'matcher_upstream_stream_standard_0', 'matcher_upstream_stream_standard_4'}, 'Context: stream matching / standard.'},
+    {'matches zero or more occurrences in a token stream', {'matcher_upstream_stream_star_0', 'matcher_upstream_stream_star_4'}, 'Context: stream matching / star.'},
+    {'matches one or more occurrences in a token stream', {'matcher_upstream_stream_plus_0', 'matcher_upstream_stream_plus_4'}, 'Context: stream matching / plus.'},
+    {'matches comma-separated values', 'matcher_upstream_arguments'},
+  },
+
   ['spec/token_spec.rb'] = {
     {'has a category and a value', {'token_upstream_fields', 'token_category_query_1_1'}},
     {'compares category and value to determine equality', 'token_upstream_equality'},

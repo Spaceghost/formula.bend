@@ -368,3 +368,5 @@ def Laws.matcher_plus_preserves_star_minimum(matcher):
   match matcher:
     case Matcher.Rule{categories, values, children, predicate, inverted, anchored, minimum, repeated}:
       {==}
+def Laws.matcher_function_category(name):
+  {==}

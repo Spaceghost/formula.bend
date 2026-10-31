@@ -288,3 +288,7 @@ def get_minimum(matcher: Matcher) -> Nat:
   match matcher:
     case Rule{categories, values, children, predicate, inverted, anchored, minimum, repeated}:
       minimum
+# The parameter is a Value: Dentaku also accepts String names, nil wildcards,
+# arrays of names and other supported Hash keys.
+def for_function(name: Core.Value) -> Matcher:
+  make(Core.SymbolValue{"function"}, name, Nil{})

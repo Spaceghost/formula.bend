@@ -111,7 +111,7 @@ The eight address runtime cases pass on both JavaScript and native CPU.
 
 Parity is measured against the pinned Ruby source and its complete 713-example
 suite. The Ruby reference passes all examples; that is not a claim that Bend does.
-A separate 7768-case corpus covers selected values,
+A separate 7951-case corpus covers selected values,
 dependencies, parse-error classification, and exception factories.
 `make parity-check` generates the fixtures using Lua.
 Use `LUA=/path/to/lua` if Lua is not on PATH.
@@ -127,7 +127,7 @@ The corpus supports exact decimal, integer, string, Boolean, null, nested array,
 ordered hash, and named class/module bindings, plus case-sensitive contexts.
 MAP, FILTER, ALL, ANY, and REDUCE also have seven reference checks over
 1,025-item collections. The checker batches static replay to bound memory.
-The merged 7,768-case corpus and seven scale checks pass Bun and native CPU
+The 7,768-case integration checkpoint and seven scale checks pass Bun and native CPU
 with one and eight threads at `-O3`. All 23 malformed inputs are rejected.
 Its 66 laws pass Lean-backed verification, and the 175 concrete fixtures pass
 on Bend 2.0.39. Combined static replay on both Bend versions is still pending.
@@ -145,6 +145,14 @@ The separate 5,326-string Ruby Integer profile checks fixture conversion rather
 than formula coverage. See [the matcher contract](docs/token-matcher.md) for
 immutable modifiers, Hash-key identity, compound inversion, and negative stream
 offsets. This API is not yet connected to the parser's lexer or a token scanner.
+
+A further 183 probes cover the parameterized function-name constructor and
+exact counterparts of all 11 upstream TokenMatcher examples. They pass both
+Bend versions. The combined 5,349-case runtime corpus passes Bun and native
+CPU with one and eight threads, along with seven scale cases and 18 malformed
+inputs. All 62 laws pass Lean-backed verification. There are now 147 explicit
+source-scenario mappings. Broader scanner integration and mutable aliasing
+remain incomplete; these results do not establish full Dentaku parity.
 
 Exception factories preserve reasons, metadata, constructor attributes, message
 overrides and assignment values. Their 131 differential cases cover every

@@ -347,3 +347,6 @@ law matcher_star_minimum:
 law matcher_plus_preserves_star_minimum:
   for matcher: Matcher.Matcher
   {Matcher.get_minimum(Matcher.plus(Matcher.star(matcher))) == 0n : Nat}
+law matcher_function_category:
+  for name: Core.Value
+  {Matcher.get_categories(Matcher.for_function(name)) == Core.ArrayCons{Core.SymbolValue{"function"}, Core.ArrayNil{}} : Core.Value}
