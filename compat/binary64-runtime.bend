@@ -2,6 +2,7 @@ import Base
 import ../src/binary64.bend as Binary
 import ../src/binary64_decimal.bend as Conversion
 import ../src/decimal.bend as Decimal
+import ../src/binary64_format.bend as Format
 
 type Operation is Data:
   Add{}
@@ -13,12 +14,14 @@ type Operation is Data:
   Words{}
   ToExact{}
   ExactRoundTrip{}
+  Format{}
 
 type Calculation is Data:
   Value{value: Binary.Float}
   Ordering{order: Maybe<&2, Cmp>}
   RawWords{value: Binary.Float}
   ExactValue{value: Conversion.Exact}
+  Formatted{value: String}
 
 type Work is Data:
   Leaf{id: String, operation: Operation, left: Binary.Float, right: Binary.Float}
@@ -53,6 +56,8 @@ def operation(text: String) -> Maybe<&2, Operation>:
       Some{ToExact{}}
     case "exact_roundtrip":
       Some{ExactRoundTrip{}}
+    case "format":
+      Some{Format{}}
     case text:
       None{}
 
@@ -233,6 +238,8 @@ def calculate(op: Operation, +a: Binary.Float, b: Binary.Float) -> Calculation:
       ExactValue{Conversion.to_exact(a)}
     case ExactRoundTrip{}:
       Value{Conversion.from_exact(Conversion.to_exact(a))}
+    case Format{}:
+      Formatted{Format.show(a)}
 
 def ordering_snapshot(order: Maybe<&2, Cmp>) -> String:
   match order:
@@ -255,6 +262,8 @@ def snapshot(result: Calculation) -> String:
       Binary.render_words(Binary.words(value))
     case ExactValue{value}:
       Conversion.snapshot(value)
+    case Formatted{value}:
+      value
 
 def execute(work: Work) -> Results:
   match work:

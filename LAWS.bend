@@ -19,6 +19,18 @@ import ./src/error_types.bend as ErrorTypes
 import ./src/errors.bend as Errors
 import ./src/binary64.bend as Binary64
 import ./src/binary64_decimal.bend as BinaryDecimal
+import ./src/binary64_format.bend as BinaryFormat
+
+law binary64_format_zero:
+  for +negative: Bool
+  {BinaryFormat.show(Binary64.zero(negative)) == Bool.pick(String, negative, "-0.0", "0.0") : String}
+
+law binary64_format_infinity:
+  for +negative: Bool
+  {BinaryFormat.show(Binary64.infinity(negative)) == Bool.pick(String, negative, "-Infinity", "Infinity") : String}
+
+law binary64_format_nan:
+  {BinaryFormat.show(Binary64.nan()) == "NaN" : String}
 
 law binary64_decimal_zero:
   for negative: Bool
