@@ -135,6 +135,9 @@ def calculator_session(input)
       when 'evaluate' then calculator.evaluate(command.fetch(:expression), command.fetch(:data, {}))
       when 'evaluate!' then calculator.evaluate!(command.fetch(:expression), command.fetch(:data, {}))
       when 'clear_cache' then calculator.clear_cache(command.fetch(:key, :all))
+      when 'warm_cache_from'
+        creator = Dentaku::Calculator.new(case_sensitive: command.fetch(:source_sensitive), cache_ast: false)
+        calculator.load_cache(command.fetch(:entries).transform_values { |source| creator.ast(source) })
       when 'warm_cache'
         calculator.load_cache(command.fetch(:entries).transform_values { |source| calculator.ast(source) })
       when 'disable_cache_status' then calculator.disable_cache { |c| c.cache_ast? }

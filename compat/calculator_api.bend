@@ -31,9 +31,9 @@ def self_result(state: Calculator.State) -> Calculator.Evaluation:
 
 def ast_result(parsed: Calculator.ParsedState) -> Calculator.Evaluation:
   match parsed:
-    case Calculator.ParsedWith{state, Parser.Accepted{expression}}:
+    case Calculator.ParsedWith{state, Parser.Accepted{expression}, origin}:
       success(state, Core.TextValue{"ast"})
-    case Calculator.ParsedWith{state, Parser.ParseError{+message}}:
+    case Calculator.ParsedWith{state, Parser.ParseError{+message}, origin}:
       Calculator.Rejected{state, Bool.pick(String, String.starts_with(message, "Tokenizer: "), "error:Dentaku::TokenizerError", "error:Dentaku::ParseError"), message}
 
 def restore_cache(result: Calculator.Evaluation) -> Calculator.Evaluation:
@@ -43,14 +43,58 @@ def restore_cache(result: Calculator.Evaluation) -> Calculator.Evaluation:
     case Calculator.Rejected{state, snapshot, message}:
       Calculator.Rejected{Calculator.enable_cache(state), snapshot, message}
 
+def missing_store_method(state: Calculator.State) -> Calculator.Evaluation:
+  Calculator.Rejected{state, "error:NoMethodError", "Input does not support the selected storage overload"}
+
+def put_array_pair(key: Core.Value, value: Core.Value, memory: Core.Value, sensitive: Bool) -> Core.Value:
+  Calculator.put(memory, Core.TextValue{Calculator.memory_key(key, sensitive)}, value)
+
+def array_head(value: Core.Value, memory: Core.Value, sensitive: Bool) -> Core.Value:
+  match value:
+    case Core.ArrayNil{}:
+      put_array_pair(Core.NullValue{}, Core.NullValue{}, memory, sensitive)
+    case Core.ArrayCons{key, Core.ArrayNil{}}:
+      put_array_pair(key, Core.NullValue{}, memory, sensitive)
+    case Core.ArrayCons{key, Core.ArrayCons{value, tail}}:
+      put_array_pair(key, value, memory, sensitive)
+    case value:
+      put_array_pair(value, Core.NullValue{}, memory, sensitive)
+
+def array_store(values: Core.Value, memory: Core.Value, +sensitive: Bool) -> Core.Value:
+  match values:
+    case Core.ArrayCons{head, tail}:
+      array_store(tail, array_head(head, memory, sensitive), sensitive)
+    case values:
+      memory
+
+def array_input(nested: Bool, +state: Calculator.State, values: Core.Value) -> Calculator.Evaluation:
+  match nested:
+    case True{}:
+      missing_store_method(state)
+    case False{}:
+      self_result(Calculator.with_memory(state, array_store(values, Calculator.get_memory(state), Calculator.case_sensitive(state))))
+
+def store_input(values: Core.Value, +state: Calculator.State) -> Calculator.Evaluation:
+  match values:
+    case Core.HashNil{}:
+      self_result(state)
+    case Core.HashEntry{key, value, tail}:
+      self_result(Calculator.store_values(state, Core.HashEntry{key, value, tail}))
+    case Core.ArrayNil{}:
+      array_input(Calculator.nested_data(state), state, Core.ArrayNil{})
+    case Core.ArrayCons{head, tail}:
+      array_input(Calculator.nested_data(state), state, Core.ArrayCons{head, tail})
+    case values:
+      missing_store_method(state)
+
 def pair_value(value: Core.Value, state: Calculator.State, key: Core.Value) -> Calculator.Evaluation:
   match value:
     case Core.NullValue{}:
-      Calculator.Rejected{state, "error:NoMethodError", "Ruby's two-argument store overload requires a non-nil value"}
+      store_input(key, state)
     case value:
       self_result(Calculator.set_value(state, key, value))
 
-def clear_one(found: Maybe<&2, Core.Expr>, state: Calculator.State, source: String) -> Calculator.Evaluation:
+def clear_one(found: Maybe<&2, Calculator.Cached>, state: Calculator.State, source: String) -> Calculator.Evaluation:
   match found:
     case None{}:
       success(Calculator.clear_cache_key(state, source), Core.NullValue{})
@@ -61,7 +105,7 @@ def cache_description(cache: List<&2, Calculator.Cached>) -> Core.Value:
   match cache:
     case Nil{}:
       Core.HashNil{}
-    case Calculator.AstEntry{key, expression} <> tail:
+    case Calculator.AstEntry{key, expression, origin} <> tail:
       Core.HashEntry{key, Core.TextValue{"ast"}, cache_description(tail)}
 
 def loaded_cache(+state: Calculator.State, +cache: List<&2, Calculator.Cached>) -> Calculator.Evaluation:
@@ -78,24 +122,24 @@ def clear_cache_key(key: Core.Value, +state: Calculator.State) -> Calculator.Eva
     case key:
       Calculator.Rejected{state, "error:ArgumentError", "Invalid cache selector"}
 
-def warm_entry(key: Core.Value, parsed: Parser.Parsed, rest: List<&2, Calculator.Cached>) -> List<&2, Calculator.Cached>:
+def warm_entry(key: Core.Value, parsed: Parser.Parsed, sensitive: Bool, rest: List<&2, Calculator.Cached>) -> List<&2, Calculator.Cached>:
   match parsed:
     case Parser.Accepted{expression}:
-      Calculator.AstEntry{key, expression} <> rest
+      Calculator.AstEntry{key, expression, sensitive} <> rest
     case parsed:
       rest
 
 def warm_cache(entries: Core.Value, +sensitive: Bool) -> List<&2, Calculator.Cached>:
   match entries:
     case Core.HashEntry{key, Core.TextValue{source}, tail}:
-      warm_entry(key, Parser.parse_in(source, sensitive), warm_cache(tail, sensitive))
+      warm_entry(key, Parser.parse_in(source, sensitive), sensitive, warm_cache(tail, sensitive))
     case entries:
       Nil{}
 
 def execute(operation: Core.Value, +input: Core.Value, +state: Calculator.State) -> Calculator.Evaluation:
   match operation:
     case Core.TextValue{"store"}:
-      self_result(Calculator.store_values(state, field(input, "values")))
+      store_input(field(input, "values"), state)
     case Core.TextValue{"store_pair"}:
       pair_value(field(input, "value"), state, field(input, "key"))
     case Core.TextValue{"clear"}:
@@ -116,6 +160,8 @@ def execute(operation: Core.Value, +input: Core.Value, +state: Calculator.State)
       Calculator.evaluate_value(field(input, "expression"), state, default_hash(field(input, "data")), True{})
     case Core.TextValue{"clear_cache"}:
       clear_cache_key(field(input, "key"), state)
+    case Core.TextValue{"warm_cache_from"}:
+      loaded_cache(state, warm_cache(field(input, "entries"), Core.truthy(field(input, "source_sensitive"))))
     case Core.TextValue{"warm_cache"}:
       loaded_cache(state, warm_cache(field(input, "entries"), Calculator.case_sensitive(state)))
     case Core.TextValue{"disable_cache_status"}:

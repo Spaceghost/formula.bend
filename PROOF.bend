@@ -451,3 +451,19 @@ def Laws.calculator_failed_context():
   {==}
 def Laws.calculator_open_index_eof():
   {==}
+def Laws.cached_program_keeps_creator_mode(state, origin):
+  match state:
+    case Calculator.Calculator{memory, cache, sensitive, nested, cache_ast, disabled}:
+      {==}
+
+def Laws.cached_folded_identifier_uses_exact_memory():
+  {==}
+
+def Laws.cached_sensitive_identifier_does_not_fold_receiver():
+  {==}
+
+def Laws.store_hash_nil_selects_hash_overload():
+  {==}
+
+def Laws.default_nested_store_array_requires_each_value():
+  {==}

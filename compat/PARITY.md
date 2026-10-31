@@ -49,7 +49,7 @@ The unchanged upstream suite passes 713 examples with zero failures and 96.82%
 line coverage in the Ruby reference environment. `reference-summary.json` and
 `upstream-spec-catalog.json` record that run. These results describe Ruby only.
 
-The Lua-driven corpus has 8537 reference cases for Ruby values, parse
+The Lua-driven corpus has 8665 reference cases for Ruby values, parse
 error classification, or exception-factory descriptions. It covers truthiness, strings/null, comparisons, selected
 numeric-string coercions, and static operand rejection. It is a small subset of
 the upstream catalog. Native error classes/messages, all calculator methods,
@@ -840,6 +840,32 @@ A separate required-CUDA checkpoint now passes 2,790 earlier token API cases
 and seven scale cases on the P4000 with NVRTC --Ofast-compile=max and fmad=false.
 It excludes the newer matcher, class, Range and Calculator changes. It is a
 fast-compilation profile correctness result, not default-profile performance.
+## Creator case modes and overloaded storage
+
+A transferred parsed program retains its creator's case mode. Prepared memory
+bindings remain exact after normalization by the receiving calculator. This
+preserves the difference between an uppercase identifier captured by a sensitive
+creator and a folded identifier evaluated against sensitive receiver memory.
+The transfer matrix includes Unicode identifiers and MAP/REDUCE scopes.
+
+The compatibility adapter now follows store(hash, nil) into hash storage.
+Array-pair storage works with nested-data support disabled; Ruby's default
+nested-data check rejects arrays through each_value. Missing pair fields become
+nil and extra fields are ignored. Other Enumerable types remain open.
+
+All 128 new multi-step sessions match the pinned Ruby reference on Bend 2.0.39
+and Bun. The complete 8,665-case runtime corpus passes Bun and native CPU with
+one and eight threads, with seven scale and 27 malformed-input checks. All 86
+laws pass Lean-backed verification. The bce55b2 checkpoint also finished full
+8,537-case static replay and 175 concrete fixtures on Bend 2.0.39; this is not a
+fresh full 8,665-case static result.
+
+The prior 2,376-case matcher checkpoint now passes both Bend versions, with its
+896 preserved legacy rows and 1,480 resumed rows matched as one complete output.
+Calculator legacy work on frozen c852ba4 source remains queued separately.
+Stored formulas and the remaining Calculator/global/custom-function/visitor and
+spreadsheet requirements are still unfinished.
+
 
 ## Calculator and binary64 integration
 
@@ -851,3 +877,18 @@ copies of the same Bun and native CPU artifacts, with one and eight threads.
 The standalone 4,595 binary64 probes keep their separate JS/CPU/CUDA evidence;
 this does not add Float support to the evaluator or a GPU pass for all formulas.
 The complete combined static replay and broader compatibility work remain open.
+## Cache mode and binary64 foundation merge
+
+The merged source keeps all 8,665 formula/API cases passing on Bun and native
+CPU with one and eight threads, plus seven scale and 27 malformed-input cases.
+Formula C and JavaScript emissions are byte-identical before and after adding
+the independent binary64 module; the existing native executable was reused
+only after those byte comparisons. The merged source passes all 90 laws
+through the Lean-backed gate. The separate 4,595 binary64 probes also pass
+again on Bun; they are not added to the formula case count.
+
+The 51 original Calculator sessions now pass Bend 2.0.16 at c852ba4, using
+eight preserved results and 43 resumed results. The new 128 mode/overload
+sessions remain verified on Bend 2.0.39; a fresh full 8,665 static replay has
+not been claimed. Float bindings and formatting are not yet wired into the
+formula evaluator, and broader parity and the shootout remain unfinished.
