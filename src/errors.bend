@@ -2,6 +2,65 @@ import Base
 import ./core.bend as Core
 import ./error_types.bend as Types
 
+type ReasonCode is Data:
+  NodeInvalid{}
+  TooFewOperands{}
+  TooManyOperands{}
+  UndefinedFunction{}
+  UnprocessedToken{}
+  UnknownCaseToken{}
+  UnbalancedBracket{}
+  UnbalancedParenthesis{}
+  UnknownGroupingToken{}
+  NotImplementedTokenCategory{}
+  InvalidStatement{}
+  ParseError{}
+  TooManyClosingParentheses{}
+  TooManyOpeningParentheses{}
+  UnexpectedZeroWidthMatch{}
+  IncompatibleType{}
+  InvalidOperator{}
+  InvalidValue{}
+  TooFewArguments{}
+  WrongNumberOfArguments{}
+  UnrecognizedReason{}
+
+type NamedReason is Data:
+  ReasonEntry{name: String, code: ReasonCode}
+
+def find_reason(entries: List<&2, NamedReason>, +name: String) -> ReasonCode:
+  match entries:
+    case Nil{}:
+      UnrecognizedReason{}
+    case ReasonEntry{key, code} <> rest:
+      Bool.pick(ReasonCode, String.eq(key, name), code, find_reason(rest, name))
+
+# String equality is shared instead of specializing a nested character-pattern
+# tree into every factory. Formatting still accepts only its own reason group.
+def reason_code(name: String) -> ReasonCode:
+  find_reason([
+    ReasonEntry{"node_invalid", NodeInvalid{}},
+    ReasonEntry{"too_few_operands", TooFewOperands{}},
+    ReasonEntry{"too_many_operands", TooManyOperands{}},
+    ReasonEntry{"undefined_function", UndefinedFunction{}},
+    ReasonEntry{"unprocessed_token", UnprocessedToken{}},
+    ReasonEntry{"unknown_case_token", UnknownCaseToken{}},
+    ReasonEntry{"unbalanced_bracket", UnbalancedBracket{}},
+    ReasonEntry{"unbalanced_parenthesis", UnbalancedParenthesis{}},
+    ReasonEntry{"unknown_grouping_token", UnknownGroupingToken{}},
+    ReasonEntry{"not_implemented_token_category", NotImplementedTokenCategory{}},
+    ReasonEntry{"invalid_statement", InvalidStatement{}},
+    ReasonEntry{"parse_error", ParseError{}},
+    ReasonEntry{"too_many_closing_parentheses", TooManyClosingParentheses{}},
+    ReasonEntry{"too_many_opening_parentheses", TooManyOpeningParentheses{}},
+    ReasonEntry{"unexpected_zero_width_match", UnexpectedZeroWidthMatch{}},
+    ReasonEntry{"incompatible_type", IncompatibleType{}},
+    ReasonEntry{"invalid_operator", InvalidOperator{}},
+    ReasonEntry{"invalid_value", InvalidValue{}},
+    ReasonEntry{"too_few_arguments", TooFewArguments{}},
+    ReasonEntry{"wrong_number_of_arguments", WrongNumberOfArguments{}}
+  ], name)
+
 # Exception factories are separate from evaluator propagation. Metadata retains
 # the original value and key types; formatting never replaces the payload.
 def field(meta: Core.Value, name: String) -> Core.Value:
@@ -101,61 +160,70 @@ def expected_names(values: Core.Value, separator: String) -> String:
     case values:
       ""
 
-def parse_message(reason: String, +meta: Core.Value) -> Maybe<&2, String>:
+def parse_message_code(reason: ReasonCode, +meta: Core.Value) -> Maybe<&2, String>:
   match reason:
-    case "node_invalid":
+    case NodeInvalid{}:
       Some{Bool.pick(String, has(meta, "operation"), shown(meta, "operation") ++ " requires " ++ expected_names(as_array(field(meta, "expected")), "") ++ " operands, but got " ++ shown(meta, "actual"), "Node is invalid")}
-    case "too_few_operands":
+    case TooFewOperands{}:
       Some{shown(meta, "operation") ++ " has too few operands (given " ++ shown(meta, "actual") ++ ", expected " ++ shown(meta, "expected") ++ ")"}
-    case "too_many_operands":
+    case TooManyOperands{}:
       Some{shown(meta, "operation") ++ " has too many operands (given " ++ shown(meta, "actual") ++ ", expected " ++ shown(meta, "expected") ++ ")"}
-    case "undefined_function":
+    case UndefinedFunction{}:
       Some{"Undefined function " ++ shown(meta, "function_name")}
-    case "unprocessed_token":
+    case UnprocessedToken{}:
       Some{"Unprocessed token " ++ shown(meta, "token_name")}
-    case "unknown_case_token":
+    case UnknownCaseToken{}:
       Some{"Unknown case token " ++ shown(meta, "token_name")}
-    case "unbalanced_bracket":
+    case UnbalancedBracket{}:
       Some{"Unbalanced bracket"}
-    case "unbalanced_parenthesis":
+    case UnbalancedParenthesis{}:
       Some{"Unbalanced parenthesis"}
-    case "unknown_grouping_token":
+    case UnknownGroupingToken{}:
       Some{"Unknown grouping token " ++ shown(meta, "token_name")}
-    case "not_implemented_token_category":
+    case NotImplementedTokenCategory{}:
       Some{"Not implemented for tokens of category " ++ shown(meta, "token_category")}
-    case "invalid_statement":
+    case InvalidStatement{}:
       Some{"Invalid statement"}
     case reason:
       None{}
 
-def tokenizer_message(reason: String, +meta: Core.Value) -> Maybe<&2, String>:
+def tokenizer_message_code(reason: ReasonCode, +meta: Core.Value) -> Maybe<&2, String>:
   match reason:
-    case "parse_error":
+    case ParseError{}:
       Some{"parse error at: '" ++ shown(meta, "at") ++ "'"}
-    case "too_many_opening_parentheses":
+    case TooManyOpeningParentheses{}:
       Some{"too many opening parentheses"}
-    case "too_many_closing_parentheses":
+    case TooManyClosingParentheses{}:
       Some{"too many closing parentheses"}
-    case "unexpected_zero_width_match":
+    case UnexpectedZeroWidthMatch{}:
       Some{"unexpected zero-width match (:" ++ shown(meta, "token_category") ++ ") at '" ++ shown(meta, "at") ++ "'"}
     case reason:
       None{}
 
-def argument_message(reason: String, +meta: Core.Value) -> Maybe<&2, String>:
+def argument_message_code(reason: ReasonCode, +meta: Core.Value) -> Maybe<&2, String>:
   match reason:
-    case "incompatible_type":
+    case IncompatibleType{}:
       +actual = Core.ruby_type_name(field(meta, "actual"))
       Some{Bool.pick(String, has(meta, "function_name"), shown(meta, "function_name") ++ "() requires " ++ shown(meta, "expected") ++ " arguments, but got " ++ actual, actual ++ " is not compatible with " ++ shown(meta, "expected"))}
-    case "invalid_operator":
+    case InvalidOperator{}:
       Some{shown(meta, "operation") ++ " requires operands that respond to " ++ shown(meta, "operator")}
-    case "invalid_value":
+    case InvalidValue{}:
       Some{Bool.pick(String, has(meta, "expected"), "'" ++ shown(meta, "actual") ++ "' is not a valid " ++ shown(meta, "expected"), Bool.pick(String, has(meta, "actual"), "'" ++ shown(meta, "actual") ++ "' is not a valid value", "Invalid value"))}
-    case "too_few_arguments":
+    case TooFewArguments{}:
       Some{shown(meta, "function_name") ++ "() has too few arguments (given " ++ shown(meta, "actual") ++ ", expected " ++ shown(meta, "expected") ++ ")"}
-    case "wrong_number_of_arguments":
+    case WrongNumberOfArguments{}:
       Some{shown(meta, "function_name") ++ "() has the wrong number of arguments (given " ++ shown(meta, "actual") ++ ", expected " ++ shown(meta, "expected") ++ ")"}
     case reason:
       None{}
+
+def parse_message(reason: String, meta: Core.Value) -> Maybe<&2, String>:
+  parse_message_code(reason_code(reason), meta)
+
+def tokenizer_message(reason: String, meta: Core.Value) -> Maybe<&2, String>:
+  tokenizer_message_code(reason_code(reason), meta)
+
+def argument_message(reason: String, meta: Core.Value) -> Maybe<&2, String>:
+  argument_message_code(reason_code(reason), meta)
 
 def completed(message: Maybe<&2, String>, class_name: String, base: String, reason: Core.Value, meta: Core.Value) -> Types.Description<Core.Value>:
   match message:

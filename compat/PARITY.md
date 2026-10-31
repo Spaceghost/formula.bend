@@ -49,7 +49,7 @@ The unchanged upstream suite passes 713 examples with zero failures and 96.82%
 line coverage in the Ruby reference environment. `reference-summary.json` and
 `upstream-spec-catalog.json` record that run. These results describe Ruby only.
 
-The Lua-driven corpus has 2607 cases matched against Ruby values, parse
+The Lua-driven corpus has 2647 cases matched against Ruby values, parse
 error classification, or exception-factory descriptions. It covers truthiness, strings/null, comparisons, selected
 numeric-string coercions, and static operand rejection. It is a small subset of
 the upstream catalog. Native error classes/messages, all calculator methods,
@@ -90,7 +90,7 @@ lua tools/run-oracle.lua PROJECT UPSTREAM GEMS STORAGE RUNROOT OUTPUT
 The probe catches Dentaku errors and records their class; unexpected Ruby failures
 abort without replacing the output. Compare the result before updating committed
 goldens. Parser snapshots currently preserve parse-error classification, while
-full runtime error-class/message parity remains unfinished. The 2607-case value and dependency
+full runtime error-class/message parity remains unfinished. The 2647-case value and dependency
 corpus passes on JavaScript; the 951-case checkpoint passed native CPU with one
 and eight threads. This is correctness verification,
 not the requested performance shootout.
@@ -546,7 +546,7 @@ non-symbol reasons. Invalid reasons produce native ArgumentError descriptions;
 Dentaku::ArgumentError and Dentaku::ZeroDivisionError retain their respective
 Ruby standard-library relationships and the shared Dentaku error relationship.
 
-Ninety-one differential cases compare complete snapshots with the pinned Ruby
+131 differential cases compare complete snapshots with the pinned Ruby
 factories. They cover UnboundVariableError, MathDomainError, NodeError,
 ParseError, TokenizerError, ArgumentError, ZeroDivisionError and BaseError.
 NodeError uses Ruby's Array conversion for the supported values, including nil
@@ -555,7 +555,7 @@ Array joining. Explicit nil message replacement returns the class name, while
 text replacements preserve the payload. Assignment and replacement return new
 Bend descriptions. Four universal laws preserve message replacement,
 attributes, metadata, and assignment behavior, bringing the proof book to 52.
-The complete JavaScript corpus now has 2,607 cases and the source scenario map
+The complete JavaScript corpus now has 2,647 cases and the source scenario map
 has 134 correspondences; the Ruby reference still has 713 examples.
 
 This is factory parity for supported typed values, not complete exception
@@ -566,3 +566,12 @@ remain unsupported. Those limits leave upstream exception examples unported.
 The new operation is available in both generated and runtime-loaded corpus
 checkers; it is a test adapter, not additional formula syntax. Native and GPU
 checkpoints remain tied to their recorded source revision and case count.
+
+Reason names are looked up once into a shared enum; each factory formats only
+its own reason group. Forty additional Ruby checks reject every valid reason
+passed to either of the other two factories. This preserves the separate
+whitelists without nested character-pattern dispatch. The runtime checker C
+shrinks from 8,089,118 to 6,758,889 bytes (16.4%). This is generated-code size,
+not a runtime timing result. All 131 factory cases pass both Bend versions;
+all 2,647 cases and seven scale cases pass Bun and native CPU at `-O3` with
+one and eight threads. Both transports reject all 14 malformed inputs.
