@@ -691,3 +691,10 @@ preserving the reference's lazy message branch.
 The 51 added Ruby-oracle checks cover these constructor paths and their complete
 snapshots. String and Symbol successor enumeration, Range hash keys, Float
 endpoints and arbitrary Ruby object iteration remain unfinished.
+
+The exact-block checkpoint at `b1fe795` passes 5,797 cases and seven scale checks
+on Bun and native CPU with one and eight threads at `-O3`, including 27 malformed
+input rejections. Its 66 laws pass Lean-backed verification. The 77 new constructor
+and block-boundary cases pass static replay on Bend 2.0.39; the 26 block-boundary
+cases also pass Bend 2.0.16. Full static replay and Range-source GPU checks remain
+pending. Source and artifact hashes are in `backend-verification.json`.

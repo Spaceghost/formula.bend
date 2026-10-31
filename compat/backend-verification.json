@@ -1,4 +1,22 @@
 {
+  "range_exact_blocks_checkpoint": {
+    "source_commit": "b1fe7956175b94d6440d0004034167787be21bf8",
+    "scope": "Range descriptors and exact integer-start enumeration in exception constructors; String/Symbol successor enumeration, Range hash keys and Float endpoints incomplete",
+    "formula_and_api_cases": 5797, "scale_cases": 7, "malformed_input_cases": 27,
+    "laws": 66, "concrete_fixtures": 175, "source_scenario_mappings": 138,
+    "javascript": {"status":"passed_file_input_runtime", "bend_version":"2.0.39", "runtime":"Bun 1.3.1", "runtime_js_sha256":"06be7a1ddc7840957381d87e798d2f668d25cb8251cbe6de793f3c6cc5f11a37"},
+    "kernel": {"status":"passed", "bend_version":"2.0.39", "lean_version":"4.34.0"},
+    "static_replay": {"status":"partial", "new_constructor_cases_on_bend_2_0_39":77, "block_boundary_cases_on_bend_2_0_16":26, "full_combined_replay":"pending"},
+    "native_cpu": {
+      "status":"passed", "compiler":"Ubuntu clang 19.1.1", "optimization":"-O3", "thread_counts":[1,8],
+      "generated_c_bytes":6954264,
+      "generated_c_sha256":"d7f410e9da3be728b64406de96f4e9067abac44badd361020451940ec33e6f84",
+      "artifact_sha256":"aadd19c9ed8b0b4aaa5e2b869d9cb32191e6e1f8e6711135e4c4b64361e6a245",
+      "input_sha256":"ac849580310421f312aa9783fef45f1fc90cc5ae80a54a183435ec849ee29a20",
+      "output_sha256":"8a3a5b329a7d5465aac6efa415e6d2b3802e90281d98b32ad8a3d304520eb60b"
+    },
+    "cuda_status":"unverified for Range source", "metal_status":"unverified"
+  },
   "integer_fixture_checkpoint": {
     "fixture_source_commit": "dd4c68bfc01a09060dc8040d60f14568047db9ae",
     "engine_source_commit": "c22a813d86f5c616e9eaa76cb7b6d68f7e13b0dc",
@@ -696,3 +714,4 @@
     ]
   }
 }
+1

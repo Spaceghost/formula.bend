@@ -142,7 +142,13 @@ Exception factories preserve reasons, metadata, constructor attributes, message
 overrides and assignment values. Their 131 differential cases cover every
 factory reason and shared/stdlib error relationships. The Bend API uses
 immutable descriptions. Evaluator errors still need integration with those
-descriptions; Float/Range metadata is not yet supported.
+descriptions; Float metadata is not yet supported.
+
+Range values retain inclusive/exclusive endpoints, Ruby rendering, truthiness,
+comparisons and open-ended arity metadata. Integer-start ranges enumerate values
+for exception constructor arguments using exact decimal blocks; endless and
+non-iterable ranges preserve native conversion errors. String/Symbol successor
+enumeration, Range hash keys and Float endpoints remain incomplete.
 
 Named class and module values preserve their canonical names, kind and ancestor
 names. They support identity, subtype comparisons, truthiness, hash keys and
