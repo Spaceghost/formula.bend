@@ -559,3 +559,9 @@ def Laws.percentage_integer_result_is_float():
 
 def Laws.percentage_negative_zero_keeps_sign():
   {==}
+
+def Laws.calculator_native_error_aborts_both_modes(state, class_name, message, strict):
+  {==}
+
+def Laws.calculator_permissive_keeps_native_error(state, class_name, message):
+  {==}

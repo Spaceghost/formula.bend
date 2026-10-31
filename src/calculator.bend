@@ -203,6 +203,8 @@ def evaluation_data(+data: Core.Value, strict: Bool) -> Core.Value:
 
 def permissive_value(value: Core.Value, state: State) -> Evaluation:
   match value:
+    case Core.Raised{class_name, message}:
+      Rejected{state, "error:" ++ class_name, message}
     case Core.Failure{+message}:
       Rejected{state, Core.failure_snapshot(message), message}
     case value:
@@ -210,6 +212,8 @@ def permissive_value(value: Core.Value, state: State) -> Evaluation:
 
 def value_result(value: Core.Value, state: State, strict: Bool) -> Evaluation:
   match value strict:
+    case Core.Raised{class_name, message} strict:
+      Rejected{state, "error:" ++ class_name, message}
     case Core.Failure{+message} True{}:
       Rejected{state, Core.failure_snapshot(message), message}
     case Core.Failure{message} False{}:

@@ -581,3 +581,16 @@ law percentage_integer_result_is_float:
 
 law percentage_negative_zero_keeps_sign:
   {Core.percentage(Core.float_words(2147483648, 0)) == Core.float_words(2147483648, 0) : Core.Value}
+
+law calculator_native_error_aborts_both_modes:
+  for state: Calculator.State
+  for +class_name: String
+  for +message: String
+  for strict: Bool
+  {Calculator.value_result(Core.Raised{class_name, message}, state, strict) == Calculator.Rejected{state, "error:" ++ class_name, message} : Calculator.Evaluation}
+
+law calculator_permissive_keeps_native_error:
+  for state: Calculator.State
+  for +class_name: String
+  for +message: String
+  {Calculator.permissive_value(Core.Raised{class_name, message}, state) == Calculator.Rejected{state, "error:" ++ class_name, message} : Calculator.Evaluation}

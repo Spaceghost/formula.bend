@@ -95,3 +95,12 @@ peaked near 30 GiB; a separate 16 GiB diagnostic hit its compiler cap. These are
 checker resource results, not formula runtime memory measurements. The newer 128
 transfer/storage sessions are verified on 2.0.39. See [numeric limits](numeric-limits.md)
 for the separate Ruby huge-shift allocation exception gap.
+
+Native evaluator errors now abort scalar and bulk Calculator evaluation in both
+strict and permissive modes. Array/hash evaluation stops at the failing element;
+subsequent formulas do not populate the AST cache. Temporary bindings are restored
+and later session commands can continue. The 60 native-error sessions cover
+RangeError, ArgumentError and FloatDomainError with caching on/off, nested bulk
+expressions and both evaluation modes. Ordinary Dentaku errors keep their
+permissive null behavior. Native errors arising during dependency guard analysis
+still require separate parity work.

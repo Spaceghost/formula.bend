@@ -2134,8 +2134,51 @@
       "status": "passed all 368 probes",
       "log": "compat/verification/percentage-static.log"
     },
-    "native_cpu": "pending for percentage checkpoint",
+    "native_cpu": {
+      "source_commit": "ce29743ee8d71f5c0791a0536bc59564bd137f0c",
+      "status": "passed all 11231 formula/API cases, 283 separate stored probes, 7 scale and 36 malformed checks",
+      "threads": [
+        1,
+        8
+      ],
+      "compiler": "clang 19.1.1 -O3",
+      "peak_bytes": 6097584128,
+      "swap_peak_bytes": 0,
+      "log": "compat/verification/percentage-121-native.log",
+      "source_manifest": "compat/verification/percentage-121-native-source.sha256",
+      "formula_c_sha256": "75ce7a147dc9abfa1c8cf5b47df342e5c2e7c1fd9ccdf05cee3e223e6a0b8985",
+      "formula_binary_sha256": "31daf4717a92e04e47deb90e7fe3f6a993619098a78501418f208146a479e014",
+      "stored_c_sha256": "26ee7a6578f70e5adcd488a890738e608911d0e4f43246573620a8c311fecdad",
+      "stored_binary_sha256": "dd5ee0c61824cfa3f50a934e263076f0fb1ea5e7b4632225a8cc980d8d7ffac0"
+    },
     "cuda": "unverified for percentage checkpoint",
+    "metal": "unverified",
+    "performance": "not measured"
+  },
+  "calculator_native_errors_checkpoint": {
+    "source_parent": "ce29743",
+    "scope": "Native failures abort bulk evaluation in strict/permissive Calculator modes; dependency guard native errors and full parity remain incomplete",
+    "formula_and_api_cases": 11291,
+    "new_native_error_sessions": 60,
+    "failures_before": 48,
+    "failures_after": 0,
+    "stored_probes": 283,
+    "laws": 123,
+    "kernel": "passed Lean-backed Bend 2.0.39",
+    "source_manifest": "compat/verification/calculator-native-errors-source.sha256",
+    "javascript": {
+      "status": "passed full corpus, 7 scale and 36 malformed checks",
+      "runtime": "Bun 1.3.1",
+      "js_sha256": "3dda940bab7e4e9ce5eb93e1f58bc660f8d6ecced051e278f184a12c12d8027c",
+      "input_sha256": "d930d26a8b257bfb0eb29a3b950dd9cacbb22d1a7dea1a98c79b21956562a5c7",
+      "output_sha256": "6f600d4582efde89944d380a76297b4b0e75a1ca4cea611f8f57c26f7c5bdce1"
+    },
+    "static_new_sessions": {
+      "status": "passed all 60",
+      "log": "compat/verification/calculator-native-error-static.log"
+    },
+    "native_cpu": "pending for new Calculator error propagation",
+    "cuda": "unverified for this evaluator source",
     "metal": "unverified",
     "performance": "not measured"
   }

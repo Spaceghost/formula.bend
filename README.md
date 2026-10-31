@@ -128,7 +128,7 @@ The eight address runtime cases pass on both JavaScript and native CPU.
 
 Parity is measured against the pinned Ruby source and its complete 713-example
 suite. The Ruby reference passes all examples; that is not a claim that Bend does.
-A separate 11231-case corpus covers selected values,
+A separate 11291-case corpus covers selected values,
 dependencies, parse-error classification, and exception factories.
 `make parity-check` generates the fixtures using Lua.
 Use `LUA=/path/to/lua` if Lua is not on PATH.
@@ -142,10 +142,11 @@ gate. No performance comparison is claimed yet.
 
 The corpus supports exact decimal, integer, raw-word Float, string, Boolean, null, nested array,
 ordered hash, named class/module and Range bindings, plus case-sensitive contexts.
-All 11,231 cases pass Bun, along with seven scale checks and 36 malformed-input
-checks. All 121 laws pass Lean-backed verification on Bend 2.0.39. There are 160
-upstream scenario mappings and 175 concrete regression fixtures. The preceding 10,863-case checkpoint passed native CPU
-with one and eight threads; the 368 new percentage probes await native replay.
+All 11,291 cases pass Bun, along with seven scale checks and 36 malformed-input
+checks. All 123 laws pass Lean-backed verification on Bend 2.0.39. There are 160
+upstream scenario mappings and 175 concrete regression fixtures. The preceding 11,231-case checkpoint and all 283 stored
+probes passed native CPU with one and eight threads; the 60 new Calculator
+native-error sessions await native replay.
 GPU replay of this evaluator source remains pending.
 
 An additional 283 probes cover stored AST values, formula-aware dependencies and
