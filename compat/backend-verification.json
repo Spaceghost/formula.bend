@@ -1,4 +1,24 @@
 {
+  "calculator_binary64_integration_checkpoint": {
+    "source_parent_commits":["3b002a7","bce55b25876130316b1e53154c0b085c6cb0b927"],
+    "source_manifest":"compat/verification/binary64-calculator-integrated-source.sha256",
+    "source_manifest_sha256":"e1c4648e8aa2476d5e6db2c60c9abd57386598587f80694665b4521e5cc16644",
+    "scope":"Calculator state/cache source combined with the independent binary64 arithmetic layer; Float evaluator integration and full Dentaku parity remain incomplete",
+    "formula_and_api_cases":8537, "separate_binary64_probes":4595, "laws":85,
+    "concrete_fixtures":175, "source_scenario_mappings":153, "scale_cases":7, "malformed_input_cases":27,
+    "kernel":{"status":"passed", "bend_version":"2.0.39", "lean_version":"4.34.0"},
+    "formula_runtime_replay":{
+      "status":"passed", "javascript":"Bun 1.3.1", "native_cpu_threads":[1,8],
+      "artifact_reuse":"Calculator runtime source manifest entries match exactly except LAWS.bend and PROOF.bend, which gain the independent binary64 laws. The binary64 module is not in the formula runtime dependency graph. Copied artifacts were hash-checked and the full 8537 input, scale input and malformed cases replayed.",
+      "runtime_js_sha256":"d59f73cab5ecb1b28ac550adb2b58172a46cd90873875187231117cce001052e",
+      "native_artifact_sha256":"25862c2427468dcee4b93b09bf4f62e95dbd3ea37a32e81f2854c0c8757dbbfe",
+      "input_sha256":"c62cbf4be7fbf899a00202383b47feebd357cec568c696da53f09142432553ad",
+      "output_sha256":"0f42aba958bd651e442046ecb8db8358bbabc404eebc6effa42117be64aee93e"
+    },
+    "binary64_verification":"Runtime source unchanged from binary64_arithmetic_checkpoint: all 4595 pass both JS compilers, native CPU threads1/8, and required default-profile CUDA",
+    "full_combined_static_replay":"pending; completed 8486-case Bend2.0.39 source checkpoint and selected Calculator sessions remain separately scoped",
+    "formula_cuda":"unverified for current source", "metal":"unverified", "performance":"not measured"
+  },
   "binary64_arithmetic_checkpoint": {
     "source_commit":"ab757f87e8b67521c70af39f64a9930dcc1d2f56",
     "scope":"Standalone binary64 arithmetic foundation; Float evaluator bindings, formatting, mixed coercion, result guards and other Float operations remain incomplete",
@@ -32,6 +52,25 @@
     "input_sha256":"d54dcc2ea38ba3662995e56ebc74465b49e3209dfbdc7ccb5b981d6dad4e5e4b",
     "output_sha256":"9eb1e29fc5fa3d7cdf1ea816e4d5ffda938e6afc5d4d5dc6755f5176b752e01a",
     "metal_status":"unverified", "performance_status":"not benchmarked"
+  },
+  "calculator_integration_checkpoint": {
+    "source_parent_commits":["c852ba48c1241a72f91ff3eedc9f397d4981ba43","90d749ed8ebfd173a6369cb289c8288352aaef21"],
+    "source_manifest":"compat/verification/calculator-integrated-source.sha256",
+    "source_manifest_sha256":"5a60d85a6435b1e1b337ecffcdd7b0b1ff3d1a3d30a26289ee34ce418b12d100",
+    "scope":"Persistent Calculator memory and AST cache, with prior named-reference, Range, token and matcher cases preserved; full Calculator and spreadsheet parity incomplete",
+    "formula_and_api_cases":8537,"new_calculator_sessions":51,
+    "laws":81,"concrete_fixtures":175,"source_scenario_mappings":153,
+    "scale_cases":7,"malformed_input_cases":27,
+    "javascript":{"status":"passed","bend_version":"2.0.39","runtime":"Bun 1.3.1","runtime_js_sha256":"d59f73cab5ecb1b28ac550adb2b58172a46cd90873875187231117cce001052e"},
+    "native_cpu":{"status":"passed","compiler":"Ubuntu clang 19.1.1","optimization":"-O3","thread_counts":[1,8],"compiled_with_cuda":false,
+      "generated_c_bytes":8888486,"generated_c_sha256":"f32bf1a7d349790b6e3e73246c7584320179fb1dbfd8687394e32fcd0c77ffd6",
+      "artifact_sha256":"25862c2427468dcee4b93b09bf4f62e95dbd3ea37a32e81f2854c0c8757dbbfe"},
+    "input_sha256":"c62cbf4be7fbf899a00202383b47feebd357cec568c696da53f09142432553ad",
+    "output_sha256":"0f42aba958bd651e442046ecb8db8358bbabc404eebc6effa42117be64aee93e",
+    "kernel":{"status":"passed","bend_version":"2.0.39","lean_version":"4.34.0"},
+    "static_replay":{"new51sessions_bend2.0.39":"passed at c852ba4","fresh_full8537":"not run",
+      "legacy2.0.16":{"verified_sessions":8,"total_sessions":51,"remaining_sessions":43,"status":"queued on frozen c852ba4 source","observed8session_checker_peak_gib":28.1,"single_session_probe":"exceeded16GiBcompilerCap"}},
+    "cuda":"unverified for integrated source","metal":"unverified","performance":"not measured"
   },
   "integrated_range_node_checkpoint": {
     "runtime_source_commit":"16281666a0cfebd784668d151d422bcc2f1e42b3",
@@ -267,6 +306,21 @@
     "cuda_scope": "No new integer-import GPU result claimed"
   },
   "cuda_formula_checkpoints": [
+    {
+      "status":"passed","scope":"Frozen earlier2790token API cases; excludes newer matcher, named-reference, Range and Calculator changes; no performance claim",
+      "engine_source_commit":"ef2cb1da57bc4a5c358800dedfabf91a8a19dada",
+      "differential_cases":2790,"scale_cases":7,"host":"fedora","gpu":"NVIDIA Quadro P4000","compute_capability":"6.1",
+      "driver_version":"580.178.04","bend_version":"2.0.39","host_compiler":"Ubuntu clang 19.1.1","host_optimization":"-O3",
+      "cuda_bundle":"12.9.1","nvrtc_version":"12.9.86","profile":"--Ofast-compile=max","fmad":false,"required_gpu_heap":"1GB",
+      "cpu_thread_counts_checked":[1,8],"default_profile_status":"unverified",
+      "generated_c_sha256":"535caa0a8be13d70f4a4d7e321858caa5d9bf3716883100cbd4e511005748268",
+      "artifact_sha256":"67d166ff18c320b365d725567b156761220994f79cb3fd13b13d41b12a831a83",
+      "gpu_artifact_sha256":"b1bfe6d634bbb2397509dc7eaa149252f73145b2919c46a3023dbff29f9ade3d",
+      "main_input_sha256":"80c9a5d97fa694b95c221676216e5185590febe3971831facfe9a3c97a1fa1c1",
+      "main_output_sha256":"27ec6c86fae953c8b9f3149fb2f90cae1a07cd8d19567d886c517680375f0b75",
+      "scale_input_sha256":"d05a7b3c1663780f7edb896a7c665a78e44925a567c6effbf1142e8278803603",
+      "scale_output_sha256":"1622d34d26cdfb85586752ab86ab4d71067ac7d4bba1ccdfbd485d314c8bc5e2"
+    },
     {
       "status": "passed",
       "scope": "2677 pre-token cases with cached c22a813 runtime; excludes token descriptors; no performance result",

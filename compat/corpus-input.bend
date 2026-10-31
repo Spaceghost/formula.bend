@@ -31,6 +31,7 @@ def operation(name: String) -> Maybe<&2, Gpu.Operation>:
     Named{"error_factory", Gpu.DescribeError{}}
     Named{"token", Gpu.InspectToken{}}
     Named{"token_matcher", Gpu.InspectMatcher{}}
+    Named{"calculator_session", Gpu.RunCalculator{}}
   ], name)
 
 # Wire pairs retain the Ruby insertion order; bindings put the last pair first.

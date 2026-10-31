@@ -1,4 +1,5 @@
 import Base
+import ./calculator_api.bend as CalculatorApi
 import ./token_matcher_api.bend as MatcherApi
 import ./token_api.bend as TokenApi
 import ../src/core.bend as Core
@@ -23,6 +24,7 @@ type Operation is Data:
   DescribeError{}
   InspectToken{}
   InspectMatcher{}
+  RunCalculator{}
 
 type Case is Data:
   Check{id: String, formula: String, operation: Operation, context: List<&2, Core.Binding>, sensitive: Bool, json: Bool}
@@ -61,6 +63,8 @@ def execute_operation(operation: Operation, formula: String, context: List<&2, C
       Resolver.order_snapshot(Core.lookup(context, "input", False{}), sensitive)
     case ResolveCycles{}:
       Resolver.cycles_snapshot(Core.lookup(context, "input", False{}), sensitive)
+    case RunCalculator{}:
+      CalculatorApi.snapshot(Core.lookup(context, "input", False{}))
     case InspectMatcher{}:
       MatcherApi.snapshot(formula, Core.lookup(context, "input", False{}))
     case InspectToken{}:

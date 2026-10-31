@@ -141,6 +141,14 @@ if program then program:write('import Base\nimport ../src/core.bend as Core\nimp
 if program and gpu then program:write('import ../compat/gpu-corpus.bend as Gpu\n\n') end
 if program then
   for _, case in ipairs(cases) do
+    if (case.operation or ''):match('calculator_session$') then
+      program:write('import ../compat/calculator_api.bend as CalculatorApi\n\n')
+      break
+    end
+  end
+end
+if program then
+  for _, case in ipairs(cases) do
     if (case.operation or ''):match('token_matcher$') then
       program:write('import ../compat/token_matcher_api.bend as MatcherApi\n\n')
       break
@@ -177,7 +185,7 @@ local gpu_inputs = {}
 local gpu_operations = {
   evaluate='Evaluate', permissive='Permissive', identifiers='Identifiers', dependencies='Dependencies',
   class='Class', type='StaticType', message='Message', coerce='Coerce', coerce_class='CoerceClass',
-  coerce_message='CoerceMessage', resolve_order='ResolveOrder', resolve_cycles='ResolveCycles', error_factory='DescribeError', token='InspectToken', token_matcher='InspectMatcher',
+  coerce_message='CoerceMessage', resolve_order='ResolveOrder', resolve_cycles='ResolveCycles', error_factory='DescribeError', token='InspectToken', token_matcher='InspectMatcher', calculator_session='RunCalculator',
 }
 for _, case in ipairs(cases) do
   assert(not ids[case.id], 'duplicate id: ' .. case.id)
@@ -190,7 +198,9 @@ for _, case in ipairs(cases) do
   local context, encoded_context = context_values(case.context, case.symbol_context)
   local sensitive = case.sensitive and 'True{}' or 'False{}'
   local call
-  if operation == 'token_matcher' then
+  if operation == 'calculator_session' then
+    call = 'CalculatorApi.snapshot(Core.lookup(' .. context .. ', "input", False{}))'
+  elseif operation == 'token_matcher' then
     call = 'MatcherApi.snapshot(' .. bend_string(case.formula) .. ', Core.lookup(' .. context .. ', "input", False{}))'
   elseif operation == 'token' then
     call = 'TokenApi.snapshot(' .. bend_string(case.formula) .. ', Core.lookup(' .. context .. ', "input", False{}))'

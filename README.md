@@ -26,6 +26,13 @@ Functions are case-insensitive. Malformed expressions return explicit errors.
 Bindings support case-insensitive matching by default, an explicit case-sensitive
 mode, and first-match precedence for transient contexts.
 
+Persistent Calculator state supports normalized memory, optional nested-data
+flattening, temporary contexts, bulk array/hash evaluation and a typed AST
+cache. Cache keys preserve scalar input types; prewarmed entries are read even
+when new writes are disabled. See [the Calculator contract](docs/calculator-api.md).
+Stored formulas, aliases, custom functions, error-handler blocks and full
+Calculator parity remain unfinished.
+
 The standalone address layer parses and renders A1 and R1C1, retains independent
 row/column anchors, and supports copying in either direction with bounds checks.
 
@@ -111,7 +118,7 @@ The eight address runtime cases pass on both JavaScript and native CPU.
 
 Parity is measured against the pinned Ruby source and its complete 713-example
 suite. The Ruby reference passes all examples; that is not a claim that Bend does.
-A separate 8486-case corpus covers selected values,
+A separate 8537-case corpus covers selected values,
 dependencies, parse-error classification, and exception factories.
 `make parity-check` generates the fixtures using Lua.
 Use `LUA=/path/to/lua` if Lua is not on PATH.
@@ -125,13 +132,16 @@ gate. No performance comparison is claimed yet.
 
 The corpus supports exact decimal, integer, string, Boolean, null, nested array,
 ordered hash, named class/module and Range bindings, plus case-sensitive contexts.
-All 8,486 cases pass Bun and native CPU with one and eight threads at `-O3`.
+All 8,537 cases pass Bun and native CPU with one and eight threads at `-O3`.
 Seven scale checks over 1,025-item collections and 27 malformed-input checks
-also pass. The 73 laws at that formula/API checkpoint pass Lean-backed verification on Bend 2.0.39. There are
+also pass. The 81 laws at that Calculator checkpoint pass Lean-backed verification on Bend 2.0.39. There are
 153 explicit upstream scenario mappings and 175 concrete regression fixtures.
 
-The full 8,486-case static replay and 175 concrete fixtures pass Bend 2.0.39.
-The full Bend 2.0.16 replay remains pending. Historical
+The preceding 8,486-case source checkpoint passes full static replay and 175
+concrete fixtures on Bend 2.0.39. All 51 added Calculator sessions pass static
+replay on that version. The fresh merged 8,537-case static replay has not run.
+Legacy Bend 2.0.16 Calculator verification is partial: eight sessions passed;
+remaining work is queued with memory guards. Historical
 checks, source revisions and artifact hashes are recorded separately in
 `compat/backend-verification.json`. Current-source CUDA and Metal remain
 unverified; no performance result is claimed.
@@ -179,7 +189,7 @@ modes remain pending.
 A separate [binary64 arithmetic layer](docs/binary64.md) passes 4,595 native Ruby
 Float probes on both Bend versions' JavaScript output, native CPU with one and
 eight threads, and required CUDA execution on the P4000 with default NVRTC options.
-Its four new laws bring the project total to 77 verified laws. These probes are
+Its four new laws combine with the Calculator laws for 85 verified project laws. These probes are
 separate from the 8,486 formula/API cases. Float bindings, rendering, mixed
 numeric coercions and evaluator error integration remain pending.
 

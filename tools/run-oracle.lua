@@ -111,6 +111,46 @@ def matcher_token_snapshot(token)
    'operator'=>token.operator?,'grouping'=>token.grouping?,
    'open'=>token.open?,'close'=>token.close?}
 end
+def calculator_normalize(value)
+  case value
+  when Dentaku::AST::Node then 'ast'
+  when Array then value.map { |item| calculator_normalize(item) }
+  when Hash then value.transform_values { |item| calculator_normalize(item) }
+  else value
+  end
+end
+def calculator_session(input)
+  calculator = Dentaku::Calculator.new(**input.fetch(:options, {}))
+  input.fetch(:commands).map do |command|
+    begin
+      value = case command.fetch(:op)
+      when 'store' then calculator.store(command.fetch(:values))
+      when 'store_pair' then calculator.store(command.fetch(:key), command.fetch(:value))
+      when 'clear' then calculator.clear
+      when 'memory' then calculator.memory
+      when 'empty' then calculator.empty?
+      when 'cache_keys' then calculator.ast_cache.keys
+      when 'cache_enabled' then calculator.cache_ast?
+      when 'ast' then calculator.ast(command.fetch(:expression))
+      when 'evaluate' then calculator.evaluate(command.fetch(:expression), command.fetch(:data, {}))
+      when 'evaluate!' then calculator.evaluate!(command.fetch(:expression), command.fetch(:data, {}))
+      when 'clear_cache' then calculator.clear_cache(command.fetch(:key, :all))
+      when 'warm_cache'
+        calculator.load_cache(command.fetch(:entries).transform_values { |source| calculator.ast(source) })
+      when 'disable_cache_status' then calculator.disable_cache { |c| c.cache_ast? }
+      when 'disable_cache_eval'
+        calculator.disable_cache { |c| c.evaluate!(command.fetch(:expression), command.fetch(:data, {})) }
+      else raise ::ArgumentError, 'Unknown calculator operation'
+      end
+      value = 'self' if value.equal?(calculator)
+      rendered = snapshot_value(calculator_normalize(value))
+    rescue StandardError => error
+      rendered = "error:#{error.class.name}"
+    end
+    {'result'=>rendered, 'memory'=>calculator.memory.dup, 'cache'=>calculator.ast_cache.keys,
+     'empty'=>calculator.empty?, 'cache_enabled'=>!!calculator.cache_ast?}
+  end
+end
 File.foreach(ENV.fetch('FORMULA_ORACLE_CORPUS')) do |line|
   id, source, operation, encoded_context, sensitive, source_format = line.chomp.split("\t", 6)
   source = JSON.parse(source) if source_format == 'json'
@@ -126,6 +166,7 @@ File.foreach(ENV.fetch('FORMULA_ORACLE_CORPUS')) do |line|
     end
     calculator = Dentaku::Calculator.new(case_sensitive: sensitive == 'true')
     value = case operation
+    when 'calculator_session' then calculator_session(context.fetch('input'))
     when 'token_matcher'
       input = context.fetch('input')
       matcher = matcher_construct(input[:matcher])

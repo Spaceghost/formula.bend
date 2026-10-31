@@ -49,7 +49,7 @@ The unchanged upstream suite passes 713 examples with zero failures and 96.82%
 line coverage in the Ruby reference environment. `reference-summary.json` and
 `upstream-spec-catalog.json` record that run. These results describe Ruby only.
 
-The Lua-driven corpus has 8486 reference cases for Ruby values, parse
+The Lua-driven corpus has 8537 reference cases for Ruby values, parse
 error classification, or exception-factory descriptions. It covers truthiness, strings/null, comparisons, selected
 numeric-string coercions, and static operand rejection. It is a small subset of
 the upstream catalog. Native error classes/messages, all calculator methods,
@@ -809,3 +809,45 @@ pass Lean-backed verification on Bend 2.0.39, and both Bend versions pass the te
 checker. These probes are not counted as Dentaku formula cases. Float evaluator
 integration, formatting, mixed coercion and broader Math behavior remain open.
 See `../docs/binary64.md` and the separately scoped backend checkpoint.
+
+## Calculator state and AST cache integration
+
+The integrated runtime now passes 8,537 reference cases on Bun and native CPU
+with one and eight threads at -O3, seven scale cases and 27 malformed inputs.
+All 81 laws pass Lean-backed verification on Bend 2.0.39. The merge preserves
+every prior case and adds 51 multi-step Calculator sessions; explicit upstream
+scenario mappings remain 153.
+
+The Calculator implementation retains normalized memory, intermediate nested
+hashes, array values and insertion order. Evaluation contexts are temporary
+after success or failure. AST caching supports prewarming, exact-key/all
+invalidation, bulk expression evaluation and write suppression with restoration
+after errors. Cache keys retain supported scalar input types.
+
+All 51 sessions passed static replay on Bend 2.0.39 before the integration.
+Eight sessions passed the legacy 2.0.16 checker in a batch peaking near 30 GiB;
+a one-session diagnostic exceeded its 16 GiB compiler cap. Remaining legacy
+work is queued on frozen source after the earlier matcher replay and a memory
+availability check. This is not a full legacy or fresh merged static pass.
+
+Stored formulas, custom functions, aliases, error-handler callbacks, regex cache
+invalidation, cross-mode AST transfer and mutable object identity remain open.
+The huge-shift allocation exception gap is recorded in
+[the numeric limits](../docs/numeric-limits.md). See calculator_integration_checkpoint
+for parent revisions, a source manifest and runtime artifact hashes.
+
+A separate required-CUDA checkpoint now passes 2,790 earlier token API cases
+and seven scale cases on the P4000 with NVRTC --Ofast-compile=max and fmad=false.
+It excludes the newer matcher, class, Range and Calculator changes. It is a
+fast-compilation profile correctness result, not default-profile performance.
+
+## Calculator and binary64 integration
+
+The combined source passes all 85 laws through the Lean-backed Bend 2.0.39 gate.
+The Calculator runtime sources match their verified manifest exactly; only the
+law/proof files gain independent binary64 contracts. The full 8,537-case input,
+seven scale cases and 27 malformed-input checks were replayed on hash-checked
+copies of the same Bun and native CPU artifacts, with one and eight threads.
+The standalone 4,595 binary64 probes keep their separate JS/CPU/CUDA evidence;
+this does not add Float support to the evaluator or a GPU pass for all formulas.
+The complete combined static replay and broader compatibility work remain open.
