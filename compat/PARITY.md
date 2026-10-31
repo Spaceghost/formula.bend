@@ -49,7 +49,7 @@ The unchanged upstream suite passes 713 examples with zero failures and 96.82%
 line coverage in the Ruby reference environment. `reference-summary.json` and
 `upstream-spec-catalog.json` record that run. These results describe Ruby only.
 
-The Lua-driven corpus has 8477 reference cases for Ruby values, parse
+The Lua-driven corpus has 8486 reference cases for Ruby values, parse
 error classification, or exception-factory descriptions. It covers truthiness, strings/null, comparisons, selected
 numeric-string coercions, and static operand rejection. It is a small subset of
 the upstream catalog. Native error classes/messages, all calculator methods,
@@ -75,6 +75,17 @@ constructor probes: 7,951 total cases, seven scale checks and 23 malformed-input
 rejections pass Bun and native CPU with one and eight threads at `-O3`. All
 67 laws pass Lean-backed verification, and 150 source scenarios have explicit
 mappings. Combined static replay and current-source GPU checks remain pending.
+
+The Range integration runtime at `1628166` passes 8,477 cases, seven scale
+checks and 27 malformed-input rejections on Bun and native CPU with one and
+eight threads at `-O3`. All 73 laws pass Lean-backed verification. Nine further
+data-only probes port the assertions from both AST Node dependency examples;
+the complete 8,486-case input passes the same unchanged Bun/native artifacts.
+The Node probes also pass static replay on both Bend versions. There are 153
+source-scenario mappings. The Ruby reference uses Calculator#dependencies,
+which delegates to the parsed node with the supplied context for these cases.
+AST purity, memoization and the broader Calculator API remain incomplete.
+Combined full static replay and current-source GPU checks are still pending.
 
 ## Reference runner
 

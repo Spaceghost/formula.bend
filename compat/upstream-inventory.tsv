@@ -20,7 +20,7 @@ spec/ast/member_access_spec.rb	22	partial
 spec/ast/min_spec.rb	5	partial
 spec/ast/mul_spec.rb	7	partial
 spec/ast/negation_spec.rb	6	partial
-spec/ast/node_spec.rb	2	unassessed
+spec/ast/node_spec.rb	2	partial
 spec/ast/numeric_spec.rb	2	partial
 spec/ast/or_spec.rb	6	partial
 spec/ast/pluck_spec.rb	6	partial

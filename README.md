@@ -111,7 +111,7 @@ The eight address runtime cases pass on both JavaScript and native CPU.
 
 Parity is measured against the pinned Ruby source and its complete 713-example
 suite. The Ruby reference passes all examples; that is not a claim that Bend does.
-A separate 8477-case corpus covers selected values,
+A separate 8486-case corpus covers selected values,
 dependencies, parse-error classification, and exception factories.
 `make parity-check` generates the fixtures using Lua.
 Use `LUA=/path/to/lua` if Lua is not on PATH.
@@ -124,43 +124,30 @@ See [the parity checklist](compat/PARITY.md) for remaining rules and the shootou
 gate. No performance comparison is claimed yet.
 
 The corpus supports exact decimal, integer, string, Boolean, null, nested array,
-ordered hash, and named class/module bindings, plus case-sensitive contexts.
-MAP, FILTER, ALL, ANY, and REDUCE also have seven reference checks over
-1,025-item collections. The checker batches static replay to bound memory.
-The 7,951-case integration checkpoint and seven scale checks pass Bun and native CPU
-with one and eight threads at `-O3`. All 23 malformed inputs are rejected, and
-all 67 laws pass Lean-backed verification. Combined static replay on both Bend
-versions, current-source CUDA and Metal remain pending.
+ordered hash, named class/module and Range bindings, plus case-sensitive contexts.
+All 8,486 cases pass Bun and native CPU with one and eight threads at `-O3`.
+Seven scale checks over 1,025-item collections and 27 malformed-input checks
+also pass. All 73 laws pass Lean-backed verification on Bend 2.0.39. There are
+153 explicit upstream scenario mappings and 175 concrete regression fixtures.
 
-The 7,768-case integration checkpoint and seven scale checks pass Bun and native CPU
-with one and eight threads at `-O3`. All 23 malformed inputs are rejected.
-Its 66 laws pass Lean-backed verification, and the 175 concrete fixtures pass
-on Bend 2.0.39. Combined static replay on both Bend versions is still pending.
+Full combined static replay on Bend 2.0.16 and 2.0.39 remains pending. Historical
+checks, source revisions and artifact hashes are recorded separately in
+`compat/backend-verification.json`. Current-source CUDA and Metal remain
+unverified; no performance result is claimed.
 
-The named-reference checkpoint passes all 5,279 cases on JavaScript with Bend
-2.0.16 and 2.0.39, native CPU with one and eight threads at `-O3`, and the seven
-scale checks. Its 60 laws pass Lean-backed kernel verification; it also has 175
-concrete fixtures. Separately, the token-matcher checkpoint passes 5,166 cases,
-seven scale checks and 18 malformed-input checks on Bun and native CPU with one
-and eight threads. Its 61 laws pass the Lean-backed gate. The matcher static
-replay on both Bend versions remains pending. Source commits and checksums are
-recorded in `compat/backend-verification.json`.
+Typed token descriptors and matchers include counterparts of all 11 upstream
+TokenMatcher examples. Both AST Node dependency examples are represented by
+nine assertions, including guard pruning and empty input. These nine probes
+also pass static replay on both Bend versions. See [the matcher contract](docs/token-matcher.md)
+for immutable modifiers, Hash-key identity, compound inversion and negative
+stream offsets. These APIs still need integration with the parser's lexer and
+a token scanner; mutable aliases remain incomplete.
 
 The separate 5,326-string Ruby Integer profile checks fixture conversion rather
-than formula coverage. See [the matcher contract](docs/token-matcher.md) for
-immutable modifiers, Hash-key identity, compound inversion, and negative stream
-offsets. This API is not yet connected to the parser's lexer or a token scanner.
-
-A further 183 probes cover the parameterized function-name constructor and
-exact counterparts of all 11 upstream TokenMatcher examples. They pass both
-Bend versions. The combined 5,349-case runtime corpus passes Bun and native
-CPU with one and eight threads, along with seven scale cases and 18 malformed
-inputs. All 62 laws pass Lean-backed verification. There are now 147 explicit
-source-scenario mappings. Broader scanner integration and mutable aliasing
-remain incomplete; these results do not establish full Dentaku parity.
+than formula coverage.
 
 Exception factories preserve reasons, metadata, constructor attributes, message
-overrides and assignment values. Their 131 differential cases cover every
+overrides and assignment values. Their differential cases cover every
 factory reason and shared/stdlib error relationships. The Bend API uses
 immutable descriptions. Evaluator errors still need integration with those
 descriptions; Float metadata is not yet supported.

@@ -2,6 +2,10 @@
 -- COUNT's Float input is represented as exact decimal 2.3 in Bend; COUNT only
 -- inspects its length capability, so this adaptation does not alter the result.
 return {
+  ['spec/ast/node_spec.rb'] = {
+    {'returns list of dependencies', {'node_upstream_add_dependencies', 'node_upstream_comparison_dependencies', 'node_upstream_literal_dependencies', 'node_upstream_group_dependencies', 'node_upstream_guard_dependencies', 'node_upstream_true_dependencies', 'node_upstream_false_dependencies', 'node_upstream_empty_dependencies'}},
+    {'returns unique list of dependencies', 'node_upstream_unique_dependencies'},
+  },
   ['spec/token_matcher_spec.rb'] = {
     {'with single category matches token category', 'matcher_upstream_single_category'},
     {'with multiple categories matches any included token category', {'matcher_upstream_multiple_categories_1', 'matcher_upstream_multiple_categories_2', 'matcher_upstream_multiple_categories_3'}},
