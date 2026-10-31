@@ -1,3 +1,4 @@
+import ./src/calculator.bend as Calculator
 import ./src/token_matcher.bend as Matcher
 import Base
 import ./src/core.bend as Core
@@ -354,4 +355,34 @@ def Laws.matcher_plus_preserves_star_minimum(matcher):
     case Matcher.Rule{categories, values, children, predicate, inverted, anchored, minimum, repeated}:
       {==}
 def Laws.matcher_function_category(name):
+  {==}
+def Laws.calculator_clear_empty(state):
+  match state:
+    case Calculator.Calculator{memory, cache, sensitive, nested, cache_ast, disabled}:
+      {==}
+
+def Laws.calculator_clear_keeps_cache(state):
+  match state:
+    case Calculator.Calculator{memory, cache, sensitive, nested, cache_ast, disabled}:
+      {==}
+
+def Laws.calculator_disable_cache(state):
+  match state:
+    case Calculator.Calculator{memory, cache, sensitive, nested, True{}, disabled}:
+      {==}
+    case Calculator.Calculator{memory, cache, sensitive, nested, False{}, disabled}:
+      {==}
+
+def Laws.calculator_false_binding():
+  {==}
+
+def Laws.calculator_null_binding():
+  {==}
+
+def Laws.calculator_temporary_context():
+  {==}
+
+def Laws.calculator_failed_context():
+  {==}
+def Laws.calculator_open_index_eof():
   {==}

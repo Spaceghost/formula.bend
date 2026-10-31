@@ -1,3 +1,4 @@
+import ./src/calculator.bend as Calculator
 import ./src/token_matcher.bend as Matcher
 import Base
 import ./src/token.bend as Token
@@ -326,3 +327,28 @@ law matcher_plus_preserves_star_minimum:
 law matcher_function_category:
   for name: Core.Value
   {Matcher.get_categories(Matcher.for_function(name)) == Core.ArrayCons{Core.SymbolValue{"function"}, Core.ArrayNil{}} : Core.Value}
+law calculator_clear_empty:
+  for state: Calculator.State
+  {Calculator.is_empty(Calculator.clear(state)) == True{} : Bool}
+
+law calculator_clear_keeps_cache:
+  for +state: Calculator.State
+  {Calculator.get_cache(Calculator.clear(state)) == Calculator.get_cache(state) : List<&2, Calculator.Cached>}
+
+law calculator_disable_cache:
+  for state: Calculator.State
+  {Calculator.cache_enabled(Calculator.disable_cache(state)) == False{} : Bool}
+
+law calculator_false_binding:
+  {Calculator.get_memory(Calculator.set_value(Calculator.create(), Core.TextValue{"flag"}, Core.Logical{False{}})) == Core.HashEntry{Core.TextValue{"flag"}, Core.Logical{False{}}, Core.HashNil{}} : Core.Value}
+
+law calculator_null_binding:
+  {Calculator.get_memory(Calculator.store_values(Calculator.create(), Core.HashEntry{Core.SymbolValue{"nullable"}, Core.NullValue{}, Core.HashNil{}})) == Core.HashEntry{Core.TextValue{"nullable"}, Core.NullValue{}, Core.HashNil{}} : Core.Value}
+
+law calculator_temporary_context:
+  {Calculator.get_memory(Calculator.result_state(Calculator.evaluate_value(Core.TextValue{"a"}, Calculator.create(), Core.HashEntry{Core.SymbolValue{"a"}, Core.Number{3n}, Core.HashNil{}}, True{}))) == Core.HashNil{} : Core.Value}
+
+law calculator_failed_context:
+  {Calculator.get_memory(Calculator.result_state(Calculator.evaluate_value(Core.TextValue{"missing"}, Calculator.create(), Core.HashEntry{Core.SymbolValue{"a"}, Core.Number{3n}, Core.HashNil{}}, True{}))) == Core.HashNil{} : Core.Value}
+law calculator_open_index_eof:
+  {Parser.snapshot("{10,20}[1", Nil{}, False{}) == "number:20" : String}

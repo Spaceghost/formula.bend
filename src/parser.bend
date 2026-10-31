@@ -730,13 +730,24 @@ def completed(stack: Stack) -> Parsed:
     case Rejected{e}:
       ParseError{e}
 
+# EOF consumes an unfinished Access operation in the pinned parser.
+# Ordinary precedence reductions still stop at an index frame.
+def reduce_eof(ops: List<&2, Operator>, values: List<&2, Core.Expr>) -> Stack:
+  match ops values:
+    case Nil{} values:
+      ParseReady{Nil{}, values}
+    case IndexFrame{structure, outer} <> rest index <> Nil{}:
+      reduce_eof(rest, Core.Access{structure, index} <> outer)
+    case +head <> +tail +values:
+      reduce_decision(reducible(head), u => ParseReady{head <> tail, values}, u => reduced_values(reduce_one(head, tail, values), v => reduce_eof(tail, v)))
+
 def drain(stack: Stack) -> Parsed:
   match stack:
     case ParseReady{ArrayFrame{a <> Nil{}, outer} <> rest, b <> Nil{}}:
       # At EOF upstream consumes the default binary arity of an open array.
       completed(close_array(ParseReady{ArrayFrame{[a], outer} <> rest, [b]}))
     case ParseReady{ops, values}:
-      completed(reduce_all(ops, values))
+      completed(reduce_eof(ops, values))
     case Rejected{e}:
       ParseError{e}
 
