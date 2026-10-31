@@ -111,7 +111,7 @@ The eight address runtime cases pass on both JavaScript and native CPU.
 
 Parity is measured against the pinned Ruby source and its complete 713-example
 suite. The Ruby reference passes all examples; that is not a claim that Bend does.
-A separate 5166-case corpus matches Ruby on JavaScript for selected values,
+A separate 5349-case corpus matches Ruby on JavaScript for selected values,
 dependencies, parse-error classification, and exception factories.
 `make parity-check` generates the fixtures using Lua.
 Use `LUA=/path/to/lua` if Lua is not on PATH.
@@ -151,6 +151,14 @@ gate. The new matcher static replay on both Bend versions is still pending.
 See [the matcher contract](docs/token-matcher.md) for immutable modifiers,
 Hash-key identity, compound inversion, and negative stream offsets. This API
 is not yet connected to the parser's lexer or a token scanner.
+
+A further 183 probes cover the parameterized function-name constructor and
+exact counterparts of all 11 upstream TokenMatcher examples. They pass both
+Bend versions. The combined 5,349-case runtime corpus passes Bun and native
+CPU with one and eight threads, along with seven scale cases and 18 malformed
+inputs. All 62 laws pass Lean-backed verification. There are now 147 explicit
+source-scenario mappings. Broader scanner integration and mutable aliasing
+remain incomplete; these results do not establish full Dentaku parity.
 
 Exception factories preserve reasons, metadata, constructor attributes, message
 overrides and assignment values. Their 131 differential cases cover every
