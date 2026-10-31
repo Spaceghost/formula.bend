@@ -1,3 +1,4 @@
+import ./src/token_matcher.bend as Matcher
 import Base
 import ./src/token.bend as Token
 import ./compat/corpus-wire.bend as Wire
@@ -309,3 +310,16 @@ law token_raw_does_not_change_equality:
   for +bv: Core.Value
   for br: Core.Value
   {Token.equal(Token.Lexeme{ac, av, ar}, Token.Lexeme{bc, bv, br}) == Token.equal(Token.Lexeme{ac, av, Core.NullValue{}}, Token.Lexeme{bc, bv, Core.NullValue{}}) : Bool}
+law matcher_nil_never_matches_leaf:
+  for categories: Core.Value
+  for values: Core.Value
+  for inverted: Bool
+  {Matcher.accepts_predicate(Matcher.Leaf{categories, values, inverted}, None{}) == False{} : Bool}
+
+law matcher_star_minimum:
+  for matcher: Matcher.Matcher
+  {Matcher.get_minimum(Matcher.star(matcher)) == 0n : Nat}
+
+law matcher_plus_preserves_star_minimum:
+  for matcher: Matcher.Matcher
+  {Matcher.get_minimum(Matcher.plus(Matcher.star(matcher))) == 0n : Nat}

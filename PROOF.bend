@@ -1,3 +1,4 @@
+import ./src/token_matcher.bend as Matcher
 import Base
 import ./src/core.bend as Core
 import ./src/decimal.bend as Decimal
@@ -340,3 +341,15 @@ def Laws.token_missing_raw_is_empty(category, value):
 
 def Laws.token_raw_does_not_change_equality(ac, av, ar, bc, bv, br):
   {==}
+def Laws.matcher_nil_never_matches_leaf(categories, values, inverted):
+  {==}
+
+def Laws.matcher_star_minimum(matcher):
+  match matcher:
+    case Matcher.Rule{categories, values, children, predicate, inverted, anchored, minimum, repeated}:
+      {==}
+
+def Laws.matcher_plus_preserves_star_minimum(matcher):
+  match matcher:
+    case Matcher.Rule{categories, values, children, predicate, inverted, anchored, minimum, repeated}:
+      {==}
