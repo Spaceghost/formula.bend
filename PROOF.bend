@@ -298,6 +298,8 @@ def Laws.empty_enumeration_batch(body, kind, binder, context, sensitive, subject
       {==}
     case Core.Negate{x0}:
       {==}
+    case Core.Percentage{x0}:
+      {==}
     case Core.Subtract{x0, x1}:
       {==}
     case Core.Round{x0, x1, x2}:
@@ -368,6 +370,8 @@ def Laws.empty_reduction_batch(body, memo_name, item_name, initial, context, sen
     case Core.Not{x0}:
       {==}
     case Core.Negate{x0}:
+      {==}
+    case Core.Percentage{x0}:
       {==}
     case Core.Subtract{x0, x1}:
       {==}
@@ -542,4 +546,16 @@ def Laws.float_shift_count_truncates_toward_zero():
   {==}
 
 def Laws.array_repetition_wraps_nonfinite_conversion(array):
+  {==}
+
+def Laws.percentage_preserves_native_error(class_name, message):
+  {==}
+
+def Laws.percentage_preparation_preserves_unary_node(expression):
+  {==}
+
+def Laws.percentage_integer_result_is_float():
+  {==}
+
+def Laws.percentage_negative_zero_keeps_sign():
   {==}

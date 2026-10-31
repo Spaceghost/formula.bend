@@ -253,6 +253,8 @@ def analyze_using(~resolve: String -> List<&2, Core.Binding> -> Bool -> Bool -> 
       List.append(&2, String, x, y)
     case Core.Negate{a}:
       analyze_using(~resolve, ~evaluate, a, context, sensitive, static, CaseUnresolved{})
+    case Core.Percentage{a}:
+      analyze_using(~resolve, ~evaluate, a, context, sensitive, static, CaseUnresolved{})
     case Core.Not{a}:
       analyze_using(~resolve, ~evaluate, a, context, sensitive, static, CaseUnresolved{})
     case Core.PrefixNot{a}:

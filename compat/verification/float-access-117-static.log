@@ -1,0 +1,41 @@
+65a0a54f831f65b7ea5f78f3c7adcd8d767f341d
+ALL PROOFS CHECK
+Use --verdict for mathematical validity.
+ALL_175_CONCRETE_FIXTURES_PASS
+Bend checker stack request: 65536 KiB
+Checked cases 1–64 of 1615
+Checked cases 65–128 of 1615
+Checked cases 129–192 of 1615
+Checked cases 193–256 of 1615
+Checked cases 257–320 of 1615
+Checked cases 321–384 of 1615
+Checked cases 385–448 of 1615
+Checked cases 449–512 of 1615
+Checked cases 513–576 of 1615
+Checked cases 577–640 of 1615
+Checked cases 641–704 of 1615
+Checked cases 705–768 of 1615
+Checked cases 769–832 of 1615
+Checked cases 833–896 of 1615
+Checked cases 897–960 of 1615
+Checked cases 961–1024 of 1615
+Checked cases 1025–1088 of 1615
+Checked cases 1089–1152 of 1615
+Checked cases 1153–1216 of 1615
+Checked cases 1217–1280 of 1615
+Checked cases 1281–1344 of 1615
+Checked cases 1345–1408 of 1615
+Checked cases 1409–1472 of 1615
+Checked cases 1473–1536 of 1615
+Checked cases 1537–1600 of 1615
+Checked cases 1601–1615 of 1615
+Bend checker stack request: 65536 KiB
+Checked cases 1–128 of 450
+Checked cases 129–256 of 450
+Checked cases 257–384 of 450
+Checked cases 385–450 of 450
+ALL_2065_FLOAT_STATIC_CASES_PASS
+FLOAT_STATIC_EXIT=0
+MemoryPeak=1870897152
+MemorySwapPeak=0
+Sat Oct 31 10:53:45 PM UTC 2026

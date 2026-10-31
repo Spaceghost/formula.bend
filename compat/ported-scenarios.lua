@@ -45,6 +45,7 @@ return {
     {'treats variables that differ only in case as distinct when case-sensitive', 'graph_upstream_sensitive_names_resolve_order'},
   },
   ['spec/parser_spec.rb'] = {
+    {'calculates unary percentage', {'percentage_syntax_1_value', 'percentage_syntax_1_class'}},
     {'calculates bitwise OR', {'bit_upstream_or', 'bit_upstream_parentheses'}},
   },
   ['spec/ast/count_spec.rb'] = {
@@ -191,6 +192,7 @@ return {
     {'leaves arithmetic alone when an operand is already infinite', {'float_value_11_4','float_value_11_7'}},
   },
   ['spec/calculator_spec.rb'] = {
+    {'differentiates between percentage and modulo operators', {'percentage_upstream_modulo_1_value', 'percentage_upstream_modulo_2_value', 'percentage_syntax_1_value', 'percentage_syntax_3_value', 'percentage_syntax_4_value', 'percentage_syntax_5_value', 'percentage_syntax_6_value'}},
     {'does not round up a float that is already exact', {'float_value_upstream_roundup_exact_07','float_value_upstream_roundup_exact_007'}, 'Context: calculator / roundup.'},
     {'does not round down a float that is already exact', {'float_value_upstream_rounddown_exact_029','float_value_upstream_rounddown_exact_115'}, 'Context: calculator / rounddown.'},
     {'returns the same type as its input, like round', {'float_value_upstream_roundup_float_type','float_value_upstream_roundup_float_type_class','float_value_upstream_roundup_integer_type','float_value_upstream_roundup_integer_type_class','float_value_upstream_roundup_decimal_type','float_value_upstream_roundup_decimal_type_class'}, 'Context: calculator / roundup.'},

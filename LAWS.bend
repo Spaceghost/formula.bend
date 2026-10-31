@@ -566,3 +566,18 @@ law float_shift_count_truncates_toward_zero:
 law array_repetition_wraps_nonfinite_conversion:
   for array: Core.Value
   {Core.array_multiply(array, Core.float_words(2146435072, 0)) == Core.Failure{"float Inf out of range of integer"} : Core.Value}
+
+law percentage_preserves_native_error:
+  for +class_name: String
+  for +message: String
+  {Core.percentage(Core.Raised{class_name, message}) == Core.Raised{class_name, message} : Core.Value}
+
+law percentage_preparation_preserves_unary_node:
+  for expression: Core.Expr
+  {Core.prepare_expression(Core.Percentage{expression}) == Core.Percentage{Core.prepare_expression(expression)} : Core.Expr}
+
+law percentage_integer_result_is_float:
+  {Core.percentage(Core.Number{5n}) == Core.float_words(1068079513, 2576980378) : Core.Value}
+
+law percentage_negative_zero_keeps_sign:
+  {Core.percentage(Core.float_words(2147483648, 0)) == Core.float_words(2147483648, 0) : Core.Value}

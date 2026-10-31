@@ -175,6 +175,8 @@ def analyze_in(+expr: Core.Expr, +sensitive: Bool) -> Info:
     case Core.Round{a, places, mode}:
       x y = analyze_in(a, sensitive) analyze_in(places, sensitive)
       binary(x, y, NumericKind{}, False{})
+    case Core.Percentage{a}:
+      binary(analyze_in(a, sensitive), Metadata{NumericKind{}, False{}, True{}}, NumericKind{}, True{})
     case Core.Negate{a}:
       unary(analyze_in(a, sensitive), NumericKind{}, True{})
     case Core.Not{a}:

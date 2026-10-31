@@ -688,17 +688,35 @@ def binary_percent(tokens: List<&2, Lex.Token>) -> Bool:
     case tokens:
       True{}
 
+def percentage_stack(stack: Stack) -> Stack:
+  match stack:
+    case ParseReady{ops, value <> rest}:
+      ParseReady{ops, Core.Percentage{value} <> rest}
+    case Rejected{message}:
+      Rejected{message}
+    case stack:
+      Rejected{"Missing operand"}
+
+def percentage_precedence(stack: Stack) -> Stack:
+  match stack:
+    case ParseReady{ops, values}:
+      percentage_stack(reduce_to(ops, values, 30n))
+    case Rejected{message}:
+      Rejected{message}
+
 def percent_position(binary: Bool, stack: Stack) -> Stack:
   match binary:
     case True{}:
       operator(Lex.ModuloToken{}, stack)
     case False{}:
-      Rejected{"Postfix percentage is not implemented"}
+      percentage_precedence(stack)
 
 def scan(tokens: List<&2, Lex.Token>, stack: Stack, expected: Bool) -> Stack:
   match tokens expected:
+    case Lex.ModuloToken{} <> Lex.Minus{} <> tail False{}:
+      Rejected{"Unexpected unary negation after percentage"}
     case Lex.ModuloToken{} <> +tail False{}:
-      scan(tail, percent_position(binary_percent(tail), stack), True{})
+      scan(tail, percent_position(binary_percent(tail), stack), binary_percent(tail))
     case Lex.NotWord{name} <> Lex.LParen{} <> tail True{}:
       scan(tail, start_call(name, stack), True{})
     case Lex.AndWord{name} <> Lex.LParen{} <> tail True{}:

@@ -109,6 +109,7 @@ type Expr is Data:
   Multiply{left: Expr, right: Expr}
   Divide{left: Expr, right: Expr}
   Modulo{left: Expr, right: Expr}
+  Percentage{operand: Expr}
   Bitwise{operation: Bits.BitwiseOperation, left: Expr, right: Expr}
   If{condition: Expr, yes: Expr, no: Expr}
   Not{operand: Expr}
@@ -2932,6 +2933,12 @@ def prepare_call(kind: FunctionKind, +arguments: Expr) -> Expr:
     case kind:
       FunctionCall{kind, arguments}
 
+def percentage_value(value: Value) -> Value:
+  unchecked_operands(FloatNumeric.Product{}, float_numeric(value), Some{FloatNumeric.Floating{Binary.from_words(1065646817, 1202590843)}})
+
+def percentage(value: Value) -> Value:
+  with_value(cast_numeric(value), value => percentage_value(value))
+
 # Normalize call evaluation order without executing any expression. Dedicated
 # nodes keep the evaluator's batch dispatch independent of argument-tree shape.
 def prepare_expression(e: Expr) -> Expr:
@@ -2958,6 +2965,8 @@ def prepare_expression(e: Expr) -> Expr:
       Not{prepare_expression(a)}
     case Negate{a}:
       Negate{prepare_expression(a)}
+    case Percentage{a}:
+      Percentage{prepare_expression(a)}
     case Subtract{a, b}:
       Subtract{prepare_expression(a), prepare_expression(b)}
     case Round{a, places, mode}:
@@ -3162,6 +3171,8 @@ def evaluate_using(~resolve: List<&2, Binding> -> String -> Bool -> List<&2, Val
       round(x, p, mode)
     case Negate{a} batch EvaluateOne{}:
       negate(evaluate_using(~resolve, a, batch, context, sensitive, subjects, EvaluateOne{}))
+    case Percentage{a} batch EvaluateOne{}:
+      percentage(evaluate_using(~resolve, a, batch, context, sensitive, subjects, EvaluateOne{}))
     case Subtract{a, b} batch EvaluateOne{}:
       x y = evaluate_using(~resolve, a, batch, context, sensitive, subjects, EvaluateOne{}) evaluate_using(~resolve, b, batch, context, sensitive, subjects, EvaluateOne{})
       subtract(x, y)

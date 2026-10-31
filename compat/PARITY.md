@@ -49,7 +49,7 @@ The unchanged upstream suite passes 713 examples with zero failures and 96.82%
 line coverage in the Ruby reference environment. `reference-summary.json` and
 `upstream-spec-catalog.json` record that run. These results describe Ruby only.
 
-The Lua-driven corpus has 10863 reference cases for Ruby values, parse
+The Lua-driven corpus has 11231 reference cases for Ruby values, parse
 error classification, or exception-factory descriptions. It covers truthiness, strings/null, comparisons, selected
 numeric-string coercions, and static operand rejection. It is a small subset of
 the upstream catalog. Native error classes/messages, all calculator methods,
@@ -393,9 +393,11 @@ operand and rejects a zero divisor before entering the left expression. Three
 new laws preserve this order, bringing the proof gate to 40 laws.
 
 The tokenizer distinguishes binary modulo positions from postfix percentage.
-Postfix percentage remains explicitly unsupported until Ruby Float arithmetic is
-implemented. A negative divisor therefore needs parentheses, as in the pinned
-source grammar. The three original FILTER/ALL/ANY binder-rejection formulas now
+Postfix percentage is now implemented with Integer-to-Float promotion and mixed
+BigDecimal arithmetic. A negative modulo divisor still needs parentheses, as in
+the pinned source grammar. The dedicated 368-case percentage corpus covers
+precedence, repeated percentages, syntax rejection, classes, dependencies and
+non-finite values. The three original FILTER/ALL/ANY binder-rejection formulas now
 have direct differential cases; the scenario map contains 116 entries.
 
 The native -O3 build of the 882-case checkpoint caused heavy paging and was
