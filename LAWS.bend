@@ -1,4 +1,5 @@
 import Base
+import ./src/token.bend as Token
 import ./compat/corpus-wire.bend as Wire
 import ./src/core.bend as Core
 import ./src/decimal.bend as Decimal
@@ -288,3 +289,23 @@ law wire_decimal_positive_zero:
 
 law wire_decimal_single_sign:
   {Wire.decimal(" --0 ") == Core.Failure{"Invalid decimal sign in corpus input"} : Core.Value}
+
+law token_nil_wildcard:
+  for category: Core.Value
+  for value: Core.Value
+  for raw: Core.Value
+  {Token.equal(Token.Lexeme{Core.NullValue{}, Core.NullValue{}, Core.NullValue{}}, Token.Lexeme{category, value, raw}) == True{} : Bool}
+
+law token_missing_raw_is_empty:
+  for category: Core.Value
+  for value: Core.Value
+  {Token.is_empty(Token.Lexeme{category, value, Core.NullValue{}}) == True{} : Bool}
+
+law token_raw_does_not_change_equality:
+  for +ac: Core.Value
+  for +av: Core.Value
+  for ar: Core.Value
+  for +bc: Core.Value
+  for +bv: Core.Value
+  for br: Core.Value
+  {Token.equal(Token.Lexeme{ac, av, ar}, Token.Lexeme{bc, bv, br}) == Token.equal(Token.Lexeme{ac, av, Core.NullValue{}}, Token.Lexeme{bc, bv, Core.NullValue{}}) : Bool}

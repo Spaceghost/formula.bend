@@ -331,3 +331,12 @@ def Laws.wire_decimal_positive_zero():
 
 def Laws.wire_decimal_single_sign():
   {==}
+
+def Laws.token_nil_wildcard(category, value, raw):
+  {==}
+
+def Laws.token_missing_raw_is_empty(category, value):
+  {==}
+
+def Laws.token_raw_does_not_change_equality(ac, av, ar, bc, bv, br):
+  {==}

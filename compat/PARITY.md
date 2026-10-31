@@ -641,3 +641,24 @@ cases pass Bun and native CPU with one and eight threads. The existing native
 and JS executables are reused only after checking that their Bend source is
 unchanged. The 55-law Lean-backed gate passes as well. This adds no new claim
 about GPU execution of these imports or about complete Ruby numeric classes.
+
+## Token descriptors
+
+`src/token.bend` preserves category, semantic value and raw spelling in an
+immutable descriptor. `make` supplies the default nil raw value; `with_raw`
+retains an explicit one. `to_value` implements Ruby Token#to_s's raw-or-value
+result, including non-String values. Length and emptiness use raw_value.to_s
+rather than that result: absent raw spelling is empty even when the semantic
+value is present, and false raw spelling has length five while to_value falls
+back to the semantic value. Length counts Unicode characters.
+
+Category tests distinguish symbol and string categories. Grouping/open/close
+predicates match the pinned implementation. Equality ignores raw spelling;
+nil category or semantic value is a wildcard on either side. This equality
+can be nontransitive and is separate from ordinary value equality.
+
+The 113 reference cases and three laws cover the supported Core.Value profile.
+Both token_spec.rb examples have direct scenario correspondences. Descriptors
+are not yet attached to internal lexer variants, and arbitrary Ruby objects,
+Float/Class values and invalid string encodings remain outside this typed API.
+These limits keep raw-token/visitor integration explicitly unfinished.

@@ -2,6 +2,10 @@
 -- COUNT's Float input is represented as exact decimal 2.3 in Bend; COUNT only
 -- inspects its length capability, so this adaptation does not alter the result.
 return {
+  ['spec/token_spec.rb'] = {
+    {'has a category and a value', {'token_upstream_fields', 'token_category_query_1_1'}},
+    {'compares category and value to determine equality', 'token_upstream_equality'},
+  },
   ['spec/exceptions_spec.rb'] = {
     {'includes variable name(s) in message', 'error_unbound_attributes'},
     {'is included in every Dentaku exception, even those subclassing Ruby built-ins', {'error_parse_override_assigned', 'error_tokenizer_override_assigned', 'error_argument_override_assigned', 'error_unbound_attributes', 'error_math_domain_attributes', 'error_node_array_coercion_1', 'error_zero_division'}},
