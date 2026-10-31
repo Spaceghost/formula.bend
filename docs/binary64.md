@@ -22,10 +22,15 @@ underflow retain the required zero sign. No host Float, F32 approximation or
 fused floating-point operation supplies an arithmetic result.
 
 The implementation does not expose floating-point exception flags or alternative
-rounding modes. Square roots, powers, transcendental functions, decimal parsing,
-Ruby Float formatting, Integer/BigDecimal coercion, evaluator result guards and
+rounding modes. An [exact decimal bridge](binary64-decimal.md) supplies IEEE
+nearest/even conversion and signed exact projection. Ruby-compatible decimal
+parsing, square roots, powers, transcendental functions,
+Integer/BigDecimal coercion, evaluator result guards and
 formula-level error propagation remain required work. This is not a claim of
 complete IEEE 754 or Ruby Float support.
+
+The [standalone Ruby Float formatter](binary64-format.md) supplies shortest
+decimal output and Ruby notation rules without adding evaluator Float values.
 
 ## Verification
 
@@ -39,6 +44,10 @@ and word/finite-value round trips. The seed is `0x6d2b79f5`. Inputs use raw word
 to avoid lossy fixture conversion. Goldens are in `compat/binary64-oracle.tsv`.
 The reference runner is `tools/run-binary64-oracle.lua`; it runs Ruby Float
 operations directly, independently of the Bend arithmetic.
+
+The same target also runs 441 separate exact-decimal conversion probes. Their
+IEEE expectations use exact rational rounding intervals; observed Ruby parser
+differences remain explicit compatibility gaps in the conversion profile.
 
 The harness builds a balanced tree of independent checks before entering the
 Bend bang and emits results in source order afterward. Input line construction

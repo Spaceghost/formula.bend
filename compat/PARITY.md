@@ -49,7 +49,7 @@ The unchanged upstream suite passes 713 examples with zero failures and 96.82%
 line coverage in the Ruby reference environment. `reference-summary.json` and
 `upstream-spec-catalog.json` record that run. These results describe Ruby only.
 
-The Lua-driven corpus has 8777 reference cases for Ruby values, parse
+The Lua-driven corpus has 8798 reference cases for Ruby values, parse
 error classification, or exception-factory descriptions. It covers truthiness, strings/null, comparisons, selected
 numeric-string coercions, and static operand rejection. It is a small subset of
 the upstream catalog. Native error classes/messages, all calculator methods,
@@ -914,3 +914,30 @@ Stored AST/callable bindings, mutable identity, full error propagation, Float
 evaluator integration, spreadsheet dialects and the broader parity/shootout
 requirements remain unfinished. These results do not claim current-source CUDA
 or Metal verification, performance results, or complete Dentaku parity.
+
+## Typed stored AST execution and Float integration
+
+The merged source passes 8,798 formula/API cases and 84 separate direct AST value
+probes on Bun and native CPU with one and eight threads at clang 19 -O3. Seven
+scale checks and 27 malformed-input cases pass. All 107 laws pass the Lean-backed
+gate, and all 175 concrete fixtures pass. The 13,253 standalone Float probes pass
+on Bun; their historical component target evidence remains separately scoped.
+
+Stored values retain their creator's case mode and resolve through the current
+context. The shared evaluator retains lazy branches, balanced enumeration and
+parallel arithmetic. The direct value corpus includes transitive chains, a
+257-formula chain, and locally rebound recursion through depth 65 without a
+fixed semantic depth limit. The recursive runner is excluded from termination
+proofs. Calculator dependency preflight, mutable identity, callable bindings,
+reflection, Float evaluator integration, spreadsheet dialects and full parity
+remain unfinished.
+
+The tokenizer now separates malformed characters and unfinished quotes from
+decimal adjacency and dotted identifiers. Twenty-one additional Ruby boundary
+probes pass. The obsolete quote/token expectations in two concrete fixtures were
+corrected; repeated decimal points retain their Ruby ParseError classification.
+
+The pre-Float 986fd47 checkpoint completed full make check and 8,798-case static
+replay. The new merged source has passed the kernel, concrete fixtures and runtime
+gates; its full static replay has not yet been verified. Current-source CUDA,
+Metal and performance results are not claimed.

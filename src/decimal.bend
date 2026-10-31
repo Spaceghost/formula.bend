@@ -5,27 +5,33 @@ import Base
 type Decimal is Data:
   Exact{digits: List<&2, U32>, scale: Nat}
 
-def add_digits(a: List<&2, U32>, b: List<&2, U32>, +carry: U32) -> List<&2, U32>:
+def add_digits_into(a: List<&2, U32>, b: List<&2, U32>, +carry: U32, reversed: List<&2, U32>) -> List<&2, U32>:
   match a b:
     case Nil{} Nil{}:
-      Bool.pick(List<&2, U32>, U32.is_eq(carry, 0), Nil{}, [carry])
+      List.reverse.go(&2, U32, reversed, Bool.pick(List<&2, U32>, U32.is_eq(carry, 0), Nil{}, [carry]))
     case x <> xs Nil{}:
       +sum = U32.add(x, carry)
-      U32.mod(sum, 10) <> add_digits(xs, Nil{}, U32.div(sum, 10))
+      add_digits_into(xs, Nil{}, U32.div(sum, 10), U32.mod(sum, 10) <> reversed)
     case Nil{} y <> ys:
       +sum = U32.add(y, carry)
-      U32.mod(sum, 10) <> add_digits(Nil{}, ys, U32.div(sum, 10))
+      add_digits_into(Nil{}, ys, U32.div(sum, 10), U32.mod(sum, 10) <> reversed)
     case x <> xs y <> ys:
       +sum = U32.add(U32.add(x, y), carry)
-      U32.mod(sum, 10) <> add_digits(xs, ys, U32.div(sum, 10))
+      add_digits_into(xs, ys, U32.div(sum, 10), U32.mod(sum, 10) <> reversed)
 
-def multiply_digit(a: List<&2, U32>, +digit: U32, +carry: U32) -> List<&2, U32>:
+def add_digits(a: List<&2, U32>, b: List<&2, U32>, carry: U32) -> List<&2, U32>:
+  add_digits_into(a, b, carry, Nil{})
+
+def multiply_digit_into(a: List<&2, U32>, +digit: U32, +carry: U32, reversed: List<&2, U32>) -> List<&2, U32>:
   match a:
     case Nil{}:
-      Bool.pick(List<&2, U32>, U32.is_eq(carry, 0), Nil{}, [carry])
+      List.reverse.go(&2, U32, reversed, Bool.pick(List<&2, U32>, U32.is_eq(carry, 0), Nil{}, [carry]))
     case x <> xs:
       +product = U32.add(U32.mul(x, digit), carry)
-      U32.mod(product, 10) <> multiply_digit(xs, digit, U32.div(product, 10))
+      multiply_digit_into(xs, digit, U32.div(product, 10), U32.mod(product, 10) <> reversed)
+
+def multiply_digit(a: List<&2, U32>, digit: U32, carry: U32) -> List<&2, U32>:
+  multiply_digit_into(a, digit, carry, Nil{})
 
 def multiply_digits(a: List<&2, U32>, +b: List<&2, U32>) -> List<&2, U32>:
   match a:
@@ -40,7 +46,7 @@ def pad(n: Nat, digits: List<&2, U32>) -> List<&2, U32>:
     case 0n:
       digits
     case 1n+p:
-      0 <> pad(p, digits)
+      pad(p, 0 <> digits)
 
 def add(a: Decimal, b: Decimal) -> Decimal:
   match a b:

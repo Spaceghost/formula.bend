@@ -280,16 +280,35 @@ def division_step(less: Bool, +remainder: List<&2, Bool>, divisor: List<&2, Bool
     case False{}:
       Step{True{}, unsigned_subtract(remainder, divisor)}
 
-# Consume the previous quotient bit before computing the next step. The initial
-# false bit is a leading zero removed by normalization. Keeping the state as
-# data avoids a curried continuation frame for every input bit on the device.
-def divide_walk(input: List<&2, Bool>, +divisor: List<&2, Bool>, step: DivisionStep, quotient: List<&2, Bool>) -> List<&2, Bool> & List<&2, Bool>:
+type DivisionState is Data:
+  State{bit: Bool, remainder: List<&2, Bool>, width: Nat}
+
+def subtracted_state(+remainder: List<&2, Bool>) -> DivisionState:
+  State{True{}, remainder, bit_length(remainder)}
+
+def division_state(less: Bool, +remainder: List<&2, Bool>, divisor: List<&2, Bool>, width: Nat) -> DivisionState:
+  match less:
+    case True{}:
+      State{False{}, remainder, width}
+    case False{}:
+      subtracted_state(unsigned_subtract(remainder, divisor))
+
+# Cache widths and avoid normalizing the growing remainder on each input bit.
+# Before the divisor fits, bringing down a bit is constant work. Only a
+# subtraction needs to scan its normalized result for the new width.
+def divide_cached(input: List<&2, Bool>, +divisor: List<&2, Bool>, +divisor_width: Nat, step: DivisionState, quotient: List<&2, Bool>) -> List<&2, Bool> & List<&2, Bool>:
   match input step:
-    case Nil{} Step{bit, remainder}:
+    case Nil{} State{bit, remainder, width}:
       (Bits.normalize(bit <> quotient), remainder)
-    case bit <> rest Step{previous, remainder}:
-      +brought = Bits.normalize(bit <> remainder)
-      divide_walk(rest, divisor, division_step(Cmp.is_lt(unsigned_compare(brought, divisor)), brought, divisor), previous <> quotient)
+    case +bit <> rest State{previous, remainder, +width}:
+      +brought_width = Bool.pick(Nat, Nat.is_eq(width, 0n), Bool.pick(Nat, bit, 1n, 0n), Nat.add(width, 1n))
+      +brought = Bool.pick(List<&2, Bool>, Nat.is_eq(brought_width, 0n), Nil{}, bit <> remainder)
+      divide_cached(rest, divisor, divisor_width, division_state(Cmp.is_lt(compare_length(Nat.cmp(brought_width, divisor_width), brought, divisor)), brought, divisor, brought_width), previous <> quotient)
+
+def divide_walk(input: List<&2, Bool>, +divisor: List<&2, Bool>, step: DivisionStep, quotient: List<&2, Bool>) -> List<&2, Bool> & List<&2, Bool>:
+  match step:
+    case Step{bit, +remainder}:
+      divide_cached(input, divisor, bit_length(divisor), State{bit, remainder, bit_length(remainder)}, quotient)
 
 def quotient_result(parts: List<&2, Bool> & List<&2, Bool>, negative: Bool) -> Float:
   (quotient, remainder) = parts

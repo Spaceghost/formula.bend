@@ -1,5 +1,10 @@
 import Base
 import ../src/binary64.bend as Binary
+import ../src/binary64_decimal.bend as Conversion
+import ../src/decimal.bend as Decimal
+import ../src/binary64_format.bend as Format
+import ../src/binary64_ruby_decimal.bend as RubyConversion
+import ../src/binary64_bigdecimal.bend as BigDecimal
 
 type Operation is Data:
   Add{}
@@ -9,15 +14,27 @@ type Operation is Data:
   RoundTrip{}
   Compare{}
   Words{}
+  ToExact{}
+  ExactRoundTrip{}
+  Format{}
+  BigDecimalImplicit{}
+  BigDecimalText{}
 
 type Calculation is Data:
   Value{value: Binary.Float}
   Ordering{order: Maybe<&2, Cmp>}
   RawWords{value: Binary.Float}
+  ExactValue{value: Conversion.Exact}
+  Formatted{value: String}
+
+type ConversionProfile is Data:
+  IeeeDecimal{}
+  RubyDecimal{}
 
 type Work is Data:
   Leaf{id: String, operation: Operation, left: Binary.Float, right: Binary.Float}
   Fork{left: Work, right: Work}
+  DecimalLeaf{id: String, profile: ConversionProfile, negative: Bool, magnitude: Decimal.Decimal}
 
 type Loaded is Data:
   LoadedWork{work: Work}
@@ -43,6 +60,16 @@ def operation(text: String) -> Maybe<&2, Operation>:
       Some{Compare{}}
     case "words":
       Some{Words{}}
+    case "to_exact":
+      Some{ToExact{}}
+    case "exact_roundtrip":
+      Some{ExactRoundTrip{}}
+    case "format":
+      Some{Format{}}
+    case "bigdecimal_implicit":
+      Some{BigDecimalImplicit{}}
+    case "bigdecimal_text":
+      Some{BigDecimalText{}}
     case text:
       None{}
 
@@ -92,8 +119,62 @@ def loaded_row(id: String, op: Maybe<&2, Operation>, ah: Maybe<&2, U32>, al: May
     case op ah al bh bl:
       Invalid{}
 
+def coefficient_digits(text: String, digits: List<&2, U32>) -> Maybe<&2, List<&2, U32>>:
+  match text:
+    case SNil{}:
+      Some{digits}
+    case SCon{'0', rest}:
+      coefficient_digits(rest, 0 <> digits)
+    case SCon{'1', rest}:
+      coefficient_digits(rest, 1 <> digits)
+    case SCon{'2', rest}:
+      coefficient_digits(rest, 2 <> digits)
+    case SCon{'3', rest}:
+      coefficient_digits(rest, 3 <> digits)
+    case SCon{'4', rest}:
+      coefficient_digits(rest, 4 <> digits)
+    case SCon{'5', rest}:
+      coefficient_digits(rest, 5 <> digits)
+    case SCon{'6', rest}:
+      coefficient_digits(rest, 6 <> digits)
+    case SCon{'7', rest}:
+      coefficient_digits(rest, 7 <> digits)
+    case SCon{'8', rest}:
+      coefficient_digits(rest, 8 <> digits)
+    case SCon{'9', rest}:
+      coefficient_digits(rest, 9 <> digits)
+    case text:
+      None{}
+
+def coefficient(text: String) -> Maybe<&2, List<&2, U32>>:
+  match text:
+    case SNil{}:
+      None{}
+    case text:
+      coefficient_digits(text, Nil{})
+
+def negative(text: String) -> Maybe<&2, Bool>:
+  match text:
+    case "+":
+      Some{False{}}
+    case "-":
+      Some{True{}}
+    case text:
+      None{}
+
+def decimal_row(id: String, profile: ConversionProfile, negative: Maybe<&2, Bool>, digits: Maybe<&2, List<&2, U32>>, scale: Maybe<&2, Nat>) -> Loaded:
+  match negative digits scale:
+    case Some{negative} Some{digits} Some{scale}:
+      LoadedWork{DecimalLeaf{id, profile, negative, Decimal.Exact{digits, scale}}}
+    case negative digits scale:
+      Invalid{}
+
 def row(fields: List<&2, String>) -> Loaded:
   match fields:
+    case id <> "from_decimal" <> sign <> digits <> scale <> Nil{}:
+      decimal_row(id, IeeeDecimal{}, negative(sign), coefficient(digits), Nat.read(scale))
+    case id <> "from_ruby_decimal" <> sign <> digits <> scale <> Nil{}:
+      decimal_row(id, RubyDecimal{}, negative(sign), coefficient(digits), Nat.read(scale))
     case id <> op <> ah <> al <> bh <> bl <> Nil{}:
       loaded_row(id, operation(op), word(ah), word(al), word(bh), word(bl))
     case fields:
@@ -106,6 +187,15 @@ def join_rows(a: Loaded, b: Loaded) -> Loaded:
     case a b:
       Invalid{}
 
+def split_fields(text: String, current: String, reversed: List<&2, String>) -> List<&2, String>:
+  match text:
+    case SNil{}:
+      List.reverse(&2, String, String.reverse(current) <> reversed)
+    case SCon{' ', rest}:
+      split_fields(rest, SNil{}, String.reverse(current) <> reversed)
+    case SCon{c, rest}:
+      split_fields(rest, SCon{c, current}, reversed)
+
 def load_rows_into(lines: List<&2, String>, reversed: List<&2, Loaded>) -> List<&2, Loaded>:
   match lines:
     case Nil{}:
@@ -113,7 +203,7 @@ def load_rows_into(lines: List<&2, String>, reversed: List<&2, Loaded>) -> List<
     case SNil{} <> Nil{}:
       List.reverse(&2, Loaded, reversed)
     case line <> rest:
-      load_rows_into(rest, row(String.split(line, ' ')) <> reversed)
+      load_rows_into(rest, row(split_fields(line, SNil{}, Nil{})) <> reversed)
 
 def split_lines(text: String, current: String, reversed: List<&2, String>) -> List<&2, String>:
   match text:
@@ -158,6 +248,16 @@ def calculate(op: Operation, +a: Binary.Float, b: Binary.Float) -> Calculation:
       Ordering{Binary.compare(a, b)}
     case Words{}:
       RawWords{a}
+    case ToExact{}:
+      ExactValue{Conversion.to_exact(a)}
+    case ExactRoundTrip{}:
+      Value{Conversion.from_exact(Conversion.to_exact(a))}
+    case Format{}:
+      Formatted{Format.show(a)}
+    case BigDecimalImplicit{}:
+      ExactValue{BigDecimal.from_float(BigDecimal.Implicit{}, a)}
+    case BigDecimalText{}:
+      ExactValue{BigDecimal.from_float(BigDecimal.ShortestText{}, a)}
 
 def ordering_snapshot(order: Maybe<&2, Cmp>) -> String:
   match order:
@@ -178,11 +278,24 @@ def snapshot(result: Calculation) -> String:
       ordering_snapshot(order)
     case RawWords{value}:
       Binary.render_words(Binary.words(value))
+    case ExactValue{value}:
+      Conversion.snapshot(value)
+    case Formatted{value}:
+      value
+
+def convert_decimal(profile: ConversionProfile, negative: Bool, magnitude: Decimal.Decimal) -> Binary.Float:
+  match profile:
+    case IeeeDecimal{}:
+      Conversion.from_decimal(negative, magnitude)
+    case RubyDecimal{}:
+      RubyConversion.from_decimal(negative, magnitude)
 
 def execute(work: Work) -> Results:
   match work:
     case Leaf{id, operation, left, right}:
       Row{id, snapshot(calculate(operation, left, right))}
+    case DecimalLeaf{id, profile, negative, magnitude}:
+      Row{id, Binary.snapshot(convert_decimal(profile, negative, magnitude))}
     case Fork{left, right}:
       a b = execute(left) execute(right)
       Joined{a, b}
