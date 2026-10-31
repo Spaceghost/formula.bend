@@ -111,7 +111,7 @@ The eight address runtime cases pass on both JavaScript and native CPU.
 
 Parity is measured against the pinned Ruby source and its complete 713-example
 suite. The Ruby reference passes all examples; that is not a claim that Bend does.
-A separate 2677-case corpus matches Ruby on JavaScript for selected values,
+A separate 2790-case corpus matches Ruby on JavaScript for selected values,
 dependencies, parse-error classification, and exception factories.
 `make parity-check` generates the fixtures using Lua.
 Use `LUA=/path/to/lua` if Lua is not on PATH.
@@ -140,6 +140,9 @@ Twenty further integer-import cases pass both Bend versions. All 2,677 cases
 and seven scale cases pass Bun and native CPU with one and eight threads. The
 separate 5,326-string Ruby Integer profile checks fixture conversion rather
 than formula coverage.
+Token descriptors add 113 Ruby-matched cases, tested on both Bend versions.
+The complete 2,790-case runtime corpus and seven scale checks pass Bun and
+native CPU with one and eight threads. All 58 laws pass the Lean-backed gate.
 
 Exception factories preserve reasons, metadata, constructor attributes, message
 overrides and assignment values. Their 131 differential cases cover every

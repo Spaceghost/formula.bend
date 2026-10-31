@@ -662,3 +662,9 @@ Both token_spec.rb examples have direct scenario correspondences. Descriptors
 are not yet attached to internal lexer variants, and arbitrary Ruby objects,
 Float/Class values and invalid string encodings remain outside this typed API.
 These limits keep raw-token/visitor integration explicitly unfinished.
+The token checkpoint brings the combined formula/API corpus to 2,790 cases
+and the proof book to 58 laws. All 113 new static token cases pass Bend 2.0.16
+and 2.0.39. The full runtime-loaded corpus, seven scale cases and 18 malformed
+inputs pass Bun and native CPU with one and eight threads at `-O3`. Artifact
+hashes are recorded in token_api_checkpoint; prior source checkpoints retain
+their own counts and validation scopes.
