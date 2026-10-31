@@ -325,6 +325,12 @@ without changing identifier or case-mapping rules.
 With Bend 2.0.39, the runtime-loaded checker emits 6,281,383 bytes of C,
 down from 7,940,117 bytes. This is a generated-code size measurement, not a
 runtime performance result.
+Both Bend 2.0.16 and 2.0.39 pass the full 2,516-case gate with this layout.
+The 6,351 Unicode probes, Bun wire checks and Lean-backed proof gate pass as
+well. Native clang 19.1.1 at `-O3` passes the same corpus and seven scale cases
+with one and eight threads, plus all 14 malformed wire inputs. Artifact hashes
+are recorded separately in `backend-verification.json`; formula CUDA execution
+remains unverified.
 
 `make unicode-boundary-check BUN=/path/to/bun` compares 6,351 probes against the
 pinned table: every ASCII character, every lowercase/fold mapping key and its
