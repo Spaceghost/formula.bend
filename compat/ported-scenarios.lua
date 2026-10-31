@@ -2,6 +2,18 @@
 -- COUNT's Float input is represented as exact decimal 2.3 in Bend; COUNT only
 -- inspects its length capability, so this adaptation does not alter the result.
 return {
+  ['spec/exceptions_spec.rb'] = {
+    {'includes variable name(s) in message', 'error_unbound_attributes'},
+    {'is included in every Dentaku exception, even those subclassing Ruby built-ins', {'error_parse_override_assigned', 'error_tokenizer_override_assigned', 'error_argument_override_assigned', 'error_unbound_attributes', 'error_math_domain_attributes', 'error_node_array_coercion_1', 'error_zero_division'}},
+    {'preserves stdlib ancestry for exceptions subclassing Ruby built-ins', {'error_argument_and_type', 'error_zero_division'}},
+    {'constructs with sparse metadata (ParseError)', 'error_parse_node_invalid_sparse'},
+    {'allows call sites to override the default message (ParseError)', 'error_parse_override_assigned', 'Immutable message replacement preserves the original attributes and assignment payload.'},
+    {'builds a message from reason and metadata (TokenizerError)', 'error_tokenizer_parse_error_metadata'},
+    {'builds an incompatible_type message from a function context', 'error_argument_and_type'},
+    {'describes an exact arity as a count', 'error_argument_exact_arity'},
+    {'constructs with sparse metadata (ArgumentError)', 'error_argument_invalid_value_sparse'},
+    {'allows call sites to override the default message (ArgumentError)', 'error_argument_override_assigned'},
+  },
   ['spec/dependency_resolver_spec.rb'] = {
     {'sorts expressions in dependency order', 'graph_upstream_chain_resolve_order'},
     {'handles case differences', 'graph_upstream_case_resolve_order'},

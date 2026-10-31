@@ -116,6 +116,14 @@ if program then program:write('import Base\nimport ../src/core.bend as Core\nimp
 if program and gpu then program:write('import ../compat/gpu-corpus.bend as Gpu\n\n') end
 if program then
   for _, case in ipairs(cases) do
+    if (case.operation or ''):match('error_factory$') then
+      program:write('import ../compat/error_factory.bend as ErrorFactory\n\n')
+      break
+    end
+  end
+end
+if program then
+  for _, case in ipairs(cases) do
     if (case.operation or ''):match('resolve_') then
       program:write('import ../src/resolver.bend as Resolver\n\n')
       break
@@ -128,7 +136,7 @@ local gpu_inputs = {}
 local gpu_operations = {
   evaluate='Evaluate', permissive='Permissive', identifiers='Identifiers', dependencies='Dependencies',
   class='Class', type='StaticType', message='Message', coerce='Coerce', coerce_class='CoerceClass',
-  coerce_message='CoerceMessage', resolve_order='ResolveOrder', resolve_cycles='ResolveCycles',
+  coerce_message='CoerceMessage', resolve_order='ResolveOrder', resolve_cycles='ResolveCycles', error_factory='DescribeError',
 }
 for _, case in ipairs(cases) do
   assert(not ids[case.id], 'duplicate id: ' .. case.id)
@@ -141,7 +149,9 @@ for _, case in ipairs(cases) do
   local context, encoded_context = context_values(case.context, case.symbol_context)
   local sensitive = case.sensitive and 'True{}' or 'False{}'
   local call
-  if operation == 'resolve_order' or operation == 'resolve_cycles' then
+  if operation == 'error_factory' then
+    call = 'ErrorFactory.snapshot(' .. bend_string(case.formula) .. ', Core.lookup(' .. context .. ', "input", False{}))'
+  elseif operation == 'resolve_order' or operation == 'resolve_cycles' then
     local name = operation == 'resolve_order' and 'order_snapshot' or 'cycles_snapshot'
     call = 'Resolver.' .. name .. '(Core.lookup(' .. context .. ', "input", False{}), ' .. sensitive .. ')'
   elseif operation == 'permissive' then

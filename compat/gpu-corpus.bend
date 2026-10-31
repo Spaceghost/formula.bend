@@ -3,6 +3,7 @@ import ../src/core.bend as Core
 import ../src/parser.bend as Parser
 import ../src/resolver.bend as Resolver
 import ../src/string.bend as StringOps
+import ./error_factory.bend as ErrorFactory
 
 type Operation is Data:
   Evaluate{}
@@ -17,6 +18,7 @@ type Operation is Data:
   CoerceMessage{}
   ResolveOrder{}
   ResolveCycles{}
+  DescribeError{}
 
 type Case is Data:
   Check{id: String, formula: String, operation: Operation, context: List<&2, Core.Binding>, sensitive: Bool, json: Bool}
@@ -55,6 +57,8 @@ def execute_operation(operation: Operation, formula: String, context: List<&2, C
       Resolver.order_snapshot(Core.lookup(context, "input", False{}), sensitive)
     case ResolveCycles{}:
       Resolver.cycles_snapshot(Core.lookup(context, "input", False{}), sensitive)
+    case DescribeError{}:
+      ErrorFactory.snapshot(formula, Core.lookup(context, "input", False{}))
 
 def frame(json: Bool, snapshot: String) -> String:
   match json:

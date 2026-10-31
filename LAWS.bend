@@ -10,6 +10,27 @@ import ./src/bits.bend as Bits
 import ./src/resolver.bend as Resolver
 
 import ./src/reference.bend as Ref
+import ./src/error_types.bend as ErrorTypes
+
+law error_override_message:
+  for error: ErrorTypes.Description<Core.Value>
+  for +message: String
+  {ErrorTypes.message(Core.Value, ErrorTypes.with_message(Core.Value, error, message)) == message : String}
+
+law error_override_preserves_attributes:
+  for +error: ErrorTypes.Description<Core.Value>
+  for message: String
+  {ErrorTypes.attributes(Core.Value, ErrorTypes.with_message(Core.Value, error, message)) == ErrorTypes.attributes(Core.Value, error) : Core.Value}
+
+law error_override_preserves_metadata:
+  for +error: ErrorTypes.Description<Core.Value>
+  for message: String
+  {ErrorTypes.metadata(Core.Value, ErrorTypes.with_message(Core.Value, error, message)) == ErrorTypes.metadata(Core.Value, error) : Core.Value}
+
+law error_assignment_preserves_message:
+  for +error: ErrorTypes.Description<Core.Value>
+  for value: Core.Value
+  {ErrorTypes.message(Core.Value, ErrorTypes.with_assigned_to(Core.Value, error, value)) == ErrorTypes.message(Core.Value, error) : String}
 
 law empty_dependency_order:
   for sensitive: Bool

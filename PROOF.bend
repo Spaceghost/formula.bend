@@ -3,6 +3,27 @@ import ./src/core.bend as Core
 import ./src/decimal.bend as Decimal
 import ./LAWS.bend as Laws
 import ./src/bits.bend as Bits
+import ./src/error_types.bend as ErrorTypes
+
+def Laws.error_override_message(error, message):
+  match error:
+    case ErrorTypes.Details{class_name, parents, reason, meta, attributes, old_message, assigned_to}:
+      {==}
+
+def Laws.error_override_preserves_attributes(error, message):
+  match error:
+    case ErrorTypes.Details{class_name, parents, reason, meta, attributes, old_message, assigned_to}:
+      {==}
+
+def Laws.error_override_preserves_metadata(error, message):
+  match error:
+    case ErrorTypes.Details{class_name, parents, reason, meta, attributes, old_message, assigned_to}:
+      {==}
+
+def Laws.error_assignment_preserves_message(error, value):
+  match error:
+    case ErrorTypes.Details{class_name, parents, reason, meta, attributes, message, assigned_to}:
+      {==}
 
 def Laws.empty_dependency_order(sensitive):
   {==}
