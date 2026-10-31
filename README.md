@@ -127,7 +127,7 @@ The corpus supports exact decimal, integer, string, Boolean, null, nested array,
 ordered hash, named class/module and Range bindings, plus case-sensitive contexts.
 All 8,486 cases pass Bun and native CPU with one and eight threads at `-O3`.
 Seven scale checks over 1,025-item collections and 27 malformed-input checks
-also pass. All 73 laws pass Lean-backed verification on Bend 2.0.39. There are
+also pass. The 73 laws at that formula/API checkpoint pass Lean-backed verification on Bend 2.0.39. There are
 153 explicit upstream scenario mappings and 175 concrete regression fixtures.
 
 The full 8,486-case static replay and 175 concrete fixtures pass Bend 2.0.39.
@@ -175,6 +175,13 @@ NumericParser coercions as well as canonical values. Signed decimal zero is
 preserved through arithmetic, rounding, comparisons, indexing, and string
 conversion. Ruby Float inputs, special numeric values, and global BigDecimal
 modes remain pending.
+
+A separate [binary64 arithmetic layer](docs/binary64.md) passes 4,595 native Ruby
+Float probes on both Bend versions' JavaScript output, native CPU with one and
+eight threads, and required CUDA execution on the P4000 with default NVRTC options.
+Its four new laws bring the project total to 77 verified laws. These probes are
+separate from the 8,486 formula/API cases. Float bindings, rendering, mixed
+numeric coercions and evaluator error integration remain pending.
 
 The oracle also checks AST result types and selected exact error messages.
 `make parity-check` validates the recorded upstream scenario mappings. New

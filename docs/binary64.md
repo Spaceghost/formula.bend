@@ -56,3 +56,12 @@ Reference semantics:
 - [Berkeley SoftFloat interface](https://www.jhauser.us/arithmetic/SoftFloat-3/doc/SoftFloat.html)
   documents software binary64 arithmetic and nearest/even rounding terminology.
   This module uses its own exact bit-list implementation, not SoftFloat's C code.
+
+At source `ab757f8`, all 4,595 probes pass Bun output from Bend 2.0.16 and 2.0.39,
+clang 19.1.1 native CPU execution with one and eight threads, and required CUDA
+execution on the Quadro P4000 with CUDA/NVRTC 12.9 and the default compilation
+profile. There is no fallback, Metal result or performance comparison. The
+initial padding/count traversal and curried division continuation exceeded the
+2,048-word device stack; tail traversals and explicit division state fixed those
+failures without changing the goldens or increasing that stack. Exact source,
+input, shader and output hashes are in `../compat/backend-verification.json`.

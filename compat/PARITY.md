@@ -797,3 +797,15 @@ input rejections. Its 66 laws pass Lean-backed verification. The 77 new construc
 and block-boundary cases pass static replay on Bend 2.0.39; the 26 block-boundary
 cases also pass Bend 2.0.16. Full static replay and Range-source GPU checks remain
 pending. Source and artifact hashes are in `backend-verification.json`.
+
+## Binary64 arithmetic foundation
+
+Source `ab757f8` adds standalone, exact-bit binary64 addition, subtraction,
+multiplication, division, comparison and transport. All 4,595 probes match Ruby
+Float on both Bend versions' JavaScript output, native CPU with one and eight
+threads, and required CUDA execution on the Quadro P4000 using default NVRTC
+options. No CPU fallback or device stack increase was used. All 77 project laws
+pass Lean-backed verification on Bend 2.0.39, and both Bend versions pass the term
+checker. These probes are not counted as Dentaku formula cases. Float evaluator
+integration, formatting, mixed coercion and broader Math behavior remain open.
+See `../docs/binary64.md` and the separately scoped backend checkpoint.
