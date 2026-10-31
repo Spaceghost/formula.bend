@@ -13,4 +13,8 @@ return {
   {input='a]', message='Corpus input must be a nonempty array'},
   {input='aa s3:bad s1:1 s7:unknown a] ff ]]', message='Unknown corpus operation'},
   {input='aa s3:bad s1:1 s8:evaluate aa s1:x ]] ff ]]', message='Invalid corpus bindings'},
+  {input='d3:--0', message='Invalid decimal sign in corpus input'},
+  {input='d3:++0', message='Invalid decimal sign in corpus input'},
+  {input='d3:+-0', message='Invalid decimal sign in corpus input'},
+  {input='d3:-+0', message='Invalid decimal sign in corpus input'},
 }

@@ -535,3 +535,18 @@ generated host invocation to request a labeled --Ofast-compile profile, retainin
 the existing --fmad=false setting and shader source. [NVIDIA documents this](https://docs.nvidia.com/cuda/archive/13.0.2/nvrtc/index.html#supported-compile-options) as
 a compile-time/runtime optimization tradeoff, so it must be recorded separately
 from the default profile. No performance comparison is claimed.
+
+## Typed decimal fixture transport
+
+Typed BigDecimal fixture values preserve their sign across exterior ASCII
+whitespace, including integer-looking negative zero. A single leading plus is
+accepted. The static fixture generator and runtime decoder normalize these
+inputs before converting the magnitude to a decimal and applying its sign.
+The original text remains in the Ruby reference payload. Formula string
+coercion keeps its existing whitespace rules.
+
+Ten reference cases cover negative and positive zero, signed nonzero values,
+scientific notation, spaces, tabs, newlines, carriage returns, vertical tabs
+and form feeds. Three transport laws preserve both zero signs and reject a
+second sign. The wire rejection corpus now has 18 cases, including all four
+doubled-sign combinations.

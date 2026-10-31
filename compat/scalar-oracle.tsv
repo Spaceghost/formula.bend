@@ -2514,3 +2514,13 @@ graph_exhaustive_510_resolve_order	error:TSort::Cyclic
 graph_exhaustive_510_resolve_cycles	array:[38:array:[8:string:a8:string:b8:string:c]]
 graph_exhaustive_511_resolve_order	error:TSort::Cyclic
 graph_exhaustive_511_resolve_cycles	array:[38:array:[8:string:a8:string:b8:string:c]]
+decimal_context_spacing_1	json:"string:-0.0"
+decimal_context_spacing_2	json:"string:-0.0"
+decimal_context_spacing_3	json:"string:-0.0"
+decimal_context_spacing_4	json:"string:-0.0"
+decimal_context_spacing_5	json:"string:0.0"
+decimal_context_spacing_6	json:"string:0.125e2"
+decimal_context_spacing_7	json:"string:0.0"
+decimal_context_spacing_8	json:"string:-0.125e2"
+decimal_context_spacing_9	json:"string:-0.0"
+decimal_context_spacing_10	json:"string:0.125e1"

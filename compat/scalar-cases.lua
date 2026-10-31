@@ -2527,4 +2527,17 @@ c\9d"}, ["expected"]="json:\"string:[\\\"a\\\\u0000b\\\\nc\\\\td\\\"]\"", ["form
   {["context"]={["input"]={["hash"]={{"a", {"b", "c"}}, {"b", {"a", "b", "c"}}, {"c", {"a", "b", "c"}}}}}, ["expected"]="array:[38:array:[8:string:a8:string:b8:string:c]]", ["formula"]="", ["id"]="graph_exhaustive_510_resolve_cycles", ["operation"]="resolve_cycles"},
   {["context"]={["input"]={["hash"]={{"a", {"a", "b", "c"}}, {"b", {"a", "b", "c"}}, {"c", {"a", "b", "c"}}}}}, ["expected"]="error:TSort::Cyclic", ["formula"]="", ["id"]="graph_exhaustive_511_resolve_order", ["operation"]="resolve_order"},
   {["context"]={["input"]={["hash"]={{"a", {"a", "b", "c"}}, {"b", {"a", "b", "c"}}, {"c", {"a", "b", "c"}}}}}, ["expected"]="array:[38:array:[8:string:a8:string:b8:string:c]]", ["formula"]="", ["id"]="graph_exhaustive_511_resolve_cycles", ["operation"]="resolve_cycles"},
+  {["context"]={["input"]={["decimal"]=" -0"}}, ["expected"]="json:\"string:-0.0\"", ["formula"]="CONCAT(input)", ["id"]="decimal_context_spacing_1", ["operation"]="json_evaluate"},
+  {["context"]={["input"]={["decimal"]="\9-0.0"}}, ["expected"]="json:\"string:-0.0\"", ["formula"]="CONCAT(input)", ["id"]="decimal_context_spacing_2", ["operation"]="json_evaluate"},
+  {["context"]={["input"]={["decimal"]="\
+-0e0"}}, ["expected"]="json:\"string:-0.0\"", ["formula"]="CONCAT(input)", ["id"]="decimal_context_spacing_3", ["operation"]="json_evaluate"},
+  {["context"]={["input"]={["decimal"]="\13\
+-0.000e+2 \9"}}, ["expected"]="json:\"string:-0.0\"", ["formula"]="CONCAT(input)", ["id"]="decimal_context_spacing_4", ["operation"]="json_evaluate"},
+  {["context"]={["input"]={["decimal"]=" +0 "}}, ["expected"]="json:\"string:0.0\"", ["formula"]="CONCAT(input)", ["id"]="decimal_context_spacing_5", ["operation"]="json_evaluate"},
+  {["context"]={["input"]={["decimal"]="\9+12.5\
+"}}, ["expected"]="json:\"string:0.125e2\"", ["formula"]="CONCAT(input)", ["id"]="decimal_context_spacing_6", ["operation"]="json_evaluate"},
+  {["context"]={["input"]={["decimal"]=" 0 "}}, ["expected"]="json:\"string:0.0\"", ["formula"]="CONCAT(input)", ["id"]="decimal_context_spacing_7", ["operation"]="json_evaluate"},
+  {["context"]={["input"]={["decimal"]=" -12.5 "}}, ["expected"]="json:\"string:-0.125e2\"", ["formula"]="CONCAT(input)", ["id"]="decimal_context_spacing_8", ["operation"]="json_evaluate"},
+  {["context"]={["input"]={["decimal"]="\11-0\12"}}, ["expected"]="json:\"string:-0.0\"", ["formula"]="CONCAT(input)", ["id"]="decimal_context_spacing_9", ["operation"]="json_evaluate"},
+  {["context"]={["input"]={["decimal"]="\12+1.25\11"}}, ["expected"]="json:\"string:0.125e1\"", ["formula"]="CONCAT(input)", ["id"]="decimal_context_spacing_10", ["operation"]="json_evaluate"},
 }

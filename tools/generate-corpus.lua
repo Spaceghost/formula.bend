@@ -70,13 +70,16 @@ local function context_value(value)
     local text = value[key]
     local expression = 'Parser.evaluate(' .. bend_string(text) .. ', Nil{}, False{})'
     if key == 'decimal' then
-      -- Parse the magnitude before applying the decimal sign. Parsing "-0"
-      -- as an Integer first would discard BigDecimal's negative zero.
-      if text:sub(1, 1) == '-' then
-        expression = 'Core.negate_value(Core.decimal_result(Parser.evaluate(' .. bend_string(text:sub(2)) .. ', Nil{}, False{})))'
-      else
-        expression = 'Core.decimal_result(' .. expression .. ')'
-      end
+      -- Typed BigDecimal values admit surrounding ASCII whitespace and a +
+      -- sign. Keep the original text in the reference payload below.
+      local literal = text:gsub('^[\t\n\v\f\r ]+', ''):gsub('[\t\n\v\f\r ]+$', '')
+      local negative = literal:sub(1, 1) == '-'
+      if negative or literal:sub(1, 1) == '+' then literal = literal:sub(2) end
+      assert(not literal:match('^[+-]'), 'invalid typed decimal sign')
+      -- Parse the magnitude before applying the sign so integer-looking -0
+      -- retains BigDecimal's negative zero.
+      expression = 'Core.decimal_result(Parser.evaluate(' .. bend_string(literal) .. ', Nil{}, False{}))'
+      if negative then expression = 'Core.negate_value(' .. expression .. ')' end
     end
     return expression, '{' .. json_string(key) .. ':' .. json_string(text) .. '}'
   end
