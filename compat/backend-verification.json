@@ -1,4 +1,34 @@
 {
+  "named_reference_checkpoint": {
+    "source_commit": "356ef66161ef4bc79b9d931f31f37338b2843a9f",
+    "scope": "Named class/module descriptors and comparisons; reflection, anonymous objects and mutable namespace behavior incomplete",
+    "formula_and_api_cases": 5279,
+    "new_named_reference_cases": 2602,
+    "laws": 60,
+    "concrete_fixtures": 175,
+    "source_scenario_mappings": 137,
+    "scale_cases": 7,
+    "malformed_input_cases": 23,
+    "javascript": {
+      "status": "passed_full_replays",
+      "bend_versions": ["2.0.16", "2.0.39"],
+      "file_input_runtime": "Bun 1.3.1",
+      "runtime_js_sha256": "fcf765854554dc1c94ad8be0ef5f0f67b4b8ad0e5d3ab8394958db77cbea74da"
+    },
+    "kernel": {"status": "passed", "bend_version": "2.0.39", "lean_version": "4.34.0"},
+    "native_cpu": {
+      "status": "passed",
+      "compiler": "Ubuntu clang 19.1.1",
+      "optimization": "-O3",
+      "thread_counts": [1, 8],
+      "generated_c_bytes": 6834868,
+      "generated_c_sha256": "1e002f6a3d8b947955955dff60a7d250c92a9d036d59d5e7507b839fee8abf72",
+      "artifact_sha256": "ec069d99ad5f743b3976379b5c2997ac67ed58d3590219c383e977bfc9320b79",
+      "input_sha256": "3927ed63fb471a3249f2a89947178158cda4c5cba5535364bb98e3316dd66519",
+      "output_sha256": "b5a5d12febca89ed872bee7ea8cafa197cf9f0e1664cacc15512be5d817af47c"
+    },
+    "cuda_status": "unverified for named-reference source"
+  },
   "integer_fixture_checkpoint": {
     "fixture_source_commit": "dd4c68bfc01a09060dc8040d60f14568047db9ae",
     "engine_source_commit": "c22a813d86f5c616e9eaa76cb7b6d68f7e13b0dc",
