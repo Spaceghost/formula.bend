@@ -20,6 +20,15 @@ def context_value(value)
   when Hash
     return value.fetch('text') if value.key?('text')
     return value.fetch('symbol').to_sym if value.key?('symbol')
+    if value.key?('class') || value.key?('module')
+      kind = value.key?('class') ? 'class' : 'module'
+      name = value.fetch(kind)
+      reference = Object.const_get(name)
+      raise 'noncanonical named reference' unless reference.name == name
+      raise 'wrong named reference kind' unless kind == (reference.is_a?(Class) ? 'class' : 'module')
+      raise 'wrong named ancestry' unless reference.ancestors.drop(1).map(&:name) == value.fetch('ancestors')
+      return reference
+    end
     return value.fetch('hash').map { |key, item| [context_value(key), context_value(item)] }.to_h if value.key?('hash')
     return Integer(value.fetch('integer')) if value.key?('integer')
     return BigDecimal(value.fetch('decimal')) if value.key?('decimal')
@@ -63,6 +72,8 @@ def snapshot_value(value)
   when Integer then "number:#{value}"
   when String then "string:#{value}"
   when Symbol then "symbol:#{value}"
+  when Class then "class-reference:#{value.name}"
+  when Module then "module-reference:#{value.name}"
   when Hash
     parts = value.flat_map { |key, item| [snapshot_value(key), snapshot_value(item)] }
     "hash:{#{parts.map { |part| "#{part.length}:#{part}" }.join}}"

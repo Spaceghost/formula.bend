@@ -7,6 +7,10 @@ import ./unicode.bend as Unicode
 import ./remainder.bend as Remainder
 import ./bits.bend as Bits
 
+type ReferenceKind is Data:
+  ClassReferenceKind{}
+  ModuleReferenceKind{}
+
 # Small integers use Nat; larger integers and decimals use exact digit lists.
 type Value is Data:
   Number{value: Nat}
@@ -18,6 +22,7 @@ type Value is Data:
   NullValue{}
   TextValue{value: String}
   SymbolValue{value: String}
+  NamedReference{kind: ReferenceKind, name: String, ancestors: List<&2, String>}
   MemberIndex{name: String}
   HashNil{}
   HashEntry{key: Value, value: Value, tail: Value}
@@ -273,6 +278,8 @@ def ruby_render(value: Value, inspect: Bool, tail_mode: Bool) -> String:
       Bool.pick(String, inspect, StringOps.quote(s), s)
     case SymbolValue{+s}:
       Bool.pick(String, inspect, StringOps.symbol_inspect(s), s)
+    case NamedReference{kind, name, ancestors}:
+      name
     case HashNil{}:
       Bool.pick(String, tail_mode, "}", "{}")
     case HashEntry{key, value, tail}:
@@ -339,12 +346,31 @@ def array_join(left: Value, right: Value) -> Value:
 
 # Ruby array equality does not coerce string elements to numbers. The pinned
 # BigDecimal implementation compares equal to integral values in subtraction.
+def reference_type_name(kind: ReferenceKind) -> String:
+  match kind:
+    case ClassReferenceKind{}:
+      "Class"
+    case ModuleReferenceKind{}:
+      "Module"
+
+def named_identity(a_kind: ReferenceKind, a_name: String, b_kind: ReferenceKind, b_name: String) -> Bool:
+  Bool.and(String.eq(reference_type_name(a_kind), reference_type_name(b_kind)), String.eq(a_name, b_name))
+
+def named_ancestor(names: List<&2, String>, +name: String) -> Bool:
+  match names:
+    case Nil{}:
+      False{}
+    case head <> rest:
+      Bool.or(String.eq(head, name), named_ancestor(rest, name))
+
 def hash_key_equal(a: Value, b: Value) -> Bool:
   match a b:
     case TextValue{x} TextValue{y}:
       String.eq(x, y)
     case SymbolValue{x} SymbolValue{y}:
       String.eq(x, y)
+    case NamedReference{ka, a, pa} NamedReference{kb, b, pb}:
+      named_identity(ka, a, kb, b)
     case a b:
       False{}
 
@@ -394,6 +420,8 @@ def value_equal(a: Value, b: Value, +strict: Bool) -> Bool:
       Bool.and(hash_equal_found(hash_find(b, key), other => value_equal(value, other, strict)), value_equal(tail, hash_remove(b, key), strict))
     case SymbolValue{x} SymbolValue{y}:
       String.eq(x, y)
+    case NamedReference{ka, a, pa} NamedReference{kb, b, pb}:
+      named_identity(ka, a, kb, b)
     case NegativeNumber{x} Number{y}:
       Bool.and(Decimal.is_zero(x), Nat.is_eq(y, 0n))
     case Number{x} NegativeNumber{y}:
@@ -486,6 +514,8 @@ def ruby_type_name(value: Value) -> String:
       "String"
     case SymbolValue{s}:
       "Symbol"
+    case NamedReference{kind, name, ancestors}:
+      reference_type_name(kind)
     case Logical{True{}}:
       "TrueClass"
     case Logical{False{}}:
@@ -1162,12 +1192,103 @@ def equality_only(op: Comparison, order: Cmp) -> Value:
     case op:
       Failure{"Incompatible comparison operands"}
 
+def named_relation(+same: Bool, +subtype: Bool, supertype: Bool, inclusive: Bool) -> Value:
+  Bool.pick(Value, Bool.or(same, Bool.or(subtype, supertype)), Logical{Bool.or(subtype, Bool.and(same, inclusive))}, NullValue{})
+
+def compare_named(op: Comparison, +same: Bool, +subtype: Bool, +supertype: Bool) -> Value:
+  match op:
+    case EqualTo{}:
+      Logical{same}
+    case NotEqualTo{}:
+      Logical{Bool.not(same)}
+    case LessThan{}:
+      named_relation(same, subtype, supertype, False{})
+    case LessOrEqual{}:
+      named_relation(same, subtype, supertype, True{})
+    case GreaterThan{}:
+      named_relation(same, supertype, subtype, False{})
+    case GreaterOrEqual{}:
+      named_relation(same, supertype, subtype, True{})
+
+def supports_order(value: Value) -> Bool:
+  match value:
+    case Logical{b}:
+      False{}
+    case NullValue{}:
+      False{}
+    case ArrayNil{}:
+      False{}
+    case ArrayCons{head, tail}:
+      False{}
+    case value:
+      True{}
+
+def missing_comparison_operator(op: Comparison) -> Value:
+  match op:
+    case LessThan{}:
+      Failure{"Dentaku::AST::LessThan requires operands that respond to <"}
+    case LessOrEqual{}:
+      Failure{"Dentaku::AST::LessThanOrEqual requires operands that respond to <="}
+    case GreaterThan{}:
+      Failure{"Dentaku::AST::GreaterThan requires operands that respond to >"}
+    case GreaterOrEqual{}:
+      Failure{"Dentaku::AST::GreaterThanOrEqual requires operands that respond to >="}
+    case op:
+      Failure{"Incompatible comparison operands"}
+
+def named_other_order(supported: Bool, op: Comparison) -> Value:
+  match supported:
+    case True{}:
+      Failure{"compared with non class/module"}
+    case False{}:
+      missing_comparison_operator(op)
+
+def compare_named_nonreference(op: Comparison, other: Value) -> Value:
+  match op:
+    case EqualTo{}:
+      Logical{False{}}
+    case NotEqualTo{}:
+      Logical{True{}}
+    case op:
+      named_other_order(supports_order(other), op)
+
+def other_named_order_message(other: Value, kind: ReferenceKind) -> Value:
+  match other:
+    case HashNil{}:
+      Failure{"no implicit conversion of " ++ reference_type_name(kind) ++ " into Hash"}
+    case HashEntry{key, item, rest}:
+      Failure{"no implicit conversion of " ++ reference_type_name(kind) ++ " into Hash"}
+    case other:
+      Failure{"comparison of " ++ ruby_type_name(other) ++ " with " ++ reference_type_name(kind) ++ " failed"}
+
+def other_named_order(supported: Bool, other: Value, kind: ReferenceKind, op: Comparison) -> Value:
+  match supported:
+    case True{}:
+      other_named_order_message(other, kind)
+    case False{}:
+      missing_comparison_operator(op)
+
+def compare_nonreference_named(+other: Value, kind: ReferenceKind, op: Comparison) -> Value:
+  match op:
+    case EqualTo{}:
+      Logical{False{}}
+    case NotEqualTo{}:
+      Logical{True{}}
+    case op:
+      other_named_order(supports_order(other), other, kind, op)
+
 def compare_values(a: Value, b: Value, op: Comparison) -> Value:
   match a b:
     case Failure{e} b:
       Failure{e}
     case a Failure{e}:
       Failure{e}
+    case NamedReference{ka, +a, pa} NamedReference{kb, +b, pb}:
+      compare_named(op, named_identity(ka, a, kb, b), named_ancestor(pa, b), named_ancestor(pb, a))
+    case NamedReference{kind, name, ancestors} b:
+      compare_named_nonreference(op, b)
+    case a NamedReference{kind, name, ancestors}:
+      compare_nonreference_named(a, kind, op)
     case HashNil{} b:
       equality_only(op, Bool.pick(Cmp, value_equal(HashNil{}, b, False{}), EQ{}, LT{}))
     case HashEntry{key, value, tail} b:
@@ -2334,6 +2455,8 @@ def show(value: Value) -> String:
       "Internal member index"
     case SymbolValue{s}:
       s
+    case NamedReference{kind, name, ancestors}:
+      name
     case HashNil{}:
       "{}"
     case HashEntry{key, value, tail}:
@@ -2371,6 +2494,13 @@ def show(value: Value) -> String:
 def failure_snapshot(+message: String) -> String:
   Bool.pick(String, is_unbound_message(message), "error:Dentaku::UnboundVariableError", Bool.pick(String, String.eq(message, "Division by zero"), "error:Dentaku::ZeroDivisionError", Bool.pick(String, is_range_message(message), "error:RangeError", "error:Dentaku::ArgumentError")))
 
+def named_snapshot(kind: ReferenceKind, name: String) -> String:
+  match kind:
+    case ClassReferenceKind{}:
+      "class-reference:" ++ name
+    case ModuleReferenceKind{}:
+      "module-reference:" ++ name
+
 def snapshot_render(value: Value, +tail_mode: Bool) -> String:
   match value:
     case MemberIndex{name}:
@@ -2406,6 +2536,8 @@ def snapshot_render(value: Value, +tail_mode: Bool) -> String:
       "string:" ++ s
     case SymbolValue{s}:
       "symbol:" ++ s
+    case NamedReference{kind, name, ancestors}:
+      named_snapshot(kind, name)
     case HashNil{}:
       Bool.pick(String, tail_mode, "}", "hash:{}")
     case HashEntry{key, value, tail}:
@@ -2422,6 +2554,8 @@ def class_snapshot(value: Value) -> String:
   match value:
     case SymbolValue{s}:
       "class:Symbol"
+    case NamedReference{kind, name, ancestors}:
+      "class:" ++ reference_type_name(kind)
     case HashNil{}:
       "class:Hash"
     case HashEntry{key, item, tail}:

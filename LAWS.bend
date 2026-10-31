@@ -12,6 +12,30 @@ import ./src/resolver.bend as Resolver
 import ./src/reference.bend as Ref
 import ./src/error_types.bend as ErrorTypes
 
+law named_class_type:
+  for name: String
+  for parents: List<&2, String>
+  {Core.ruby_type_name(Core.NamedReference{Core.ClassReferenceKind{}, name, parents}) == "Class" : String}
+
+law named_module_type:
+  for name: String
+  for parents: List<&2, String>
+  {Core.ruby_type_name(Core.NamedReference{Core.ModuleReferenceKind{}, name, parents}) == "Module" : String}
+
+law named_reference_truthy:
+  for kind: Core.ReferenceKind
+  for name: String
+  for parents: List<&2, String>
+  {Core.truthy(Core.NamedReference{kind, name, parents}) == True{} : Bool}
+
+law named_relation_unrelated:
+  for inclusive: Bool
+  {Core.named_relation(False{}, False{}, False{}, inclusive) == Core.NullValue{} : Core.Value}
+
+law named_relation_reflexive:
+  for +inclusive: Bool
+  {Core.named_relation(True{}, False{}, False{}, inclusive) == Core.Logical{inclusive} : Core.Value}
+
 law error_override_message:
   for error: ErrorTypes.Description<Core.Value>
   for +message: String
