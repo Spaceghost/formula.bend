@@ -668,3 +668,15 @@ and 2.0.39. The full runtime-loaded corpus, seven scale cases and 18 malformed
 inputs pass Bun and native CPU with one and eight threads at `-O3`. Artifact
 hashes are recorded in token_api_checkpoint; prior source checkpoints retain
 their own counts and validation scopes.
+
+## Required-GPU fast-compile checkpoint after fixture fixes
+
+The cached c22a813 runtime passes all 2,677 pre-token cases on the P4000 with
+`--gpu 1GB` and NVRTC `--Ofast-compile=max`, retaining `--fmad=false`. Its
+preceding 2,657-case run passed the same seven scale inputs on that shader.
+CPU pool sizes one and eight also match the 2,677-case oracle. The expanded
+integer import cases require new fixture data, so they reuse this unchanged
+Bend runtime and shader. Exact input, binary and shader hashes are recorded.
+The 113 newer token cases require a new shader and remain GPU-unverified.
+Default-profile CUDA and Metal execution remain unverified. No runtime
+performance comparison follows from these correctness runs.

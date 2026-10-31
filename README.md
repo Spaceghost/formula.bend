@@ -175,3 +175,6 @@ Parser.identifiers reports unique syntactic inputs; Parser.dependencies prunes
 resolvable IF/AND/OR branches. Public formula evaluation checks dependencies
 before evaluating, while Core.evaluate_in remains direct AST evaluation. Stored
 formula values, cycles, and volatile custom-function analysis are not implemented.
+The labeled CUDA fast-compile checkpoint now covers all 2,677 pre-token cases
+and seven scale cases on the P4000. The newer token API needs its own GPU
+checkpoint; default-profile CUDA and Metal remain unverified.
