@@ -118,7 +118,7 @@ The eight address runtime cases pass on both JavaScript and native CPU.
 
 Parity is measured against the pinned Ruby source and its complete 713-example
 suite. The Ruby reference passes all examples; that is not a claim that Bend does.
-A separate 8537-case corpus covers selected values,
+A separate 8665-case corpus covers selected values,
 dependencies, parse-error classification, and exception factories.
 `make parity-check` generates the fixtures using Lua.
 Use `LUA=/path/to/lua` if Lua is not on PATH.
@@ -132,16 +132,16 @@ gate. No performance comparison is claimed yet.
 
 The corpus supports exact decimal, integer, string, Boolean, null, nested array,
 ordered hash, named class/module and Range bindings, plus case-sensitive contexts.
-All 8,537 cases pass Bun and native CPU with one and eight threads at `-O3`.
+All 8,665 cases pass Bun and native CPU with one and eight threads at `-O3`.
 Seven scale checks over 1,025-item collections and 27 malformed-input checks
-also pass. All 81 laws pass Lean-backed verification on Bend 2.0.39. There are
+also pass. All 86 laws pass Lean-backed verification on Bend 2.0.39. There are
 153 explicit upstream scenario mappings and 175 concrete regression fixtures.
 
-The preceding 8,486-case source checkpoint passes full static replay and 175
-concrete fixtures on Bend 2.0.39. All 51 added Calculator sessions pass static
-replay on that version. The fresh merged 8,537-case static replay has not run.
-Legacy Bend 2.0.16 Calculator verification is partial: eight sessions passed;
-remaining work is queued with memory guards. Historical
+The bce55b2 source checkpoint passes full 8,537-case static replay and 175
+concrete fixtures on Bend 2.0.39. All 128 added cache-transfer and storage
+sessions pass static replay on that version. Fresh full 8,665-case static replay
+has not run. Legacy Calculator verification remains partial; the older 2,376
+matcher cases now pass both Bend versions. Historical
 checks, source revisions and artifact hashes are recorded separately in
 `compat/backend-verification.json`. Current-source CUDA and Metal remain
 unverified; no performance result is claimed.
