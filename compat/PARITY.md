@@ -70,6 +70,12 @@ Lean-backed gate; 175 concrete fixtures pass Bend 2.0.39. Full combined static
 replay on both Bend versions, current-source CUDA and Metal remain unverified.
 This is correctness evidence, with no performance result.
 
+The subsequent `5103172` integration includes the 183 exact matcher/function
+constructor probes: 7,951 total cases, seven scale checks and 23 malformed-input
+rejections pass Bun and native CPU with one and eight threads at `-O3`. All
+67 laws pass Lean-backed verification, and 150 source scenarios have explicit
+mappings. Combined static replay and current-source GPU checks remain pending.
+
 ## Reference runner
 
 `tools/reference.Containerfile` pins the Ruby image manifest and adds Git for the

@@ -127,6 +127,11 @@ The corpus supports exact decimal, integer, string, Boolean, null, nested array,
 ordered hash, and named class/module bindings, plus case-sensitive contexts.
 MAP, FILTER, ALL, ANY, and REDUCE also have seven reference checks over
 1,025-item collections. The checker batches static replay to bound memory.
+The current 7,951-case corpus and seven scale checks pass Bun and native CPU
+with one and eight threads at `-O3`. All 23 malformed inputs are rejected, and
+all 67 laws pass Lean-backed verification. Combined static replay on both Bend
+versions, current-source CUDA and Metal remain pending.
+
 The 7,768-case integration checkpoint and seven scale checks pass Bun and native CPU
 with one and eight threads at `-O3`. All 23 malformed inputs are rejected.
 Its 66 laws pass Lean-backed verification, and the 175 concrete fixtures pass
