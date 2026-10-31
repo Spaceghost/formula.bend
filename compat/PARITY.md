@@ -603,3 +603,20 @@ prefix from its verified transport checkpoint and executes both changed
 batches, covering all 353 remaining cases. Existing source modules were checked
 for changes before reuse, and every retained output matches the merged golden.
 The prefix artifact hashes and all checkpoint hashes are recorded in the repo.
+
+## Typed integer fixture imports
+
+Fixture `{integer='...'}` inputs use Ruby's `Integer(String)` rules with an
+inferred base. The static and wire encoders share a Lua normalizer for binary,
+octal, decimal and hexadecimal prefixes, leading-zero octal, one sign, digit
+separators and exterior ASCII whitespace. Nondecimal magnitudes are converted
+to decimal digits without putting the complete value in a Lua number. Ruby
+reference payloads retain their original strings.
+
+Twenty formula cases exercise these imports through CONCAT, including values
+larger than 64 bits. A separate pinned Ruby 3.3.13 profile checks 5,326 strings:
+1,768 accepted and 3,558 rejected. These are fixture-converter checks, counted
+separately from formula parity. `make integer-context-check` validates the
+profile; `tools/run-integer-reference.lua STORAGE RUNROOT OUTPUT` regenerates
+it in the pinned Ruby reference container. Formula numeric-literal grammar is
+unchanged by this fixture transport normalization.

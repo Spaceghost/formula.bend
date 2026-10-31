@@ -1,3 +1,4 @@
+local IntegerContext = dofile((debug.getinfo(1, 'S').source:match('^@(.*/)') or './') .. 'integer-context.lua')
 local input = assert(arg[1], 'usage: lua tools/generate-corpus.lua CASES.lua OUTPUT_PREFIX [--metadata-only | --slice START COUNT | --gpu | --gpu-slice START COUNT]')
 local prefix = assert(arg[2], 'missing output prefix')
 local metadata_only = arg[3] == '--metadata-only'
@@ -68,7 +69,8 @@ local function context_value(value)
   if value.decimal or value.integer then
     local key = value.decimal and 'decimal' or 'integer'
     local text = value[key]
-    local expression = 'Parser.evaluate(' .. bend_string(text) .. ', Nil{}, False{})'
+    local literal_text = key == 'integer' and IntegerContext.canonical(text) or text
+    local expression = 'Parser.evaluate(' .. bend_string(literal_text) .. ', Nil{}, False{})'
     if key == 'decimal' then
       -- Typed BigDecimal values admit surrounding ASCII whitespace and a +
       -- sign. Keep the original text in the reference payload below.

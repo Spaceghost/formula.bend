@@ -1,0 +1,13 @@
+{
+  "ruby_version": "3.3.13",
+  "scope": "Typed fixture Integer(String) conversion with inferred base; separate from formula parity",
+  "checks": 5326,
+  "accepted": 1768,
+  "rejected": 3558,
+  "reference": "compat/integer-context-oracle.tsv",
+  "reference_sha256": "3aa74277a3463a15449dd11c27880d61c1e2baa7337d080d1aa83c75f9b68e48",
+  "reference_command": "lua tools/run-integer-reference.lua STORAGE RUNROOT OUTPUT",
+  "check_command": "make integer-context-check",
+  "implementation": "tools/integer-context.lua",
+  "arithmetic": "Decimal digit arrays for nondecimal conversion; the full integer never enters a Lua number"
+}
