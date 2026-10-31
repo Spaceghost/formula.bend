@@ -49,7 +49,7 @@ The unchanged upstream suite passes 713 examples with zero failures and 96.82%
 line coverage in the Ruby reference environment. `reference-summary.json` and
 `upstream-spec-catalog.json` record that run. These results describe Ruby only.
 
-The Lua-driven corpus has 8665 reference cases for Ruby values, parse
+The Lua-driven corpus has 8777 reference cases for Ruby values, parse
 error classification, or exception-factory descriptions. It covers truthiness, strings/null, comparisons, selected
 numeric-string coercions, and static operand rejection. It is a small subset of
 the upstream catalog. Native error classes/messages, all calculator methods,
@@ -892,3 +892,25 @@ eight preserved results and 43 resumed results. The new 128 mode/overload
 sessions remain verified on Bend 2.0.39; a fresh full 8,665 static replay has
 not been claimed. Float bindings and formatting are not yet wired into the
 formula evaluator, and broader parity and the shootout remain unfinished.
+
+## Calculator dependency queries
+
+The complete 8,777-case corpus passes Bun and native CPU with one and eight
+threads at clang 19 -O3. Seven scale checks and 27 malformed-input cases also
+pass. All 112 new session probes pass Bend 2.0.39 static replay, and all 97 laws
+pass Lean-backed verification. The previous 79ca28c checkpoint now also has a
+completed full 8,665-case static replay and full make check; the newer 8,777-case
+static replay has not run.
+
+Calculator dependency queries use memory plus temporary context, preserve
+Dentaku's duplicates and collection traversal order, and retain transferred AST
+creator modes. Nil context ignores memory. Identifier queries visit all branches
+without evaluating guards and deduplicate across the complete collection.
+The exact Boolean true static marker visits all branches while bound names stay
+satisfied. The tokenizer distinguishes malformed characters and unterminated
+strings from unspaced logical-alias grammar errors.
+
+Stored AST/callable bindings, mutable identity, full error propagation, Float
+evaluator integration, spreadsheet dialects and the broader parity/shootout
+requirements remain unfinished. These results do not claim current-source CUDA
+or Metal verification, performance results, or complete Dentaku parity.

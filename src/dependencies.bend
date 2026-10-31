@@ -44,7 +44,7 @@ def union(a: List<&2, String>, b: List<&2, String>) -> List<&2, String>:
   unique(List.append(&2, String, a, b), Nil{})
 
 def variable(+name: String, context: List<&2, Core.Binding>, +sensitive: Bool, static: Bool) -> List<&2, String>:
-  Bool.pick(List<&2, String>, Bool.or(static, Bool.not(present(context, name, sensitive))), [Core.normalize(sensitive, name)], Nil{})
+  Bool.pick(List<&2, String>, Bool.not(present(context, name, sensitive)), [Core.normalize(sensitive, name)], Nil{})
 
 def branch(chosen: Bool, yes: Unit -> List<&2, String>, no: Unit -> List<&2, String>) -> List<&2, String>:
   match chosen:

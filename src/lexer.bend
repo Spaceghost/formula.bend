@@ -39,6 +39,7 @@ type Token is Data:
   XorWord{spelling: String}
   NotWord{spelling: String}
   BangWord{}
+  InvalidLogicalAlias{}
   Invalid{character: Char}
   InvalidNumeric{}
   CaseWord{}
@@ -211,7 +212,7 @@ def flush(mode: Mode, tokens: List<&2, Token>) -> List<&2, Token>:
     case Hexadecimal{digits, False{}, raw}:
       Identifier{String.reverse(raw)} <> tokens
     case AliasPending{is_and}:
-      Invalid{Chr{38}} <> tokens
+      InvalidLogicalAlias{} <> tokens
     case Pending{c}:
       symbol(c) <> tokens
     case Quoted{quote, text}:
@@ -258,7 +259,7 @@ def step(kind: CharacterClass, mode: Mode, tokens: List<&2, Token>) -> Mode & Li
     case Letter{c} Fraction{digits, scale}:
       numeric_word(SCon{c, fraction_reversed(digits, scale)}, tokens)
     case Digit{n, c} AliasPending{is_and}:
-      (Idle{}, Invalid{c} <> tokens)
+      (Idle{}, InvalidLogicalAlias{} <> tokens)
     case Digit{n, c} Pending{first}:
       (Digits{[U32.from_nat(n)]}, symbol(first) <> tokens)
     case Digit{n, c} Quoted{quote, text}:
@@ -350,7 +351,7 @@ def alias_step(space: Bool, is_and: Bool, c: Char, tokens: List<&2, Token>) -> M
     case True{}:
       (Idle{}, Bool.pick(Token, is_and, AndWord{"&&"}, OrWord{"||"}) <> tokens)
     case False{}:
-      (Idle{}, Invalid{c} <> tokens)
+      (Idle{}, InvalidLogicalAlias{} <> tokens)
 
 def scientific_word(explicit_sign: Bool, negative: Bool, exponent: List<&2, U32>, prefix: String, c: Char, tokens: List<&2, Token>) -> Mode & List<&2, Token>:
   match explicit_sign:
