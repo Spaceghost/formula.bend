@@ -550,3 +550,8 @@ scientific notation, spaces, tabs, newlines, carriage returns, vertical tabs
 and form feeds. Three transport laws preserve both zero signs and reject a
 second sign. The wire rejection corpus now has 18 cases, including all four
 doubled-sign combinations.
+All 2,526 cases pass on both Bend 2.0.16 and 2.0.39. The 51-law gate passes
+Lean-backed checking on Bend 2.0.39. Bun 1.3.1 and native clang 19.1.1 at `-O3`
+pass the full runtime-loaded corpus, seven scale checks and 18 malformed inputs;
+the native checks pass with both one and eight threads. The typed decimal
+checkpoint records exact artifact and input hashes in `backend-verification.json`.
