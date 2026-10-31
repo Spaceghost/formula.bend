@@ -14,6 +14,14 @@ import ./src/reference.bend as Ref
 import ./src/error_types.bend as ErrorTypes
 import ./src/errors.bend as Errors
 
+law range_zero_blocks:
+  for depth: Nat
+  for first: Core.Value
+  for stride: Core.Value
+  for last: Core.Value
+  for excluded: Bool
+  {Errors.range_block(depth, 0n, first, stride, last, excluded) == Core.ArrayNil{} : Core.Value}
+
 law endless_range_array:
   for first: Core.Value
   for excluded: Bool

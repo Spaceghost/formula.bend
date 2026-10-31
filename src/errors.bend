@@ -119,35 +119,51 @@ def hash_array(value: Core.Value) -> Core.Value:
     case value:
       Core.ArrayNil{}
 
-def integer_range_pick(within: Core.Value, first: Core.Value, next: Unit -> Core.Value) -> Core.Value:
+def integer_range_pick(within: Core.Value, first: Core.Value) -> Core.Value:
   match within:
     case Core.Logical{True{}}:
-      Core.ArrayCons{first, next(Unit{})}
+      Core.ArrayCons{first, Core.ArrayNil{}}
     case within:
       Core.ArrayNil{}
 
-def integer_range_step(fuel: Nat, +first: Core.Value, +last: Core.Value, +excluded: Bool) -> Core.Value:
-  match fuel:
-    case 0n:
+# A depth-d block contains ten depth-(d-1) blocks. Only the small block
+# counter uses Nat; the complete span remains an exact decimal coefficient.
+def range_block(+depth: Nat, count: Nat, +first: Core.Value, +stride: Core.Value, +last: Core.Value, +excluded: Bool) -> Core.Value:
+  match depth count:
+    case depth 0n:
       Core.ArrayNil{}
-    case 1n+rest:
-      integer_range_pick(Core.compare_values(first, last, Bool.pick(Core.Comparison, excluded, Core.LessThan{}, Core.LessOrEqual{})), first, u => integer_range_step(rest, Core.add(first, Core.Number{1n}), last, excluded))
+    case 0n 1n+rest:
+      left right = integer_range_pick(Core.compare_values(first, last, Bool.pick(Core.Comparison, excluded, Core.LessThan{}, Core.LessOrEqual{})), first) range_block(0n, rest, Core.add(first, stride), stride, last, excluded)
+      Core.array_append(left, right)
+    case 1n+smaller 1n+rest:
+      left right = range_block(smaller, 10n, first, Core.integer_result(Core.divide(stride, Core.Number{10n})), last, excluded) range_block(1n+smaller, rest, Core.add(first, stride), stride, last, excluded)
+      Core.array_append(left, right)
 
-def range_fuel(operand: Core.NumericOperand) -> Nat:
+# Each call shrinks the digit list and advances by one decimal place.
+# Independent lower and higher blocks run concurrently.
+def range_digits(digits: List<&2, U32>, +depth: Nat, +first: Core.Value, +stride: Core.Value, +last: Core.Value, +excluded: Bool) -> Core.Value:
+  match digits:
+    case Nil{}:
+      Core.ArrayNil{}
+    case +digit <> rest:
+      low high = range_block(depth, U32.to_nat(digit), first, stride, last, excluded) range_digits(rest, 1n+depth, Core.add(first, Core.multiply(stride, Core.Number{U32.to_nat(digit)})), Core.multiply(stride, Core.Number{10n}), last, excluded)
+      Core.array_append(low, high)
+
+def integer_range_span(operand: Core.NumericOperand, first: Core.Value, +last: Core.Value, +excluded: Bool) -> Core.Value:
   match operand:
     case Core.Magnitude{True{}, value}:
-      0n
+      Core.ArrayNil{}
     case Core.Magnitude{False{}, Decimal.Exact{digits, places}}:
-      1n+Decimal.coefficient(Decimal.integer_digits(places, digits))
+      range_digits(Decimal.add_digits(Decimal.integer_digits(places, digits), [1], 0), 0n, first, Core.Number{1n}, last, excluded)
     case operand:
-      0n
+      Core.ArrayNil{}
 
 # Array(range) belongs to exception construction as well as value semantics.
 # String/Symbol successor enumeration is a separate, still-open compatibility gap.
 def range_array_kind(integer: Bool, +first: Core.Value, +last: Core.Value, excluded: Bool) -> Core.Value:
   match integer:
     case True{}:
-      integer_range_step(range_fuel(Core.numeric_operand_value(Core.subtract(last, first))), first, last, excluded)
+      integer_range_span(Core.numeric_operand_value(Core.subtract(last, first)), first, last, excluded)
     case False{}:
       match first:
         case Core.TextValue{text}:

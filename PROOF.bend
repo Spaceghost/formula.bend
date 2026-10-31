@@ -5,6 +5,13 @@ import ./LAWS.bend as Laws
 import ./src/bits.bend as Bits
 import ./src/error_types.bend as ErrorTypes
 
+def Laws.range_zero_blocks(depth, first, stride, last, excluded):
+  match depth:
+    case 0n:
+      {==}
+    case 1n+rest:
+      {==}
+
 def Laws.endless_range_array(first, excluded):
   {==}
 

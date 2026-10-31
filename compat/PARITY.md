@@ -680,8 +680,9 @@ continues to cover only the earlier 2,516-case source checkpoint.
 
 Finite integer-start ranges enumerate expected operand values for `NodeError`
 and `ParseError`'s `node_invalid` reason. Integer endpoints remain exact even
-when they exceed a machine word, provided the materialized span fits the runtime
-Nat representation. Exclusive, descending, negative and mixed integer/decimal
+when they exceed a machine word. Decimal blocks retain the complete span count
+without converting it to a bounded Nat. Materializing a range still requires
+memory proportional to its length. Exclusive, descending, negative and mixed integer/decimal
 end bounds follow the reference checks. Endless ranges produce Ruby's native
 `RangeError`; beginless and non-iterable ranges produce `TypeError` with their
 class-specific messages. A parse error without an operation skips conversion,
