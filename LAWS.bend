@@ -1,3 +1,4 @@
+import ./compat/calculator_api.bend as CalculatorApi
 import ./src/calculator.bend as Calculator
 import ./src/token_matcher.bend as Matcher
 import Base
@@ -412,3 +413,19 @@ law calculator_failed_context:
   {Calculator.get_memory(Calculator.result_state(Calculator.evaluate_value(Core.TextValue{"missing"}, Calculator.create(), Core.HashEntry{Core.SymbolValue{"a"}, Core.Number{3n}, Core.HashNil{}}, True{}))) == Core.HashNil{} : Core.Value}
 law calculator_open_index_eof:
   {Parser.snapshot("{10,20}[1", Nil{}, False{}) == "number:20" : String}
+law cached_program_keeps_creator_mode:
+  for state: Calculator.State
+  for +origin: Bool
+  {Calculator.ast_mode(Calculator.ast(Calculator.load_cache(state, [Calculator.AstEntry{Core.TextValue{"probe"}, Core.Literal{Core.NullValue{}}, origin}]), Core.TextValue{"probe"})) == origin : Bool}
+
+law cached_folded_identifier_uses_exact_memory:
+  {Calculator.result_snapshot(Calculator.evaluate_value(Core.TextValue{"probe"}, Calculator.load_cache(Calculator.set_value(Calculator.set_value(Calculator.make(True{}, True{}, False{}), Core.TextValue{"A"}, Core.Number{10n}), Core.TextValue{"a"}, Core.Number{20n}), [Calculator.AstEntry{Core.TextValue{"probe"}, Core.Variable{"A"}, False{}}]), Core.HashNil{}, True{})) == "number:20" : String}
+
+law cached_sensitive_identifier_does_not_fold_receiver:
+  {Calculator.result_snapshot(Calculator.evaluate_value(Core.TextValue{"probe"}, Calculator.load_cache(Calculator.set_value(Calculator.make(False{}, True{}, False{}), Core.TextValue{"A"}, Core.Number{10n}), [Calculator.AstEntry{Core.TextValue{"probe"}, Core.Variable{"A"}, True{}}]), Core.HashNil{}, True{})) == "error:Dentaku::UnboundVariableError" : String}
+
+law store_hash_nil_selects_hash_overload:
+  {Calculator.get_memory(Calculator.result_state(CalculatorApi.pair_value(Core.NullValue{}, Calculator.create(), Core.HashEntry{Core.SymbolValue{"nullable"}, Core.NullValue{}, Core.HashNil{}}))) == Core.HashEntry{Core.TextValue{"nullable"}, Core.NullValue{}, Core.HashNil{}} : Core.Value}
+
+law default_nested_store_array_requires_each_value:
+  {Calculator.result_snapshot(CalculatorApi.store_input(Core.ArrayNil{}, Calculator.create())) == "error:NoMethodError" : String}
