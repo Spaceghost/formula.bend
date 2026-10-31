@@ -17,6 +17,7 @@ check:
 	$(MAKE) unicode-check
 	$(MAKE) binary64-check
 	$(MAKE) stored-check
+	$(MAKE) stored-dependencies-check
 	$(MAKE) parity-check
 
 .PHONY: binary64-check
@@ -156,3 +157,17 @@ stored-check:
 	$(BEND) compat/stored-runtime.bend -o build/stored-runtime.js
 	$(BUN) build/stored-runtime.js build/stored.input > build/stored.actual
 	diff -u compat/stored-oracle.tsv build/stored.actual
+
+.PHONY: stored-dependencies-check
+stored-dependencies-check:
+	mkdir -p build
+	$(LUA) tools/generate-wire.lua compat/stored-cases.lua build/stored.input
+	$(LUA) tools/generate-wire.lua compat/stored-dependency-cases.lua build/stored-dependencies.input
+	$(LUA) tools/generate-wire.lua compat/stored-checked-cases.lua build/stored-checked.input
+	$(BEND) compat/stored-runtime.bend -o build/stored-analysis-runtime.js
+	$(BUN) build/stored-analysis-runtime.js build/stored-dependencies.input > build/stored-dependencies.actual
+	diff -u compat/stored-dependency-oracle.tsv build/stored-dependencies.actual
+	$(BUN) build/stored-analysis-runtime.js build/stored-checked.input > build/stored-checked.actual
+	diff -u compat/stored-checked-oracle.tsv build/stored-checked.actual
+	$(BUN) build/stored-analysis-runtime.js build/stored.input > build/stored-analysis-values.actual
+	diff -u compat/stored-oracle.tsv build/stored-analysis-values.actual

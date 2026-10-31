@@ -946,6 +946,25 @@ def lookup(context: List<&2, Binding>, +name: String, +sensitive: Bool) -> Value
     case SymbolBound{key, value} <> tail:
       found(String.eq(normalize(sensitive, key), normalize(sensitive, name)), value, u => lookup(tail, name, sensitive))
 
+def found_binding(same: Bool, value: Value, rest: Unit -> Maybe<&2, Value>) -> Maybe<&2, Value>:
+  match same:
+    case True{}:
+      Some{value}
+    case False{}:
+      rest(Unit{})
+
+# Presence is independent of the bound value, including null and false.
+def find_binding(context: List<&2, Binding>, +name: String, +sensitive: Bool) -> Maybe<&2, Value>:
+  match context:
+    case Nil{}:
+      None{}
+    case Bound{key, value} <> tail:
+      found_binding(String.eq(normalize(sensitive, key), normalize(sensitive, name)), value, u => find_binding(tail, name, sensitive))
+    case ScopedBound{key, value} <> tail:
+      found_binding(String.eq(key, normalize(sensitive, name)), value, u => find_binding(tail, name, sensitive))
+    case SymbolBound{key, value} <> tail:
+      found_binding(String.eq(normalize(sensitive, key), normalize(sensitive, name)), value, u => find_binding(tail, name, sensitive))
+
 # Root calculator storage normalizes keys; Enum's FlatHash merge preserves them.
 def flatten_fields(value: Value, +prefix: String, +scoped: Bool) -> List<&2, Binding>:
   match value:
@@ -2645,7 +2664,7 @@ def class_snapshot(value: Value) -> String:
 
 def message_snapshot(value: Value) -> String:
   match value:
-    case Failure{message}:
-      "message:" ++ message
+    case Failure{+message}:
+      "message:" ++ Bool.pick(String, String.eq(message, "Division by zero"), "Dentaku::ZeroDivisionError", message)
     case value:
       "no-error"

@@ -141,21 +141,22 @@ The corpus supports exact decimal, integer, string, Boolean, null, nested array,
 ordered hash, named class/module and Range bindings, plus case-sensitive contexts.
 All 8,798 cases pass Bun and native CPU with one and eight threads at `-O3`.
 Seven scale checks over 1,025-item collections and 27 malformed-input checks
-also pass. All 107 laws pass Lean-backed verification on Bend 2.0.39. There are
+also pass. All 109 laws pass Lean-backed verification on Bend 2.0.39. There are
 153 explicit upstream scenario mappings and 175 concrete regression fixtures.
 
-An additional 84 probes compare direct stored-AST value execution against Ruby.
-They pass Bun and native CPU with one and eight threads, including a 257-formula
-chain and recursion through locally rebound MAP variables. The optional recursive
-runner is outside termination proofs. Calculator stored-formula entry points
-remain unfinished; see [stored expressions](docs/stored-expressions.md).
+An additional 283 probes cover stored AST values, formula-aware dependencies and
+checked AST evaluation. They pass Bun and native CPU with one and eight threads.
+The corpus includes a 257-formula chain, locally rebound recursion, branch
+pruning, dependency-first errors and messages. The recursive runners remain
+outside termination proofs. Calculator state/cache evaluation entry points are
+not yet connected; see [stored expressions](docs/stored-expressions.md).
 
-The 986fd47 checkpoint passes full 8,798-case static replay and all concrete
-fixtures on Bend 2.0.39. That checkpoint predates the Float foundation merge.
-The merged source passes the 107-law gate and runtime checks; its fresh full
-static replay remains unverified. Historical checks, source revisions and artifact
-hashes are recorded separately in compat/backend-verification.json.
-Current-source CUDA and Metal remain unverified; no performance result is claimed.
+Full 8,798-case static replay and all concrete fixtures pass on Bend 2.0.39.
+The checker launcher requests a 64 MiB process stack for large diagnostics;
+FORMULA_CHECK_STACK_KIB overrides it within the host hard limit.
+Historical source revisions and artifact hashes are recorded separately in
+compat/backend-verification.json. Current-source CUDA and Metal remain
+unverified; no performance result is claimed.
 
 Typed token descriptors and matchers include counterparts of all 11 upstream
 TokenMatcher examples. Both AST Node dependency examples are represented by

@@ -1,3 +1,5 @@
+import ./stored_checked_api.bend as CheckedApi
+import ./stored_dependencies_api.bend as DependencyApi
 import Base
 import ../src/core.bend as Core
 import ./corpus-wire.bend as Wire
@@ -8,10 +10,23 @@ type Results is Data:
   Joined{left: Results, right: Results}
   Invalid{message: String}
 
+def execute(operation: String, id: String, input: Core.Value) -> Results:
+  match operation:
+    case "stored_value":
+      Result{id, Api.snapshot(input)}
+    case "stored_checked":
+      Result{id, CheckedApi.snapshot(input, False{})}
+    case "stored_checked_message":
+      Result{id, CheckedApi.snapshot(input, True{})}
+    case "stored_dependencies":
+      Result{id, DependencyApi.snapshot(input)}
+    case operation:
+      Invalid{"Unknown stored corpus operation"}
+
 def row(value: Core.Value) -> Results:
   match value:
-    case Core.ArrayCons{Core.TextValue{id}, Core.ArrayCons{Core.TextValue{formula}, Core.ArrayCons{Core.TextValue{"stored_value"}, Core.ArrayCons{Core.ArrayCons{Core.ArrayCons{Core.TextValue{"input"}, Core.ArrayCons{input, Core.ArrayNil{}}}, Core.ArrayNil{}}, Core.ArrayCons{Core.Logical{sensitive}, Core.ArrayCons{Core.Logical{False{}}, Core.ArrayNil{}}}}}}}:
-      Result{id, Api.snapshot(input)}
+    case Core.ArrayCons{Core.TextValue{id}, Core.ArrayCons{Core.TextValue{formula}, Core.ArrayCons{Core.TextValue{operation}, Core.ArrayCons{Core.ArrayCons{Core.ArrayCons{Core.TextValue{"input"}, Core.ArrayCons{input, Core.ArrayNil{}}}, Core.ArrayNil{}}, Core.ArrayCons{Core.Logical{sensitive}, Core.ArrayCons{Core.Logical{False{}}, Core.ArrayNil{}}}}}}}:
+      execute(operation, id, input)
     case value:
       Invalid{"Invalid stored-value corpus row"}
 

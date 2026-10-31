@@ -522,3 +522,11 @@ law stored_ast_snapshot_is_typed:
   for expression: Core.Expr
   for sensitive: Bool
   {Core.snapshot(Core.StoredExpression{expression, sensitive}) == "ast" : String}
+
+law prepared_binding_first_wins:
+  for +first: Core.Value
+  for second: Core.Value
+  {Core.find_binding([Core.ScopedBound{"a", first}, Core.ScopedBound{"a", second}], "a", False{}) == Some{first} : Maybe<&2, Core.Value>}
+
+law ruby_zero_division_default_message:
+  {Core.message_snapshot(Core.Failure{"Division by zero"}) == "message:Dentaku::ZeroDivisionError" : String}

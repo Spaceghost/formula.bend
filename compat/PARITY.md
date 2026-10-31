@@ -941,3 +941,30 @@ The pre-Float 986fd47 checkpoint completed full make check and 8,798-case static
 replay. The new merged source has passed the kernel, concrete fixtures and runtime
 gates; its full static replay has not yet been verified. Current-source CUDA,
 Metal and performance results are not claimed.
+
+## Stored dependencies and checked AST execution
+
+The combined source passes 8,798 regular formula/API cases and 283 separate
+stored-expression probes on Bun and native CPU with one and eight threads:
+84 direct value, 101 dependency, and 98 checked-value/message probes.
+Full 8,798-case static replay, all 175 concrete fixtures, seven scale checks
+and 27 malformed-input checks pass. All 109 laws pass Lean-backed verification.
+The separate 13,253 Float probes pass on Bun.
+
+Dependency analysis expands stored ASTs and evaluates stored guards in their
+creator modes. Checked AST evaluation reports unsatisfied dependencies before
+running the value expression, retaining first-occurrence name order. The
+default zero-division diagnostic now uses Ruby's class-name message while the
+internal failure representation stays stable.
+
+The shared analyzer and evaluator retain their total wrappers for the proof
+imports. Recursive stored execution and analysis remain outside termination
+proofs. The process stack was raised to 64 MiB for the large Range diagnostic;
+the checker launcher now requests that size, capped by the host hard limit.
+An explicit resume index retains original case indices, and joined results are
+compared with the complete oracle.
+
+Calculator state/cache entry points, native guard-error propagation, callbacks,
+aliases, mutable identity, reflection, Float evaluator integration, spreadsheet
+dialects and the complete upstream port remain unfinished. No current-source
+GPU/Metal or performance result is claimed.

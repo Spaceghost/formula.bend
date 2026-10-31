@@ -35,3 +35,18 @@ Formula-aware dependency expansion, the Calculator entry points, identifier
 memoization, callable bindings, mutable identity and raw Ruby AST reflection
 remain unfinished. The stable ast snapshot is a fixture descriptor, not a Ruby
 object serialization.
+
+# Dependency queries and checked evaluation
+
+src/stored_dependencies.bend expands stored AST dependencies through current
+bindings. It uses the stored evaluator for guards and preserves duplicate and
+binder rules from the shared analyzer.
+
+src/stored_checked.bend provides dependency preflight followed by value
+execution. Missing names are reported before value evaluation and retain Ruby's
+first-occurrence order. An exact Boolean true static-dependency context marker
+visits every branch while bound identifiers remain satisfied.
+
+These are low-level AST entry points. Calculator state/cache evaluation entry
+points are not yet connected. Native guard-error propagation and the other
+remaining parity work still require completion.
