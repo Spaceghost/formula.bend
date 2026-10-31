@@ -26,10 +26,10 @@ def dropped_digits(count: Nat, digits: List<&2, U32>) -> Nat:
     case 1n+rest digit <> tail:
       dropped_digits(rest, tail)
 
-def restore(parts: Decimal.Removed, dropped: Nat, scale: Nat) -> Decimal.Decimal:
+def restore(parts: Decimal.Removed, +dropped: Nat, +scale: Nat) -> Decimal.Decimal:
   match parts:
     case Decimal.Cut{digits, guard, sticky}:
-      Decimal.Exact{Decimal.pad(dropped, digits), scale}
+      Decimal.Exact{Decimal.pad(Nat.sub(dropped, scale), digits), Nat.sub(scale, dropped)}
 
 def truncate_digits(+dropped: Nat, digits: List<&2, U32>, scale: Nat) -> Decimal.Decimal:
   restore(Decimal.split_digits(dropped, digits, 0, False{}), dropped, scale)

@@ -66,6 +66,11 @@ def converted_quotient(parts: List<&2, Bool> & List<&2, Bool>, negative: Bool, d
   (quotient, remainder) = parts
   Binary.quantize(quotient, 1075n, negative, Bool.or(discarded, Bool.not(List.is_empty(&2, Bool, remainder))))
 
+def retained_ratio(value: Decimal.Decimal, negative: Bool, discarded: Bool) -> Binary.Float:
+  match value:
+    case Decimal.Exact{digits, scale}:
+      converted_quotient(Binary.divide_walk(List.reverse(&2, Bool, Binary.pad(1075n, Bits.from_decimal(digits))), Bits.from_decimal(Decimal.pad(scale, [1])), Binary.Step{False{}, Nil{}}, Nil{}), negative, discarded)
+
 # Every binary64 rounding midpoint is a multiple of 2^-1075 and has a
 # terminating decimal at or before fractional place 1075. Decimal truncation
 # beyond that grid cannot cross a midpoint. A nonzero omitted tail only needs
@@ -73,7 +78,9 @@ def converted_quotient(parts: List<&2, Bool> & List<&2, Bool>, negative: Bool, d
 def from_retained(parts: Decimal.Removed, scale: Nat, negative: Bool) -> Binary.Float:
   match parts:
     case Decimal.Cut{digits, guard, sticky}:
-      converted_quotient(Binary.divide_walk(List.reverse(&2, Bool, Binary.pad(1075n, Bits.from_decimal(digits))), Bits.from_decimal(Decimal.pad(scale, [1])), Binary.Step{False{}, Nil{}}, Nil{}), negative, Bool.or(U32.is_ne(guard, 0), sticky))
+      # Cropping can expose a long run of low zeros. Cancel those powers of
+      # ten before binary division, retaining the ORIGINAL omitted-tail bit.
+      retained_ratio(Decimal.canonical(Decimal.Exact{digits, scale}), negative, Bool.or(U32.is_ne(guard, 0), sticky))
 
 def from_bounded(overflow: Bool, underflow: Bool, negative: Bool, digits: List<&2, U32>, +scale: Nat) -> Binary.Float:
   match overflow underflow:
