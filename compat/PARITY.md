@@ -315,6 +315,24 @@ tables come from reference runtime queries, not hand-maintained approximations.
 Run tools/run-unicode-reference.lua STORAGE RUNROOT OUTPUT to regenerate the
 reference table, then tools/generate-unicode.lua INPUT OUTPUT. make unicode-check
 verifies generated source reproducibility.
+
+Lookup generation groups 32 property ranges or eight mapping entries behind
+balanced dispatch. Boolean mapping columns keep the older Bend checker from
+expanding large numeric pattern refinements; each branch constructs only its
+selected string. The resulting source has 828 functions, down from 4,417, with
+the same reference table and ASCII fast paths. This reduces generated dispatch
+without changing identifier or case-mapping rules.
+With Bend 2.0.39, the runtime-loaded checker emits 6,281,383 bytes of C,
+down from 7,940,117 bytes. This is a generated-code size measurement, not a
+runtime performance result.
+
+`make unicode-boundary-check BUN=/path/to/bun` compares 6,351 probes against the
+pinned table: every ASCII character, every lowercase/fold mapping key and its
+adjacent scalars, and every alpha/word range boundary and adjacent scalars.
+The check loads probes at runtime and compares all four lookup results. It
+checks the generator against the pinned data; it does not rerun Ruby's Unicode
+implementation. Table provenance remains the separate reference-runtime gate.
+
 The Unicode data notice is retained in LICENSE.unicode; unicode-profile.json
 records table counts and source hashes.
 

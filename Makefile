@@ -2,7 +2,7 @@ BEND ?= bend
 LUA ?= lua
 BUN ?= bun
 
-.PHONY: parity-check check native-check rounding-check division-check address-check enumeration-check unicode-check wire-check
+.PHONY: parity-check check native-check rounding-check division-check address-check enumeration-check unicode-check unicode-boundary-check wire-check
 check:
 	$(BEND) PROOF.bend
 	$(BEND) tests.bend
@@ -20,6 +20,13 @@ unicode-check:
 	mkdir -p build
 	$(LUA) tools/generate-unicode.lua compat/unicode-ranges.tsv build/unicode-generated.bend
 	diff -u src/unicode.bend build/unicode-generated.bend
+
+unicode-boundary-check:
+	mkdir -p build
+	$(LUA) tools/generate-unicode-check.lua compat/unicode-ranges.tsv build/unicode.input build/unicode.expected
+	$(BEND) compat/unicode-runtime.bend -o build/unicode-runtime.js
+	$(BUN) build/unicode-runtime.js build/unicode.input > build/unicode.actual
+	diff -u build/unicode.expected build/unicode.actual
 
 enumeration-check:
 	mkdir -p build

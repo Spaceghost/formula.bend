@@ -11,7 +11,10 @@
   "reference_table": "compat/unicode-ranges.tsv",
   "reference_sha256": "cec5deb1a0cba6aeb5df0ac9560de5e91a0dea99beee7bdb8d8e4ffbd00509d5",
   "generated_source": "src/unicode.bend",
-  "generated_sha256": "be6a8b8954f65c47e53166b52ce2600fc56afa4a91790dc19f9a311dd0d64b9a",
+  "generated_sha256": "21419b6e4142b7a6027a951910bcd943faeca3fc863f31fdce7f6f151238ab4f",
+  "generation_layout": "Balanced dispatch; 32 ranges or 8 Boolean mapping columns per chunk",
+  "generated_function_count": 828,
+  "mapping_boundary_checks": 6351,
   "reference_command": "lua tools/run-unicode-reference.lua STORAGE RUNROOT OUTPUT",
   "generation_command": "lua tools/generate-unicode.lua compat/unicode-ranges.tsv src/unicode.bend",
   "notice": "LICENSE.unicode"

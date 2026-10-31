@@ -1,4 +1,4 @@
--- Generate balanced, total Unicode lookups from the pinned Ruby reference.
+-- Compact balanced lookup dispatch over bounded chunks of the pinned tables.
 local input=assert(arg[1], 'usage: lua tools/generate-unicode.lua RANGES.tsv OUTPUT.bend')
 local output=assert(arg[2], 'missing output path')
 local groups={alpha={},word={},lower={},fold={}}
@@ -19,6 +19,11 @@ local function chars(codes)
  for i=#cps,1,-1 do s='SCon{Chr{'..cps[i]..'}, '..s..'}' end
  return s
 end
+local function disjunction(items,a,b)
+ if a==b then return items[a] end
+ local m=(a+b)//2
+ return 'Bool.or('..disjunction(items,a,m)..', '..disjunction(items,m+1,b)..')'
+end
 for _,kind in ipairs{'alpha','word','lower','fold'} do
  local ranges=groups[kind]
  assert(#ranges>0, 'empty Unicode table')
@@ -37,20 +42,50 @@ for _,kind in ipairs{'alpha','word','lower','fold'} do
   previous=last
  end
  local result_type=is_range and 'Bool' or 'String'
- local default=is_range and 'False{}' or 'SCon{Chr{code}, SNil{}}'
- local function emit(a,b)
-  if a>b then return default end
-  local m=(a+b)//2
-  local left=emit(a,m-1); local right=emit(m+1,b)
-  local lo=ranges[m][1]; local hi=is_range and tonumber(ranges[m][2]) or lo
-  local value=is_range and 'True{}' or chars(ranges[m][2])
-  local name=kind..'_node_'..m
-  -- Pass comparisons as scalar columns instead of allocating two closures at
-  -- every table node. Only the selected child executes.
-  f:write('def ',name,'(below: Bool, above: Bool, +code: U32) -> ',result_type,':\n  match below above:\n    case True{} above:\n      ',left,'\n    case False{} True{}:\n      ',right,'\n    case False{} False{}:\n      ',value,'\n\n')
-  return name..'(U32.is_lt(code, '..lo..'), U32.is_gt(code, '..hi..'), code)'
+ local chunks={}
+ -- Keep primitive-match refinements small for the older Bend checker.
+ local chunk_size=is_range and 32 or 8
+ for first=1,#ranges,chunk_size do
+  local last=math.min(first+chunk_size-1,#ranges)
+  local name=kind..'_chunk_'..#chunks
+  local call=name..'(code)'
+  if is_range then
+   f:write('def ',name,'(+code: U32) -> Bool:\n')
+   local checks={}
+   for i=first,last do
+    checks[#checks+1]='Bool.and(U32.is_ge(code, '..ranges[i][1]..'), U32.is_le(code, '..ranges[i][2]..'))'
+   end
+   f:write('  ',disjunction(checks,1,#checks),'\n\n')
+  else
+   -- Scalar Boolean columns avoid the older checker's expensive refinements
+   -- for large U32 literal patterns. Only the selected string is constructed.
+   local params,columns,args={'+code: U32'},{},{'code'}
+   for i=first,last do
+    local column='eq_'..(i-first)
+    params[#params+1]=column..': Bool';columns[#columns+1]=column
+    args[#args+1]='U32.is_eq(code, '..ranges[i][1]..')'
+   end
+   f:write('def ',name,'(',table.concat(params,', '),') -> String:\n  match ',table.concat(columns,' '),':\n')
+   for i=first,last do
+    local row={}
+    for j=first,last do row[#row+1]=j<i and 'False{}' or j==i and 'True{}' or 'rest_'..(j-first) end
+    f:write('    case ',table.concat(row,' '),':\n      ',chars(ranges[i][2]),'\n')
+   end
+   local row={};for i=first,last do row[#row+1]='False{}' end
+   f:write('    case ',table.concat(row,' '),':\n      SCon{Chr{code}, SNil{}}\n\n')
+   call=name..'('..table.concat(args,', ')..')'
+  end
+  chunks[#chunks+1]={first=ranges[first][1],call=call}
  end
- local root=emit(1,#ranges)
+ local function dispatch(a,b)
+  if a==b then return chunks[a].call end
+  local m=(a+b)//2
+  local left,right=dispatch(a,m),dispatch(m+1,b)
+  local name=kind..'_branch_'..a..'_'..b
+  f:write('def ',name,'(before: Bool, +code: U32) -> ',result_type,':\n  match before:\n    case True{}:\n      ',left,'\n    case False{}:\n      ',right,'\n\n')
+  return name..'(U32.is_lt(code, '..chunks[m+1].first..'), code)'
+ end
+ local root=dispatch(1,#chunks)
  if is_range then
   local ascii=kind=='alpha' and 'Char.is_alpha(c)' or "Bool.or(Char.is_alpha(c), Bool.or(Char.is_digit(c), Char.is_eq(c, '_')))"
   f:write('def ',kind,'_dispatch(ascii: Bool, +c: Char, +code: U32) -> Bool:\n  match ascii:\n    case True{}:\n      ',ascii,'\n    case False{}:\n      ',root,'\n\n')
@@ -61,4 +96,4 @@ for _,kind in ipairs{'alpha','word','lower','fold'} do
   f:write('def ',kind,'(text: String) -> String:\n  match text:\n    case SNil{}:\n      SNil{}\n    case SCon{c, rest}:\n      ',kind,'_char(c) ++ ',kind,'(rest)\n\n')
  end
 end
-f:close()
+assert(f:close())
