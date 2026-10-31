@@ -2,6 +2,10 @@
 -- COUNT's Float input is represented as exact decimal 2.3 in Bend; COUNT only
 -- inspects its length capability, so this adaptation does not alter the result.
 return {
+  ['spec/ast/node_spec.rb'] = {
+    {'returns list of dependencies', {'node_upstream_add_dependencies', 'node_upstream_comparison_dependencies', 'node_upstream_literal_dependencies', 'node_upstream_group_dependencies', 'node_upstream_guard_dependencies', 'node_upstream_true_dependencies', 'node_upstream_false_dependencies', 'node_upstream_empty_dependencies'}},
+    {'returns unique list of dependencies', 'node_upstream_unique_dependencies'},
+  },
   ['spec/token_matcher_spec.rb'] = {
     {'with single category matches token category', 'matcher_upstream_single_category'},
     {'with multiple categories matches any included token category', {'matcher_upstream_multiple_categories_1', 'matcher_upstream_multiple_categories_2', 'matcher_upstream_multiple_categories_3'}},
@@ -21,6 +25,10 @@ return {
     {'compares category and value to determine equality', 'token_upstream_equality'},
   },
   ['spec/exceptions_spec.rb'] = {
+    {'describes an at-least arity as a range', 'range_arity_3_too_few_arguments'},
+    {'builds a message from reason and metadata (ParseError)', 'named_parse_class_operation'},
+    {'describes an :incompatible expectation as requiring compatible operands', 'named_parse_class_incompatible'},
+    {'builds an invalid_operator message', 'named_argument_class_operator'},
     {'includes variable name(s) in message', 'error_unbound_attributes'},
     {'is included in every Dentaku exception, even those subclassing Ruby built-ins', {'error_parse_override_assigned', 'error_tokenizer_override_assigned', 'error_argument_override_assigned', 'error_unbound_attributes', 'error_math_domain_attributes', 'error_node_array_coercion_1', 'error_zero_division'}},
     {'preserves stdlib ancestry for exceptions subclassing Ruby built-ins', {'error_argument_and_type', 'error_zero_division'}},

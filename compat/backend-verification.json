@@ -1,4 +1,136 @@
 {
+  "calculator_integration_checkpoint": {
+    "source_parent_commits":["c852ba48c1241a72f91ff3eedc9f397d4981ba43","90d749ed8ebfd173a6369cb289c8288352aaef21"],
+    "source_manifest":"compat/verification/calculator-integrated-source.sha256",
+    "source_manifest_sha256":"5a60d85a6435b1e1b337ecffcdd7b0b1ff3d1a3d30a26289ee34ce418b12d100",
+    "scope":"Persistent Calculator memory and AST cache, with prior named-reference, Range, token and matcher cases preserved; full Calculator and spreadsheet parity incomplete",
+    "formula_and_api_cases":8537,"new_calculator_sessions":51,
+    "laws":81,"concrete_fixtures":175,"source_scenario_mappings":153,
+    "scale_cases":7,"malformed_input_cases":27,
+    "javascript":{"status":"passed","bend_version":"2.0.39","runtime":"Bun 1.3.1","runtime_js_sha256":"d59f73cab5ecb1b28ac550adb2b58172a46cd90873875187231117cce001052e"},
+    "native_cpu":{"status":"passed","compiler":"Ubuntu clang 19.1.1","optimization":"-O3","thread_counts":[1,8],"compiled_with_cuda":false,
+      "generated_c_bytes":8888486,"generated_c_sha256":"f32bf1a7d349790b6e3e73246c7584320179fb1dbfd8687394e32fcd0c77ffd6",
+      "artifact_sha256":"25862c2427468dcee4b93b09bf4f62e95dbd3ea37a32e81f2854c0c8757dbbfe"},
+    "input_sha256":"c62cbf4be7fbf899a00202383b47feebd357cec568c696da53f09142432553ad",
+    "output_sha256":"0f42aba958bd651e442046ecb8db8358bbabc404eebc6effa42117be64aee93e",
+    "kernel":{"status":"passed","bend_version":"2.0.39","lean_version":"4.34.0"},
+    "static_replay":{"new51sessions_bend2.0.39":"passed at c852ba4","fresh_full8537":"not run",
+      "legacy2.0.16":{"verified_sessions":8,"total_sessions":51,"remaining_sessions":43,"status":"queued on frozen c852ba4 source","observed8session_checker_peak_gib":28.1,"single_session_probe":"exceeded16GiBcompilerCap"}},
+    "cuda":"unverified for integrated source","metal":"unverified","performance":"not measured"
+  },
+  "integrated_range_node_checkpoint": {
+    "runtime_source_commit":"16281666a0cfebd784668d151d422bcc2f1e42b3",
+    "scope":"Named references, Range constructor enumeration and token/matcher integration; full Ruby object, Calculator and scanner parity remains incomplete",
+    "formula_and_api_cases":8486, "base_compile_corpus_cases":8477, "additional_data_only_node_cases":9,
+    "laws":73, "concrete_fixtures":175, "source_scenario_mappings":153,
+    "scale_cases":7, "malformed_input_cases":27,
+    "javascript": {
+      "status":"passed_file_input_runtime", "bend_version":"2.0.39", "runtime":"Bun 1.3.1",
+      "runtime_js_sha256":"22fc0b391c92b9956a6bd235387187d720ff580f897feddba33b327d7844dce9"
+    },
+    "kernel":{"status":"passed", "bend_version":"2.0.39", "lean_version":"4.34.0"},
+    "static_replay":{"full_combined_status":"partial", "full_make_check_passed":{"bend_version":"2.0.39", "source_commit":"818a5ae", "cases":8486, "concrete_fixtures":175}, "bend_2_0_16":"pending", "exact_node_cases":9, "node_cases_passed_versions":["2.0.16","2.0.39"]},
+    "native_cpu": {
+      "status":"passed", "compiler":"Ubuntu clang 19.1.1", "optimization":"-O3", "thread_counts":[1,8],
+      "runtime_reused_for_data_only_node_additions":true,
+      "generated_c_bytes":8133835,
+      "generated_c_sha256":"aeea9441c43cde273678dc1edb1ec4ff9713cbd4fb509a3a32da05c8c98e516a",
+      "artifact_sha256":"56551460231213cd74e0c0a2bc29d28e0325deaedae5f1834084b8d31b29e3e8",
+      "input_sha256":"b1a98b063397ed000e1df116fbfc75ec8acf45551616bdd856fdc0e929e34359",
+      "output_sha256":"84b77cf64196bb35db006edda8c4540f060820d036516bd99afd9ff54750a8d4",
+      "base_8477_input_sha256":"501912646329c2350fa40d0207462fcbcf105dc7cedb23939cebe4cd6c59ed65",
+      "base_8477_output_sha256":"00b03db98f2298e31ca8258c4a49af37570baa70735f0102d0b3f1e774dd1ddb"
+    },
+    "cuda_status":"unverified for integrated source", "metal_status":"unverified"
+  },
+  "named_matcher_scenarios_integration_checkpoint": {
+    "source_commit": "5103172ed99007d858ae8c1e10ff683e725a51f1",
+    "scope": "Named references plus all mapped TokenMatcher examples; full Dentaku parity and scanner integration remain incomplete",
+    "formula_and_api_cases": 7951,
+    "scale_cases": 7,
+    "malformed_input_cases": 23,
+    "laws": 67,
+    "concrete_fixtures": 175,
+    "source_scenario_mappings": 150,
+    "javascript": {
+      "status": "passed_file_input_runtime", "bend_version": "2.0.39", "runtime": "Bun 1.3.1",
+      "runtime_js_sha256": "1a73c8b6e8c0bf7a7c786c70ca1458db5c3919d494169c44db7d3d0c3a2c9eab"
+    },
+    "kernel": {"status":"passed", "bend_version":"2.0.39", "lean_version":"4.34.0"},
+    "static_replay": {"status":"pending_combined_replay", "versions":["2.0.16","2.0.39"]},
+    "native_cpu": {
+      "status": "passed", "compiler": "Ubuntu clang 19.1.1", "optimization": "-O3", "thread_counts": [1,8],
+      "generated_c_bytes": 8014297,
+      "generated_c_sha256": "805bcc561ea9e6c6d67256400a06f28e64c1fc78ae3040b20b3881dc8a508526",
+      "artifact_sha256": "9d5ddd58307b5be8342f2c8a38e96e4544dd14d4ba4fcf9ea5019c1166aab90c",
+      "input_sha256": "910929d5c2ddd46f9782c44eae57e70c0a4298a1e81bb2e078be1c95c2d3814c",
+      "output_sha256": "ee777de4bdc6dc68014de54d1e9faccf99bf6c7243705fecb1c37cbe6ced3c03"
+    },
+    "cuda_status": "unverified for integrated source", "metal_status": "unverified"
+  },
+  "named_matcher_integration_checkpoint": {
+    "source_commit": "5da966d172e477c535eb3de891c2a542411ef265",
+    "scope": "Named references integrated with typed token and matcher APIs; parser/scanner integration and full Ruby object semantics remain incomplete",
+    "formula_and_api_cases": 7768,
+    "scale_cases": 7,
+    "malformed_input_cases": 23,
+    "laws": 66,
+    "concrete_fixtures": 175,
+    "source_scenario_mappings": 139,
+    "javascript": {
+      "status": "passed_file_input_runtime",
+      "bend_version": "2.0.39",
+      "runtime": "Bun 1.3.1",
+      "runtime_js_sha256": "b562d64dddb0e50c2420d604cd323db234c8c05743a03c06b322ffe48a774fac"
+    },
+    "kernel": {"status":"passed", "bend_version":"2.0.39", "lean_version":"4.34.0"},
+    "concrete_fixture_check": {"status":"passed", "bend_version":"2.0.39"},
+    "static_replay": {"status":"pending_combined_replay", "versions":["2.0.16","2.0.39"]},
+    "native_cpu": {
+      "status": "passed",
+      "compiler": "Ubuntu clang 19.1.1",
+      "optimization": "-O3",
+      "thread_counts": [1,8],
+      "generated_c_bytes": 7990937,
+      "generated_c_sha256": "a476c7b4ef461bfc972cb0d689a8a9837c9699dacaf7f88c1499f3fe0061564c",
+      "artifact_sha256": "148ccf891196d571ec4a41b26b28d11ae347ac379b703a0669cc52f98b9c807f",
+      "input_sha256": "609fc7b48b5b26fa2cd2966ee8f77f29f3861d26ac3447a08a96761a5f635e75",
+      "output_sha256": "fb5d1330d2c6a7365163d1b997efa7b51c0d6974f6ac0563a6da33bda87d93ac",
+      "scale_output_sha256": "1622d34d26cdfb85586752ab86ab4d71067ac7d4bba1ccdfbd485d314c8bc5e2"
+    },
+    "cuda_status": "unverified for integrated source",
+    "metal_status": "unverified"
+  },
+  "named_reference_checkpoint": {
+    "source_commit": "356ef66161ef4bc79b9d931f31f37338b2843a9f",
+    "scope": "Named class/module descriptors and comparisons; reflection, anonymous objects and mutable namespace behavior incomplete",
+    "formula_and_api_cases": 5279,
+    "new_named_reference_cases": 2602,
+    "laws": 60,
+    "concrete_fixtures": 175,
+    "source_scenario_mappings": 137,
+    "scale_cases": 7,
+    "malformed_input_cases": 23,
+    "javascript": {
+      "status": "passed_full_replays",
+      "bend_versions": ["2.0.16", "2.0.39"],
+      "file_input_runtime": "Bun 1.3.1",
+      "runtime_js_sha256": "fcf765854554dc1c94ad8be0ef5f0f67b4b8ad0e5d3ab8394958db77cbea74da"
+    },
+    "kernel": {"status": "passed", "bend_version": "2.0.39", "lean_version": "4.34.0"},
+    "native_cpu": {
+      "status": "passed",
+      "compiler": "Ubuntu clang 19.1.1",
+      "optimization": "-O3",
+      "thread_counts": [1, 8],
+      "generated_c_bytes": 6834868,
+      "generated_c_sha256": "1e002f6a3d8b947955955dff60a7d250c92a9d036d59d5e7507b839fee8abf72",
+      "artifact_sha256": "ec069d99ad5f743b3976379b5c2997ac67ed58d3590219c383e977bfc9320b79",
+      "input_sha256": "3927ed63fb471a3249f2a89947178158cda4c5cba5535364bb98e3316dd66519",
+      "output_sha256": "b5a5d12febca89ed872bee7ea8cafa197cf9f0e1664cacc15512be5d817af47c"
+    },
+    "cuda_status": "unverified for named-reference source"
+  },
   "token_matcher_scenarios_checkpoint": {
     "source_commit": "b8d437ce269b813fcae11e58f758da044d42ee7f",
     "scope": "Exact11TokenMatcher source examples and parameterized function-name constructor over supported value descriptors; mutable aliasing and scanner integration incomplete",
@@ -81,6 +213,24 @@
     "output_sha256": "27ec6c86fae953c8b9f3149fb2f90cae1a07cd8d19567d886c517680375f0b75",
     "cuda_scope": "No token descriptor GPU result claimed"
   },
+  "range_exact_blocks_checkpoint": {
+    "source_commit": "b1fe7956175b94d6440d0004034167787be21bf8",
+    "scope": "Range descriptors and exact integer-start enumeration in exception constructors; String/Symbol successor enumeration, Range hash keys and Float endpoints incomplete",
+    "formula_and_api_cases": 5797, "scale_cases": 7, "malformed_input_cases": 27,
+    "laws": 66, "concrete_fixtures": 175, "source_scenario_mappings": 138,
+    "javascript": {"status":"passed_file_input_runtime", "bend_version":"2.0.39", "runtime":"Bun 1.3.1", "runtime_js_sha256":"06be7a1ddc7840957381d87e798d2f668d25cb8251cbe6de793f3c6cc5f11a37"},
+    "kernel": {"status":"passed", "bend_version":"2.0.39", "lean_version":"4.34.0"},
+    "static_replay": {"status":"partial", "new_constructor_cases_on_bend_2_0_39":77, "block_boundary_cases_on_bend_2_0_16":26, "full_combined_replay":"pending"},
+    "native_cpu": {
+      "status":"passed", "compiler":"Ubuntu clang 19.1.1", "optimization":"-O3", "thread_counts":[1,8],
+      "generated_c_bytes":6954264,
+      "generated_c_sha256":"d7f410e9da3be728b64406de96f4e9067abac44badd361020451940ec33e6f84",
+      "artifact_sha256":"aadd19c9ed8b0b4aaa5e2b869d9cb32191e6e1f8e6711135e4c4b64361e6a245",
+      "input_sha256":"ac849580310421f312aa9783fef45f1fc90cc5ae80a54a183435ec849ee29a20",
+      "output_sha256":"8a3a5b329a7d5465aac6efa415e6d2b3802e90281d98b32ad8a3d304520eb60b"
+    },
+    "cuda_status":"unverified for Range source", "metal_status":"unverified"
+  },
   "integer_fixture_checkpoint": {
     "fixture_source_commit": "dd4c68bfc01a09060dc8040d60f14568047db9ae",
     "engine_source_commit": "c22a813d86f5c616e9eaa76cb7b6d68f7e13b0dc",
@@ -102,6 +252,21 @@
     "cuda_scope": "No new integer-import GPU result claimed"
   },
   "cuda_formula_checkpoints": [
+    {
+      "status":"passed","scope":"Frozen earlier2790token API cases; excludes newer matcher, named-reference, Range and Calculator changes; no performance claim",
+      "engine_source_commit":"ef2cb1da57bc4a5c358800dedfabf91a8a19dada",
+      "differential_cases":2790,"scale_cases":7,"host":"fedora","gpu":"NVIDIA Quadro P4000","compute_capability":"6.1",
+      "driver_version":"580.178.04","bend_version":"2.0.39","host_compiler":"Ubuntu clang 19.1.1","host_optimization":"-O3",
+      "cuda_bundle":"12.9.1","nvrtc_version":"12.9.86","profile":"--Ofast-compile=max","fmad":false,"required_gpu_heap":"1GB",
+      "cpu_thread_counts_checked":[1,8],"default_profile_status":"unverified",
+      "generated_c_sha256":"535caa0a8be13d70f4a4d7e321858caa5d9bf3716883100cbd4e511005748268",
+      "artifact_sha256":"67d166ff18c320b365d725567b156761220994f79cb3fd13b13d41b12a831a83",
+      "gpu_artifact_sha256":"b1bfe6d634bbb2397509dc7eaa149252f73145b2919c46a3023dbff29f9ade3d",
+      "main_input_sha256":"80c9a5d97fa694b95c221676216e5185590febe3971831facfe9a3c97a1fa1c1",
+      "main_output_sha256":"27ec6c86fae953c8b9f3149fb2f90cae1a07cd8d19567d886c517680375f0b75",
+      "scale_input_sha256":"d05a7b3c1663780f7edb896a7c665a78e44925a567c6effbf1142e8278803603",
+      "scale_output_sha256":"1622d34d26cdfb85586752ab86ab4d71067ac7d4bba1ccdfbd485d314c8bc5e2"
+    },
     {
       "status": "passed",
       "scope": "2677 pre-token cases with cached c22a813 runtime; excludes token descriptors; no performance result",

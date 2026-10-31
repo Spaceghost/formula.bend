@@ -20,6 +20,19 @@ def context_value(value)
   when Hash
     return value.fetch('text') if value.key?('text')
     return value.fetch('symbol').to_sym if value.key?('symbol')
+    if value.key?('class') || value.key?('module')
+      kind = value.key?('class') ? 'class' : 'module'
+      name = value.fetch(kind)
+      reference = Object.const_get(name)
+      raise 'noncanonical named reference' unless reference.name == name
+      raise 'wrong named reference kind' unless kind == (reference.is_a?(Class) ? 'class' : 'module')
+      raise 'wrong named ancestry' unless reference.ancestors.drop(1).map(&:name) == value.fetch('ancestors')
+      return reference
+    end
+    if value.key?('range')
+      range = value.fetch('range')
+      return Range.new(context_value(range.fetch('first')), context_value(range.fetch('last')), range.fetch('exclude_end'))
+    end
     return value.fetch('hash').map { |key, item| [context_value(key), context_value(item)] }.to_h if value.key?('hash')
     return Integer(value.fetch('integer')) if value.key?('integer')
     return BigDecimal(value.fetch('decimal')) if value.key?('decimal')
@@ -39,8 +52,8 @@ def error_factory(factory, input)
     when 'zero_division' then Dentaku::ZeroDivisionError.new
     else Dentaku::BaseError.new
     end
-  rescue ::ArgumentError => error
-    # Invalid factory reasons deliberately raise a native ArgumentError.
+  rescue ::ArgumentError, ::RangeError, ::TypeError => error
+    # Invalid reasons and Array(range) conversion can raise native errors.
   end
   error = error.exception(input[:override_message]) if input.key?(:override_message)
   error.assigned_to = input[:assigned_to] if input.key?(:assigned_to)
@@ -63,6 +76,12 @@ def snapshot_value(value)
   when Integer then "number:#{value}"
   when String then "string:#{value}"
   when Symbol then "symbol:#{value}"
+  when Class then "class-reference:#{value.name}"
+  when Module then "module-reference:#{value.name}"
+  when Range
+    first = snapshot_value(value.begin)
+    last = snapshot_value(value.end)
+    "range:#{value.exclude_end? ? 'exclusive' : 'inclusive'}:#{first.length}:#{first}#{last.length}:#{last}"
   when Hash
     parts = value.flat_map { |key, item| [snapshot_value(key), snapshot_value(item)] }
     "hash:{#{parts.map { |part| "#{part.length}:#{part}" }.join}}"

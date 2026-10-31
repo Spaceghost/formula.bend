@@ -49,7 +49,7 @@ The unchanged upstream suite passes 713 examples with zero failures and 96.82%
 line coverage in the Ruby reference environment. `reference-summary.json` and
 `upstream-spec-catalog.json` record that run. These results describe Ruby only.
 
-The Lua-driven corpus has 5349 cases matched against Ruby values, parse
+The Lua-driven corpus has 8537 reference cases for Ruby values, parse
 error classification, or exception-factory descriptions. It covers truthiness, strings/null, comparisons, selected
 numeric-string coercions, and static operand rejection. It is a small subset of
 the upstream catalog. Native error classes/messages, all calculator methods,
@@ -62,6 +62,34 @@ The static analysis pass never evaluates guards or functions. It distinguishes
 literal strings rejected as arithmetic operands from variables that can resolve
 to numeric strings. Validation visits unused branches too, matching parse-time
 rejection independently of evaluation-time branch laziness.
+
+The integrated named-reference/token-matcher source at `5da966d` passes all
+7,768 cases and seven scale checks on Bun and native CPU with one and eight
+threads at `-O3`, plus 23 malformed-input rejections. Its 66 laws pass the
+Lean-backed gate; 175 concrete fixtures pass Bend 2.0.39. Full combined static
+replay on both Bend versions, current-source CUDA and Metal remain unverified.
+This is correctness evidence, with no performance result.
+
+The subsequent `5103172` integration includes the 183 exact matcher/function
+constructor probes: 7,951 total cases, seven scale checks and 23 malformed-input
+rejections pass Bun and native CPU with one and eight threads at `-O3`. All
+67 laws pass Lean-backed verification, and 150 source scenarios have explicit
+mappings. Combined static replay and current-source GPU checks remain pending.
+
+The Range integration runtime at `1628166` passes 8,477 cases, seven scale
+checks and 27 malformed-input rejections on Bun and native CPU with one and
+eight threads at `-O3`. All 73 laws pass Lean-backed verification. Nine further
+data-only probes port the assertions from both AST Node dependency examples;
+the complete 8,486-case input passes the same unchanged Bun/native artifacts.
+The Node probes also pass static replay on both Bend versions. There are 153
+source-scenario mappings. The Ruby reference uses Calculator#dependencies,
+which delegates to the parsed node with the supplied context for these cases.
+AST purity, memoization and the broader Calculator API remain incomplete.
+Combined full static replay and current-source GPU checks are still pending.
+
+The frozen `818a5ae` source also passes the complete Bend 2.0.39 `make check`,
+including all 8,486 static corpus cases and 175 concrete fixtures. Full Bend
+2.0.16 replay is still queued behind the earlier Range checks.
 
 ## Reference runner
 
@@ -90,7 +118,7 @@ lua tools/run-oracle.lua PROJECT UPSTREAM GEMS STORAGE RUNROOT OUTPUT
 The probe catches Dentaku errors and records their class; unexpected Ruby failures
 abort without replacing the output. Compare the result before updating committed
 goldens. Parser snapshots currently preserve parse-error classification, while
-full runtime error-class/message parity remains unfinished. The 2647-case value and dependency
+full runtime error-class/message parity remains unfinished. The 5279-case value and dependency
 corpus passes on JavaScript; the 951-case checkpoint passed native CPU with one
 and eight threads. This is correctness verification,
 not the requested performance shootout.
@@ -576,8 +604,9 @@ has 134 correspondences; the Ruby reference still has 713 examples.
 This is factory parity for supported typed values, not complete exception
 propagation. The evaluator's string failures have not yet been replaced by
 structured descriptions. Metadata accepts the existing ordered hashes and
-value types; Ruby Class/Float/Range values, including open-ended arity ranges,
-remain unsupported. Those limits leave upstream exception examples unported.
+value types. At this factory-only checkpoint, Ruby Class/Float/Range values,
+including open-ended arity ranges, were unsupported. Named class references
+are added by the later checkpoint below; Float and Range remain open.
 The new operation is available in both generated and runtime-loaded corpus
 checkers; it is a test adapter, not additional formula syntax. Native and GPU
 checkpoints remain tied to their recorded source revision and case count.
@@ -641,6 +670,39 @@ cases pass Bun and native CPU with one and eight threads. The existing native
 and JS executables are reused only after checking that their Bend source is
 unchanged. The 55-law Lean-backed gate passes as well. This adds no new claim
 about GPU execution of these imports or about complete Ruby numeric classes.
+
+## Named class and module values
+
+`Core.NamedReference` carries a class/module kind, canonical name and ordered
+ancestor names. Typed bindings use `{class='...', ancestors={...}}` or
+`{module='...', ancestors={...}}`. The caller supplies the owning runtime's
+complete ancestor list, excluding the reference itself; the engine does not
+resolve Ruby constants. The reference adapter validates every descriptor against
+the actual pinned Ruby object. The probes load JSON as the oracle does, because
+its included modules can affect those ancestor lists.
+
+The new values preserve rendering, identity, truthiness, value classes, hash
+keys and array-set behavior. Subtype comparisons include class/module mixins
+and return nil for unrelated references. Mixed comparison failures distinguish
+missing operators, scalar comparison failures, Hash conversion failures and
+comparisons against non-class/module operands. Exception metadata now retains
+actual named classes, including Dentaku::AST::Addition and Numeric, rather than
+using display strings in their place. Three further exception examples have
+exact source correspondences.
+
+The 2,602 additional Ruby comparisons include a complete six-operator matrix
+for 19 named references, mixed scalar comparisons, hash keys and exact exception
+payloads. The integrated corpus has 5,279 cases, 60 laws, 175 concrete fixtures
+and 137 source scenario correspondences. Its full checks run on both Bend
+versions; Bun and native CPU check the full runtime-loaded corpus plus seven
+scale cases. Native checks use one and eight threads at `-O3`. Both transports
+reject 23 malformed inputs, including invalid named-reference framing.
+
+Named references remain immutable descriptors. Ruby class execution,
+reflection, anonymous objects and namespace mutation are not implemented.
+Range and Float values, full structured evaluator failures, and broader
+calculator/function-registry behavior remain open. The recorded CUDA pass
+continues to cover only the earlier 2,516-case source checkpoint.
 
 ## Token descriptors
 
@@ -712,3 +774,56 @@ wire inputs. All62laws pass .39Lean-backed verification. There are147explicit
 source-scenario mappings. Source and artifact hashes are recorded in
 token_matcher_scenarios_checkpoint. Mutable aliasing, arbitrary Ruby values,
 and scanner integration remain unfinished; the spec family remains partial.
+
+## Integer Range conversion in exception construction
+
+Finite integer-start ranges enumerate expected operand values for `NodeError`
+and `ParseError`'s `node_invalid` reason. Integer endpoints remain exact even
+when they exceed a machine word. Decimal blocks retain the complete span count
+without converting it to a bounded Nat. Materializing a range still requires
+memory proportional to its length. Exclusive, descending, negative and mixed integer/decimal
+end bounds follow the reference checks. Endless ranges produce Ruby's native
+`RangeError`; beginless and non-iterable ranges produce `TypeError` with their
+class-specific messages. A parse error without an operation skips conversion,
+preserving the reference's lazy message branch.
+
+The 51 added Ruby-oracle checks cover these constructor paths and their complete
+snapshots. String and Symbol successor enumeration, Range hash keys, Float
+endpoints and arbitrary Ruby object iteration remain unfinished.
+
+The exact-block checkpoint at `b1fe795` passes 5,797 cases and seven scale checks
+on Bun and native CPU with one and eight threads at `-O3`, including 27 malformed
+input rejections. Its 66 laws pass Lean-backed verification. The 77 new constructor
+and block-boundary cases pass static replay on Bend 2.0.39; the 26 block-boundary
+cases also pass Bend 2.0.16. Full static replay and Range-source GPU checks remain
+pending. Source and artifact hashes are in `backend-verification.json`.
+## Calculator state and AST cache integration
+
+The integrated runtime now passes 8,537 reference cases on Bun and native CPU
+with one and eight threads at -O3, seven scale cases and 27 malformed inputs.
+All 81 laws pass Lean-backed verification on Bend 2.0.39. The merge preserves
+every prior case and adds 51 multi-step Calculator sessions; explicit upstream
+scenario mappings remain 153.
+
+The Calculator implementation retains normalized memory, intermediate nested
+hashes, array values and insertion order. Evaluation contexts are temporary
+after success or failure. AST caching supports prewarming, exact-key/all
+invalidation, bulk expression evaluation and write suppression with restoration
+after errors. Cache keys retain supported scalar input types.
+
+All 51 sessions passed static replay on Bend 2.0.39 before the integration.
+Eight sessions passed the legacy 2.0.16 checker in a batch peaking near 30 GiB;
+a one-session diagnostic exceeded its 16 GiB compiler cap. Remaining legacy
+work is queued on frozen source after the earlier matcher replay and a memory
+availability check. This is not a full legacy or fresh merged static pass.
+
+Stored formulas, custom functions, aliases, error-handler callbacks, regex cache
+invalidation, cross-mode AST transfer and mutable object identity remain open.
+The huge-shift allocation exception gap is recorded in
+[the numeric limits](../docs/numeric-limits.md). See calculator_integration_checkpoint
+for parent revisions, a source manifest and runtime artifact hashes.
+
+A separate required-CUDA checkpoint now passes 2,790 earlier token API cases
+and seven scale cases on the P4000 with NVRTC --Ofast-compile=max and fmad=false.
+It excludes the newer matcher, class, Range and Calculator changes. It is a
+fast-compilation profile correctness result, not default-profile performance.

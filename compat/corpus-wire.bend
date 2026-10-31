@@ -7,6 +7,8 @@ import ../src/core.bend as Core
 type Container is Data:
   ArrayContainer{}
   HashContainer{}
+  ReferenceContainer{kind: Core.ReferenceKind}
+  RangeContainer{}
 
 type Frame is Data:
   Open{kind: Container, reversed: List<&2, Core.Value>}
@@ -66,6 +68,50 @@ def close_hash(valid: Bool, values: List<&2, Core.Value>, stack: List<&2, Frame>
     case False{}:
       Broken{"Odd number of hash fields in corpus input"}
 
+def named_parent(+name: String, rest: Maybe<&2, List<&2, String>>) -> Maybe<&2, List<&2, String>>:
+  match rest:
+    case Some{names}:
+      Bool.pick(Maybe<&2, List<&2, String>>, Nat.is_eq(String.length(name), 0n), None{}, Some{name <> names})
+    case None{}:
+      None{}
+
+def named_parents(value: Core.Value) -> Maybe<&2, List<&2, String>>:
+  match value:
+    case Core.ArrayNil{}:
+      Some{Nil{}}
+    case Core.ArrayCons{Core.TextValue{name}, rest}:
+      named_parent(name, named_parents(rest))
+    case value:
+      None{}
+
+def named_complete(parents: Maybe<&2, List<&2, String>>, kind: Core.ReferenceKind, name: String) -> Core.Value:
+  match parents:
+    case Some{names}:
+      Core.NamedReference{kind, name, names}
+    case None{}:
+      Core.Failure{"Invalid named ancestry in corpus input"}
+
+def named_nonempty(name: String, kind: Core.ReferenceKind, parents: Core.Value) -> Core.Value:
+  match name:
+    case SNil{}:
+      Core.Failure{"Missing named reference name in corpus input"}
+    case SCon{head, tail}:
+      named_complete(named_parents(parents), kind, SCon{head, tail})
+
+def named_reference(values: List<&2, Core.Value>, kind: Core.ReferenceKind) -> Core.Value:
+  match values:
+    case Core.TextValue{name} <> parents <> Nil{}:
+      named_nonempty(name, kind, parents)
+    case values:
+      Core.Failure{"Invalid named reference in corpus input"}
+
+def range_value(values: List<&2, Core.Value>) -> Core.Value:
+  match values:
+    case first <> last <> Core.Logical{excluded} <> Nil{}:
+      Core.RangeValue{first, last, excluded}
+    case values:
+      Core.Failure{"Invalid range descriptor in corpus input"}
+
 def close(stack: List<&2, Frame>, end: Char) -> State:
   match stack end:
     case Open{ArrayContainer{}, reversed} <> rest Chr{93}:
@@ -73,6 +119,10 @@ def close(stack: List<&2, Frame>, end: Char) -> State:
     case Open{HashContainer{}, reversed} <> rest Chr{125}:
       +values = List.reverse(&2, Core.Value, reversed)
       close_hash(even_fields(values), values, rest)
+    case Open{ReferenceContainer{kind}, reversed} <> rest Chr{93}:
+      accept(named_reference(List.reverse(&2, Core.Value, reversed), kind), rest)
+    case Open{RangeContainer{}, reversed} <> rest Chr{93}:
+      accept(range_value(List.reverse(&2, Core.Value, reversed)), rest)
     case stack end:
       Broken{"Unmatched container end in corpus input"}
 
@@ -192,6 +242,12 @@ def tag_step(+c: Char, stack: List<&2, Frame>) -> State:
       Reading{AwaitValue{}, Open{ArrayContainer{}, Nil{}} <> stack}
     case Chr{104}:
       Reading{AwaitValue{}, Open{HashContainer{}, Nil{}} <> stack}
+    case Chr{99}:
+      Reading{AwaitValue{}, Open{ReferenceContainer{Core.ClassReferenceKind{}}, Nil{}} <> stack}
+    case Chr{109}:
+      Reading{AwaitValue{}, Open{ReferenceContainer{Core.ModuleReferenceKind{}}, Nil{}} <> stack}
+    case Chr{114}:
+      Reading{AwaitValue{}, Open{RangeContainer{}, Nil{}} <> stack}
     case Chr{93}:
       close(stack, c)
     case Chr{125}:

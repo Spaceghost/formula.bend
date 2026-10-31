@@ -17,6 +17,22 @@ local function value(item)
   assert(kind == 'table', 'unsupported corpus value')
   if item.null then return 'n' end
   if item.symbol then return text('y', item.symbol) end
+  if item.class or item.module then
+    local name = item.class or item.module
+    assert(type(name) == 'string' and #name > 0 and type(item.ancestors) == 'table', 'invalid named reference')
+    local parents = {'a'}
+    for _, parent in ipairs(item.ancestors) do
+      assert(type(parent) == 'string' and #parent > 0, 'invalid named ancestor')
+      parents[#parents+1] = text('s', parent)
+    end
+    parents[#parents+1] = ']'
+    return (item.class and 'c' or 'm') .. text('s', name) .. table.concat(parents) .. ']'
+  end
+  if item.range then
+    local range = item.range
+    assert(range.first ~= nil and range.last ~= nil and type(range.exclude_end) == 'boolean', 'invalid range descriptor')
+    return 'r' .. value(range.first) .. value(range.last) .. (range.exclude_end and 't' or 'f') .. ']'
+  end
   if item.integer then return text('i', IntegerContext.canonical(item.integer)) end
   if item.decimal then return text('d', item.decimal) end
   local parts = {}

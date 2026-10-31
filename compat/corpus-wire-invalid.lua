@@ -1,4 +1,13 @@
 return {
+  {input='r]', message='Invalid range descriptor in corpus input'},
+  {input='rnnn]', message='Invalid range descriptor in corpus input'},
+  {input='rnnff]', message='Invalid range descriptor in corpus input'},
+  {input='rnnf}', message='Unmatched container end in corpus input'},
+  {input='c]', message='Invalid named reference in corpus input'},
+  {input='c s0: a]]', message='Missing named reference name in corpus input'},
+  {input='m s6:Kernel an]]', message='Invalid named ancestry in corpus input'},
+  {input='c s7:Integer a s0: ]]', message='Invalid named ancestry in corpus input'},
+  {input='c s7:Integer a]}', message='Unmatched container end in corpus input'},
   {input='', message='Incomplete corpus input'},
   {input='a', message='Incomplete corpus input'},
   {input='a}', message='Unmatched container end in corpus input'},

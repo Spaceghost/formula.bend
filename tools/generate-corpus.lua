@@ -50,11 +50,31 @@ local function context_value(value)
   if value.symbol then
     return 'Core.SymbolValue{' .. bend_string(value.symbol) .. '}', '{"symbol":' .. json_string(value.symbol) .. '}'
   end
+  if value.class or value.module then
+    local category = value.class and 'class' or 'module'
+    local name = value[category]
+    assert(type(name) == 'string' and #name > 0, 'named references require a canonical name')
+    assert(type(value.ancestors) == 'table', 'named references require their ordered ancestor names')
+    local parents, encoded = {}, {}
+    for i, parent in ipairs(value.ancestors) do
+      assert(type(parent) == 'string' and #parent > 0, 'invalid named ancestor')
+      parents[i], encoded[i] = bend_string(parent), json_string(parent)
+    end
+    local kind = category == 'class' and 'ClassReferenceKind' or 'ModuleReferenceKind'
+    return 'Core.NamedReference{Core.' .. kind .. '{}, ' .. bend_string(name) .. ', [' .. table.concat(parents, ', ') .. ']}', '{' .. json_string(category) .. ':' .. json_string(name) .. ',"ancestors":[' .. table.concat(encoded, ',') .. ']}'
+  end
+  if value.range then
+    local range = value.range
+    assert(range.first ~= nil and range.last ~= nil and type(range.exclude_end) == 'boolean', 'range needs explicit endpoints and exclusion flag')
+    local first, first_json = context_value(range.first)
+    local last, last_json = context_value(range.last)
+    return 'Core.RangeValue{' .. first .. ', ' .. last .. ', ' .. (range.exclude_end and 'True{}' or 'False{}') .. '}', '{"range":{"first":' .. first_json .. ',"last":' .. last_json .. ',"exclude_end":' .. tostring(range.exclude_end) .. '}}'
+  end
   if value.hash then
     local entries, encoded, seen = {}, {}, {}
     for i, pair in ipairs(value.hash) do
       assert(#pair == 2, 'hash entry must contain key and value')
-      assert(type(pair[1]) == 'string' or type(pair[1]) == 'table' and pair[1].symbol, 'hash keys must be strings or symbols')
+      assert(type(pair[1]) == 'string' or type(pair[1]) == 'table' and (pair[1].symbol or pair[1].class or pair[1].module), 'unsupported hash key')
       local key, key_json = context_value(pair[1])
       assert(not seen[key_json], 'duplicate hash key')
       seen[key_json] = true

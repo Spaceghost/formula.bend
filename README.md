@@ -26,6 +26,13 @@ Functions are case-insensitive. Malformed expressions return explicit errors.
 Bindings support case-insensitive matching by default, an explicit case-sensitive
 mode, and first-match precedence for transient contexts.
 
+Persistent Calculator state supports normalized memory, optional nested-data
+flattening, temporary contexts, bulk array/hash evaluation and a typed AST
+cache. Cache keys preserve scalar input types; prewarmed entries are read even
+when new writes are disabled. See [the Calculator contract](docs/calculator-api.md).
+Stored formulas, aliases, custom functions, error-handler blocks and full
+Calculator parity remain unfinished.
+
 The standalone address layer parses and renders A1 and R1C1, retains independent
 row/column anchors, and supports copying in either direction with bounds checks.
 
@@ -111,7 +118,7 @@ The eight address runtime cases pass on both JavaScript and native CPU.
 
 Parity is measured against the pinned Ruby source and its complete 713-example
 suite. The Ruby reference passes all examples; that is not a claim that Bend does.
-A separate 5349-case corpus matches Ruby on JavaScript for selected values,
+A separate 8537-case corpus covers selected values,
 dependencies, parse-error classification, and exception factories.
 `make parity-check` generates the fixtures using Lua.
 Use `LUA=/path/to/lua` if Lua is not on PATH.
@@ -123,48 +130,50 @@ invalid arithmetic operand types before evaluation, including unused branches.
 See [the parity checklist](compat/PARITY.md) for remaining rules and the shootout
 gate. No performance comparison is claimed yet.
 
-The corpus supports exact decimal, integer, string, Boolean, null, and nested
-array and ordered hash bindings plus case-sensitive contexts. MAP, FILTER, ALL, ANY, and REDUCE
-also pass seven reference checks over 1,025-item collections. Both Bend 2.0.16
-and 2.0.39 pass all 2,657 cases on JavaScript, with 55 laws and 175 concrete
-fixtures. The checker runs the corpus in batches of 256 to bound peak memory.
-All 55 laws pass Lean-backed kernel verification on Bend 2.0.39.
-The 2,657-case checkpoint and seven scale
-checks pass native CPU with one and eight threads at `-O3`.
-Source commits and checksums are recorded in
-`compat/backend-verification.json`.
-The Bend 2.0.16 integration check reuses 2,304 source-identical passing cases
-and executes the 353 cases in changed batches; the recorded hashes make that
-reuse auditable.
-Twenty further integer-import cases pass both Bend versions. All 2,677 cases
-and seven scale cases pass Bun and native CPU with one and eight threads. The
-separate 5,326-string Ruby Integer profile checks fixture conversion rather
+The corpus supports exact decimal, integer, string, Boolean, null, nested array,
+ordered hash, named class/module and Range bindings, plus case-sensitive contexts.
+All 8,537 cases pass Bun and native CPU with one and eight threads at `-O3`.
+Seven scale checks over 1,025-item collections and 27 malformed-input checks
+also pass. All 81 laws pass Lean-backed verification on Bend 2.0.39. There are
+153 explicit upstream scenario mappings and 175 concrete regression fixtures.
+
+The preceding 8,486-case source checkpoint passes full static replay and 175
+concrete fixtures on Bend 2.0.39. All 51 added Calculator sessions pass static
+replay on that version. The fresh merged 8,537-case static replay has not run.
+Legacy Bend 2.0.16 Calculator verification is partial: eight sessions passed;
+remaining work is queued with memory guards. Historical
+checks, source revisions and artifact hashes are recorded separately in
+`compat/backend-verification.json`. Current-source CUDA and Metal remain
+unverified; no performance result is claimed.
+
+Typed token descriptors and matchers include counterparts of all 11 upstream
+TokenMatcher examples. Both AST Node dependency examples are represented by
+nine assertions, including guard pruning and empty input. These nine probes
+also pass static replay on both Bend versions. See [the matcher contract](docs/token-matcher.md)
+for immutable modifiers, Hash-key identity, compound inversion and negative
+stream offsets. These APIs still need integration with the parser's lexer and
+a token scanner; mutable aliases remain incomplete.
+
+The separate 5,326-string Ruby Integer profile checks fixture conversion rather
 than formula coverage.
-Token descriptors add 113 Ruby-matched cases, tested on both Bend versions.
-The complete 2,790-case runtime corpus and seven scale checks pass Bun and
-native CPU with one and eight threads. All 58 laws pass the Lean-backed gate.
-
-Token matchers add 2,376 Ruby-matched API probes. The combined 5,166-case corpus
-passes Bun and native CPU with one and eight threads at -O3. The seven scale
-checks and 18 malformed-input checks also pass. All 61 laws pass the Lean-backed
-gate. The new matcher static replay on both Bend versions is still pending.
-See [the matcher contract](docs/token-matcher.md) for immutable modifiers,
-Hash-key identity, compound inversion, and negative stream offsets. This API
-is not yet connected to the parser's lexer or a token scanner.
-
-A further 183 probes cover the parameterized function-name constructor and
-exact counterparts of all 11 upstream TokenMatcher examples. They pass both
-Bend versions. The combined 5,349-case runtime corpus passes Bun and native
-CPU with one and eight threads, along with seven scale cases and 18 malformed
-inputs. All 62 laws pass Lean-backed verification. There are now 147 explicit
-source-scenario mappings. Broader scanner integration and mutable aliasing
-remain incomplete; these results do not establish full Dentaku parity.
 
 Exception factories preserve reasons, metadata, constructor attributes, message
-overrides and assignment values. Their 131 differential cases cover every
+overrides and assignment values. Their differential cases cover every
 factory reason and shared/stdlib error relationships. The Bend API uses
 immutable descriptions. Evaluator errors still need integration with those
-descriptions; Float/Class/Range metadata is not yet supported.
+descriptions; Float metadata is not yet supported.
+
+Range values retain inclusive/exclusive endpoints, Ruby rendering, truthiness,
+comparisons and open-ended arity metadata. Integer-start ranges enumerate values
+for exception constructor arguments using exact decimal blocks; endless and
+non-iterable ranges preserve native conversion errors. String/Symbol successor
+enumeration, Range hash keys and Float endpoints remain incomplete.
+
+Named class and module values preserve their canonical names, kind and ancestor
+names. They support identity, subtype comparisons, truthiness, hash keys and
+class-valued exception metadata. Callers supply the complete ancestor list from
+the owning runtime. These descriptors do not execute Ruby class methods or
+represent anonymous objects.
 
 Scientific exponents support at most 14 significant exponent digits; scales and
 indexes remain bounded by the runtime Nat representation. Hex coefficients use

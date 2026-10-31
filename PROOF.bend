@@ -7,6 +7,43 @@ import ./LAWS.bend as Laws
 import ./src/bits.bend as Bits
 import ./src/error_types.bend as ErrorTypes
 
+def Laws.range_zero_blocks(depth, first, stride, last, excluded):
+  match depth:
+    case 0n:
+      {==}
+    case 1n+rest:
+      {==}
+
+def Laws.endless_range_array(first, excluded):
+  {==}
+
+def Laws.beginless_integer_range_array(last, excluded):
+  {==}
+
+def Laws.range_type_name(first, last, excluded):
+  {==}
+
+def Laws.range_truthy(first, last, excluded):
+  {==}
+
+def Laws.endless_arity(first, excluded):
+  {==}
+
+def Laws.named_class_type(name, parents):
+  {==}
+
+def Laws.named_module_type(name, parents):
+  {==}
+
+def Laws.named_reference_truthy(kind, name, parents):
+  {==}
+
+def Laws.named_relation_unrelated(inclusive):
+  {==}
+
+def Laws.named_relation_reflexive(inclusive):
+  {==}
+
 def Laws.error_override_message(error, message):
   match error:
     case ErrorTypes.Details{class_name, parents, reason, meta, attributes, old_message, assigned_to}:
