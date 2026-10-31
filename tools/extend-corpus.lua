@@ -1,7 +1,10 @@
 -- Append a verified batch. Never adopt an oracle result before Bend matches it.
-local input = assert(arg[1], 'usage: lua tools/extend-corpus.lua CASES.lua ORACLE.tsv ACTUAL.tsv')
+local input = assert(arg[1], 'usage: lua tools/extend-corpus.lua CASES.lua ORACLE.tsv ACTUAL.tsv [CASES_OUTPUT.lua ORACLE_OUTPUT.tsv]')
 local oracle_path = assert(arg[2], 'missing oracle output')
 local actual_path = assert(arg[3], 'missing Bend output')
+assert((arg[4] == nil) == (arg[5] == nil), 'supply both corpus output paths')
+local cases_path = arg[4] or 'compat/scalar-cases.lua'
+local adopted_oracle_path = arg[5] or 'compat/scalar-oracle.tsv'
 local function read(path)
   local file = assert(io.open(path, 'r')); local value = assert(file:read('*a')); file:close(); return value
 end
@@ -29,7 +32,10 @@ for id, value in oracle:gmatch('([^\n\t]+)\t([^\n]*)\n') do
   assert(not values[id], 'duplicate oracle id: ' .. id)
   values[id], rows = value, rows + 1
 end
-local old = dofile('compat/scalar-cases.lua')
+local existing = io.open(cases_path, 'r')
+local old_source = existing and existing:read('*a') or 'return {\n}\n'
+if existing then existing:close() end
+local old = assert(load(old_source, '@' .. cases_path))()
 local seen = {}; for _, case in ipairs(old) do seen[case.id] = true end
 local cases, additions = dofile(input), {}
 assert(#cases == rows, 'oracle count differs from batch count')
@@ -39,12 +45,15 @@ for _, case in ipairs(cases) do
   case.expected = assert(values[case.id], 'missing oracle id: ' .. case.id)
   additions[#additions+1] = '  ' .. literal(case) .. ',\n'
 end
-local source, replacements = read('compat/scalar-cases.lua'):gsub('}%s*$', function()
+local source, replacements = old_source:gsub('}%s*$', function()
   return table.concat(additions) .. '}\n'
 end)
 assert(replacements == 1, 'cannot locate fixture table end')
 assert(load(source), 'generated fixture table is invalid Lua')
-local complete_oracle = read('compat/scalar-oracle.tsv') .. oracle
-write('compat/scalar-cases.lua', source)
-write('compat/scalar-oracle.tsv', complete_oracle)
+local existing_oracle = io.open(adopted_oracle_path, 'r')
+local old_oracle = existing_oracle and existing_oracle:read('*a') or ''
+if existing_oracle then existing_oracle:close() end
+local complete_oracle = old_oracle .. oracle
+write(cases_path, source)
+write(adopted_oracle_path, complete_oracle)
 print(#cases .. ' verified cases added; ' .. (#old + #cases) .. ' total')

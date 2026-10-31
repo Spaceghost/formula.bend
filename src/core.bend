@@ -22,6 +22,7 @@ type Value is Data:
   NullValue{}
   TextValue{value: String}
   SymbolValue{value: String}
+  StoredExpression{expression: Expr, sensitive: Bool}
   NamedReference{kind: ReferenceKind, name: String, ancestors: List<&2, String>}
   RangeValue{first: Value, last: Value, exclude_end: Bool}
   MemberIndex{name: String}
@@ -2372,107 +2373,116 @@ def enumeration_finish(kind: EnumerationKind, result: Value) -> Value:
 # Recursion is lexicographic over expression and batch. An enum enters its body
 # subexpression with a fresh batch; each repeated body evaluation consumes a
 # smaller batch node. Context and mode can then change without unsafe recursion.
-def evaluate_machine(e: Expr, +batch: Value, +context: List<&2, Binding>, +sensitive: Bool, +subjects: List<&2, Value>, mode: EvaluationMode) -> Value:
+def resolve_lookup(context: List<&2, Binding>, name: String, sensitive: Bool, subjects: List<&2, Value>) -> Value:
+  lookup(context, name, sensitive)
+
+# The resolver is compiled into each evaluator specialization. The ordinary
+# evaluator retains its total lookup; a stored-expression runner can share the
+# traversal without imposing a fixed recursion cutoff on user programs.
+def evaluate_using(~resolve: List<&2, Binding> -> String -> Bool -> List<&2, Value> -> Value, e: Expr, +batch: Value, +context: List<&2, Binding>, +sensitive: Bool, +subjects: List<&2, Value>, mode: EvaluationMode) -> Value:
   match e batch mode:
     case +e ArgumentPair{a, b} EvaluateItems{AllItems{}, +binder}:
-      enumeration_decide(evaluate_machine(e, a, context, sensitive, subjects, EvaluateItems{AllItems{}, binder}), False{}, u => evaluate_machine(e, b, context, sensitive, subjects, EvaluateItems{AllItems{}, binder}))
+      enumeration_decide(evaluate_using(~resolve, e, a, context, sensitive, subjects, EvaluateItems{AllItems{}, binder}), False{}, u => evaluate_using(~resolve, e, b, context, sensitive, subjects, EvaluateItems{AllItems{}, binder}))
     case +e ArgumentPair{a, b} EvaluateItems{AnyItems{}, +binder}:
-      enumeration_decide(evaluate_machine(e, a, context, sensitive, subjects, EvaluateItems{AnyItems{}, binder}), True{}, u => evaluate_machine(e, b, context, sensitive, subjects, EvaluateItems{AnyItems{}, binder}))
+      enumeration_decide(evaluate_using(~resolve, e, a, context, sensitive, subjects, EvaluateItems{AnyItems{}, binder}), True{}, u => evaluate_using(~resolve, e, b, context, sensitive, subjects, EvaluateItems{AnyItems{}, binder}))
     case +e ArgumentPair{a, b} EvaluateItems{+kind, +binder}:
-      x y = evaluate_machine(e, a, context, sensitive, subjects, EvaluateItems{kind, binder}) evaluate_machine(e, b, context, sensitive, subjects, EvaluateItems{kind, binder})
+      x y = evaluate_using(~resolve, e, a, context, sensitive, subjects, EvaluateItems{kind, binder}) evaluate_using(~resolve, e, b, context, sensitive, subjects, EvaluateItems{kind, binder})
       ArgumentPair{x, y}
     case +e ArgumentValue{item} EvaluateItems{PluckItems{}, binder}:
-      ArgumentValue{with_value(evaluate_machine(e, item, context, sensitive, subjects, EvaluateOne{}), fallback => pluck_default(pluck_find(item, normalize(sensitive, binder)), fallback))}
+      ArgumentValue{with_value(evaluate_using(~resolve, e, item, context, sensitive, subjects, EvaluateOne{}), fallback => pluck_default(pluck_find(item, normalize(sensitive, binder)), fallback))}
     case +e ArgumentValue{+item} EvaluateItems{FilterItems{}, binder}:
-      filter_leaf(item, evaluate_machine(e, item, item_context(binder, item, context, sensitive), sensitive, subjects, EvaluateOne{}))
+      filter_leaf(item, evaluate_using(~resolve, e, item, item_context(binder, item, context, sensitive), sensitive, subjects, EvaluateOne{}))
     case +e ArgumentValue{+item} EvaluateItems{kind, binder}:
-      enumeration_leaf(kind, item, mapped_result(lookup(context, "__evaluation_mode", sensitive), evaluate_machine(e, item, item_context(binder, item, context, sensitive), sensitive, subjects, EvaluateOne{})))
+      enumeration_leaf(kind, item, mapped_result(lookup(context, "__evaluation_mode", sensitive), evaluate_using(~resolve, e, item, item_context(binder, item, context, sensitive), sensitive, subjects, EvaluateOne{})))
     case e EmptyArgumentValues{} EvaluateItems{kind, binder}:
       enumeration_empty(kind)
     case +e ArgumentPair{a, b} EvaluateReduction{+memo_binder, +item_binder, memo}:
-      with_value(evaluate_machine(e, a, context, sensitive, subjects, EvaluateReduction{memo_binder, item_binder, memo}), next => evaluate_machine(e, b, context, sensitive, subjects, EvaluateReduction{memo_binder, item_binder, next}))
+      with_value(evaluate_using(~resolve, e, a, context, sensitive, subjects, EvaluateReduction{memo_binder, item_binder, memo}), next => evaluate_using(~resolve, e, b, context, sensitive, subjects, EvaluateReduction{memo_binder, item_binder, next}))
     case +e ArgumentValue{+item} EvaluateReduction{memo_binder, item_binder, memo}:
-      evaluate_machine(e, item, item_context(item_binder, item, item_context(memo_binder, memo, context, sensitive), sensitive), sensitive, subjects, EvaluateOne{})
+      evaluate_using(~resolve, e, item, item_context(item_binder, item, item_context(memo_binder, memo, context, sensitive), sensitive), sensitive, subjects, EvaluateOne{})
     case e EmptyArgumentValues{} EvaluateReduction{memo_binder, item_binder, memo}:
       memo
     case EnumerationExpression{+kind, collection, binder, body} batch EvaluateOne{}:
-      with_value(evaluate_machine(collection, batch, context, sensitive, subjects, EvaluateOne{}), value => with_value(enumeration_collection(kind, value), values => enumeration_finish(kind, evaluate_machine(body, collection_batch(values), context, sensitive, subjects, EvaluateItems{kind, binder}))))
+      with_value(evaluate_using(~resolve, collection, batch, context, sensitive, subjects, EvaluateOne{}), value => with_value(enumeration_collection(kind, value), values => enumeration_finish(kind, evaluate_using(~resolve, body, collection_batch(values), context, sensitive, subjects, EvaluateItems{kind, binder}))))
     case ReductionExpression{collection, memo_binder, item_binder, body, initial} batch EvaluateOne{}:
-      with_value(evaluate_machine(collection, batch, context, sensitive, subjects, EvaluateOne{}), values => with_value(evaluate_machine(initial, batch, context, sensitive, subjects, EvaluateOne{}), memo => evaluate_machine(body, collection_batch(values), context, sensitive, subjects, EvaluateReduction{memo_binder, item_binder, memo})))
+      with_value(evaluate_using(~resolve, collection, batch, context, sensitive, subjects, EvaluateOne{}), values => with_value(evaluate_using(~resolve, initial, batch, context, sensitive, subjects, EvaluateOne{}), memo => evaluate_using(~resolve, body, collection_batch(values), context, sensitive, subjects, EvaluateReduction{memo_binder, item_binder, memo})))
     case CaseExpression{subject, clauses} batch EvaluateOne{}:
-      with_case_value(evaluate_machine(subject, batch, context, sensitive, subjects, EvaluateOne{}), value => evaluate_machine(clauses, batch, context, sensitive, value <> subjects, EvaluateOne{}))
+      with_case_value(evaluate_using(~resolve, subject, batch, context, sensitive, subjects, EvaluateOne{}), value => evaluate_using(~resolve, clauses, batch, context, sensitive, value <> subjects, EvaluateOne{}))
     case WhenExpression{key, value, rest} batch EvaluateOne{}:
-      case_when_value(evaluate_machine(key, batch, context, sensitive, subjects, EvaluateOne{}), case_subject(subjects), u => evaluate_machine(value, batch, context, sensitive, subjects, EvaluateOne{}), u => evaluate_machine(rest, batch, context, sensitive, subjects, EvaluateOne{}))
+      case_when_value(evaluate_using(~resolve, key, batch, context, sensitive, subjects, EvaluateOne{}), case_subject(subjects), u => evaluate_using(~resolve, value, batch, context, sensitive, subjects, EvaluateOne{}), u => evaluate_using(~resolve, rest, batch, context, sensitive, subjects, EvaluateOne{}))
     case ElseExpression{value} batch EvaluateOne{}:
-      evaluate_machine(value, batch, context, sensitive, subjects, EvaluateOne{})
+      evaluate_using(~resolve, value, batch, context, sensitive, subjects, EvaluateOne{})
     case NoCaseMatch{} batch EvaluateOne{}:
       Failure{"No block matched the switch value '" ++ ruby_render(case_subject(subjects), False{}, False{}) ++ "'"}
     case MidExpression{value, offset, length} batch EvaluateOne{}:
-      mid_text(evaluate_machine(value, batch, context, sensitive, subjects, EvaluateOne{}), u => evaluate_machine(offset, batch, context, sensitive, subjects, EvaluateOne{}), u => evaluate_machine(length, batch, context, sensitive, subjects, EvaluateOne{}))
+      mid_text(evaluate_using(~resolve, value, batch, context, sensitive, subjects, EvaluateOne{}), u => evaluate_using(~resolve, offset, batch, context, sensitive, subjects, EvaluateOne{}), u => evaluate_using(~resolve, length, batch, context, sensitive, subjects, EvaluateOne{}))
     case ContainsExpression{needle, haystack} batch EvaluateOne{}:
-      contains_haystack(evaluate_machine(haystack, batch, context, sensitive, subjects, EvaluateOne{}), u => evaluate_machine(needle, batch, context, sensitive, subjects, EvaluateOne{}))
+      contains_haystack(evaluate_using(~resolve, haystack, batch, context, sensitive, subjects, EvaluateOne{}), u => evaluate_using(~resolve, needle, batch, context, sensitive, subjects, EvaluateOne{}))
     case ArrayLiteral{elements} batch EvaluateOne{}:
-      array_value(evaluate_machine(elements, batch, context, sensitive, subjects, EvaluateOne{}))
+      array_value(evaluate_using(~resolve, elements, batch, context, sensitive, subjects, EvaluateOne{}))
     case Access{structure, index} batch EvaluateOne{}:
-      access_scoped(evaluate_machine(structure, batch, context, sensitive, subjects, EvaluateOne{}), u => evaluate_machine(index, batch, context, sensitive, subjects, EvaluateOne{}), sensitive)
+      access_scoped(evaluate_using(~resolve, structure, batch, context, sensitive, subjects, EvaluateOne{}), u => evaluate_using(~resolve, index, batch, context, sensitive, subjects, EvaluateOne{}), sensitive)
     case CountOneExpression{a} batch EvaluateOne{}:
-      count_single(evaluate_machine(a, batch, context, sensitive, subjects, EvaluateOne{}))
+      count_single(evaluate_using(~resolve, a, batch, context, sensitive, subjects, EvaluateOne{}))
     case CountManyExpression{arguments, count} batch EvaluateOne{}:
       Number{count}
     case EmptyArguments{} batch EvaluateOne{}:
       EmptyArgumentValues{}
     case Argument{a, validation} batch EvaluateOne{}:
-      ArgumentValue{validate_argument(validation, evaluate_machine(a, batch, context, sensitive, subjects, EvaluateOne{}))}
+      ArgumentValue{validate_argument(validation, evaluate_using(~resolve, a, batch, context, sensitive, subjects, EvaluateOne{}))}
     case Arguments{a, b} batch EvaluateOne{}:
-      x y = evaluate_machine(a, batch, context, sensitive, subjects, EvaluateOne{}) evaluate_machine(b, batch, context, sensitive, subjects, EvaluateOne{})
+      x y = evaluate_using(~resolve, a, batch, context, sensitive, subjects, EvaluateOne{}) evaluate_using(~resolve, b, batch, context, sensitive, subjects, EvaluateOne{})
       ArgumentPair{x, y}
     case FunctionCall{kind, arguments} batch EvaluateOne{}:
-      call(kind, evaluate_machine(arguments, batch, context, sensitive, subjects, EvaluateOne{}))
+      call(kind, evaluate_using(~resolve, arguments, batch, context, sensitive, subjects, EvaluateOne{}))
     case Literal{v} batch EvaluateOne{}:
       v
     case Variable{name} batch EvaluateOne{}:
-      lookup(context, name, sensitive)
+      resolve(context, name, sensitive, subjects)
     case Add{a, b} batch EvaluateOne{}:
-      x y = evaluate_machine(a, batch, context, sensitive, subjects, EvaluateOne{}) evaluate_machine(b, batch, context, sensitive, subjects, EvaluateOne{})
+      x y = evaluate_using(~resolve, a, batch, context, sensitive, subjects, EvaluateOne{}) evaluate_using(~resolve, b, batch, context, sensitive, subjects, EvaluateOne{})
       add(x, y)
     case Divide{a, b} batch EvaluateOne{}:
-      x y = evaluate_machine(a, batch, context, sensitive, subjects, EvaluateOne{}) evaluate_machine(b, batch, context, sensitive, subjects, EvaluateOne{})
+      x y = evaluate_using(~resolve, a, batch, context, sensitive, subjects, EvaluateOne{}) evaluate_using(~resolve, b, batch, context, sensitive, subjects, EvaluateOne{})
       divide(x, y)
     case Modulo{a, b} batch EvaluateOne{}:
-      modulo_right(numeric_operand(evaluate_machine(b, batch, context, sensitive, subjects, EvaluateOne{})), u => evaluate_machine(a, batch, context, sensitive, subjects, EvaluateOne{}))
+      modulo_right(numeric_operand(evaluate_using(~resolve, b, batch, context, sensitive, subjects, EvaluateOne{})), u => evaluate_using(~resolve, a, batch, context, sensitive, subjects, EvaluateOne{}))
     case Bitwise{kind, a, b} batch EvaluateOne{}:
-      with_value(evaluate_machine(a, batch, context, sensitive, subjects, EvaluateOne{}), left => with_value(evaluate_machine(b, batch, context, sensitive, subjects, EvaluateOne{}), right => bitwise(kind, left, right)))
+      with_value(evaluate_using(~resolve, a, batch, context, sensitive, subjects, EvaluateOne{}), left => with_value(evaluate_using(~resolve, b, batch, context, sensitive, subjects, EvaluateOne{}), right => bitwise(kind, left, right)))
     case Multiply{a, b} batch EvaluateOne{}:
-      x y = evaluate_machine(a, batch, context, sensitive, subjects, EvaluateOne{}) evaluate_machine(b, batch, context, sensitive, subjects, EvaluateOne{})
+      x y = evaluate_using(~resolve, a, batch, context, sensitive, subjects, EvaluateOne{}) evaluate_using(~resolve, b, batch, context, sensitive, subjects, EvaluateOne{})
       multiply(x, y)
     case And{a, b} batch EvaluateOne{}:
-      logical_left(evaluate_machine(a, batch, context, sensitive, subjects, EvaluateOne{}), True{}, u => evaluate_machine(b, batch, context, sensitive, subjects, EvaluateOne{}))
+      logical_left(evaluate_using(~resolve, a, batch, context, sensitive, subjects, EvaluateOne{}), True{}, u => evaluate_using(~resolve, b, batch, context, sensitive, subjects, EvaluateOne{}))
     case Or{a, b} batch EvaluateOne{}:
-      logical_left(evaluate_machine(a, batch, context, sensitive, subjects, EvaluateOne{}), False{}, u => evaluate_machine(b, batch, context, sensitive, subjects, EvaluateOne{}))
+      logical_left(evaluate_using(~resolve, a, batch, context, sensitive, subjects, EvaluateOne{}), False{}, u => evaluate_using(~resolve, b, batch, context, sensitive, subjects, EvaluateOne{}))
     case Xor{a, b} batch EvaluateOne{}:
-      x y = evaluate_machine(a, batch, context, sensitive, subjects, EvaluateOne{}) evaluate_machine(b, batch, context, sensitive, subjects, EvaluateOne{})
+      x y = evaluate_using(~resolve, a, batch, context, sensitive, subjects, EvaluateOne{}) evaluate_using(~resolve, b, batch, context, sensitive, subjects, EvaluateOne{})
       logical_xor(x, y)
     case PrefixNot{a} batch EvaluateOne{}:
-      logical_not(evaluate_machine(a, batch, context, sensitive, subjects, EvaluateOne{}))
+      logical_not(evaluate_using(~resolve, a, batch, context, sensitive, subjects, EvaluateOne{}))
     case CoerceNumber{a} batch EvaluateOne{}:
-      require_numeric(evaluate_machine(a, batch, context, sensitive, subjects, EvaluateOne{}))
+      require_numeric(evaluate_using(~resolve, a, batch, context, sensitive, subjects, EvaluateOne{}))
     case Compare{op, a, b} batch EvaluateOne{}:
-      x y = evaluate_machine(a, batch, context, sensitive, subjects, EvaluateOne{}) evaluate_machine(b, batch, context, sensitive, subjects, EvaluateOne{})
+      x y = evaluate_using(~resolve, a, batch, context, sensitive, subjects, EvaluateOne{}) evaluate_using(~resolve, b, batch, context, sensitive, subjects, EvaluateOne{})
       compare(x, y, op)
     case Round{a, places, mode} batch EvaluateOne{}:
-      x p = evaluate_machine(a, batch, context, sensitive, subjects, EvaluateOne{}) evaluate_machine(places, batch, context, sensitive, subjects, EvaluateOne{})
+      x p = evaluate_using(~resolve, a, batch, context, sensitive, subjects, EvaluateOne{}) evaluate_using(~resolve, places, batch, context, sensitive, subjects, EvaluateOne{})
       round(x, p, mode)
     case Negate{a} batch EvaluateOne{}:
-      negate(evaluate_machine(a, batch, context, sensitive, subjects, EvaluateOne{}))
+      negate(evaluate_using(~resolve, a, batch, context, sensitive, subjects, EvaluateOne{}))
     case Subtract{a, b} batch EvaluateOne{}:
-      x y = evaluate_machine(a, batch, context, sensitive, subjects, EvaluateOne{}) evaluate_machine(b, batch, context, sensitive, subjects, EvaluateOne{})
+      x y = evaluate_using(~resolve, a, batch, context, sensitive, subjects, EvaluateOne{}) evaluate_using(~resolve, b, batch, context, sensitive, subjects, EvaluateOne{})
       subtract(x, y)
     case Not{a} batch EvaluateOne{}:
-      logical_not(evaluate_machine(a, batch, context, sensitive, subjects, EvaluateOne{}))
+      logical_not(evaluate_using(~resolve, a, batch, context, sensitive, subjects, EvaluateOne{}))
     case If{c, a, b} batch EvaluateOne{}:
-      choose(evaluate_machine(c, batch, context, sensitive, subjects, EvaluateOne{}), u => evaluate_machine(a, batch, context, sensitive, subjects, EvaluateOne{}), u => evaluate_machine(b, batch, context, sensitive, subjects, EvaluateOne{}))
+      choose(evaluate_using(~resolve, c, batch, context, sensitive, subjects, EvaluateOne{}), u => evaluate_using(~resolve, a, batch, context, sensitive, subjects, EvaluateOne{}), u => evaluate_using(~resolve, b, batch, context, sensitive, subjects, EvaluateOne{}))
     case e batch mode:
       Failure{"Invalid evaluation batch"}
+
+def evaluate_machine(e: Expr, +batch: Value, +context: List<&2, Binding>, +sensitive: Bool, +subjects: List<&2, Value>, mode: EvaluationMode) -> Value:
+  evaluate_using(~resolve_lookup, e, batch, context, sensitive, subjects, mode)
 
 def evaluate_scoped(e: Expr, context: List<&2, Binding>, sensitive: Bool, subjects: List<&2, Value>) -> Value:
   evaluate_machine(prepare_expression(e), EmptyArgumentValues{}, context, sensitive, subjects, EvaluateOne{})
@@ -2485,6 +2495,8 @@ def evaluate(e: Expr) -> Value:
 
 def show(value: Value) -> String:
   match value:
+    case StoredExpression{expression, sensitive}:
+      "AST"
     case MemberIndex{name}:
       "Internal member index"
     case SymbolValue{s}:
@@ -2539,6 +2551,8 @@ def named_snapshot(kind: ReferenceKind, name: String) -> String:
 
 def snapshot_render(value: Value, +tail_mode: Bool) -> String:
   match value:
+    case StoredExpression{expression, sensitive}:
+      "ast"
     case MemberIndex{name}:
       "internal:member-index"
     case IntegerNumber{n}:
