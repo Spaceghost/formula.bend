@@ -64,7 +64,10 @@ make native-check
 execution with expected output. `make native-check` needs a compatible clang and
 compares the native program with the same output. Build outputs stay in `build/`.
 All nineteen arithmetic/function runtime cases and eight rounding runtime cases
-have passed on JavaScript and native CPU. CUDA and Metal remain unverified.
+have passed on JavaScript and native CPU. A frozen 2,516-case interpreter
+checkpoint and seven scale cases also pass CUDA on a Quadro P4000 with the
+explicit `--Ofast-compile=max` profile. Default-profile CUDA, newer interpreter
+changes, and Metal remain unverified. No performance comparison is claimed.
 
 ## Compatibility limits
 
@@ -108,7 +111,7 @@ The eight address runtime cases pass on both JavaScript and native CPU.
 
 Parity is measured against the pinned Ruby source and its complete 713-example
 suite. The Ruby reference passes all examples; that is not a claim that Bend does.
-A separate 2657-case corpus matches Ruby on JavaScript for selected values,
+A separate 2677-case corpus matches Ruby on JavaScript for selected values,
 dependencies, parse-error classification, and exception factories.
 `make parity-check` generates the fixtures using Lua.
 Use `LUA=/path/to/lua` if Lua is not on PATH.
@@ -133,6 +136,10 @@ Source commits and checksums are recorded in
 The Bend 2.0.16 integration check reuses 2,304 source-identical passing cases
 and executes the 353 cases in changed batches; the recorded hashes make that
 reuse auditable.
+Twenty further integer-import cases pass both Bend versions. All 2,677 cases
+and seven scale cases pass Bun and native CPU with one and eight threads. The
+separate 5,326-string Ruby Integer profile checks fixture conversion rather
+than formula coverage.
 
 Exception factories preserve reasons, metadata, constructor attributes, message
 overrides and assignment values. Their 131 differential cases cover every
