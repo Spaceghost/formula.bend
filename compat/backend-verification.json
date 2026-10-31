@@ -1,4 +1,22 @@
 {
+  "float_foundation_integrated_checkpoint": {
+    "source_commit":"0f0aa97", "scope":"Standalone arithmetic, decimal conversion, Ruby formatting and BigDecimal coercion profiles combined with Calculator dependency APIs; evaluator Float integration and full parity remain incomplete",
+    "laws":105, "kernel":{"status":"passed", "bend_version":"2.0.39", "lean_version":"4.34.0"},
+    "formula_and_api_cases":8777, "separate_binary64_probes":13253,
+    "probe_families":{"arithmetic":4595,"ieee_decimal":441,"ruby_decimal":1239,"ruby_format":6668,"bigdecimal_coercion":310},
+    "coercion_source_manifest":"compat/verification/binary64-bigdecimal-source.sha256", "coercion_source_manifest_sha256":"b5f05fea9231e018fd35d324fdc65bf459ea4fd7dbb4eeee73624c95f3ab4b41",
+    "formula_runtime":{"source_commit":"3d934e8", "status":"passed", "artifact_reuse":false, "post_merge_artifact_identity":"Regenerated C and JavaScript at 0f0aa97 byte-compare identical after standalone module merges", "javascript":"Bun 1.3.1", "native_cpu_threads":[1,8], "scale_cases":7, "malformed_cases":27,
+      "source_manifest":"compat/verification/float-foundation-formula-source.sha256", "source_manifest_sha256":"ec957b983da9f5c92a62fed6d8cf1d23afc80739570f529630ec25dd60661c07",
+      "js_sha256":"1660d515fd4d93754181eb75e126df28911a52b636fed4af4882a6fe9b4dca53",
+      "c_sha256":"0417ce724f49860b621ec3f0f63164dfe8ac02bc59c3ed28eb604f2d772f07a0", "artifact_sha256":"7b75ab7c4280d5101fef8d8a766ce0afa077381fbbcf7286c2ed38194f1d0116",
+      "input_sha256":"a4af83e89ed4145e8cfb600afc1127c0615ea3e288f7354bab737a5f5336b7b2", "output_sha256":"14b9dcaecec3de998a1afb9938ffdb1510f8b01900ff73fa847bfeec23a92832"},
+    "component_verification":{"arithmetic_and_ieee_decimal":"5036 passed both JS compilers, CPU threads1/8 and required default-profile CUDA at b604167",
+      "ruby_format":"6668 passed both JS compilers, CPU threads1/8 and required default-profile CUDA; legacy JS completed after an alpha-equivalent binder fix with identical emitted C",
+      "ruby_decimal":"1239 passed both JS compilers and CPU threads1/8 at c1d5cf1; required CUDA running",
+      "bigdecimal_coercion":"310 direct Ruby reference probes passed Bend2.0.39/Bun at 0f0aa97"},
+    "combined_13253_matrix":{"status":"running on frozen 0f0aa97 source", "javascript_compilers":["2.0.16","2.0.39"], "native_cpu_threads":[1,8], "cuda":"RequiredGPU(1GB), default NVRTC profile; no fallback", "memory_max_gib":48, "memory_swap_max_gib":8},
+    "full_current_static_corpus":"not run", "current_formula_cuda":"unverified", "metal":"unverified", "performance":"not measured"
+  },
   "decimal_cache_integration_checkpoint": {
     "runtime_source_commit":"6490cbf", "source_parent_commits":["02bd3c2","79ca28c"],
     "scope":"Exact decimal bridge and shared Decimal tail traversals combined with Calculator creator-mode and storage fixes; full Float evaluator and Dentaku parity remain incomplete",
@@ -121,7 +139,7 @@
     "probes":6668, "reference":"Pinned Ruby 3.3.13 Float#to_s", "formula_case_count_includes_these_probes":false,
     "kernel":{"status":"passed", "laws":91, "bend_version":"2.0.39", "lean_version":"4.34.0"},
     "javascript":{"status":"passed_full_probe_corpus", "bend_version":"2.0.39", "runtime":"Bun 1.3.1", "js_sha256":"06e1c453630b2bf25ea699f3967e3c30000d7b5ff8159df9832c19d04f116723"},
-    "legacy_javascript":{"bend_version":"2.0.16", "status":"compiled after local binder rename; full corpus running", "js_sha256":"293c744d5226d0b9bd1c13090fedaa72b9688166b7a17d78cd0c1e079a101d04"},
+    "legacy_javascript":{"bend_version":"2.0.16", "status":"passed_full_probe_corpus", "runtime":"Bun 1.3.1", "js_sha256":"293c744d5226d0b9bd1c13090fedaa72b9688166b7a17d78cd0c1e079a101d04"},
     "native_cpu":{"status":"passed_full_probe_corpus", "threads":[1,8], "compiler":"clang 19.1.1", "optimization":"-O3", "cuda_capable_artifact":true},
     "cuda":{"status":"passed_full_probe_corpus", "requested_mode":"RequiredGPU(1GB)", "fallback":false, "profile":"default NVRTC options", "gpu":"Quadro P4000", "toolkit":"12.9.1", "nvrtc":"12.9.86", "device_stack_limit_increased":false,
       "shader_sha256":"f6a06bfc1d3bf2265f54859cc49303f42fc58688e7615a35f3162a640902b0f4"},

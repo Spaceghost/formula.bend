@@ -42,6 +42,13 @@ digit lists. Coefficients can grow beyond a machine word. Decimal scale uses Nat
 Formatting preserves fractional zeros: `1.25 * .4` displays `0.500`.
 This formatting is not a claim of Ruby BigDecimal display compatibility.
 
+Standalone binary64 layers provide arithmetic, exact decimal conversion,
+[Ruby Float formatting](docs/binary64-format.md),
+[pinned BigDecimal-to-Float conversion](docs/binary64-ruby-decimal.md), and
+[Float-to-BigDecimal coercion profiles](docs/binary64-bigdecimal.md).
+These have separate reference probes; Float values are not yet available in
+the formula evaluator.
+
 Universal laws and concrete regression fixtures cover these
 parts. They do not establish full Ruby or spreadsheet compatibility.
 
