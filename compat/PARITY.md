@@ -595,3 +595,11 @@ Lean-backed checking on Bend 2.0.39. Bun 1.3.1 and native clang 19.1.1 at `-O3`
 pass the full runtime-loaded corpus, seven scale checks and 18 malformed inputs;
 the native checks pass with both one and eight threads. The typed decimal
 checkpoint records exact artifact and input hashes in `backend-verification.json`.
+The merged checkpoint at `c22a813` combines exception dispatch and typed decimal
+transport: 2,657 cases, 55 laws, seven scale checks and 18 malformed inputs.
+Bun and native CPU pass the complete runtime-loaded corpus; native checks use
+one and eight threads at `-O3`. Bend 2.0.16 reuses the byte-identical 2,304-case
+prefix from its verified transport checkpoint and executes both changed
+batches, covering all 353 remaining cases. Existing source modules were checked
+for changes before reuse, and every retained output matches the merged golden.
+The prefix artifact hashes and all checkpoint hashes are recorded in the repo.
