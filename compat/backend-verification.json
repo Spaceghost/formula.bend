@@ -36,6 +36,38 @@
     "scale_output_sha256": "1622d34d26cdfb85586752ab86ab4d71067ac7d4bba1ccdfbd485d314c8bc5e2",
     "cuda_formula_status": "unverified"
   },
+  "reason_dispatch_checkpoint": {
+    "engine_source_commit": "b0f14783cdfe0f02c928b1954773af4ce5bd5093",
+    "scope": "Shared reason lookup and complete cross-factory reason rejection checks; no performance result",
+    "differential_cases": 2647,
+    "exception_factory_cases": 131,
+    "cross_factory_rejections": 40,
+    "scale_cases": 7,
+    "malformed_input_cases": 14,
+    "universal_laws": 52,
+    "javascript": {
+      "factory_cases_status": "passed",
+      "factory_case_bend_versions": ["2.0.16", "2.0.39"],
+      "full_runtime_corpus_status": "passed",
+      "file_input_runtime": "Bun 1.3.1",
+      "generated_runtime_js_sha256": "10c2e265845b2a623b22353820b01519fda891b173cad96e62735d3607608c70"
+    },
+    "kernel_status": "passed",
+    "native_cpu": {
+      "status": "passed",
+      "bend_version": "2.0.39",
+      "compiler": "Ubuntu clang 19.1.1",
+      "optimization": "-O3",
+      "thread_counts": [1, 8],
+      "generated_c_bytes": 6758889,
+      "previous_generated_c_bytes": 8089118,
+      "generated_c_sha256": "cc9f114fb7b5728656da79ae4fdcda037d36ed7fda05be96f55453f2272b16e8",
+      "artifact_sha256": "81cc45bbaad418b2a02fff24de3cbe1ba5ea2e65b69dfc9abfa7150d2e9bf723",
+      "main_input_sha256": "12071617da7dfc5628b366563826057a3c284c70999b495aaaf9cf777a6cb3d1",
+      "main_output_sha256": "61a865f257f2ff5a7f255a15482ec2e0dcc74eb260f6e942a3bc65c29aaa946e"
+    },
+    "cuda_formula_status": "unverified"
+  },
   "exception_factory_checkpoint": {
     "engine_source_commit": "2412dee5b4619cd3b32b26ee50e240c749677567",
     "scope": "Supported exception factory payloads; evaluator propagation and Float/Class/Range metadata remain incomplete",
