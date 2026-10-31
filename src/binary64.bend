@@ -280,18 +280,16 @@ def division_step(less: Bool, +remainder: List<&2, Bool>, divisor: List<&2, Bool
     case False{}:
       Step{True{}, unsigned_subtract(remainder, divisor)}
 
-def continue_step(step: DivisionStep, next: Bool -> List<&2, Bool> -> (List<&2, Bool> & List<&2, Bool>)) -> List<&2, Bool> & List<&2, Bool>:
-  match step:
-    case Step{bit, remainder}:
-      next(bit, remainder)
-
-def divide_walk(input: List<&2, Bool>, +divisor: List<&2, Bool>, remainder: List<&2, Bool>, quotient: List<&2, Bool>) -> List<&2, Bool> & List<&2, Bool>:
-  match input:
-    case Nil{}:
-      (Bits.normalize(quotient), remainder)
-    case bit <> rest:
+# Consume the previous quotient bit before computing the next step. The initial
+# false bit is a leading zero removed by normalization. Keeping the state as
+# data avoids a curried continuation frame for every input bit on the device.
+def divide_walk(input: List<&2, Bool>, +divisor: List<&2, Bool>, step: DivisionStep, quotient: List<&2, Bool>) -> List<&2, Bool> & List<&2, Bool>:
+  match input step:
+    case Nil{} Step{bit, remainder}:
+      (Bits.normalize(bit <> quotient), remainder)
+    case bit <> rest Step{previous, remainder}:
       +brought = Bits.normalize(bit <> remainder)
-      continue_step(division_step(Cmp.is_lt(unsigned_compare(brought, divisor)), brought, divisor), q => r => divide_walk(rest, divisor, r, q <> quotient))
+      divide_walk(rest, divisor, division_step(Cmp.is_lt(unsigned_compare(brought, divisor)), brought, divisor), previous <> quotient)
 
 def quotient_result(parts: List<&2, Bool> & List<&2, Bool>, negative: Bool) -> Float:
   (quotient, remainder) = parts
@@ -306,7 +304,7 @@ def finite_division(za: Bool, zb: Bool, +a: Float, +b: Float) -> Float:
     case True{} False{}:
       zero(Bool.xor(sign(a), sign(b)))
     case False{} False{}:
-      quotient_result(divide_walk(List.reverse(&2, Bool, pad(Nat.add(1075n, Nat.sub(shift(a), shift(b))), significand(a))), pad(Nat.sub(shift(b), shift(a)), significand(b)), Nil{}, Nil{}), Bool.xor(sign(a), sign(b)))
+      quotient_result(divide_walk(List.reverse(&2, Bool, pad(Nat.add(1075n, Nat.sub(shift(a), shift(b))), significand(a))), pad(Nat.sub(shift(b), shift(a)), significand(b)), Step{False{}, Nil{}}, Nil{}), Bool.xor(sign(a), sign(b)))
 
 def divide_kind(ka: Classification, kb: Classification, +a: Float, +b: Float) -> Float:
   match ka kb:
