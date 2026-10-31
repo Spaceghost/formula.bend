@@ -1,4 +1,37 @@
 {
+  "named_matcher_integration_checkpoint": {
+    "source_commit": "5da966d172e477c535eb3de891c2a542411ef265",
+    "scope": "Named references integrated with typed token and matcher APIs; parser/scanner integration and full Ruby object semantics remain incomplete",
+    "formula_and_api_cases": 7768,
+    "scale_cases": 7,
+    "malformed_input_cases": 23,
+    "laws": 66,
+    "concrete_fixtures": 175,
+    "source_scenario_mappings": 139,
+    "javascript": {
+      "status": "passed_file_input_runtime",
+      "bend_version": "2.0.39",
+      "runtime": "Bun 1.3.1",
+      "runtime_js_sha256": "b562d64dddb0e50c2420d604cd323db234c8c05743a03c06b322ffe48a774fac"
+    },
+    "kernel": {"status":"passed", "bend_version":"2.0.39", "lean_version":"4.34.0"},
+    "concrete_fixture_check": {"status":"passed", "bend_version":"2.0.39"},
+    "static_replay": {"status":"pending_combined_replay", "versions":["2.0.16","2.0.39"]},
+    "native_cpu": {
+      "status": "passed",
+      "compiler": "Ubuntu clang 19.1.1",
+      "optimization": "-O3",
+      "thread_counts": [1,8],
+      "generated_c_bytes": 7990937,
+      "generated_c_sha256": "a476c7b4ef461bfc972cb0d689a8a9837c9699dacaf7f88c1499f3fe0061564c",
+      "artifact_sha256": "148ccf891196d571ec4a41b26b28d11ae347ac379b703a0669cc52f98b9c807f",
+      "input_sha256": "609fc7b48b5b26fa2cd2966ee8f77f29f3861d26ac3447a08a96761a5f635e75",
+      "output_sha256": "fb5d1330d2c6a7365163d1b997efa7b51c0d6974f6ac0563a6da33bda87d93ac",
+      "scale_output_sha256": "1622d34d26cdfb85586752ab86ab4d71067ac7d4bba1ccdfbd485d314c8bc5e2"
+    },
+    "cuda_status": "unverified for integrated source",
+    "metal_status": "unverified"
+  },
   "named_reference_checkpoint": {
     "source_commit": "356ef66161ef4bc79b9d931f31f37338b2843a9f",
     "scope": "Named class/module descriptors and comparisons; reflection, anonymous objects and mutable namespace behavior incomplete",

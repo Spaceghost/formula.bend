@@ -63,6 +63,13 @@ literal strings rejected as arithmetic operands from variables that can resolve
 to numeric strings. Validation visits unused branches too, matching parse-time
 rejection independently of evaluation-time branch laziness.
 
+The integrated named-reference/token-matcher source at `5da966d` passes all
+7,768 cases and seven scale checks on Bun and native CPU with one and eight
+threads at `-O3`, plus 23 malformed-input rejections. Its 66 laws pass the
+Lean-backed gate; 175 concrete fixtures pass Bend 2.0.39. Full combined static
+replay on both Bend versions, current-source CUDA and Metal remain unverified.
+This is correctness evidence, with no performance result.
+
 ## Reference runner
 
 `tools/reference.Containerfile` pins the Ruby image manifest and adds Git for the

@@ -127,7 +127,10 @@ The corpus supports exact decimal, integer, string, Boolean, null, nested array,
 ordered hash, and named class/module bindings, plus case-sensitive contexts.
 MAP, FILTER, ALL, ANY, and REDUCE also have seven reference checks over
 1,025-item collections. The checker batches static replay to bound memory.
-The merged 7,768-case corpus is awaiting integration verification.
+The merged 7,768-case corpus and seven scale checks pass Bun and native CPU
+with one and eight threads at `-O3`. All 23 malformed inputs are rejected.
+Its 66 laws pass Lean-backed verification, and the 175 concrete fixtures pass
+on Bend 2.0.39. Combined static replay on both Bend versions is still pending.
 
 The named-reference checkpoint passes all 5,279 cases on JavaScript with Bend
 2.0.16 and 2.0.39, native CPU with one and eight threads at `-O3`, and the seven
