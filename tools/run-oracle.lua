@@ -83,6 +83,26 @@ def snapshot_value(value)
   else raise "unhandled oracle type #{value.class}"
   end
 end
+require 'dentaku/token_matcher'
+def matcher_construct(data)
+  matcher = if data[:builtin]
+    Dentaku::TokenMatcher.public_send(data[:builtin])
+  else
+    Dentaku::TokenMatcher.new(data[:categories], data[:values], (data[:children] || []).map { |child| child && matcher_construct(child) })
+  end
+  (data[:alternatives] || []).each { |other| matcher = matcher | matcher_construct(other) }
+  (data[:modifiers] || []).each { |modifier| matcher.public_send(modifier) }
+  matcher
+end
+def matcher_token(data)
+  data && Dentaku::Token.new(data[:category], data[:value], data[:raw_value])
+end
+def matcher_token_snapshot(token)
+  {'category'=>token.category,'value'=>token.value,'raw_value'=>token.raw_value,
+   'to_s'=>token.to_s,'length'=>token.length,'empty'=>token.empty?,
+   'operator'=>token.operator?,'grouping'=>token.grouping?,
+   'open'=>token.open?,'close'=>token.close?}
+end
 File.foreach(ENV.fetch('FORMULA_ORACLE_CORPUS')) do |line|
   id, source, operation, encoded_context, sensitive, source_format = line.chomp.split("\t", 6)
   source = JSON.parse(source) if source_format == 'json'
@@ -98,6 +118,33 @@ File.foreach(ENV.fetch('FORMULA_ORACLE_CORPUS')) do |line|
     end
     calculator = Dentaku::Calculator.new(case_sensitive: sensitive == 'true')
     value = case operation
+    when 'token_matcher'
+      input = context.fetch('input')
+      matcher = matcher_construct(input[:matcher])
+      case source
+      when 'accept' then matcher == matcher_token(input[:token])
+      when 'match'
+        accepted, tokens = matcher.match(input[:stream].map { |data| matcher_token(data) }, input.fetch(:offset, 0))
+        [accepted, tokens.map { |token| matcher_token_snapshot(token) }]
+      else
+        {'categories'=>matcher.categories.keys,'values'=>matcher.values.keys,'leaf'=>matcher.leaf_matcher?, 'caret'=>matcher.caret?,
+         'minimum'=>matcher.instance_variable_get(:@min),
+         'maximum'=>matcher.instance_variable_get(:@max).infinite? ? 'infinity' : 1}
+      end
+    when 'token'
+      make_token = ->(data) { Dentaku::Token.new(data[:category], data[:value], data[:raw_value]) }
+      input = context.fetch('input')
+      if source == 'equal'
+        make_token.call(input[:left]) == make_token.call(input[:right])
+      elsif source == 'is'
+        make_token.call(input[:token]).is?(input[:expected])
+      else
+        token = make_token.call(input)
+        {'category'=>token.category,'value'=>token.value,'raw_value'=>token.raw_value,
+         'to_s'=>token.to_s,'length'=>token.length,'empty'=>token.empty?,
+         'operator'=>token.operator?,'grouping'=>token.grouping?,
+         'open'=>token.open?,'close'=>token.close?}
+      end
     when 'error_factory' then error_factory(source, context.fetch('input'))
     when 'resolve_order' then Dentaku::DependencyResolver.find_resolve_order(context.fetch('input'), sensitive == 'true')
     when 'resolve_cycles' then Dentaku::DependencyResolver.cycles(context.fetch('input'), sensitive == 'true')

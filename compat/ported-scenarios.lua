@@ -2,6 +2,10 @@
 -- COUNT's Float input is represented as exact decimal 2.3 in Bend; COUNT only
 -- inspects its length capability, so this adaptation does not alter the result.
 return {
+  ['spec/token_spec.rb'] = {
+    {'has a category and a value', {'token_upstream_fields', 'token_category_query_1_1'}},
+    {'compares category and value to determine equality', 'token_upstream_equality'},
+  },
   ['spec/exceptions_spec.rb'] = {
     {'builds a message from reason and metadata (ParseError)', 'named_parse_class_operation'},
     {'describes an :incompatible expectation as requiring compatible operands', 'named_parse_class_incompatible'},

@@ -29,6 +29,8 @@ def operation(name: String) -> Maybe<&2, Gpu.Operation>:
     Named{"coerce_class", Gpu.CoerceClass{}}, Named{"coerce_message", Gpu.CoerceMessage{}},
     Named{"resolve_order", Gpu.ResolveOrder{}}, Named{"resolve_cycles", Gpu.ResolveCycles{}},
     Named{"error_factory", Gpu.DescribeError{}}
+    Named{"token", Gpu.InspectToken{}}
+    Named{"token_matcher", Gpu.InspectMatcher{}}
   ], name)
 
 # Wire pairs retain the Ruby insertion order; bindings put the last pair first.

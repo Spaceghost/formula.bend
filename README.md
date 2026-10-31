@@ -111,7 +111,7 @@ The eight address runtime cases pass on both JavaScript and native CPU.
 
 Parity is measured against the pinned Ruby source and its complete 713-example
 suite. The Ruby reference passes all examples; that is not a claim that Bend does.
-A separate 5279-case corpus matches Ruby on JavaScript for selected values,
+A separate 7768-case corpus covers selected values,
 dependencies, parse-error classification, and exception factories.
 `make parity-check` generates the fixtures using Lua.
 Use `LUA=/path/to/lua` if Lua is not on PATH.
@@ -123,20 +123,25 @@ invalid arithmetic operand types before evaluation, including unused branches.
 See [the parity checklist](compat/PARITY.md) for remaining rules and the shootout
 gate. No performance comparison is claimed yet.
 
-The corpus supports exact decimal, integer, string, Boolean, null, and nested
-array and ordered hash bindings plus case-sensitive contexts. MAP, FILTER, ALL, ANY, and REDUCE
-also pass seven reference checks over 1,025-item collections. Both Bend 2.0.16
-and 2.0.39 pass all 5,279 cases on JavaScript, with 60 laws and 175 concrete
-fixtures. The checker runs the corpus in batches of 256 to bound peak memory.
-All 60 laws pass Lean-backed kernel verification on Bend 2.0.39.
-The 5,279-case checkpoint and seven scale
-checks pass native CPU with one and eight threads at `-O3`.
-Source commits and checksums are recorded in
-`compat/backend-verification.json`.
-The named-value integration reruns the full corpus on both Bend versions.
-Earlier unchanged-case reuse is documented with its original checkpoints.
-The separate 5,326-string Ruby Integer profile checks fixture conversion
-rather than formula coverage.
+The corpus supports exact decimal, integer, string, Boolean, null, nested array,
+ordered hash, and named class/module bindings, plus case-sensitive contexts.
+MAP, FILTER, ALL, ANY, and REDUCE also have seven reference checks over
+1,025-item collections. The checker batches static replay to bound memory.
+The merged 7,768-case corpus is awaiting integration verification.
+
+The named-reference checkpoint passes all 5,279 cases on JavaScript with Bend
+2.0.16 and 2.0.39, native CPU with one and eight threads at `-O3`, and the seven
+scale checks. Its 60 laws pass Lean-backed kernel verification; it also has 175
+concrete fixtures. Separately, the token-matcher checkpoint passes 5,166 cases,
+seven scale checks and 18 malformed-input checks on Bun and native CPU with one
+and eight threads. Its 61 laws pass the Lean-backed gate. The matcher static
+replay on both Bend versions remains pending. Source commits and checksums are
+recorded in `compat/backend-verification.json`.
+
+The separate 5,326-string Ruby Integer profile checks fixture conversion rather
+than formula coverage. See [the matcher contract](docs/token-matcher.md) for
+immutable modifiers, Hash-key identity, compound inversion, and negative stream
+offsets. This API is not yet connected to the parser's lexer or a token scanner.
 
 Exception factories preserve reasons, metadata, constructor attributes, message
 overrides and assignment values. Their 131 differential cases cover every
@@ -175,3 +180,6 @@ Parser.identifiers reports unique syntactic inputs; Parser.dependencies prunes
 resolvable IF/AND/OR branches. Public formula evaluation checks dependencies
 before evaluating, while Core.evaluate_in remains direct AST evaluation. Stored
 formula values, cycles, and volatile custom-function analysis are not implemented.
+The labeled CUDA fast-compile checkpoint now covers all 2,677 pre-token cases
+and seven scale cases on the P4000. The newer token API needs its own GPU
+checkpoint; default-profile CUDA and Metal remain unverified.

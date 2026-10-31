@@ -49,7 +49,7 @@ The unchanged upstream suite passes 713 examples with zero failures and 96.82%
 line coverage in the Ruby reference environment. `reference-summary.json` and
 `upstream-spec-catalog.json` record that run. These results describe Ruby only.
 
-The Lua-driven corpus has 5279 cases matched against Ruby values, parse
+The Lua-driven corpus has 7768 reference cases for Ruby values, parse
 error classification, or exception-factory descriptions. It covers truthiness, strings/null, comparisons, selected
 numeric-string coercions, and static operand rejection. It is a small subset of
 the upstream catalog. Native error classes/messages, all calculator methods,
@@ -675,3 +675,59 @@ reflection, anonymous objects and namespace mutation are not implemented.
 Range and Float values, full structured evaluator failures, and broader
 calculator/function-registry behavior remain open. The recorded CUDA pass
 continues to cover only the earlier 2,516-case source checkpoint.
+
+## Token descriptors
+
+`src/token.bend` preserves category, semantic value and raw spelling in an
+immutable descriptor. `make` supplies the default nil raw value; `with_raw`
+retains an explicit one. `to_value` implements Ruby Token#to_s's raw-or-value
+result, including non-String values. Length and emptiness use raw_value.to_s
+rather than that result: absent raw spelling is empty even when the semantic
+value is present, and false raw spelling has length five while to_value falls
+back to the semantic value. Length counts Unicode characters.
+
+Category tests distinguish symbol and string categories. Grouping/open/close
+predicates match the pinned implementation. Equality ignores raw spelling;
+nil category or semantic value is a wildcard on either side. This equality
+can be nontransitive and is separate from ordinary value equality.
+
+The 113 reference cases and three laws cover the supported Core.Value profile.
+Both token_spec.rb examples have direct scenario correspondences. Descriptors
+are not yet attached to internal lexer variants, and arbitrary Ruby objects,
+Float/Class values and invalid string encodings remain outside this typed API.
+These limits keep raw-token/visitor integration explicitly unfinished.
+The token checkpoint brings the combined formula/API corpus to 2,790 cases
+and the proof book to 58 laws. All 113 new static token cases pass Bend 2.0.16
+and 2.0.39. The full runtime-loaded corpus, seven scale cases and 18 malformed
+inputs pass Bun and native CPU with one and eight threads at `-O3`. Artifact
+hashes are recorded in token_api_checkpoint; prior source checkpoints retain
+their own counts and validation scopes.
+
+## Required-GPU fast-compile checkpoint after fixture fixes
+
+The cached c22a813 runtime passes all 2,677 pre-token cases on the P4000 with
+`--gpu 1GB` and NVRTC `--Ofast-compile=max`, retaining `--fmad=false`. Its
+preceding 2,657-case run passed the same seven scale inputs on that shader.
+CPU pool sizes one and eight also match the 2,677-case oracle. The expanded
+integer import cases require new fixture data, so they reuse this unchanged
+Bend runtime and shader. Exact input, binary and shader hashes are recorded.
+The 113 newer token cases require a new shader and remain GPU-unverified.
+Default-profile CUDA and Metal execution remain unverified. No runtime
+performance comparison follows from these correctness runs.
+## Token matcher checkpoint
+
+Source 4644bd476213675b54f0b6b3611ea9aecd28c2e8 adds immutable TokenMatcher
+descriptors, named presets, nested category/value sets with Hash key identity,
+alternatives, inversion, caret metadata, and stream quantifiers. Negative
+offsets preserve Ruby Array indexing, including wrap through index zero.
+No fixed matcher depth or stream length cutoff is used.
+
+All 2,376 new matcher probes agree with the pinned Ruby implementation in Bun.
+The combined corpus has 5,166 cases and passes Bun and native CPU with one and
+eight threads at -O3. Seven scale and 18 malformed-input checks also pass on those
+runtimes; all 61 laws pass Lean-backed verification. The full matcher static
+replay on Bend 2.0.16 and 2.0.39 remains pending at this checkpoint. Do not infer a matcher CUDA or Metal pass.
+
+The tests cover supported Core.Value descriptors. Mutable Ruby aliasing,
+arbitrary objects, Float identity, scanner behavior, and lexer/visitor
+integration remain incomplete. The matcher spec family remains partial.

@@ -46,9 +46,9 @@ spec/identifiers_spec.rb	11	partial
 spec/numeric_parser_spec.rb	9	partial
 spec/parser_spec.rb	29	partial
 spec/print_visitor_spec.rb	20	unassessed
-spec/token_matcher_spec.rb	11	unassessed
+spec/token_matcher_spec.rb	11	partial
 spec/token_scanner_spec.rb	6	unassessed
-spec/token_spec.rb	2	unassessed
+spec/token_spec.rb	2	partial
 spec/tokenizer_spec.rb	48	partial
 spec/visitor/infix_spec.rb	2	unassessed
 spec/visitor_spec.rb	1	unassessed

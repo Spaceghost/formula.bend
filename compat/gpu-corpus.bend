@@ -1,4 +1,6 @@
 import Base
+import ./token_matcher_api.bend as MatcherApi
+import ./token_api.bend as TokenApi
 import ../src/core.bend as Core
 import ../src/parser.bend as Parser
 import ../src/resolver.bend as Resolver
@@ -19,6 +21,8 @@ type Operation is Data:
   ResolveOrder{}
   ResolveCycles{}
   DescribeError{}
+  InspectToken{}
+  InspectMatcher{}
 
 type Case is Data:
   Check{id: String, formula: String, operation: Operation, context: List<&2, Core.Binding>, sensitive: Bool, json: Bool}
@@ -57,6 +61,10 @@ def execute_operation(operation: Operation, formula: String, context: List<&2, C
       Resolver.order_snapshot(Core.lookup(context, "input", False{}), sensitive)
     case ResolveCycles{}:
       Resolver.cycles_snapshot(Core.lookup(context, "input", False{}), sensitive)
+    case InspectMatcher{}:
+      MatcherApi.snapshot(formula, Core.lookup(context, "input", False{}))
+    case InspectToken{}:
+      TokenApi.snapshot(formula, Core.lookup(context, "input", False{}))
     case DescribeError{}:
       ErrorFactory.snapshot(formula, Core.lookup(context, "input", False{}))
 
