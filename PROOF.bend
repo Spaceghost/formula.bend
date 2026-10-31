@@ -5,6 +5,15 @@ import ./LAWS.bend as Laws
 import ./src/bits.bend as Bits
 import ./src/error_types.bend as ErrorTypes
 
+def Laws.range_type_name(first, last, excluded):
+  {==}
+
+def Laws.range_truthy(first, last, excluded):
+  {==}
+
+def Laws.endless_arity(first, excluded):
+  {==}
+
 def Laws.named_class_type(name, parents):
   {==}
 

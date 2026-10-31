@@ -23,6 +23,7 @@ type Value is Data:
   TextValue{value: String}
   SymbolValue{value: String}
   NamedReference{kind: ReferenceKind, name: String, ancestors: List<&2, String>}
+  RangeValue{first: Value, last: Value, exclude_end: Bool}
   MemberIndex{name: String}
   HashNil{}
   HashEntry{key: Value, value: Value, tail: Value}
@@ -262,7 +263,17 @@ def cast_numeric(value: Value) -> Value:
     case value:
       value
 
-def ruby_render(value: Value, inspect: Bool, tail_mode: Bool) -> String:
+def is_null_value(value: Value) -> Bool:
+  match value:
+    case NullValue{}:
+      True{}
+    case value:
+      False{}
+
+def range_separator(excluded: Bool) -> String:
+  Bool.pick(String, excluded, "...", "..")
+
+def ruby_render(value: Value, +inspect: Bool, tail_mode: Bool) -> String:
   match value:
     case Number{n}:
       Nat.show(n)
@@ -280,6 +291,8 @@ def ruby_render(value: Value, inspect: Bool, tail_mode: Bool) -> String:
       Bool.pick(String, inspect, StringOps.symbol_inspect(s), s)
     case NamedReference{kind, name, ancestors}:
       name
+    case RangeValue{+first, +last, excluded}:
+      ruby_render(first, Bool.and(inspect, Bool.or(Bool.not(is_null_value(first)), is_null_value(last))), False{}) ++ range_separator(excluded) ++ ruby_render(last, Bool.and(inspect, Bool.or(Bool.not(is_null_value(last)), is_null_value(first))), False{})
     case HashNil{}:
       Bool.pick(String, tail_mode, "}", "{}")
     case HashEntry{key, value, tail}:
@@ -414,6 +427,8 @@ def hash_get(hash: Value, key: Value) -> Value:
 
 def value_equal(a: Value, b: Value, +strict: Bool) -> Bool:
   match a b:
+    case RangeValue{af, al, ax} RangeValue{bf, bl, bx}:
+      Bool.and(Cmp.is_eq(Bool.cmp(ax, bx)), Bool.and(value_equal(af, bf, True{}), value_equal(al, bl, True{})))
     case HashNil{} HashNil{}:
       True{}
     case HashEntry{+key, value, tail} +b:
@@ -516,6 +531,8 @@ def ruby_type_name(value: Value) -> String:
       "Symbol"
     case NamedReference{kind, name, ancestors}:
       reference_type_name(kind)
+    case RangeValue{first, last, excluded}:
+      "Range"
     case Logical{True{}}:
       "TrueClass"
     case Logical{False{}}:
@@ -590,6 +607,8 @@ def set_equal(a: Value, b: Value, +hashed: Bool) -> Bool:
       True{}
     case ArrayCons{ah, at} ArrayCons{bh, bt}:
       Bool.and(set_equal(ah, bh, hashed), set_equal(at, bt, hashed))
+    case RangeValue{af, al, ax} RangeValue{bf, bl, bx}:
+      Bool.and(Cmp.is_eq(Bool.cmp(ax, bx)), Bool.and(set_equal(af, bf, hashed), set_equal(al, bl, hashed)))
     case +a +b:
       Bool.or(set_numeric_equal(a, b, hashed), value_equal_same_type(a, b))
 
@@ -1220,6 +1239,8 @@ def supports_order(value: Value) -> Bool:
       False{}
     case ArrayCons{head, tail}:
       False{}
+    case RangeValue{first, last, excluded}:
+      False{}
     case value:
       True{}
 
@@ -1277,12 +1298,25 @@ def compare_nonreference_named(+other: Value, kind: ReferenceKind, op: Compariso
     case op:
       other_named_order(supports_order(other), other, kind, op)
 
+def compare_range(a: Value, b: Value, op: Comparison) -> Value:
+  match op:
+    case EqualTo{}:
+      Logical{value_equal(a, b, True{})}
+    case NotEqualTo{}:
+      Logical{Bool.not(value_equal(a, b, True{}))}
+    case op:
+      missing_comparison_operator(op)
+
 def compare_values(a: Value, b: Value, op: Comparison) -> Value:
   match a b:
     case Failure{e} b:
       Failure{e}
     case a Failure{e}:
       Failure{e}
+    case RangeValue{first, last, excluded} b:
+      compare_range(RangeValue{first, last, excluded}, b, op)
+    case a RangeValue{first, last, excluded}:
+      compare_range(a, RangeValue{first, last, excluded}, op)
     case NamedReference{ka, +a, pa} NamedReference{kb, +b, pb}:
       compare_named(op, named_identity(ka, a, kb, b), named_ancestor(pa, b), named_ancestor(pb, a))
     case NamedReference{kind, name, ancestors} b:
@@ -2457,6 +2491,8 @@ def show(value: Value) -> String:
       s
     case NamedReference{kind, name, ancestors}:
       name
+    case RangeValue{first, last, excluded}:
+      ruby_render(RangeValue{first, last, excluded}, False{}, False{})
     case HashNil{}:
       "{}"
     case HashEntry{key, value, tail}:
@@ -2538,6 +2574,10 @@ def snapshot_render(value: Value, +tail_mode: Bool) -> String:
       "symbol:" ++ s
     case NamedReference{kind, name, ancestors}:
       named_snapshot(kind, name)
+    case RangeValue{first, last, excluded}:
+      +a = snapshot_render(first, False{})
+      +b = snapshot_render(last, False{})
+      "range:" ++ Bool.pick(String, excluded, "exclusive:", "inclusive:") ++ Nat.show(String.length(a)) ++ ":" ++ a ++ Nat.show(String.length(b)) ++ ":" ++ b
     case HashNil{}:
       Bool.pick(String, tail_mode, "}", "hash:{}")
     case HashEntry{key, value, tail}:
@@ -2556,6 +2596,8 @@ def class_snapshot(value: Value) -> String:
       "class:Symbol"
     case NamedReference{kind, name, ancestors}:
       "class:" ++ reference_type_name(kind)
+    case RangeValue{first, last, excluded}:
+      "class:Range"
     case HashNil{}:
       "class:Hash"
     case HashEntry{key, item, tail}:

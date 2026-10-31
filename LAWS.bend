@@ -12,6 +12,24 @@ import ./src/resolver.bend as Resolver
 
 import ./src/reference.bend as Ref
 import ./src/error_types.bend as ErrorTypes
+import ./src/errors.bend as Errors
+
+law range_type_name:
+  for first: Core.Value
+  for last: Core.Value
+  for excluded: Bool
+  {Core.ruby_type_name(Core.RangeValue{first, last, excluded}) == "Range" : String}
+
+law range_truthy:
+  for first: Core.Value
+  for last: Core.Value
+  for excluded: Bool
+  {Core.truthy(Core.RangeValue{first, last, excluded}) == True{} : Bool}
+
+law endless_arity:
+  for +first: Core.Value
+  for excluded: Bool
+  {Errors.expected_count(Core.RangeValue{first, Core.NullValue{}, excluded}) == "at least " ++ Errors.render(first) : String}
 
 law named_class_type:
   for name: String

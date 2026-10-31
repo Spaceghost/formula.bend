@@ -82,6 +82,13 @@ def render(value: Core.Value) -> String:
 def shown(meta: Core.Value, name: String) -> String:
   render(field(meta, name))
 
+def expected_count(value: Core.Value) -> String:
+  match value:
+    case Core.RangeValue{first, Core.NullValue{}, excluded}:
+      "at least " ++ render(first)
+    case value:
+      render(value)
+
 def parents(base: String, dentaku: Bool) -> List<&2, String>:
   match dentaku:
     case True{}:
@@ -210,9 +217,9 @@ def argument_message_code(reason: ReasonCode, +meta: Core.Value) -> Maybe<&2, St
     case InvalidValue{}:
       Some{Bool.pick(String, has(meta, "expected"), "'" ++ shown(meta, "actual") ++ "' is not a valid " ++ shown(meta, "expected"), Bool.pick(String, has(meta, "actual"), "'" ++ shown(meta, "actual") ++ "' is not a valid value", "Invalid value"))}
     case TooFewArguments{}:
-      Some{shown(meta, "function_name") ++ "() has too few arguments (given " ++ shown(meta, "actual") ++ ", expected " ++ shown(meta, "expected") ++ ")"}
+      Some{shown(meta, "function_name") ++ "() has too few arguments (given " ++ shown(meta, "actual") ++ ", expected " ++ expected_count(field(meta, "expected")) ++ ")"}
     case WrongNumberOfArguments{}:
-      Some{shown(meta, "function_name") ++ "() has the wrong number of arguments (given " ++ shown(meta, "actual") ++ ", expected " ++ shown(meta, "expected") ++ ")"}
+      Some{shown(meta, "function_name") ++ "() has the wrong number of arguments (given " ++ shown(meta, "actual") ++ ", expected " ++ expected_count(field(meta, "expected")) ++ ")"}
     case reason:
       None{}
 

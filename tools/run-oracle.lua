@@ -29,6 +29,10 @@ def context_value(value)
       raise 'wrong named ancestry' unless reference.ancestors.drop(1).map(&:name) == value.fetch('ancestors')
       return reference
     end
+    if value.key?('range')
+      range = value.fetch('range')
+      return Range.new(context_value(range.fetch('first')), context_value(range.fetch('last')), range.fetch('exclude_end'))
+    end
     return value.fetch('hash').map { |key, item| [context_value(key), context_value(item)] }.to_h if value.key?('hash')
     return Integer(value.fetch('integer')) if value.key?('integer')
     return BigDecimal(value.fetch('decimal')) if value.key?('decimal')
@@ -74,6 +78,10 @@ def snapshot_value(value)
   when Symbol then "symbol:#{value}"
   when Class then "class-reference:#{value.name}"
   when Module then "module-reference:#{value.name}"
+  when Range
+    first = snapshot_value(value.begin)
+    last = snapshot_value(value.end)
+    "range:#{value.exclude_end? ? 'exclusive' : 'inclusive'}:#{first.length}:#{first}#{last.length}:#{last}"
   when Hash
     parts = value.flat_map { |key, item| [snapshot_value(key), snapshot_value(item)] }
     "hash:{#{parts.map { |part| "#{part.length}:#{part}" }.join}}"
