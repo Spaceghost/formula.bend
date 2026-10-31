@@ -77,7 +77,17 @@ def pad(count: Nat, bits: List<&2, Bool>) -> List<&2, Bool>:
     case 0n:
       bits
     case 1n+rest:
-      False{} <> pad(rest, bits)
+      pad(rest, False{} <> bits)
+
+def bit_length_into(bits: List<&2, Bool>, length: Nat) -> Nat:
+  match bits:
+    case Nil{}:
+      length
+    case bit <> rest:
+      bit_length_into(rest, Nat.add(length, 1n))
+
+def bit_length(bits: List<&2, Bool>) -> Nat:
+  bit_length_into(bits, 0n)
 
 def word_value(bits: List<&2, Bool>) -> U32:
   match bits:
@@ -132,7 +142,7 @@ def pack_rounded(bits: List<&2, Bool>, negative: Bool, +removed: Nat, +scale: Na
     case Nil{}:
       zero(negative)
     case +head <> +rest:
-      +length = Nat.add(1n, List.length(&2, Bool, rest))
+      +length = Nat.add(1n, bit_length(rest))
       pack_magnitude(Nat.is_gt(Nat.add(Nat.add(length, removed), 1022n), scale), negative, head <> rest, length, removed, scale)
 
 def quantize_shift(+removed: Nat, bits: List<&2, Bool>, scale: Nat, negative: Bool, sticky: Bool) -> Float:
@@ -144,7 +154,7 @@ def rounding_shift(+length: Nat, +scale: Nat) -> Nat:
   Bool.pick(Nat, Nat.is_ge(normal, subnormal), normal, subnormal)
 
 def quantize_normalized(+bits: List<&2, Bool>, +scale: Nat, negative: Bool, sticky: Bool) -> Float:
-  quantize_shift(rounding_shift(List.length(&2, Bool, bits), scale), bits, scale, negative, sticky)
+  quantize_shift(rounding_shift(bit_length(bits), scale), bits, scale, negative, sticky)
 
 def quantize(bits: List<&2, Bool>, scale: Nat, negative: Bool, sticky: Bool) -> Float:
   quantize_normalized(Bits.normalize(bits), scale, negative, sticky)
@@ -182,7 +192,7 @@ def compare_length(order: Cmp, a: List<&2, Bool>, b: List<&2, Bool>) -> Cmp:
       order
 
 def unsigned_compare(+a: List<&2, Bool>, +b: List<&2, Bool>) -> Cmp:
-  compare_length(Nat.cmp(List.length(&2, Bool, a), List.length(&2, Bool, b)), a, b)
+  compare_length(Nat.cmp(bit_length(a), bit_length(b)), a, b)
 
 def subtract_walk(a: List<&2, Bool>, b: List<&2, Bool>, +borrow: Bool, reversed: List<&2, Bool>) -> List<&2, Bool>:
   match a b:
