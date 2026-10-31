@@ -36,6 +36,45 @@
     "scale_output_sha256": "1622d34d26cdfb85586752ab86ab4d71067ac7d4bba1ccdfbd485d314c8bc5e2",
     "cuda_formula_status": "unverified"
   },
+  "exception_factory_checkpoint": {
+    "engine_source_commit": "2412dee5b4619cd3b32b26ee50e240c749677567",
+    "scope": "Supported exception factory payloads; evaluator propagation and Float/Class/Range metadata remain incomplete",
+    "differential_cases": 2607,
+    "exception_factory_cases": 91,
+    "scale_cases": 7,
+    "malformed_input_cases": 14,
+    "universal_laws": 52,
+    "concrete_fixtures": 175,
+    "source_scenario_mappings": 134,
+    "javascript": {
+      "status": "passed",
+      "bend_versions": ["2.0.16", "2.0.39"],
+      "file_input_runtime": "Bun 1.3.1",
+      "generated_runtime_js_sha256": "1d4707748df6569457fd8b1f86b114ddd808c19e2993f0abe701467a8614fb46"
+    },
+    "kernel": {
+      "status": "passed",
+      "bend_version": "2.0.39",
+      "lean_version": "4.34.0"
+    },
+    "native_cpu": {
+      "status": "passed",
+      "host": "fedora",
+      "bend_version": "2.0.39",
+      "compiler": "Ubuntu clang 19.1.1",
+      "build_flags": ["-std=c11", "-O3"],
+      "cuda_compiled_in": false,
+      "thread_counts": [1, 8],
+      "generated_c_bytes": 8089118,
+      "generated_c_sha256": "cf7a263aa5fa4eb1fe67e15c90fcdcfb334a0ca109b5411b662e379581d3715e",
+      "artifact_sha256": "7901f293002d0b813c6ee45909d62a90b48a2a6948e602903612e2a0fc1f6a48",
+      "main_input_sha256": "8393753798ac049cf75858770d1b0db2c7784a40bab996022a21bef779223a8c",
+      "main_output_sha256": "05411a1b67ad15b35694e7db9499a12cdbc67739f492bd4773cf625836c050d7",
+      "scale_input_sha256": "d05a7b3c1663780f7edb896a7c665a78e44925a567c6effbf1142e8278803603",
+      "scale_output_sha256": "1622d34d26cdfb85586752ab86ab4d71067ac7d4bba1ccdfbd485d314c8bc5e2"
+    },
+    "cuda_formula_status": "unverified"
+  },
   "compact_unicode_checkpoint": {
     "source_commit": "29854e6780e808c23783d7b7db298b5ef25d4230",
     "scope": "Correctness and generated-code size; no runtime performance result",

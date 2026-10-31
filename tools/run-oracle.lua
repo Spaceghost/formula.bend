@@ -27,6 +27,34 @@ def context_value(value)
   else value
   end
 end
+def error_factory(factory, input)
+  begin
+    error = case factory
+    when 'parse' then Dentaku::ParseError.for(input[:reason], **input.fetch(:meta))
+    when 'tokenizer' then Dentaku::TokenizerError.for(input[:reason], **input.fetch(:meta))
+    when 'argument' then Dentaku::ArgumentError.for(input[:reason], **input.fetch(:meta))
+    when 'unbound' then Dentaku::UnboundVariableError.new(input[:variables])
+    when 'math_domain' then Dentaku::MathDomainError.new(input[:function_name], input[:args])
+    when 'node' then Dentaku::NodeError.new(input[:expected], input[:actual], input[:operand])
+    when 'zero_division' then Dentaku::ZeroDivisionError.new
+    else Dentaku::BaseError.new
+    end
+  rescue ::ArgumentError => error
+    # Invalid factory reasons deliberately raise a native ArgumentError.
+  end
+  error = error.exception(input[:override_message]) if input.key?(:override_message)
+  error.assigned_to = input[:assigned_to] if input.key?(:assigned_to)
+  attributes = {}
+  %i[unbound_variables function_name args expected actual operand reason meta].each do |name|
+    attributes[name] = error.public_send(name) if error.respond_to?(name)
+  end
+  {'class' => error.class.name, 'message' => error.message,
+   'dentaku_error' => error.is_a?(Dentaku::Error),
+   'argument_error' => error.is_a?(::ArgumentError),
+   'zero_division_error' => error.is_a?(::ZeroDivisionError),
+   'attributes' => attributes,
+   'assigned_to' => error.respond_to?(:assigned_to) ? error.assigned_to : nil}
+end
 def snapshot_value(value)
   case value
   when nil then 'null'
@@ -59,6 +87,7 @@ File.foreach(ENV.fetch('FORMULA_ORACLE_CORPUS')) do |line|
     end
     calculator = Dentaku::Calculator.new(case_sensitive: sensitive == 'true')
     value = case operation
+    when 'error_factory' then error_factory(source, context.fetch('input'))
     when 'resolve_order' then Dentaku::DependencyResolver.find_resolve_order(context.fetch('input'), sensitive == 'true')
     when 'resolve_cycles' then Dentaku::DependencyResolver.cycles(context.fetch('input'), sensitive == 'true')
     when 'identifiers' then calculator.identifiers(source)
