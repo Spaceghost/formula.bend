@@ -1,4 +1,19 @@
 {
+  "binary64_format_checkpoint": {
+    "source_commit":"ec1588d", "scope":"Standalone Ruby Float#to_s shortest decimal formatting; evaluator Float values remain incomplete",
+    "source_manifest":"compat/verification/binary64-format-source.sha256", "source_manifest_sha256":"45d2dd6b012adff28df73b029cd80b75b218d0be9a2f531c6d14264a335d8a8d",
+    "probes":6668, "reference":"Pinned Ruby 3.3.13 Float#to_s", "formula_case_count_includes_these_probes":false,
+    "kernel":{"status":"passed", "laws":91, "bend_version":"2.0.39", "lean_version":"4.34.0"},
+    "javascript":{"status":"passed_full_probe_corpus", "bend_version":"2.0.39", "runtime":"Bun 1.3.1", "js_sha256":"06e1c453630b2bf25ea699f3967e3c30000d7b5ff8159df9832c19d04f116723"},
+    "legacy_javascript":{"bend_version":"2.0.16", "status":"compiled after local binder rename; full corpus running", "js_sha256":"293c744d5226d0b9bd1c13090fedaa72b9688166b7a17d78cd0c1e079a101d04"},
+    "native_cpu":{"status":"passed_full_probe_corpus", "threads":[1,8], "compiler":"clang 19.1.1", "optimization":"-O3", "cuda_capable_artifact":true},
+    "cuda":{"status":"passed_full_probe_corpus", "requested_mode":"RequiredGPU(1GB)", "fallback":false, "profile":"default NVRTC options", "gpu":"Quadro P4000", "toolkit":"12.9.1", "nvrtc":"12.9.86", "device_stack_limit_increased":false,
+      "shader_sha256":"f6a06bfc1d3bf2265f54859cc49303f42fc58688e7615a35f3162a640902b0f4"},
+    "generated_c_bytes":10790682, "c_sha256":"c1bfe658e0f2f2ca9ec588d43b6a7b9cf66838a821d4cba5b58dfa4010e18085", "artifact_sha256":"f39ec1e9cfb7b5ffa303e2008542bdc42e9220df8c20bcd54fdcd45448380850",
+    "input_sha256":"851a6f2da204942ad33c55c7af3e08fe09c7f07b9a304c6c782cdd87085b72dc", "output_sha256":"65112ad4e26542ce669e86751724a0141891ae05ee19e087e399694b659dd9b6",
+    "legacy_source_fix":"Only a local binder was renamed to avoid a 2.0.16 parser collision; regenerated 2.0.39 C byte-compares identical to the verified artifact's C",
+    "metal":"unverified", "performance":"not measured"
+  },
   "calculator_binary64_integration_checkpoint": {
     "source_parent_commits":["3b002a7","bce55b25876130316b1e53154c0b085c6cb0b927"],
     "source_manifest":"compat/verification/binary64-calculator-integrated-source.sha256",

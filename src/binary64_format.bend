@@ -135,9 +135,9 @@ def render_mode(scientific_mode: Bool, digits: List<&2, U32>, +scale: Nat, small
 def render_parts(value: Decimal.Decimal) -> String:
   match value:
     case Decimal.Exact{+digits, +scale}:
-      +length = Conversion.digit_length_into(digits, 0n)
-      +small = Nat.is_ge(scale, length)
-      +exponent = Bool.pick(Nat, small, Nat.add(Nat.sub(scale, length), 1n), Nat.sub(Nat.sub(length, scale), 1n))
+      +width = Conversion.digit_length_into(digits, 0n)
+      +small = Nat.is_ge(scale, width)
+      +exponent = Bool.pick(Nat, small, Nat.add(Nat.sub(scale, width), 1n), Nat.sub(Nat.sub(width, scale), 1n))
       render_mode(Bool.or(Bool.and(small, Nat.is_gt(exponent, 4n)), Bool.and(Nat.is_eq(scale, 0n), Bool.and(Bool.not(small), Nat.is_ge(exponent, 15n)))), digits, scale, small, exponent)
 
 def finite(zero: Bool, +value: Binary.Float) -> String:
