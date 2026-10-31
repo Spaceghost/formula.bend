@@ -1,4 +1,29 @@
 {
+  "binary64_decimal_checkpoint": {
+    "source_commit":"b604167",
+    "scope":"Standalone exact decimal projection and IEEE nearest/even decimal conversion; evaluator Float values and Ruby-compatible decimal parsing remain incomplete",
+    "source_manifest":"compat/verification/binary64-decimal-source.sha256",
+    "source_manifest_sha256":"2995e9ae4b774a1682368fecfc6e1170504d4123c8773f1ced8fd0b39069f5c4",
+    "conversion_probes":441, "separate_arithmetic_probes":4595,
+    "conversion_oracle":"Exact rational midpoint intervals; libc supplies only an initial candidate",
+    "ruby_parser_discrepancy_rows":72,
+    "ruby_parser_discrepancies":"compat/binary64-conversion-ruby-profile.tsv; these are open compatibility items, not passing Ruby parity cases",
+    "kernel":{"status":"passed", "laws":88, "bend_version":"2.0.39", "lean_version":"4.34.0"},
+    "javascript":{"status":"passed_all_5036_probes", "bend_version":"2.0.39", "runtime":"Bun 1.3.1", "js_sha256":"4783c628b409512cdee0a57c25fe7cd80caf6dc80392f613fb62c20bd4f11c04"},
+    "legacy_javascript":{"bend_version":"2.0.16", "status":"passed_all_5036_probes", "runtime":"Bun 1.3.1"},
+    "native_cpu":{"status":"passed_all_5036_probes", "threads":[1,8], "compiler":"clang 19.1.1", "optimization":"-O3", "cuda_capable_artifact":true,
+      "c_sha256":"f4e7222d3a38d447689e7d5d71f5aab13003fb807ef9c1bcdb72d1e79ad2204d", "artifact_sha256":"db60252f17e807d635cef130d6f6971b4e94c1b788cda7d5a2eb6b5c2f8ed7a6"},
+    "cuda":{"status":"passed_all_5036_probes", "requested_mode":"RequiredGPU(1GB)", "fallback":false, "profile":"default NVRTC options", "gpu":"Quadro P4000", "toolkit":"12.9.1", "nvrtc":"12.9.86",
+      "shader_sha256":"8036c52a7f0ea87dd3108c1e61da1936eacc36a4b5ef66059864717d55642115", "device_stack_limit_increased":false,
+      "conversion_input_sha256":"6120fb3b5c0b5922afa71c7fbbdf435d284793f3ec49e73f12074b87ee76d20e", "conversion_output_sha256":"e7d07b66ae24506a14f0f722dcb90256cd851044af90644214721d00479ac67f"},
+    "fresh_formula_regression":{"cases":8537, "scale_cases":7, "malformed_cases":27, "bun":"passed", "native_cpu_threads":[1,8], "native_cpu_status":"passed",
+      "artifact_reuse":false, "source_manifest":"compat/verification/binary64-decimal-formula-source.sha256",
+      "js_sha256":"094363b04ce6df5a1e773836fc98ec108119406afda0a033a5b34e196d146ac2",
+      "c_sha256":"d27667a69ac66cc7bb6d522be4a75f5bc69458ffb6916f5179f6f993c880fa8f",
+      "artifact_sha256":"daa42e4db16e9ec71eef7797c8774bec6d8a92790302c942f740c841c4e6cb4c",
+      "input_sha256":"c62cbf4be7fbf899a00202383b47feebd357cec568c696da53f09142432553ad", "output_sha256":"0f42aba958bd651e442046ecb8db8358bbabc404eebc6effa42117be64aee93e"},
+    "formula_cuda":"unverified for this source", "metal":"unverified", "performance":"not measured"
+  },
   "calculator_binary64_integration_checkpoint": {
     "source_parent_commits":["3b002a7","bce55b25876130316b1e53154c0b085c6cb0b927"],
     "source_manifest":"compat/verification/binary64-calculator-integrated-source.sha256",
@@ -83,7 +108,7 @@
       "runtime_js_sha256":"22fc0b391c92b9956a6bd235387187d720ff580f897feddba33b327d7844dce9"
     },
     "kernel":{"status":"passed", "bend_version":"2.0.39", "lean_version":"4.34.0"},
-    "static_replay":{"full_combined_status":"partial", "full_make_check_passed":{"bend_version":"2.0.39", "source_commit":"818a5ae", "cases":8486, "concrete_fixtures":175}, "bend_2_0_16":"pending", "exact_node_cases":9, "node_cases_passed_versions":["2.0.16","2.0.39"]},
+    "static_replay":{"full_combined_status":"passed at the scoped source checkpoint", "full_make_check_passed":{"bend_versions":["2.0.16","2.0.39"], "source_commit":"818a5ae", "cases":8486, "concrete_fixtures":175}, "bend_2_0_16":"passed; terminal success 2026-10-31 20:21:35 UTC", "exact_node_cases":9, "node_cases_passed_versions":["2.0.16","2.0.39"]},
     "native_cpu": {
       "status":"passed", "compiler":"Ubuntu clang 19.1.1", "optimization":"-O3", "thread_counts":[1,8],
       "runtime_reused_for_data_only_node_additions":true,
