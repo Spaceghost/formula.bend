@@ -51,6 +51,8 @@ def alternatives(values: List<&2, Matcher.Matcher>, matcher: Matcher.Matcher) ->
 
 def base(builtin: Core.Value, +raw: Core.Value, fields: List<&2, Field>) -> Matcher.Matcher:
   match builtin:
+    case Core.TextValue{"function"}:
+      Matcher.for_function(field(raw, "values"))
     case Core.TextValue{name}:
       Matcher.builtin(name)
     case value:

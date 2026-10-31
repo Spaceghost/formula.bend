@@ -16,6 +16,8 @@ between an Integer and a BigDecimal with the same numeric value.
 
 `category(name)`, `selected(category, value)`, and
 `pair(category, first, second)` construct common symbol rules.
+`for_function(name)` accepts a supported Core.Value function name, including
+nil and arrays, with the same key-set construction rules.
 `builtin(name)` provides Dentaku's named matcher presets.
 `accepts(matcher, token)` takes `Some{Token.Token}` or `None{}`.
 An absent token never matches, including an inverted leaf.
@@ -58,3 +60,8 @@ The value profile follows `Core.Value`. Arbitrary Ruby objects, Float
 identity, mutable aliasing, scanner behavior, and raw-token visitor integration
 are not established by these probes. These are matcher checks, not a claim of
 complete Dentaku or spreadsheet parity.
+The exact examples in all 11 declarations of the pinned
+`spec/token_matcher_spec.rb` have explicit case mappings in
+`compat/ported-scenarios.lua`. A further 156 probes cover the parameterized
+function-name constructor. These complement the original 2,376-probe matrix.
+They do not establish mutable aliasing or integration with the scanner.
