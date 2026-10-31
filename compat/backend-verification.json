@@ -9,7 +9,14 @@
     "source_scenario_mappings": 136,
     "bun": {"status":"passed", "version":"1.3.1"},
     "static_replay": {"status":"pending", "versions":["2.0.16","2.0.39"]},
-    "native_cpu": {"status":"pending"},
+    "native_cpu": {
+      "status":"passed", "compiler":"Ubuntu clang 19.1.1", "optimization":"-O3",
+      "thread_counts":[1,8], "compiled_with_cuda":false,
+      "generated_c_bytes":7923109,
+      "generated_c_sha256":"7feeaf6aef55024420cf3ac0d94e218244fc6f8488016f26be77450aec779a34",
+      "artifact_sha256":"2513234383e59e5efc0fe517b6fe647f605a79fabca20bea9d94abeb70d1e911",
+      "combined_output_sha256":"6ff04fdc01173f9f7582222aaa127d06e1649a28d17f8340d50b76a2c35e8e84"
+    },
     "cuda": {"status":"unverified for matcher source"},
     "metal": {"status":"unverified"},
     "scale_cases": 7,

@@ -689,10 +689,10 @@ offsets preserve Ruby Array indexing, including wrap through index zero.
 No fixed matcher depth or stream length cutoff is used.
 
 All 2,376 new matcher probes agree with the pinned Ruby implementation in Bun.
-The combined corpus has 5,166 cases and also passes Bun. Seven scale and 18
-malformed-input checks remain passing; all 61 laws pass Lean-backed verification.
-The full matcher static replay on Bend 2.0.16 and 2.0.39 and native CPU checks
-are pending at this checkpoint. Do not infer a matcher CUDA or Metal pass.
+The combined corpus has 5,166 cases and passes Bun and native CPU with one and
+eight threads at -O3. Seven scale and 18 malformed-input checks also pass on those
+runtimes; all 61 laws pass Lean-backed verification. The full matcher static
+replay on Bend 2.0.16 and 2.0.39 remains pending at this checkpoint. Do not infer a matcher CUDA or Metal pass.
 
 The tests cover supported Core.Value descriptors. Mutable Ruby aliasing,
 arbitrary objects, Float identity, scanner behavior, and lexer/visitor

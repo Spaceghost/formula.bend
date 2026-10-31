@@ -145,9 +145,9 @@ The complete 2,790-case runtime corpus and seven scale checks pass Bun and
 native CPU with one and eight threads. All 58 laws pass the Lean-backed gate.
 
 Token matchers add 2,376 Ruby-matched API probes. The combined 5,166-case corpus
-passes Bun, with the seven scale checks and 18 malformed-input checks retained.
-All 61 laws pass the Lean-backed gate. The new matcher replay on both Bend
-versions and native CPU checks are still pending at this checkpoint.
+passes Bun and native CPU with one and eight threads at -O3. The seven scale
+checks and 18 malformed-input checks also pass. All 61 laws pass the Lean-backed
+gate. The new matcher static replay on both Bend versions is still pending.
 See [the matcher contract](docs/token-matcher.md) for immutable modifiers,
 Hash-key identity, compound inversion, and negative stream offsets. This API
 is not yet connected to the parser's lexer or a token scanner.
