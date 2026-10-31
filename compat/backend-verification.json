@@ -1,4 +1,24 @@
 {
+  "token_matcher_checkpoint": {
+    "source_commit": "4644bd476213675b54f0b6b3611ea9aecd28c2e8",
+    "scope": "Immutable TokenMatcher API over supported Core.Value descriptors; scanner, lexer integration, arbitrary Ruby objects and mutable aliasing incomplete",
+    "formula_and_api_cases": 5166,
+    "new_matcher_cases": 2376,
+    "laws": 61,
+    "concrete_fixtures": 175,
+    "source_scenario_mappings": 136,
+    "bun": {"status":"passed", "version":"1.3.1"},
+    "static_replay": {"status":"pending", "versions":["2.0.16","2.0.39"]},
+    "native_cpu": {"status":"pending"},
+    "cuda": {"status":"unverified for matcher source"},
+    "metal": {"status":"unverified"},
+    "scale_cases": 7,
+    "malformed_input_cases": 18,
+    "kernel": {"status":"passed","bend_version":"2.0.39","lean_version":"4.34.0"},
+    "generated_js_sha256": "b2d4f8acc0fdc0e86991b0f1f7833aa2bf139b04cd1b12c14e42a0f0f903c390",
+    "combined_input_sha256": "c400db2c464bbc2aab44bf10750886a441d6ef052ffe6ce4cb9b318c6e46be8f",
+    "combined_output_sha256": "6ff04fdc01173f9f7582222aaa127d06e1649a28d17f8340d50b76a2c35e8e84"
+  },
   "token_api_checkpoint": {
     "source_commit": "ef2cb1da57bc4a5c358800dedfabf91a8a19dada",
     "scope": "Typed token descriptor API; internal lexer and visitor integration remain incomplete",
