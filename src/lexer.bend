@@ -195,6 +195,13 @@ def flush_scientific(digits: List<&2, U32>, scale: Nat, negative: Bool, exponent
 def reserved_word(+text: String) -> Token:
   Bool.pick(Token, String.eq(String.to_lower(text), "case"), CaseWord{}, Bool.pick(Token, String.eq(String.to_lower(text), "when"), WhenWord{}, Bool.pick(Token, String.eq(String.to_lower(text), "then"), ThenWord{}, Bool.pick(Token, String.eq(String.to_lower(text), "else"), ElseWord{}, Bool.pick(Token, String.eq(String.to_lower(text), "end"), EndWord{}, Identifier{text})))))
 
+def word_token(reversed: String) -> Token:
+  match reversed:
+    case SCon{Chr{46}, rest}:
+      Invalid{Chr{46}}
+    case reversed:
+      reserved_word(String.reverse(reversed))
+
 def flush(mode: Mode, tokens: List<&2, Token>) -> List<&2, Token>:
   match mode:
     case AfterClose{}:
@@ -228,17 +235,35 @@ def flush(mode: Mode, tokens: List<&2, Token>) -> List<&2, Token>:
     case Fraction{digits, 1n+p}:
       DecimalLiteral{Decimal.Exact{digits, 1n+p}} <> tokens
     case Word{s}:
-      reserved_word(String.reverse(s)) <> tokens
+      word_token(s) <> tokens
 
 def spaced_word(+text: String) -> Token:
   Bool.pick(Token, String.eq(String.to_lower(text), "and"), AndWord{text}, Bool.pick(Token, String.eq(String.to_lower(text), "or"), OrWord{text}, Bool.pick(Token, String.eq(String.to_lower(text), "xor"), XorWord{text}, Bool.pick(Token, String.eq(String.to_lower(text), "not"), NotWord{text}, reserved_word(text)))))
 
+def spaced_word_token(reversed: String) -> Token:
+  match reversed:
+    case SCon{Chr{46}, rest}:
+      Invalid{Chr{46}}
+    case reversed:
+      spaced_word(String.reverse(reversed))
+
 def space_flush(mode: Mode, tokens: List<&2, Token>) -> List<&2, Token>:
   match mode:
     case Word{reversed}:
-      spaced_word(String.reverse(reversed)) <> tokens
+      spaced_word_token(reversed) <> tokens
     case mode:
       flush(mode, tokens)
+
+# Numeric scanning ends at the next dot. A leading doubled dot can instead
+# start Ruby's dotted identifier scanner when a word character follows it.
+def next_decimal_dot(digits: List<&2, U32>, scale: Nat, tokens: List<&2, Token>) -> Mode & List<&2, Token>:
+  match digits scale:
+    case Nil{} 0n:
+      (Word{".."}, tokens)
+    case +digits 0n:
+      (Word{".."}, integer_token(digits, Nat.is_le(List.length(&2, U32, digits), 3n)) <> tokens)
+    case digits 1n+p:
+      (Fraction{Nil{}, 0n}, DecimalLiteral{Decimal.Exact{digits, 1n+p}} <> tokens)
 
 def step(kind: CharacterClass, mode: Mode, tokens: List<&2, Token>) -> Mode & List<&2, Token>:
   match kind mode:
@@ -280,6 +305,8 @@ def step(kind: CharacterClass, mode: Mode, tokens: List<&2, Token>) -> Mode & Li
       (Idle{}, space_flush(mode, tokens))
     case Symbol{Chr{46}} Digits{digits}:
       (Fraction{digits, 0n}, tokens)
+    case Symbol{Chr{46}} Fraction{digits, scale}:
+      next_decimal_dot(digits, scale, tokens)
     case Symbol{Chr{46}} Idle{}:
       (Fraction{Nil{}, 0n}, tokens)
     case Symbol{Chr{46}} Word{s}:

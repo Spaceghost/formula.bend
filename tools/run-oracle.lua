@@ -70,6 +70,7 @@ def error_factory(factory, input)
 end
 def snapshot_value(value)
   case value
+  when Dentaku::AST::Node then 'ast'
   when nil then 'null'
   when true, false then "boolean:#{value}"
   when BigDecimal then "number:#{value.to_s('F').sub(/\.0+\z/, '')}"
@@ -172,6 +173,16 @@ File.foreach(ENV.fetch('FORMULA_ORACLE_CORPUS')) do |line|
     end
     calculator = Dentaku::Calculator.new(case_sensitive: sensitive == 'true')
     value = case operation
+    when 'stored_value'
+      input = context.fetch('input')
+      receiver = Dentaku::Calculator.new(case_sensitive: input.fetch(:receiver_sensitive, false))
+      receiver.store(input.fetch(:data, {}))
+      input.fetch(:programs, {}).each do |name, descriptor|
+        creator = Dentaku::Calculator.new(case_sensitive: descriptor.fetch(:sensitive, false))
+        receiver.store(name, creator.ast(descriptor.fetch(:source)))
+      end
+      creator = Dentaku::Calculator.new(case_sensitive: input.fetch(:root_sensitive, false))
+      creator.ast(input.fetch(:source)).value(receiver.memory)
     when 'calculator_session' then calculator_session(context.fetch('input'))
     when 'token_matcher'
       input = context.fetch('input')

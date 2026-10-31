@@ -81,7 +81,7 @@ def trailing_operator() -> {Parser.parse("1 +") == Parser.ParseError{"Expected a
 def empty_group() -> {Parser.parse("()") == Parser.ParseError{"Expected an operand"} : Parser.Parsed}:
   {==}
 
-def unsupported_character() -> {Parser.parse("1 @ 2") == Parser.ParseError{"Expected an operator"} : Parser.Parsed}:
+def unsupported_character() -> {Parser.parse("1 @ 2") == Parser.ParseError{"Tokenizer: unrecognized token"} : Parser.Parsed}:
   {==}
 
 def unmatched_group() -> {Parser.parse("(1 + 2") == Parser.ParseError{"Tokenizer: unbalanced parentheses"} : Parser.Parsed}:
@@ -363,7 +363,7 @@ def literal_quoted_text() -> {Parser.evaluate("'a 1 + (b)'", Nil{}, False{}) == 
 def literal_double_quoted_text() -> {Parser.evaluate("\"a 'b'\"", Nil{}, False{}) == Core.TextValue{"a 'b'"} : Core.Value}:
   {==}
 
-def missing_closing_quote() -> {Parser.parse("'missing") == Parser.ParseError{"Expected an operand"} : Parser.Parsed}:
+def missing_closing_quote() -> {Parser.parse("'missing") == Parser.ParseError{"Tokenizer: unrecognized token"} : Parser.Parsed}:
   {==}
 
 def separated_comparator_symbols() -> {Parser.parse("1 < = 2") == Parser.ParseError{"Expected an operand"} : Parser.Parsed}:

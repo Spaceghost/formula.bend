@@ -1,4 +1,28 @@
 {
+  "stored_ast_float_integration_checkpoint": {
+    "source_parent_commits":["986fd47d67ad9faa89c450fc951245ae1e046506","cb62d932a32a2580e1f4e78f15d6cebc637cbb9b"],
+    "scope":"Typed stored AST value execution and lexical boundary corrections combined with the standalone Float foundation; Calculator stored-formula entry points and full parity remain incomplete",
+    "formula_and_api_cases":8798,"separate_stored_value_probes":84,"separate_binary64_probes":13253,"laws":107,
+    "concrete_fixtures":175,"source_scenario_mappings":153,"scale_cases":7,"malformed_input_cases":27,
+    "source_manifest":"compat/verification/stored-float-integration-source.sha256","source_manifest_sha256":"2adb169788d6cf87ad4e8184950279338f30a0ad441572709c1b363c5d093617",
+    "kernel":{"status":"passed","bend_version":"2.0.39","lean_version":"4.34.0","scope":"Shared total core, representation contracts and standalone Float laws; the recursive stored runner is excluded"},
+    "formula_runtime":{"status":"passed","javascript":"Bun 1.3.1","native_cpu_threads":[1,8],"compiler":"clang 19.1.1","optimization":"-O3","artifact_reuse":false,
+      "js_sha256":"4ae7f95cf68164660a004c64ec9781c3efbb34357fb5181e31c221921bb82231","c_sha256":"98f25e5c73b1dad308cc2057026b9bdea469dc3bc95f21292d77b9cbc6451961","artifact_sha256":"c80d95e514b7fa4b9bf5baa71cb1816bbdb7f31fb75ef54c4f003a3d4a49585b","input_sha256":"e8bdfc7d7035c755793e026b31952ddf32b95910476f6d39085b9fa222b1454e","output_sha256":"885f47a478c182dda642f58ff973760af522cb2ce7cda38811758ec6ac3d7fd1"},
+    "stored_value_runtime":{"status":"passed","reference":"Direct pinned Ruby AST value(context), not Calculator dependency preflight","javascript":"Bun 1.3.1","native_cpu_threads":[1,8],
+      "js_sha256":"be21b1a69a9ff22c2778e6fc67e0488c8f8ea6404357fe4e92b2b5b4c22491ee","c_sha256":"c03c37f3a9d5c13d624e0c6fc97b81718187002897049d7524be9327aa6fe881","artifact_sha256":"e41517c6000a029312406a4a94349e168a010c4e19894e6f21b61f817c669d07","input_sha256":"3f65b1ff9a579f45f8c8a01077231cca6816659485233b03a47420e89531d0f7","output_sha256":"4f7ab1c5a8025df9f368fba67207d2470a86c92db638d2c260233dbbfca514c7",
+      "longest_chain":257,"largest_locally_rebound_recursion_probe":65,"semantic_depth_limit":false},
+    "binary64_current_js":{"status":"passed","probes":13253,"native_cuda_scope":"Retained component-specific historical evidence; not a new merged formula GPU pass"},
+    "recursive_runner_verdict":{"status":"outside termination proofs","expected_rejection":"bridge, resolve, expand, evaluate_in depend on unsafe recursion"},
+    "fresh_full8798_static_replay":"not yet verified on this merged source",
+    "cuda":"unverified for this source","metal":"unverified","performance":"not measured"
+  },
+  "stored_ast_pre_float_checkpoint": {
+    "source_commit":"986fd47d67ad9faa89c450fc951245ae1e046506",
+    "formula_and_api_cases":8798,"separate_stored_value_probes":84,"laws":99,
+    "full_make_check":{"status":"passed","checker":"Bend 2.0.39","concrete_fixtures":175,"full_static_cases":8798},
+    "native_cpu_threads":[1,8],"javascript":"Bun 1.3.1","scale_cases":7,"malformed_input_cases":27,
+    "source_manifest":"compat/verification/stored-values-source.sha256","source_manifest_sha256":"93520256b51a6b28f3c0218c897896acf19dabe005aef3a024e2623a522225b9"
+  },
   "float_foundation_integrated_checkpoint": {
     "source_commit":"0f0aa97", "scope":"Standalone arithmetic, decimal conversion, Ruby formatting and BigDecimal coercion profiles combined with Calculator dependency APIs; evaluator Float integration and full parity remain incomplete",
     "laws":105, "kernel":{"status":"passed", "bend_version":"2.0.39", "lean_version":"4.34.0"},

@@ -16,6 +16,7 @@ check:
 	$(MAKE) enumeration-check
 	$(MAKE) unicode-check
 	$(MAKE) binary64-check
+	$(MAKE) stored-check
 	$(MAKE) parity-check
 
 .PHONY: binary64-check
@@ -147,3 +148,11 @@ native-check:
 .PHONY: integer-context-check
 integer-context-check:
 	$(LUA) tools/check-integer-context.lua
+
+.PHONY: stored-check
+stored-check:
+	mkdir -p build
+	$(LUA) tools/generate-wire.lua compat/stored-cases.lua build/stored.input
+	$(BEND) compat/stored-runtime.bend -o build/stored-runtime.js
+	$(BUN) build/stored-runtime.js build/stored.input > build/stored.actual
+	diff -u compat/stored-oracle.tsv build/stored.actual

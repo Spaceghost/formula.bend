@@ -79,7 +79,7 @@ disabled-evaluation operation restores the enabled state after success or failur
 
 ## Remaining API work
 
-Stored formulas, custom functions, aliases, error-handler callbacks, bulk solving,
+Stored-formula execution through Calculator, custom functions, aliases, error-handler callbacks, bulk solving,
 formula-aware dependency analysis and regex cache invalidation remain unfinished.
 Direct mutable identity and hand-assembled Ruby ASTs with mixed per-node case
 modes are not modeled. Float, date/time and arbitrary Ruby object inputs remain

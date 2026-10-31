@@ -512,3 +512,13 @@ law static_dependencies_respect_context:
 
 law unspaced_logical_alias_is_parse_error:
   {Parser.names_snapshot(Parser.identifiers("a&&b", False{})) == "error:Dentaku::ParseError" : String}
+
+law stored_ast_is_truthy:
+  for expression: Core.Expr
+  for sensitive: Bool
+  {Core.truthy(Core.StoredExpression{expression, sensitive}) == True{} : Bool}
+
+law stored_ast_snapshot_is_typed:
+  for expression: Core.Expr
+  for sensitive: Bool
+  {Core.snapshot(Core.StoredExpression{expression, sensitive}) == "ast" : String}
