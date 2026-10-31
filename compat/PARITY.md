@@ -797,6 +797,19 @@ input rejections. Its 66 laws pass Lean-backed verification. The 77 new construc
 and block-boundary cases pass static replay on Bend 2.0.39; the 26 block-boundary
 cases also pass Bend 2.0.16. Full static replay and Range-source GPU checks remain
 pending. Source and artifact hashes are in `backend-verification.json`.
+
+## Binary64 arithmetic foundation
+
+Source `ab757f8` adds standalone, exact-bit binary64 addition, subtraction,
+multiplication, division, comparison and transport. All 4,595 probes match Ruby
+Float on both Bend versions' JavaScript output, native CPU with one and eight
+threads, and required CUDA execution on the Quadro P4000 using default NVRTC
+options. No CPU fallback or device stack increase was used. All 77 project laws
+pass Lean-backed verification on Bend 2.0.39, and both Bend versions pass the term
+checker. These probes are not counted as Dentaku formula cases. Float evaluator
+integration, formatting, mixed coercion and broader Math behavior remain open.
+See `../docs/binary64.md` and the separately scoped backend checkpoint.
+
 ## Calculator state and AST cache integration
 
 The integrated runtime now passes 8,537 reference cases on Bun and native CPU
@@ -852,3 +865,30 @@ The prior 2,376-case matcher checkpoint now passes both Bend versions, with its
 Calculator legacy work on frozen c852ba4 source remains queued separately.
 Stored formulas and the remaining Calculator/global/custom-function/visitor and
 spreadsheet requirements are still unfinished.
+
+
+## Calculator and binary64 integration
+
+The combined source passes all 85 laws through the Lean-backed Bend 2.0.39 gate.
+The Calculator runtime sources match their verified manifest exactly; only the
+law/proof files gain independent binary64 contracts. The full 8,537-case input,
+seven scale cases and 27 malformed-input checks were replayed on hash-checked
+copies of the same Bun and native CPU artifacts, with one and eight threads.
+The standalone 4,595 binary64 probes keep their separate JS/CPU/CUDA evidence;
+this does not add Float support to the evaluator or a GPU pass for all formulas.
+The complete combined static replay and broader compatibility work remain open.
+## Cache mode and binary64 foundation merge
+
+The merged source keeps all 8,665 formula/API cases passing on Bun and native
+CPU with one and eight threads, plus seven scale and 27 malformed-input cases.
+Formula C and JavaScript emissions are byte-identical before and after adding
+the independent binary64 module; the existing native executable was reused
+only after those byte comparisons. The merged source passes all 90 laws
+through the Lean-backed gate. The separate 4,595 binary64 probes also pass
+again on Bun; they are not added to the formula case count.
+
+The 51 original Calculator sessions now pass Bend 2.0.16 at c852ba4, using
+eight preserved results and 43 resumed results. The new 128 mode/overload
+sessions remain verified on Bend 2.0.39; a fresh full 8,665 static replay has
+not been claimed. Float bindings and formatting are not yet wired into the
+formula evaluator, and broader parity and the shootout remain unfinished.

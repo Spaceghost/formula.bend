@@ -6,6 +6,25 @@ import ./src/decimal.bend as Decimal
 import ./LAWS.bend as Laws
 import ./src/bits.bend as Bits
 import ./src/error_types.bend as ErrorTypes
+import ./src/binary64.bend as Binary64
+
+def Laws.binary64_negate_twice(value):
+  match value:
+    case Binary64.Binary64{negative, exponent, high, low}:
+      match negative:
+        case False{}:
+          {==}
+        case True{}:
+          {==}
+
+def Laws.binary64_zero_order(left, right):
+  {==}
+
+def Laws.binary64_infinity_kind(negative):
+  {==}
+
+def Laws.binary64_nan_order(value):
+  {==}
 
 def Laws.range_zero_blocks(depth, first, stride, last, excluded):
   match depth:

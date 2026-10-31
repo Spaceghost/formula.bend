@@ -134,14 +134,15 @@ The corpus supports exact decimal, integer, string, Boolean, null, nested array,
 ordered hash, named class/module and Range bindings, plus case-sensitive contexts.
 All 8,665 cases pass Bun and native CPU with one and eight threads at `-O3`.
 Seven scale checks over 1,025-item collections and 27 malformed-input checks
-also pass. All 86 laws pass Lean-backed verification on Bend 2.0.39. There are
+also pass. All 90 laws pass Lean-backed verification on Bend 2.0.39. There are
 153 explicit upstream scenario mappings and 175 concrete regression fixtures.
 
 The bce55b2 source checkpoint passes full 8,537-case static replay and 175
 concrete fixtures on Bend 2.0.39. All 128 added cache-transfer and storage
 sessions pass static replay on that version. Fresh full 8,665-case static replay
-has not run. Legacy Calculator verification remains partial; the older 2,376
-matcher cases now pass both Bend versions. Historical
+has not run. The original 51 Calculator sessions and older 2,376 matcher cases
+now pass both Bend versions at their recorded source checkpoints. The new 128
+transfer/storage sessions are verified on 2.0.39. Historical
 checks, source revisions and artifact hashes are recorded separately in
 `compat/backend-verification.json`. Current-source CUDA and Metal remain
 unverified; no performance result is claimed.
@@ -185,6 +186,13 @@ NumericParser coercions as well as canonical values. Signed decimal zero is
 preserved through arithmetic, rounding, comparisons, indexing, and string
 conversion. Ruby Float inputs, special numeric values, and global BigDecimal
 modes remain pending.
+
+A separate [binary64 arithmetic layer](docs/binary64.md) passes 4,595 native Ruby
+Float probes on both Bend versions' JavaScript output, native CPU with one and
+eight threads, and required CUDA execution on the P4000 with default NVRTC options.
+Its four new laws combine with the Calculator laws for 85 verified project laws. These probes are
+separate from the 8,486 formula/API cases. Float bindings, rendering, mixed
+numeric coercions and evaluator error integration remain pending.
 
 The oracle also checks AST result types and selected exact error messages.
 `make parity-check` validates the recorded upstream scenario mappings. New

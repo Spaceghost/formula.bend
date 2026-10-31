@@ -1,4 +1,31 @@
 {
+  "cache_binary64_integration_checkpoint": {
+    "source_parent_commits":["dd01d269aa43d0d098fe5e6a4712ebbe0c5f33a9","b2bbe9b447deb6ca418ecbebe544a3d12bea2bc1"],
+    "source_manifest":"compat/verification/cache-binary64-source.sha256",
+    "source_manifest_sha256":"d94a0188c41fd44a616b011928ad170fddc4e56d2d4fd0e51f7e3f205765b7db",
+    "scope":"Creator-mode cache and storage-overload fixes combined with standalone binary64 arithmetic; Float evaluator integration and full parity incomplete",
+    "formula_and_api_cases":8665,"separate_binary64_probes":4595,"laws":90,
+    "concrete_fixtures":175,"source_scenario_mappings":153,"scale_cases":7,"malformed_input_cases":27,
+    "formula_runtime":{"status":"passed","javascript":"Bun 1.3.1","native_cpu_threads":[1,8],
+      "artifact_reuse":"Re-emitted formula C and JavaScript byte-compare identical after the independent binary64 merge; replayed the complete corpus and scale inputs on verified artifacts.",
+      "generated_c_sha256":"f2a120d4c94494d0fe4df30daca9e5ad43f23c8a2aa2e45364244daf7849d76c",
+      "runtime_js_sha256":"cfa07349f5cd66e29b78c8043079b33ea21f16ddee2c83087c4c3d758b547600",
+      "native_artifact_sha256":"faf5c66c4e08e1e81e7b48d7bbb65fad94f434554c49b983d84d1cd2c5e5daa7",
+      "input_sha256":"995f1d9ea1b9c8f85a34a91186cdc5a41d53709fb0cb913eaf4865d06337d471",
+      "output_sha256":"ae940c2e39f7221ff44e93fef2ba50bf73d6bbad2df73342c7175465456da183"},
+    "binary64_replay":{"status":"passed","runtime":"Bun 1.3.1","cases":4595,
+      "runtime_js_sha256":"630c6cd58bea74d734457bca3dfa25a361f563e9d8f3ffd5813eacef4a419edc",
+      "output_sha256":"9eb1e29fc5fa3d7cdf1ea816e4d5ffda938e6afc5d4d5dc6755f5176b752e01a"},
+    "kernel":{"status":"passed","bend_version":"2.0.39","lean_version":"4.34.0"},
+    "fresh_full8665_static_replay":"not run",
+    "current_formula_cuda":"unverified","metal":"unverified","performance":"not measured"
+  },
+  "calculator_original_legacy_completion_checkpoint": {
+    "source_commit":"c852ba48c1241a72f91ff3eedc9f397d4981ba43",
+    "status":"passed","session_cases":51,"preserved_prefix_cases":8,"resumed_cases":43,
+    "checker":"Bend 2.0.16","resumed_batch_size":8,
+    "scope":"Original Calculator sessions only; excludes newer creator-mode and overload additions"
+  },
   "cache_origin_checkpoint": {
     "source_commit":"eba187acc0c2edcca02cd592593f83c1b5d3523d",
     "source_manifest":"compat/verification/cache-origin-source.sha256",
@@ -24,6 +51,60 @@
     "legacy_preserved_prefix_cases":896,"legacy_resumed_cases":1480,
     "legacy_resumed_batch_size":64,
     "output_sha256":"a5ee2531016fac36b11ba9f5573b7ad1e9917f11c0ee4644ce15d8116e0c2093"
+  },
+  "calculator_binary64_integration_checkpoint": {
+    "source_parent_commits":["3b002a7","bce55b25876130316b1e53154c0b085c6cb0b927"],
+    "source_manifest":"compat/verification/binary64-calculator-integrated-source.sha256",
+    "source_manifest_sha256":"e1c4648e8aa2476d5e6db2c60c9abd57386598587f80694665b4521e5cc16644",
+    "scope":"Calculator state/cache source combined with the independent binary64 arithmetic layer; Float evaluator integration and full Dentaku parity remain incomplete",
+    "formula_and_api_cases":8537, "separate_binary64_probes":4595, "laws":85,
+    "concrete_fixtures":175, "source_scenario_mappings":153, "scale_cases":7, "malformed_input_cases":27,
+    "kernel":{"status":"passed", "bend_version":"2.0.39", "lean_version":"4.34.0"},
+    "formula_runtime_replay":{
+      "status":"passed", "javascript":"Bun 1.3.1", "native_cpu_threads":[1,8],
+      "artifact_reuse":"Calculator runtime source manifest entries match exactly except LAWS.bend and PROOF.bend, which gain the independent binary64 laws. The binary64 module is not in the formula runtime dependency graph. Copied artifacts were hash-checked and the full 8537 input, scale input and malformed cases replayed.",
+      "runtime_js_sha256":"d59f73cab5ecb1b28ac550adb2b58172a46cd90873875187231117cce001052e",
+      "native_artifact_sha256":"25862c2427468dcee4b93b09bf4f62e95dbd3ea37a32e81f2854c0c8757dbbfe",
+      "input_sha256":"c62cbf4be7fbf899a00202383b47feebd357cec568c696da53f09142432553ad",
+      "output_sha256":"0f42aba958bd651e442046ecb8db8358bbabc404eebc6effa42117be64aee93e"
+    },
+    "binary64_verification":"Runtime source unchanged from binary64_arithmetic_checkpoint: all 4595 pass both JS compilers, native CPU threads1/8, and required default-profile CUDA",
+    "full_combined_static_replay":"pending; completed 8486-case Bend2.0.39 source checkpoint and selected Calculator sessions remain separately scoped",
+    "formula_cuda":"unverified for current source", "metal":"unverified", "performance":"not measured"
+  },
+  "binary64_arithmetic_checkpoint": {
+    "source_commit":"ab757f87e8b67521c70af39f64a9930dcc1d2f56",
+    "scope":"Standalone binary64 arithmetic foundation; Float evaluator bindings, formatting, mixed coercion, result guards and other Float operations remain incomplete",
+    "probe_cases":4595, "arithmetic_cases":3428, "comparison_cases":857, "value_roundtrip_cases":155, "word_transport_cases":155,
+    "formula_case_count_includes_these_probes":false,
+    "operations":["add","subtract","multiply","divide","compare","roundtrip","words"],
+    "rounding":"nearest, ties to even; gradual underflow; arithmetic NaNs canonicalized, raw payload transport checked separately",
+    "reference":"Ruby 3.3.13 native Float operations",
+    "fixture_seed":"0x6d2b79f5",
+    "project_laws":77, "new_laws":4,
+    "term_checkers_passed":["2.0.16","2.0.39"],
+    "kernel":{"status":"passed", "bend_version":"2.0.39", "lean_version":"4.34.0"},
+    "javascript":{
+      "status":"passed_full_probe_corpus", "bend_versions":["2.0.16","2.0.39"], "runtime":"Bun 1.3.1",
+      "bend_2_0_39_js_sha256":"630c6cd58bea74d734457bca3dfa25a361f563e9d8f3ffd5813eacef4a419edc",
+      "bend_2_0_16_js_sha256":"8696cfe2a75535c74c3865e18e4bb4d4cdfcbf96b0102edf499e6fd6d24900d6"
+    },
+    "native_cpu":{
+      "status":"passed_full_probe_corpus", "artifact_profile":"CUDA-capable binary with --gpu off", "compiler":"Ubuntu clang 19.1.1", "optimization":"-O3", "thread_counts":[1,8]
+    },
+    "cuda":{
+      "status":"passed_full_probe_corpus", "fallback":false, "requested_mode":"RequiredGPU(1GB)",
+      "gpu":"NVIDIA Quadro P4000", "compute_capability":"6.1", "driver":"580.178.04",
+      "toolkit":"12.9.1", "nvrtc":"12.9.86", "profile":"default NVRTC options; no --Ofast-compile flag", "fmad":false,
+      "device_stack_limit_increased":false,
+      "shader_sha256":"c1b916dec54556466f2b2a4f5ee91c2ab0a9703297706cc14dda934299345f75"
+    },
+    "generated_c_bytes":420530,
+    "generated_c_sha256":"9d26c5e9d719ae95f36d273219031fd300be701bb3eb864913d95151c659b894",
+    "artifact_sha256":"a5f55cbdc1714886213ad3d27b7ad95da9fd884c8b2532134eaa022cbffb5a05",
+    "input_sha256":"d54dcc2ea38ba3662995e56ebc74465b49e3209dfbdc7ccb5b981d6dad4e5e4b",
+    "output_sha256":"9eb1e29fc5fa3d7cdf1ea816e4d5ffda938e6afc5d4d5dc6755f5176b752e01a",
+    "metal_status":"unverified", "performance_status":"not benchmarked"
   },
   "calculator_integration_checkpoint": {
     "source_parent_commits":["c852ba48c1241a72f91ff3eedc9f397d4981ba43","90d749ed8ebfd173a6369cb289c8288352aaef21"],

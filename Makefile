@@ -15,7 +15,26 @@ check:
 	$(MAKE) address-check
 	$(MAKE) enumeration-check
 	$(MAKE) unicode-check
+	$(MAKE) binary64-check
 	$(MAKE) parity-check
+
+.PHONY: binary64-check
+binary64-check:
+	mkdir -p build
+	$(LUA) tools/generate-binary64-cases.lua build/binary64.input
+	$(BEND) compat/binary64-runtime.bend -o build/binary64-runtime.js
+	$(BUN) build/binary64-runtime.js build/binary64.input > build/binary64.actual
+	diff -u compat/binary64-oracle.tsv build/binary64.actual
+
+.PHONY: binary64-native-check
+binary64-native-check:
+	mkdir -p build
+	$(LUA) tools/generate-binary64-cases.lua build/binary64.input
+	$(BEND) compat/binary64-runtime.bend -o build/binary64-runtime-native
+	./build/binary64-runtime-native build/binary64.input +RTS --gpu off --threads 1 > build/binary64-native-1.actual
+	diff -u compat/binary64-oracle.tsv build/binary64-native-1.actual
+	./build/binary64-runtime-native build/binary64.input +RTS --gpu off --threads 8 > build/binary64-native-8.actual
+	diff -u compat/binary64-oracle.tsv build/binary64-native-8.actual
 
 unicode-check:
 	mkdir -p build
@@ -72,6 +91,7 @@ wire-check:
 
 native-check:
 	mkdir -p build
+	$(MAKE) binary64-native-check
 	$(BEND) runtime.bend -o build/runtime
 	./build/runtime > build/runtime-native.actual
 	diff -u runtime.expected build/runtime-native.actual

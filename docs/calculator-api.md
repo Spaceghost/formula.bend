@@ -69,9 +69,9 @@ Session probes record results, memory, cache keys, emptiness and cache-enabled
 state after every operation. Golden results are adopted only after Bend agrees
 with the pinned Ruby implementation.
 
-Legacy Bend 2.0.16 verification concerns the prior c852ba4 source: eight sessions
-passed in a batch whose checker peaked near 30 GiB; a single-session diagnostic
-exceeded its 16 GiB compiler cap. Remaining legacy work is queued. The newer
-transfer and storage-overload cases are verified on 2.0.39. These are checker
-resource results, not measurements of formula runtime memory. The separate Ruby
-huge-shift exception gap is recorded in [numeric limits](numeric-limits.md).
+All 51 original Calculator sessions pass Bend 2.0.16 on frozen c852ba4 source:
+eight preserved results and 43 resumed results match the Ruby oracle. Its checker
+peaked near 30 GiB; a separate 16 GiB diagnostic hit its compiler cap. These are
+checker resource results, not formula runtime memory measurements. The newer 128
+transfer/storage sessions are verified on 2.0.39. See [numeric limits](numeric-limits.md)
+for the separate Ruby huge-shift allocation exception gap.

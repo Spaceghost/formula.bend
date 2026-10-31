@@ -17,6 +17,24 @@ import ./src/resolver.bend as Resolver
 import ./src/reference.bend as Ref
 import ./src/error_types.bend as ErrorTypes
 import ./src/errors.bend as Errors
+import ./src/binary64.bend as Binary64
+
+law binary64_negate_twice:
+  for +value: Binary64.Float
+  {Binary64.negate(Binary64.negate(value)) == value : Binary64.Float}
+
+law binary64_zero_order:
+  for left: Bool
+  for right: Bool
+  {Binary64.compare(Binary64.zero(left), Binary64.zero(right)) == Some{EQ{}} : Maybe<&2, Cmp>}
+
+law binary64_infinity_kind:
+  for negative: Bool
+  {Binary64.kind(Binary64.infinity(negative)) == Binary64.Infinite{} : Binary64.Classification}
+
+law binary64_nan_order:
+  for value: Binary64.Float
+  {Binary64.compare(Binary64.nan(), value) == None{} : Maybe<&2, Cmp>}
 
 law range_zero_blocks:
   for depth: Nat
