@@ -27,6 +27,11 @@ after reading the input, while preserving decisions made by a digit thousands of
 places beyond a midpoint. It is a mathematical precision bound, not a limit on
 the number of source decimal digits.
 
+Cropping can expose trailing decimal zeros in the retained coefficient. The
+converter canonicalizes that retained ratio before constructing its binary
+numerator and denominator, cancelling powers of ten. The original discarded
+tail bit remains separate, so this reduction preserves midpoint decisions.
+
 The conversion corpus includes exact Float projections, round trips, signed
 zeros, very large scales, subnormal/normal boundaries, overflow, integer rounding,
 and decimal inputs with 10,000 extra digits below, at and above midpoints. Exact

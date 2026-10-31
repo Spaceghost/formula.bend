@@ -1,0 +1,30 @@
+39b1bec425fbf14a63fe369a49d5baac2212dfe5
+mkdir -p build
+/home/jack/Projects/.system-cache/formula-tools/lua tools/generate-binary64-cases.lua build/binary64.input
+4595 binary64 arithmetic/roundtrip cases generated (full)
+/home/jack/Projects/.system-cache/bend/2.0.16/bin/bend compat/binary64-runtime.bend -o build/binary64-runtime.js
+/home/jack/Projects/.system-cache/bun/1.3.1/bun-linux-x64/bun build/binary64-runtime.js build/binary64.input > build/binary64.actual
+diff -u compat/binary64-oracle.tsv build/binary64.actual
+/home/jack/Projects/.system-cache/formula-tools/lua tools/generate-binary64-conversion-cases.lua build/binary64-conversion.input
+441 exact-decimal/binary64 conversion probes generated (full)
+/home/jack/Projects/.system-cache/bun/1.3.1/bun-linux-x64/bun build/binary64-runtime.js build/binary64-conversion.input > build/binary64-conversion.actual
+diff -u compat/binary64-conversion-oracle.tsv build/binary64-conversion.actual
+/home/jack/Projects/.system-cache/formula-tools/lua tools/generate-binary64-format-cases.lua build/binary64-format.input
+6668 binary64 formatting probes generated (full)
+/home/jack/Projects/.system-cache/bun/1.3.1/bun-linux-x64/bun build/binary64-runtime.js build/binary64-format.input > build/binary64-format.actual
+diff -u compat/binary64-format-oracle.tsv build/binary64-format.actual
+/home/jack/Projects/.system-cache/formula-tools/lua tools/generate-binary64-ruby-conversion-cases.lua build/binary64-ruby-conversion.input
+441 exact-decimal/binary64 conversion probes generated (full)
+1239 pinned Ruby BigDecimal-to-Float probes generated (full)
+/home/jack/Projects/.system-cache/bun/1.3.1/bun-linux-x64/bun build/binary64-runtime.js build/binary64-ruby-conversion.input > build/binary64-ruby-conversion.actual
+diff -u compat/binary64-ruby-conversion-oracle.tsv build/binary64-ruby-conversion.actual
+/home/jack/Projects/.system-cache/formula-tools/lua tools/generate-binary64-coercion-cases.lua build/binary64-coercion.input
+4595 binary64 arithmetic/roundtrip cases generated (full)
+310 pinned Ruby Float-to-BigDecimal coercion probes generated (full)
+/home/jack/Projects/.system-cache/bun/1.3.1/bun-linux-x64/bun build/binary64-runtime.js build/binary64-coercion.input > build/binary64-coercion.actual
+diff -u compat/binary64-coercion-oracle.tsv build/binary64-coercion.actual
+ALL_13253_JOINT_16_GATES_PASSED
+JOINT_16_EXIT=0
+MemoryPeak=2522271744
+MemorySwapPeak=0
+Sat Oct 31 10:39:07 PM UTC 2026

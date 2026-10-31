@@ -1,0 +1,59 @@
+39b1bec425fbf14a63fe369a49d5baac2212dfe5
+binary64 CPU threads=1 PASS
+binary64-conversion CPU threads=1 PASS
+binary64-format CPU threads=1 PASS
+binary64-ruby-conversion CPU threads=1 PASS
+binary64-coercion CPU threads=1 PASS
+binary64 CPU threads=8 PASS
+binary64-conversion CPU threads=8 PASS
+binary64-format CPU threads=8 PASS
+binary64-ruby-conversion CPU threads=8 PASS
+binary64-coercion CPU threads=8 PASS
+bend: compiling the GPU program (/var/home/jack/Projects/formula.bend-checks/ratio-reduction-105/build/joint-targets.gpu is missing or stale)
+binary64 REQUIRED_GPU default_NVRTC PASS
+binary64-conversion REQUIRED_GPU default_NVRTC PASS
+binary64-format REQUIRED_GPU default_NVRTC PASS
+binary64-ruby-conversion REQUIRED_GPU default_NVRTC PASS
+binary64-coercion REQUIRED_GPU default_NVRTC PASS
+src/address.bend: OK
+src/binary64.bend: OK
+src/binary64_bigdecimal.bend: OK
+src/binary64_decimal.bend: OK
+src/binary64_format.bend: OK
+src/binary64_ruby_decimal.bend: OK
+src/bits.bend: OK
+src/calculator.bend: OK
+src/comments.bend: OK
+src/core.bend: OK
+src/decimal.bend: OK
+src/dependencies.bend: OK
+src/division.bend: OK
+src/errors.bend: OK
+src/error_types.bend: OK
+src/inspect.bend: OK
+src/lexer.bend: OK
+src/parser.bend: OK
+src/reference.bend: OK
+src/remainder.bend: OK
+src/resolver.bend: OK
+src/string.bend: OK
+src/token.bend: OK
+src/token_matcher.bend: OK
+src/unicode.bend: OK
+compat/binary64-runtime.bend: OK
+compat/binary64-coercion-oracle.tsv: OK
+compat/binary64-conversion-oracle.tsv: OK
+compat/binary64-conversion-ruby-profile.tsv: OK
+compat/binary64-format-oracle.tsv: OK
+compat/binary64-oracle.tsv: OK
+compat/binary64-ruby-conversion-oracle.tsv: OK
+e4e1bd9b7ff6b8f8a1f07e3bafa07f56500e2c1f5354047ef4801720d89ad485  build/joint-targets.c
+0e64c4d1849b5fa1f7699a57c959eaf74cf3b2f974347169cfded5b647b6a91c  build/joint-targets
+b67e4947e6b9837b98cd06c94ead3b5dc1c090dca2d8105af18ff906a5f0f7e9  build/joint-targets.gpu
+e6bc0de70c601822472d5e20575bcc363fbb55f0090455c1dc3cdc708f5e453c  build/binary64-coercion.input
+9f88b6641e661cbf861ed29541b85c12921d26dff1acc6b4da4878aa1919317a  build/binary64-coercion-joint-gpu.actual
+ALL_13253_JOINT_TARGET_GATES_PASSED
+JOINT_TARGETS_EXIT=0
+MemoryPeak=2756870144
+MemorySwapPeak=0
+Sat Oct 31 10:05:36 PM UTC 2026

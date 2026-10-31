@@ -2014,5 +2014,41 @@
     "cuda": "unverified for merged evaluator source",
     "metal": "unverified",
     "performance": "not measured"
+  },
+  "binary64_ratio_reduction_checkpoint": {
+    "source_commit": "39b1bec425fbf14a63fe369a49d5baac2212dfe5",
+    "scope": "Standalone 13253 numerical probes; does not establish formula evaluator GPU compatibility or performance",
+    "cases": 13253,
+    "js_compiler_versions": [
+      "2.0.39",
+      "2.0.16"
+    ],
+    "js_runtime": "Bun 1.3.1",
+    "cpu": {
+      "compiler": "clang 19.1.1 -O3",
+      "threads": [
+        1,
+        8
+      ],
+      "status": "passed all cases"
+    },
+    "cuda": {
+      "status": "passed all cases with required GPU",
+      "device": "Quadro P4000",
+      "allocation": "1GB",
+      "nvrtc": "default flags, CUDA 12.9.1 / NVRTC 12.9.86"
+    },
+    "logs": [
+      "compat/verification/ratio-reduction-joint-targets.log",
+      "compat/verification/ratio-reduction-joint-16.log"
+    ],
+    "source_manifest": "compat/verification/ratio-reduction-joint-target-source.sha256",
+    "memory_max_gib": 48,
+    "memory_swap_max_gib": 8,
+    "native_peak_bytes": 2756870144,
+    "legacy_js_peak_bytes": 2522271744,
+    "swap_peak_bytes": 0,
+    "metal": "unverified",
+    "performance": "not measured"
   }
 }

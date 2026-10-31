@@ -11,10 +11,10 @@ type Profile is Data:
 # BigDecimal 3.1.5's implicit Float coercion uses dtoa mode zero, then
 # truncates a seventeenth significant digit (rather than rounding it).
 # BigDecimal(float.to_s, 16) parses all text digits and follows another path.
-def restore(parts: Decimal.Removed, dropped: Nat, scale: Nat) -> Decimal.Decimal:
+def restore(parts: Decimal.Removed, +dropped: Nat, +scale: Nat) -> Decimal.Decimal:
   match parts:
     case Decimal.Cut{digits, guard, sticky}:
-      Decimal.canonical(Decimal.Exact{Decimal.pad(dropped, digits), scale})
+      Decimal.canonical(Decimal.Exact{Decimal.pad(Nat.sub(dropped, scale), digits), Nat.sub(scale, dropped)})
 
 def truncate_digits(+dropped: Nat, digits: List<&2, U32>, scale: Nat) -> Decimal.Decimal:
   restore(Decimal.split_digits(dropped, digits, 0, False{}), dropped, scale)
