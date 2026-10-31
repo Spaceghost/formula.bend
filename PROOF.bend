@@ -17,6 +17,9 @@ def Laws.binary64_format_infinity(negative):
 def Laws.binary64_format_nan():
   {==}
 
+def Laws.binary64_ruby_decimal_zero(negative, scale):
+  {==}
+
 def Laws.binary64_decimal_zero(negative, scale):
   {==}
 

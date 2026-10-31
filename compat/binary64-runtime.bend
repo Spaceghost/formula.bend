@@ -3,6 +3,7 @@ import ../src/binary64.bend as Binary
 import ../src/binary64_decimal.bend as Conversion
 import ../src/decimal.bend as Decimal
 import ../src/binary64_format.bend as Format
+import ../src/binary64_ruby_decimal.bend as RubyConversion
 
 type Operation is Data:
   Add{}
@@ -23,10 +24,14 @@ type Calculation is Data:
   ExactValue{value: Conversion.Exact}
   Formatted{value: String}
 
+type ConversionProfile is Data:
+  IeeeDecimal{}
+  RubyDecimal{}
+
 type Work is Data:
   Leaf{id: String, operation: Operation, left: Binary.Float, right: Binary.Float}
   Fork{left: Work, right: Work}
-  DecimalLeaf{id: String, negative: Bool, magnitude: Decimal.Decimal}
+  DecimalLeaf{id: String, profile: ConversionProfile, negative: Bool, magnitude: Decimal.Decimal}
 
 type Loaded is Data:
   LoadedWork{work: Work}
@@ -150,17 +155,19 @@ def negative(text: String) -> Maybe<&2, Bool>:
     case text:
       None{}
 
-def decimal_row(id: String, negative: Maybe<&2, Bool>, digits: Maybe<&2, List<&2, U32>>, scale: Maybe<&2, Nat>) -> Loaded:
+def decimal_row(id: String, profile: ConversionProfile, negative: Maybe<&2, Bool>, digits: Maybe<&2, List<&2, U32>>, scale: Maybe<&2, Nat>) -> Loaded:
   match negative digits scale:
     case Some{negative} Some{digits} Some{scale}:
-      LoadedWork{DecimalLeaf{id, negative, Decimal.Exact{digits, scale}}}
+      LoadedWork{DecimalLeaf{id, profile, negative, Decimal.Exact{digits, scale}}}
     case negative digits scale:
       Invalid{}
 
 def row(fields: List<&2, String>) -> Loaded:
   match fields:
     case id <> "from_decimal" <> sign <> digits <> scale <> Nil{}:
-      decimal_row(id, negative(sign), coefficient(digits), Nat.read(scale))
+      decimal_row(id, IeeeDecimal{}, negative(sign), coefficient(digits), Nat.read(scale))
+    case id <> "from_ruby_decimal" <> sign <> digits <> scale <> Nil{}:
+      decimal_row(id, RubyDecimal{}, negative(sign), coefficient(digits), Nat.read(scale))
     case id <> op <> ah <> al <> bh <> bl <> Nil{}:
       loaded_row(id, operation(op), word(ah), word(al), word(bh), word(bl))
     case fields:
@@ -265,12 +272,19 @@ def snapshot(result: Calculation) -> String:
     case Formatted{value}:
       value
 
+def convert_decimal(profile: ConversionProfile, negative: Bool, magnitude: Decimal.Decimal) -> Binary.Float:
+  match profile:
+    case IeeeDecimal{}:
+      Conversion.from_decimal(negative, magnitude)
+    case RubyDecimal{}:
+      RubyConversion.from_decimal(negative, magnitude)
+
 def execute(work: Work) -> Results:
   match work:
     case Leaf{id, operation, left, right}:
       Row{id, snapshot(calculate(operation, left, right))}
-    case DecimalLeaf{id, negative, magnitude}:
-      Row{id, Binary.snapshot(Conversion.from_decimal(negative, magnitude))}
+    case DecimalLeaf{id, profile, negative, magnitude}:
+      Row{id, Binary.snapshot(convert_decimal(profile, negative, magnitude))}
     case Fork{left, right}:
       a b = execute(left) execute(right)
       Joined{a, b}

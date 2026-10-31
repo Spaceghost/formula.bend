@@ -31,6 +31,9 @@ binary64-check:
 	$(LUA) tools/generate-binary64-format-cases.lua build/binary64-format.input
 	$(BUN) build/binary64-runtime.js build/binary64-format.input > build/binary64-format.actual
 	diff -u compat/binary64-format-oracle.tsv build/binary64-format.actual
+	$(LUA) tools/generate-binary64-ruby-conversion-cases.lua build/binary64-ruby-conversion.input
+	$(BUN) build/binary64-runtime.js build/binary64-ruby-conversion.input > build/binary64-ruby-conversion.actual
+	diff -u compat/binary64-ruby-conversion-oracle.tsv build/binary64-ruby-conversion.actual
 
 .PHONY: binary64-native-check
 binary64-native-check:
@@ -38,6 +41,7 @@ binary64-native-check:
 	$(LUA) tools/generate-binary64-cases.lua build/binary64.input
 	$(LUA) tools/generate-binary64-conversion-cases.lua build/binary64-conversion.input
 	$(LUA) tools/generate-binary64-format-cases.lua build/binary64-format.input
+	$(LUA) tools/generate-binary64-ruby-conversion-cases.lua build/binary64-ruby-conversion.input
 	$(BEND) compat/binary64-runtime.bend -o build/binary64-runtime-native
 	./build/binary64-runtime-native build/binary64.input +RTS --gpu off --threads 1 > build/binary64-native-1.actual
 	diff -u compat/binary64-oracle.tsv build/binary64-native-1.actual
@@ -51,6 +55,10 @@ binary64-native-check:
 	diff -u compat/binary64-format-oracle.tsv build/binary64-format-native-1.actual
 	./build/binary64-runtime-native build/binary64-format.input +RTS --gpu off --threads 8 > build/binary64-format-native-8.actual
 	diff -u compat/binary64-format-oracle.tsv build/binary64-format-native-8.actual
+	./build/binary64-runtime-native build/binary64-ruby-conversion.input +RTS --gpu off --threads 1 > build/binary64-ruby-conversion-native-1.actual
+	diff -u compat/binary64-ruby-conversion-oracle.tsv build/binary64-ruby-conversion-native-1.actual
+	./build/binary64-runtime-native build/binary64-ruby-conversion.input +RTS --gpu off --threads 8 > build/binary64-ruby-conversion-native-8.actual
+	diff -u compat/binary64-ruby-conversion-oracle.tsv build/binary64-ruby-conversion-native-8.actual
 
 unicode-check:
 	mkdir -p build

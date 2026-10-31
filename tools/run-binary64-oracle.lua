@@ -51,9 +51,13 @@ def ieee_decimal(coefficient, scale)
 end
 File.foreach(ENV.fetch('BINARY64_INPUT')) do |line|
   id, op, ah, al, bh, bl = line.split
-  if op == 'from_decimal'
+  if op == 'from_decimal' || op == 'from_ruby_decimal'
     source = (ah == '-' ? '-' : '') + al + 'e-' + bh
     ruby_decimal, ruby_text = BigDecimal(source).to_f, Float(source)
+    if op == 'from_ruby_decimal'
+      puts "#{id}\t#{word_snapshot(ruby_decimal)}"
+      next
+    end
     value = ieee_decimal(al, Integer(bh))
     value = -value if ah == '-'
     unless word_snapshot(ruby_decimal) == word_snapshot(value) && word_snapshot(ruby_text) == word_snapshot(value)

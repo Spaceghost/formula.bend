@@ -45,11 +45,13 @@ produces the smallest subnormal. Some exact overflow midpoint inputs differ too.
 
 `compat/binary64-conversion-ruby-profile.tsv` records all observed discrepancies
 by fixture ID, with BigDecimal#to_f, Float(text), and exact IEEE results. They
-remain incomplete Ruby compatibility items. `from_decimal` is explicitly the
-IEEE conversion; it must not silently stand in for the pinned Ruby conversion
-when the evaluator's coercion profile is added. Ruby-compatible conversion,
-[Float formatting](binary64-format.md) is implemented as a standalone layer;
-mixed numeric coercions and evaluator integration remain required work.
+remain observations of the distinct numeric profiles. `from_decimal` is
+explicitly the IEEE conversion. The separate
+[pinned BigDecimal conversion](binary64-ruby-decimal.md) reproduces the normalized
+Ruby path's decimal cutoff before IEEE rounding; it must be selected explicitly
+when the evaluator's coercion profile is added.
+[Float formatting](binary64-format.md) is implemented as a standalone layer.
+Ruby Float(text), mixed numeric coercions and evaluator integration remain open.
 
 References: [Ruby Float](https://docs.ruby-lang.org/en/3.3/Float.html#method-i-to_r),
 [BigDecimal conversion](https://docs.ruby-lang.org/en/3.3/BigDecimal.html#method-i-to_f),

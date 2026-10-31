@@ -20,6 +20,7 @@ import ./src/errors.bend as Errors
 import ./src/binary64.bend as Binary64
 import ./src/binary64_decimal.bend as BinaryDecimal
 import ./src/binary64_format.bend as BinaryFormat
+import ./src/binary64_ruby_decimal.bend as RubyBinaryDecimal
 
 law binary64_format_zero:
   for +negative: Bool
@@ -31,6 +32,11 @@ law binary64_format_infinity:
 
 law binary64_format_nan:
   {BinaryFormat.show(Binary64.nan()) == "NaN" : String}
+
+law binary64_ruby_decimal_zero:
+  for +negative: Bool
+  for scale: Nat
+  {RubyBinaryDecimal.from_decimal(negative, Decimal.Exact{Nil{}, scale}) == Binary64.zero(negative) : Binary64.Float}
 
 law binary64_decimal_zero:
   for negative: Bool
