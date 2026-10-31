@@ -447,3 +447,30 @@ law store_hash_nil_selects_hash_overload:
 
 law default_nested_store_array_requires_each_value:
   {Calculator.result_snapshot(CalculatorApi.store_input(Core.ArrayNil{}, Calculator.create())) == "error:NoMethodError" : String}
+
+law calculator_nil_dependency_context:
+  for state: Calculator.State
+  {Calculator.query_context(False{}, Core.NullValue{}, state) == Nil{} : List<&2, Core.Binding>}
+
+law calculator_static_query_ignores_memory:
+  for data: Core.Value
+  for state: Calculator.State
+  {Calculator.query_context(True{}, data, state) == Nil{} : List<&2, Core.Binding>}
+
+law calculator_static_marker_requires_true:
+  {Calculator.dependency_static(Core.Number{1n}) == False{} : Bool}
+
+law calculator_query_unique_across_children:
+  {Calculator.unique_name_values(Core.ArrayCons{Core.TextValue{"a"}, Core.ArrayCons{Core.TextValue{"b"}, Core.ArrayCons{Core.TextValue{"a"}, Core.ArrayNil{}}}}, Core.HashNil{}) == Core.ArrayCons{Core.TextValue{"a"}, Core.ArrayCons{Core.TextValue{"b"}, Core.ArrayNil{}}} : Core.Value}
+
+law invalid_character_is_tokenizer_error:
+  {Parser.names_snapshot(Parser.identifiers("@", False{})) == "error:Dentaku::TokenizerError" : String}
+
+# Static mode visits all branches; supplied bindings still satisfy identifiers.
+law static_dependencies_respect_context:
+  for value: Core.Value
+  for +sensitive: Bool
+  {Dependencies.variable("a", [Core.Bound{"a", value}], sensitive, True{}) == Nil{} : List<&2, String>}
+
+law unspaced_logical_alias_is_parse_error:
+  {Parser.names_snapshot(Parser.identifiers("a&&b", False{})) == "error:Dentaku::ParseError" : String}

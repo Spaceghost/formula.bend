@@ -458,3 +458,28 @@ def Laws.store_hash_nil_selects_hash_overload():
 
 def Laws.default_nested_store_array_requires_each_value():
   {==}
+
+def Laws.calculator_nil_dependency_context(state):
+  {==}
+
+def Laws.calculator_static_query_ignores_memory(data, state):
+  {==}
+
+def Laws.calculator_static_marker_requires_true():
+  {==}
+
+def Laws.calculator_query_unique_across_children():
+  {==}
+
+def Laws.invalid_character_is_tokenizer_error():
+  {==}
+
+def Laws.static_dependencies_respect_context(value, sensitive):
+  match sensitive:
+    case False{}:
+      {==}
+    case True{}:
+      {==}
+
+def Laws.unspaced_logical_alias_is_parse_error():
+  {==}

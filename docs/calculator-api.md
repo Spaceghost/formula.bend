@@ -41,6 +41,26 @@ collection shape are retained.
 Arithmetic uses the engine's parallel evaluator. Ordered cache updates let
 later children observe prior cache writes.
 
+## Dependency and identifier queries
+
+`dependencies(expression, state, data)` reports unsatisfied names using memory
+merged with temporary context. Passing nil context deliberately ignores memory.
+Returned state retains cache writes and preserves the original memory.
+
+`identifiers(expression, state)` reports syntactic identifiers, visits every
+branch without evaluating guards, ignores stored memory, and removes duplicates
+across the complete input. Arrays and hash values flatten in input order.
+Dependency queries preserve duplicates when Dentaku does, including SUM arguments
+and repeated collection children.
+
+Queries retain the creator mode of transferred cached ASTs. An exact Boolean
+true `__static_dependencies` context binding visits all branches while still
+allowing other bindings to satisfy identifiers. Other truthy values do not enable
+this mode.
+
+Stored AST values and custom callable values remain unfinished. The query API
+does not claim recursive dependency expansion through those inputs yet.
+
 ## Cache operations
 
 `get_cache`, `get_cache_keys`, `load_cache`, `clear_cache`, and `clear_cache_key`

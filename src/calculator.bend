@@ -1,3 +1,4 @@
+import ./dependencies.bend as Dependencies
 import Base
 import ./core.bend as Core
 import ./parser.bend as Parser
@@ -283,3 +284,107 @@ def ast_mode(parsed: ParsedState) -> Bool:
   match parsed:
     case ParsedWith{state, result, origin}:
       origin
+# Dependency queries share parsing/cache semantics but never write temporary data
+# into the returned calculator. A nil context intentionally ignores memory.
+def name_values(names: List<&2, String>) -> Core.Value:
+  match names:
+    case Nil{}:
+      Core.ArrayNil{}
+    case head <> tail:
+      Core.ArrayCons{Core.TextValue{head}, name_values(tail)}
+
+def query_context(static: Bool, data: Core.Value, state: State) -> List<&2, Core.Binding>:
+  match static data:
+    case True{} data:
+      Nil{}
+    case False{} Core.NullValue{}:
+      Nil{}
+    case False{} data:
+      bindings(get_memory(store_values(state, data)))
+
+def query_names(result: Parser.NamesResult, state: State) -> Evaluation:
+  match result:
+    case Parser.FoundNames{names}:
+      Calculated{state, name_values(names)}
+    case Parser.NamesError{+message}:
+      Rejected{state, Bool.pick(String, String.starts_with(message, "Tokenizer: "), "error:Dentaku::TokenizerError", "error:Dentaku::ParseError"), message}
+
+def dependency_static(value: Core.Value) -> Bool:
+  match value:
+    case Core.Logical{True{}}:
+      True{}
+    case value:
+      False{}
+
+def query_parsed(parsed: Parser.Parsed, +context: List<&2, Core.Binding>, +origin: Bool, static: Bool) -> Parser.NamesResult:
+  match parsed:
+    case Parser.Accepted{expression}:
+      Parser.FoundNames{Dependencies.analyze(expression, context, origin, Bool.or(static, dependency_static(Core.lookup(context, "__static_dependencies", origin))))}
+    case Parser.ParseError{message}:
+      Parser.NamesError{message}
+
+def query_ast(parsed: ParsedState, data: Core.Value, +static: Bool) -> Evaluation:
+  match parsed:
+    case ParsedWith{+state, expression, origin}:
+      query_names(query_parsed(expression, query_context(static, data, state), origin, static), state)
+
+def append_names(left: Core.Value, right: Core.Value) -> Core.Value:
+  match left:
+    case Core.ArrayCons{head, tail}:
+      Core.ArrayCons{head, append_names(tail, right)}
+    case left:
+      right
+
+def query_finish(head: Core.Value, tail: Evaluation) -> Evaluation:
+  match tail:
+    case Calculated{state, values}:
+      Calculated{state, append_names(head, values)}
+    case Rejected{state, snapshot, message}:
+      Rejected{state, snapshot, message}
+
+def query_next(head: Evaluation, next: State -> Evaluation) -> Evaluation:
+  match head:
+    case Calculated{state, values}:
+      query_finish(values, next(state))
+    case Rejected{state, snapshot, message}:
+      Rejected{state, snapshot, message}
+
+def query_value(expression: Core.Value, state: State, +data: Core.Value, +static: Bool) -> Evaluation:
+  match expression:
+    case Core.ArrayNil{}:
+      Calculated{state, Core.ArrayNil{}}
+    case Core.HashNil{}:
+      Calculated{state, Core.ArrayNil{}}
+    case Core.ArrayCons{head, tail}:
+      query_next(query_value(head, state, data, static), next => query_value(tail, next, data, static))
+    case Core.HashEntry{key, value, tail}:
+      query_next(query_value(value, state, data, static), next => query_value(tail, next, data, static))
+    case expression:
+      query_ast(ast(state, expression), data, static)
+
+def dependencies(expression: Core.Value, state: State, data: Core.Value) -> Evaluation:
+  query_value(expression, state, data, False{})
+
+def unique_name_pick(found: Maybe<&2, Core.Value>, head: Core.Value, skipped: Unit -> Core.Value, added: Unit -> Core.Value) -> Core.Value:
+  match found:
+    case Some{value}:
+      skipped(Unit{})
+    case None{}:
+      Core.ArrayCons{head, added(Unit{})}
+
+def unique_name_values(values: Core.Value, +seen: Core.Value) -> Core.Value:
+  match values:
+    case Core.ArrayCons{+head, +tail}:
+      unique_name_pick(Core.hash_find(seen, head), head, u => unique_name_values(tail, seen), u => unique_name_values(tail, Core.HashEntry{head, Core.NullValue{}, seen}))
+    case values:
+      Core.ArrayNil{}
+
+def identifiers_result(result: Evaluation) -> Evaluation:
+  match result:
+    case Calculated{state, names}:
+      Calculated{state, unique_name_values(names, Core.HashNil{})}
+    case Rejected{state, snapshot, message}:
+      Rejected{state, snapshot, message}
+
+def identifiers(expression: Core.Value, state: State) -> Evaluation:
+  identifiers_result(query_value(expression, state, Core.HashNil{}, True{}))

@@ -118,7 +118,7 @@ The eight address runtime cases pass on both JavaScript and native CPU.
 
 Parity is measured against the pinned Ruby source and its complete 713-example
 suite. The Ruby reference passes all examples; that is not a claim that Bend does.
-A separate 8665-case corpus covers selected values,
+A separate 8777-case corpus covers selected values,
 dependencies, parse-error classification, and exception factories.
 `make parity-check` generates the fixtures using Lua.
 Use `LUA=/path/to/lua` if Lua is not on PATH.
@@ -132,19 +132,18 @@ gate. No performance comparison is claimed yet.
 
 The corpus supports exact decimal, integer, string, Boolean, null, nested array,
 ordered hash, named class/module and Range bindings, plus case-sensitive contexts.
-All 8,665 cases pass Bun and native CPU with one and eight threads at `-O3`.
+All 8,777 cases pass Bun and native CPU with one and eight threads at `-O3`.
 Seven scale checks over 1,025-item collections and 27 malformed-input checks
-also pass. All 90 laws pass Lean-backed verification on Bend 2.0.39. There are
+also pass. All 97 laws pass Lean-backed verification on Bend 2.0.39. There are
 153 explicit upstream scenario mappings and 175 concrete regression fixtures.
 
-The bce55b2 source checkpoint passes full 8,537-case static replay and 175
-concrete fixtures on Bend 2.0.39. All 128 added cache-transfer and storage
-sessions pass static replay on that version. Fresh full 8,665-case static replay
-has not run. The original 51 Calculator sessions and older 2,376 matcher cases
-now pass both Bend versions at their recorded source checkpoints. The new 128
-transfer/storage sessions are verified on 2.0.39. Historical
-checks, source revisions and artifact hashes are recorded separately in
-`compat/backend-verification.json`. Current-source CUDA and Metal remain
+The 79ca28c source checkpoint passes full 8,665-case static replay and 175
+concrete fixtures on Bend 2.0.39. All 112 added Calculator dependency and
+identifier sessions pass static replay on that version. A full 8,777-case
+static replay has not run. The original 51 Calculator sessions and older
+2,376 matcher cases pass both Bend versions at their recorded source checkpoints.
+Historical checks, source revisions and artifact hashes are recorded separately
+in `compat/backend-verification.json`. Current-source CUDA and Metal remain
 unverified; no performance result is claimed.
 
 Typed token descriptors and matchers include counterparts of all 11 upstream

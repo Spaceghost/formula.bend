@@ -158,6 +158,12 @@ def execute(operation: Core.Value, +input: Core.Value, +state: Calculator.State)
       Calculator.evaluate_value(field(input, "expression"), state, default_hash(field(input, "data")), False{})
     case Core.TextValue{"evaluate!"}:
       Calculator.evaluate_value(field(input, "expression"), state, default_hash(field(input, "data")), True{})
+    case Core.TextValue{"dependencies"}:
+      Calculator.dependencies(field(input, "expression"), state, default_hash(field(input, "data")))
+    case Core.TextValue{"dependencies_nil"}:
+      Calculator.dependencies(field(input, "expression"), state, Core.NullValue{})
+    case Core.TextValue{"identifiers"}:
+      Calculator.identifiers(field(input, "expression"), state)
     case Core.TextValue{"clear_cache"}:
       clear_cache_key(field(input, "key"), state)
     case Core.TextValue{"warm_cache_from"}:

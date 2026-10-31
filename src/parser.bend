@@ -793,9 +793,25 @@ def parse_numeric_tokens(valid: Bool, +tokens: List<&2, Lex.Token>) -> Parsed:
     case False{}:
       ParseError{"Tokenizer: invalid numeric literal"}
 
+def valid_lexical_tokens(tokens: List<&2, Lex.Token>) -> Bool:
+  match tokens:
+    case Nil{}:
+      True{}
+    case Lex.Invalid{character} <> rest:
+      False{}
+    case head <> rest:
+      valid_lexical_tokens(rest)
+
+def parse_lexical_tokens(valid: Bool, +tokens: List<&2, Lex.Token>) -> Parsed:
+  match valid:
+    case True{}:
+      parse_numeric_tokens(valid_numeric_tokens(tokens), tokens)
+    case False{}:
+      ParseError{"Tokenizer: unrecognized token"}
+
 def parse_syntax(source: String) -> Parsed:
   +tokens = Lex.tokenize(Comments.strip_comments(source))
-  parse_numeric_tokens(valid_numeric_tokens(tokens), tokens)
+  parse_lexical_tokens(valid_lexical_tokens(tokens), tokens)
 
 def validate_parsed(parsed: Parsed, sensitive: Bool) -> Parsed:
   match parsed:
